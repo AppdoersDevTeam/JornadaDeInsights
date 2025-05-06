@@ -18,6 +18,13 @@ if (!admin.apps.length) {
 }
 
 export default async function handler(req, res) {
+  console.log('Stats API request:', {
+    method: req.method,
+    url: req.url,
+    query: req.query,
+    headers: req.headers
+  });
+
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', 'https://jornadadeinsights.com');
@@ -92,6 +99,13 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('Error fetching stats:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Environment:', {
+      NODE_ENV: process.env.NODE_ENV,
+      FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? 'Set' : 'Not set',
+      FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL ? 'Set' : 'Not set',
+      FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY ? 'Set' : 'Not set',
+      STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ? 'Set' : 'Not set'
+    });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 } 

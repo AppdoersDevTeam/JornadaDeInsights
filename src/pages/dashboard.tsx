@@ -85,6 +85,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   // Constants
   const itemsPerPage = 20;
   const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
+  console.log('Dashboard using SERVER_URL:', SERVER_URL);
 
   // Helper function to safely parse dates
   const parseDate = (dateStr: string): Date | null => {
@@ -189,10 +190,23 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     // Start of month local midnight
     const monthStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000);
     // Fetch stats with timezone-aware thresholds
-    fetch(`${SERVER_URL}/stats?dayStart=${dayStart}&weekStart=${weekStart}&monthStart=${monthStart}`)
-      .then(res => res.json())
+    fetch(`${SERVER_URL}/api/stats?dayStart=${dayStart}&weekStart=${weekStart}&monthStart=${monthStart}`, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then(data => setStats(data))
-      .catch(err => console.error('Error fetching stats:', err))
+      .catch(err => {
+        console.error('Error fetching stats:', err);
+        setStats({ today: 0, week: 0, month: 0, completedOrders: 0, users: { total: 0, newThisWeek: 0 } });
+      })
       .finally(() => setStatsLoading(false));
   }, []);
 
