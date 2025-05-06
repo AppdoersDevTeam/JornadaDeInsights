@@ -501,16 +501,16 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       )}
 
       {activeTab === 'analytics' && (
-        <div className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card className="p-6">
+        <div className="space-y-6 w-full">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
+            <Card className="p-6 w-full">
               <CardHeader>
                 <CardTitle>Sales Trends</CardTitle>
                 <CardDescription>Daily, weekly, and monthly sales data</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 flex items-center justify-center">
-                  <div className="text-center">
+                <div className="flex items-center justify-center w-full min-h-[120px]">
+                  <div className="text-center w-full">
                     <LineChart className="h-12 w-12 mx-auto text-primary mb-2" />
                     <p className="text-sm text-muted-foreground">Sales trends chart will be displayed here</p>
                   </div>
@@ -522,14 +522,14 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 </Button>
               </CardFooter>
             </Card>
-            <Card className="p-6">
+            <Card className="p-6 w-full">
               <CardHeader>
                 <CardTitle>Revenue Breakdown</CardTitle>
                 <CardDescription>Revenue distribution by product</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 flex items-center justify-center">
-                  <div className="text-center">
+                <div className="flex items-center justify-center w-full min-h-[120px]">
+                  <div className="text-center w-full">
                     <PieChart className="h-12 w-12 mx-auto text-primary mb-2" />
                     <p className="text-sm text-muted-foreground">Revenue breakdown chart will be displayed here</p>
                   </div>
@@ -544,22 +544,22 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           </div>
 
           {/* Export Options */}
-          <Card className="p-6">
+          <Card className="p-6 w-full">
             <CardHeader>
               <CardTitle>Export Reports</CardTitle>
               <CardDescription>Download sales reports in various formats</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-4">
-                <Button variant="outline" className="flex-1">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 w-full">
+                <Button variant="outline" className="flex-1 w-full">
                   <Download className="mr-2 h-4 w-4" />
                   Export as CSV
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1 w-full">
                   <Download className="mr-2 h-4 w-4" />
                   Export as PDF
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1 w-full">
                   <Download className="mr-2 h-4 w-4" />
                   Export as Excel
                 </Button>
@@ -571,9 +571,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
       {activeTab === 'content' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full">
             {/* Content Navigation Panel */}
-            <div className="col-span-3">
+            <div className="col-span-1 md:col-span-3">
               <Card className="p-4">
                 <nav className="space-y-1">
                   <Button variant="ghost" className="w-full justify-start">
@@ -597,7 +597,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             </div>
 
             {/* Content Editor */}
-            <div className="col-span-9">
+            <div className="col-span-1 md:col-span-9">
               <Card className="p-6">
                 <div className="space-y-6">
                   <div>
@@ -653,28 +653,28 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       )}
 
       {activeTab === 'users' && (
-        <div className="space-y-6">
-          <Card className="p-6">
+        <div className="space-y-6 w-full">
+          <Card className="p-6 w-full">
             <h2 className="text-xl font-semibold mb-6">User Management</h2>
-            <div className="space-y-4">
+            <div className="space-y-4 w-full">
               {usersList.map((user) => (
                 <div
                   key={user.uid}
-                  className="flex items-center justify-between p-4 border rounded-lg"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg w-full gap-4"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 w-full">
                     <Avatar>
                       <AvatarImage src={user.photoURL ? `${SERVER_URL}/user-photo/${user.uid}` : undefined} />
                       <AvatarFallback>{user.displayName?.[0] || user.email?.[0] || user.uid}</AvatarFallback>
                     </Avatar>
-                    <div>
-                      <h3 className="font-medium">{user.displayName || user.email || user.uid}</h3>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="w-full">
+                      <h3 className="font-medium break-words">{user.displayName || user.email || user.uid}</h3>
+                      <p className="text-sm text-muted-foreground break-words">
                         {user.email}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <Button variant="ghost" size="icon">
                       <Mail className="h-4 w-4" />
                     </Button>
