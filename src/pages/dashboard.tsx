@@ -798,14 +798,19 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                             month: 'short',
                             day: 'numeric'
                           })}</td>
-                          <td className="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap" title={o.name}>{o.name}</td>
+                          <td>
+                            <div className="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap" title={o.name}>
+                              {o.name}
+                            </div>
+                          </td>
                           <td
                             onMouseEnter={() => setHoverEmail(o.id)}
                             onMouseLeave={() => setHoverEmail(null)}
-                            className="relative max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap"
-                            title={o.email}
+                            className="relative"
                           >
-                            {o.email}
+                            <div className="max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap" title={o.email}>
+                              {o.email}
+                            </div>
                             {hoverEmail === o.id && (
                               <Copy className="absolute right-1 top-1 cursor-pointer" onClick={() => copyEmail(o.email)} />
                             )}
