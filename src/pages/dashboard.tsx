@@ -777,7 +777,29 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 </div>
               </div>
               <div className="overflow-x-auto w-full">
-                <table className="min-w-full text-left whitespace-nowrap">
+                {/* Mobile: Simple Table */}
+                <table className="min-w-full text-left whitespace-nowrap md:hidden">
+                  <thead>
+                    <tr>
+                      <th style={{ color: '#808000' }}>Name</th>
+                      <th style={{ color: '#808000' }}>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedOrders.map(o => (
+                      <tr key={o.id} className="border-t hover:bg-gray-50">
+                        <td>
+                          <div className="max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap" title={o.name}>
+                            {o.name}
+                          </div>
+                        </td>
+                        <td>{new Intl.NumberFormat('en-US', {style:'currency',currency:'USD'}).format(o.total)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {/* Desktop: Full Table */}
+                <table className="min-w-full text-left whitespace-nowrap hidden md:table">
                   <thead>
                     <tr>
                       <th style={{ color: '#808000' }}>Date</th>
