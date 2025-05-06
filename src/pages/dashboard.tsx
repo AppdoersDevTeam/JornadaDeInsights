@@ -337,7 +337,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       {activeTab === 'overview' && (
         <div className="space-y-8">
           {/* Sales and User Overview Section */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -403,7 +403,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           </div>
 
           {/* Insights Section */}
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
