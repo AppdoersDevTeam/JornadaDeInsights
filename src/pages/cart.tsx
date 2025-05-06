@@ -106,11 +106,11 @@ export function CartPage() {
 
       // Get the correct API URL based on environment
       const apiUrl = process.env.NODE_ENV === 'production'
-        ? 'https://jornadadeinsights.com/api'
-        : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+        ? 'https://jornadadeinsights.com'
+        : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
       // Create checkout session
-      const response = await fetch(`${apiUrl}/create-checkout-session`, {
+      const response = await fetch(`${apiUrl}/api/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

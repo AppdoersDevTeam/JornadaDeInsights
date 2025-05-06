@@ -26,13 +26,7 @@ const validateCartItems = (items) => {
   });
 };
 
-async function handler(req, res) {
-  console.log('Request received:', {
-    method: req.method,
-    headers: req.headers,
-    body: req.body
-  });
-
+module.exports = async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
@@ -50,5 +44,90 @@ async function handler(req, res) {
     return;
   }
 
-  // ... existing code ...
-} 
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    // Validate environment variables
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('Stripe secret key is not configured');
+    }
+    if (!process.env.FRONTEND_URL) {
+      throw new Error('Frontend URL is not configured');
+    }
+
+    const { items } = req.body;
+
+    if (!items) {
+      return res.status(400).json({ error: 'No items provided' });
+    }
+
+    // Validate cart items
+    try {
+      validateCartItems(items);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      locale: 'pt-BR',
+      currency: 'brl',
+      line_items: items.map(item => {
+        // Ensure image URL is properly formatted for Stripe
+        let imageUrl = item.image;
+        if (imageUrl) {
+          try {
+            const url = new URL(imageUrl);
+            url.search = '';
+            url.hash = '';
+            url.protocol = 'https:';
+            imageUrl = url.toString();
+          } catch (error) {
+            console.error('Error processing image URL:', error);
+            imageUrl = undefined;
+          }
+        }
+
+        // Convert USD price to BRL
+        const exchangeRate = 5; // This should be fetched from a real exchange rate API
+        const priceInBRL = Math.round(item.price * exchangeRate);
+
+        return {
+          price_data: {
+            currency: 'brl',
+            product_data: {
+              name: item.name,
+              description: `${item.description || 'Digital eBook'} ($${(item.price/100).toFixed(2)} USD / R$${(priceInBRL/100).toFixed(2)} BRL)`,
+              images: imageUrl ? [imageUrl] : [],
+              metadata: { 
+                ebookId: item.id,
+                type: 'ebook'
+              }
+            },
+            unit_amount: priceInBRL,
+          },
+          quantity: item.quantity,
+          adjustable_quantity: {
+            enabled: false
+          }
+        };
+      }),
+      success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+      allow_promotion_codes: true,
+      billing_address_collection: 'required'
+    });
+
+    return res.status(200).json({ sessionId: session.id });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    return res.status(error.message.includes('valid') ? 400 : 500).json({
+      error: error.message || 'An unexpected error occurred'
+    });
+  }
+}; 
