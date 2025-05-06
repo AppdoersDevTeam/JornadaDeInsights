@@ -754,15 +754,15 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
       {/* Completed Orders Tab */}
       {activeTab === 'orders' && (
-        <div className="space-y-6">
-          <Card className="p-6">
+        <div className="space-y-6 w-full">
+          <Card className="p-6 w-full">
             <CardHeader>
               <CardTitle>All Completed Orders</CardTitle>
             </CardHeader>
             <CardContent>
               {/* Filters */}
-              <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
-                <div className="flex-grow">
+              <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4 w-full">
+                <div className="flex-grow w-full">
                   <input
                     type="text"
                     placeholder="Search by name, email, date or item"
@@ -771,13 +771,13 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                     className="w-full border px-3 py-1 rounded"
                   />
                 </div>
-                <div className="flex space-x-2">
-                  <input type="date" value={dateRange.start} onChange={e => setDateRange({...dateRange, start: e.target.value})} className="border px-2 py-1 rounded" />
-                  <input type="date" value={dateRange.end}   onChange={e => setDateRange({...dateRange, end: e.target.value})  } className="border px-2 py-1 rounded" />
+                <div className="flex space-x-2 w-full md:w-auto">
+                  <input type="date" value={dateRange.start} onChange={e => setDateRange({...dateRange, start: e.target.value})} className="border px-2 py-1 rounded w-full md:w-auto" />
+                  <input type="date" value={dateRange.end}   onChange={e => setDateRange({...dateRange, end: e.target.value})  } className="border px-2 py-1 rounded w-full md:w-auto" />
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left whitespace-nowrap">
+              <div className="overflow-x-auto w-full">
+                <table className="min-w-full text-left whitespace-nowrap">
                   <thead>
                     <tr>
                       <th style={{ color: '#808000' }}>Date</th>
