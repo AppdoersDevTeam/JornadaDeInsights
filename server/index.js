@@ -64,9 +64,14 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: '*', // Allow all origins during development
-  methods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://jornadadeinsights.com', 'https://jornada-de-insights-nu.vercel.app']
+    : '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
 // Validate cart items

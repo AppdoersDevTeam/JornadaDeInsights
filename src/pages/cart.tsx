@@ -23,6 +23,18 @@ interface CartItem {
   quantity: number;
   cover_url?: string;
   description?: string;
+  filename?: string;
+  created_at: string;
+}
+
+interface Ebook {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  filename: string;
+  cover_url?: string;
+  created_at: string;
 }
 
 export function CartPage() {
@@ -44,7 +56,19 @@ export function CartPage() {
             const parsedCart = JSON.parse(savedCart) as CartItem[];
             // Clear current cart and restore saved items
             clearCart();
-            parsedCart.forEach((item) => addItem(item));
+            parsedCart.forEach((item) => {
+              // Ensure required fields are present
+              const ebookItem: Ebook = {
+                id: item.id,
+                title: item.title,
+                description: item.description || '',
+                price: item.price,
+                filename: item.filename || item.id,
+                cover_url: item.cover_url,
+                created_at: item.created_at
+              };
+              addItem(ebookItem);
+            });
             sessionStorage.removeItem('cartState');
             // Close auth modal if open
             setShowAuthModal(false);
@@ -80,8 +104,13 @@ export function CartPage() {
       const stripe = await stripePromise;
       if (!stripe) throw new Error('Stripe failed to initialize');
 
+      // Get the correct API URL based on environment
+      const apiUrl = process.env.NODE_ENV === 'production'
+        ? 'https://jornadadeinsights.com/api'
+        : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+
       // Create checkout session
-      const response = await fetch(`${SERVER_URL}/create-checkout-session`, {
+      const response = await fetch(`${apiUrl}/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -183,7 +212,7 @@ export function CartPage() {
                     <div key={item.id} className="bg-card rounded-lg p-4 flex justify-between items-center">
                       <div className="flex items-center space-x-4">
                         <LazyImage
-                          src={item.cover_url}
+                          src={item.cover_url || ''}
                           alt={item.title}
                           className="w-20 h-20 object-cover rounded"
                         />
