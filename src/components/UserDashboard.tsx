@@ -135,17 +135,17 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] p-4 sm:p-6 pb-24">
+    <div className="min-h-[calc(100vh-4rem)] p-6 pb-24">
       {/* Header */}
-      <div className="mb-8 sm:mb-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="mb-12 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">
+          <h1 className="text-3xl font-bold">
             {activeTab === 'ebooks' && 'My eBooks'}
             {activeTab === 'orders' && 'My Orders'}
             {activeTab === 'newsletter' && 'Newsletter'}
             {activeTab === 'settings' && 'Settings'}
           </h1>
-          <p className="text-muted-foreground mt-2 text-sm sm:text-base">
+          <p className="text-muted-foreground mt-2">
             {activeTab === 'ebooks' && 'Manage your eBooks and downloads'}
             {activeTab === 'orders' && 'Track your orders and purchases'}
             {activeTab === 'newsletter' && 'Manage your newsletter preferences'}
@@ -155,22 +155,22 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
       </div>
 
       {/* Content */}
-      <div className="space-y-6 sm:space-y-8">
+      <div className="space-y-8">
         {activeTab === 'ebooks' && (
-          <div className="space-y-6 sm:space-y-8">
+          <div className="space-y-8">
             {userEbooks.length === 0 ? (
-              <div className="text-center py-8 sm:py-12">
-                <p className="text-base sm:text-lg text-muted-foreground">You haven't purchased any eBooks yet.</p>
+              <div className="text-center py-12">
+                <p className="text-lg text-muted-foreground">You haven't purchased any eBooks yet.</p>
                 <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
                   Browse eBooks
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {userEbooks.map((ebook) => (
-                  <Card key={ebook.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 p-4 sm:p-6">
-                      <div className="w-full sm:w-32 h-40 overflow-hidden rounded-md relative bg-muted mx-auto sm:mx-0">
+                  <Card key={ebook.id} className="overflow-hidden">
+                    <div className="flex gap-6 p-8">
+                      <div className="w-32 h-40 overflow-hidden rounded-md relative bg-muted">
                         <img
                           src={ebook.cover_url}
                           alt={ebook.title}
@@ -185,11 +185,11 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                       </div>
                       <div className="flex-1">
                         <CardHeader className="p-0">
-                          <CardTitle className="text-lg sm:text-xl text-center sm:text-left">{ebook.title}</CardTitle>
-                          <CardDescription className="line-clamp-2 text-center sm:text-left">{ebook.description}</CardDescription>
+                          <CardTitle className="text-xl">{ebook.title}</CardTitle>
+                          <CardDescription className="line-clamp-2">{ebook.description}</CardDescription>
                         </CardHeader>
                         <CardContent className="p-0 mt-4">
-                          <div className="flex flex-col sm:flex-row gap-2">
+                          <div className="flex gap-2">
                             <Button 
                               variant="outline" 
                               size="sm" 
@@ -202,8 +202,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                               }}
                             >
                               <Eye className="mr-2 h-4 w-4" />
-                              <span className="hidden sm:inline">View</span>
-                              <span className="sm:hidden">View eBook</span>
+                              View
                             </Button>
                             <Button 
                               variant="outline" 
@@ -237,8 +236,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                               }}
                             >
                               <Download className="mr-2 h-4 w-4" />
-                              <span className="hidden sm:inline">Download</span>
-                              <span className="sm:hidden">Download PDF</span>
+                              Download
                             </Button>
                           </div>
                         </CardContent>
@@ -252,114 +250,163 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
         )}
 
         {activeTab === 'orders' && (
-          <div className="space-y-6">
-            {completedOrdersList.length === 0 ? (
-              <div className="text-center py-8 sm:py-12">
-                <p className="text-base sm:text-lg text-muted-foreground">You haven't placed any orders yet.</p>
-                <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
-                  Browse eBooks
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4 sm:space-y-6">
-                {completedOrdersList.map((order) => (
-                  <Card key={order.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="p-4 sm:p-6">
-                      <div className="flex flex-col sm:flex-row justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-medium">Order ID: {order.id}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(order.date).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium">Total: ${order.total.toFixed(2)}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleRow(order.id)}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            {expandedRows.has(order.id) ? 'Hide Details' : 'Show Details'}
-                          </Button>
-                        </div>
-                      </div>
-                      {expandedRows.has(order.id) && (
-                        <div className="mt-4 pt-4 border-t">
-                          <div className="space-y-2">
-                            {order.items.map((item, index) => (
-                              <div key={index} className="flex justify-between text-sm">
-                                <span>{item.name}</span>
-                                <span>${item.price.toFixed(2)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
+          <div className="space-y-8">
+            <Card className="p-6">
+              <CardHeader>
+                <CardTitle>Order History</CardTitle>
+                <CardDescription>View all your orders and purchases</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {completedOrdersList.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-lg text-muted-foreground">You haven't made any purchases yet.</p>
+                    <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
+                      Browse eBooks
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left whitespace-nowrap">
+                      <thead>
+                        <tr>
+                          <th className="py-3 px-4 border-b">Date</th>
+                          <th className="py-3 px-4 border-b">Name</th>
+                          <th className="py-3 px-4 border-b">Email</th>
+                          <th className="py-3 px-4 border-b">Total</th>
+                          <th className="py-3 px-4 border-b">Items</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {completedOrdersList.map((order: CompletedOrder) => (
+                          <Fragment key={order.id}>
+                            <tr className="border-t hover:bg-gray-50">
+                              <td className="py-3 px-4">{new Date(order.date).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}</td>
+                              <td className="py-3 px-4">{order.name}</td>
+                              <td
+                                className="py-3 px-4 relative"
+                                onMouseEnter={() => setHoverEmail(order.id)}
+                                onMouseLeave={() => setHoverEmail(null)}
+                              >
+                                {order.email}
+                                {hoverEmail === order.id && (
+                                  <Copy 
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-primary" 
+                                    onClick={() => copyEmail(order.email)}
+                                  />
+                                )}
+                              </td>
+                              <td className="py-3 px-4">{new Intl.NumberFormat('en-US', {style:'currency',currency:'USD'}).format(order.total)}</td>
+                              <td className="py-3 px-4">
+                                <button 
+                                  className="text-primary hover:underline" 
+                                  onClick={() => toggleRow(order.id)}
+                                >
+                                  {order.items.length} item{order.items.length>1?'s':''}
+                                </button>
+                              </td>
+                            </tr>
+                            {expandedRows.has(order.id) && (
+                              <tr className="bg-muted/30">
+                                <td colSpan={5}>
+                                  <div className="p-4">
+                                    <ul className="space-y-2">
+                                      {order.items.map((item: { name: string; price: number }, index: number) => (
+                                        <li key={index} className="flex justify-between items-center">
+                                          <span>{item.name}</span>
+                                          <span className="text-muted-foreground">
+                                            {new Intl.NumberFormat('en-US', {style:'currency',currency:'USD'}).format(item.price)}
+                                          </span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         )}
 
         {activeTab === 'newsletter' && (
-          <Card className="overflow-hidden">
-            <div className="p-4 sm:p-6">
-              <CardHeader className="p-0 mb-6">
-                <CardTitle className="text-xl">Newsletter Preferences</CardTitle>
-                <CardDescription>Manage your email subscription settings</CardDescription>
+          <div className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Newsletter</CardTitle>
+                <CardDescription>
+                  Receive updates and exclusive content
+                </CardDescription>
               </CardHeader>
-              <CardContent className="p-0">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Weekly Updates</p>
-                      <p className="text-sm text-muted-foreground">Receive weekly updates about new content</p>
-                    </div>
+              <CardContent>
+                <div className="max-w-md">
+                  <p className="text-muted-foreground mb-6">
+                    Subscribe to receive the latest news, eBooks, and exclusive content.
+                  </p>
+                  <div className="flex items-center gap-4">
                     <Button
-                      variant={isSubscribed ? "default" : "outline"}
                       onClick={handleNewsletterToggle}
+                      variant={isSubscribed ? 'outline' : 'default'}
                     >
                       {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
                     </Button>
+                    {isSubscribed && (
+                      <p className="text-sm text-muted-foreground">
+                        You are subscribed to the newsletter
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>
-            </div>
-          </Card>
+            </Card>
+          </div>
         )}
 
         {activeTab === 'settings' && (
-          <Card className="overflow-hidden">
-            <div className="p-4 sm:p-6">
-              <CardHeader className="p-0 mb-6">
-                <CardTitle className="text-xl">Account Settings</CardTitle>
-                <CardDescription>Manage your account preferences</CardDescription>
+          <div className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Settings</CardTitle>
+                <CardDescription>
+                  Manage your account preferences and information
+                </CardDescription>
               </CardHeader>
-              <CardContent className="p-0">
-                <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                      <p className="font-medium">Email Address</p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
+              <CardContent>
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="text-lg font-medium mb-6">Account Information</h3>
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-muted-foreground mb-2">
+                          Email
+                        </label>
+                        <p className="text-sm">{user.email}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-muted-foreground mb-2">
+                          Account created on
+                        </label>
+                        <p className="text-sm">
+                          {user.metadata.creationTime
+                            ? new Date(user.metadata.creationTime).toLocaleDateString()
+                            : 'N/A'}
+                        </p>
+                      </div>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => copyEmail(user.email || '')}
-                      onMouseEnter={() => setHoverEmail(user.email || '')}
-                      onMouseLeave={() => setHoverEmail(null)}
-                    >
-                      <Copy className="h-4 w-4 mr-2" />
-                      Copy
-                    </Button>
                   </div>
                 </div>
               </CardContent>
-            </div>
-          </Card>
+            </Card>
+          </div>
         )}
       </div>
     </div>
