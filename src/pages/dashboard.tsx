@@ -301,9 +301,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 max-w-full w-full overflow-x-hidden">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           {activeTab === 'overview' ? (
             <>
@@ -317,15 +317,15 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           )}
         </div>
         {activeTab === 'overview' && (
-          <div className="flex items-center gap-4">
+          <div className="flex w-full sm:w-auto items-center gap-2">
             <Input
               type="search"
               placeholder="Search..."
-              className="w-64"
+              className="w-full max-w-xs md:w-64"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Button variant="outline">
+            <Button variant="outline" className="shrink-0">
               <Bell className="mr-2 h-4 w-4" />
               Notifications
             </Button>
@@ -335,9 +335,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
       {/* Content */}
       {activeTab === 'overview' && (
-        <div className="space-y-8">
+        <div className="space-y-8 w-full">
           {/* Sales and User Overview Section */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 w-full">
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -403,7 +403,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           </div>
 
           {/* Insights Section */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 w-full">
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
