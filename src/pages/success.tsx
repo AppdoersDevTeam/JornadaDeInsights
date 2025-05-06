@@ -7,6 +7,7 @@ import { auth } from '@/lib/firebase';
 
 // Server URL
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
+console.log('Using server URL:', SERVER_URL);
 
 export function SuccessPage() {
   const [searchParams] = useSearchParams();
@@ -58,7 +59,7 @@ export function SuccessPage() {
         }
 
         // Send purchase confirmation email
-        const response = await fetch(`${SERVER_URL}/send-purchase-email`, {
+        const response = await fetch(`${SERVER_URL}/api/send-purchase-email`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
