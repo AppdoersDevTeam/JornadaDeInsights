@@ -21,6 +21,8 @@ import { UserDashboardSidePanel } from '@/components/dashboard/user-dashboard-si
 import { Toaster } from 'react-hot-toast';
 import { CartProvider } from '@/context/cart-context';
 import { EbookDetailsPage } from '@/pages/ebook-details';
+import { TermsPage } from '@/pages/terms';
+import { PrivacyPage } from '@/pages/privacy';
 
 function App() {
   const [activeTab, setActiveTab] = useState<string>('overview');
@@ -69,6 +71,8 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/check-email" element={<CheckEmailPage />} />
               <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
             </Routes>
           </Layout>
         } />
