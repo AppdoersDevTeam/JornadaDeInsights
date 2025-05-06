@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Headphones } from 'lucide-react';
+import { Headphones, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
 
 export function AdminFooter() {
   const currentYear = new Date().getFullYear();
+  const [open, setOpen] = useState<string | null>(null);
+
+  const toggle = (section: string) => setOpen(open === section ? null : section);
 
   return (
     <footer className="bg-card border-t footer-wave relative">
@@ -13,7 +17,8 @@ export function AdminFooter() {
         </svg>
       </div>
       <div className="container mx-auto px-4 py-6 bg-card">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        {/* Mobile: Accordions */}
+        <div className="md:hidden space-y-4">
           {/* Brand Section */}
           <div className="flex flex-col">
             <Link to="/dashboard" className="flex items-center gap-2 mb-4">
@@ -24,73 +29,103 @@ export function AdminFooter() {
               Admin Dashboard - Your control center
             </p>
           </div>
-
+          {/* Quick Links Accordion */}
+          <div>
+            <button className="w-full flex items-center justify-between font-medium mb-2" onClick={() => toggle('quick')}>Quick Links {open === 'quick' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</button>
+            {open === 'quick' && (
+              <ul className="space-y-2 pl-2 pb-2">
+                <li>
+                  <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-primary">Dashboard</Link>
+                </li>
+                <li>
+                  <Link to="/dashboard/content" className="text-sm text-muted-foreground hover:text-primary">Content Management</Link>
+                </li>
+                <li>
+                  <Link to="/dashboard/analytics" className="text-sm text-muted-foreground hover:text-primary">Analytics</Link>
+                </li>
+                <li>
+                  <Link to="/dashboard/support" className="text-sm text-muted-foreground hover:text-primary">Support</Link>
+                </li>
+              </ul>
+            )}
+          </div>
+          {/* Legal Accordion */}
+          <div>
+            <button className="w-full flex items-center justify-between font-medium mb-2" onClick={() => toggle('legal')}>Legal {open === 'legal' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</button>
+            {open === 'legal' && (
+              <ul className="space-y-2 pl-2 pb-2">
+                <li>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-primary">Terms of Service</a>
+                </li>
+                <li>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</a>
+                </li>
+              </ul>
+            )}
+          </div>
+          {/* Support Accordion */}
+          <div>
+            <button className="w-full flex items-center justify-between font-medium mb-2" onClick={() => toggle('support')}>Need Help? {open === 'support' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</button>
+            {open === 'support' && (
+              <div className="pl-2 pb-2">
+                <p className="text-sm text-muted-foreground mb-2">Contact our support team for assistance with your admin dashboard.</p>
+                <Link to="/dashboard/support" className="text-sm text-primary hover:underline">Get Support →</Link>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Desktop: Grid */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Brand Section */}
+          <div className="flex flex-col">
+            <Link to="/dashboard" className="flex items-center gap-2 mb-4">
+              <Headphones className="h-6 w-6 text-primary" />
+              <span className="text-xl font-heading font-semibold">Patricia Dashboard</span>
+            </Link>
+            <p className="text-sm text-muted-foreground">
+              Admin Dashboard - Your control center
+            </p>
+          </div>
           {/* Quick Links */}
           <div>
             <h3 className="font-medium mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-primary">
-                  Dashboard
-                </Link>
+                <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-primary">Dashboard</Link>
               </li>
               <li>
-                <Link to="/dashboard/content" className="text-sm text-muted-foreground hover:text-primary">
-                  Content Management
-                </Link>
+                <Link to="/dashboard/content" className="text-sm text-muted-foreground hover:text-primary">Content Management</Link>
               </li>
               <li>
-                <Link to="/dashboard/analytics" className="text-sm text-muted-foreground hover:text-primary">
-                  Analytics
-                </Link>
+                <Link to="/dashboard/analytics" className="text-sm text-muted-foreground hover:text-primary">Analytics</Link>
               </li>
               <li>
-                <Link to="/dashboard/support" className="text-sm text-muted-foreground hover:text-primary">
-                  Support
-                </Link>
+                <Link to="/dashboard/support" className="text-sm text-muted-foreground hover:text-primary">Support</Link>
               </li>
             </ul>
           </div>
-
           {/* Legal Links */}
           <div>
             <h3 className="font-medium mb-4">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-primary">
-                  Terms of Service
-                </a>
+                <a href="#" className="text-sm text-muted-foreground hover:text-primary">Terms of Service</a>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-primary">
-                  Privacy Policy
-                </a>
+                <a href="#" className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</a>
               </li>
             </ul>
           </div>
-
           {/* Support Section */}
           <div>
             <h3 className="font-medium mb-4">Need Help?</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Contact our support team for assistance with your admin dashboard.
-            </p>
-            <Link 
-              to="/dashboard/support"
-              className="text-sm text-primary hover:underline"
-            >
-              Get Support →
-            </Link>
+            <p className="text-sm text-muted-foreground mb-4">Contact our support team for assistance with your admin dashboard.</p>
+            <Link to="/dashboard/support" className="text-sm text-primary hover:underline">Get Support →</Link>
           </div>
         </div>
-
         <div className="border-t border-border/50 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} Patricia. All rights reserved.
-          </p>
-          <p className="text-sm text-muted-foreground mt-2 md:mt-0">
-            Website developed by <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">buildwithsds.com</a>
-          </p>
+          <p className="text-sm text-muted-foreground">© {currentYear} Patricia. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground mt-2 md:mt-0">Website developed by <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">buildwithsds.com</a></p>
         </div>
       </div>
     </footer>
