@@ -35,6 +35,7 @@ module.exports = async function handler(req, res) {
     'Access-Control-Allow-Headers',
     'Content-Type, Authorization, X-Requested-With'
   );
+  res.setHeader('Content-Type', 'application/json');
 
   // Handle preflight request
   if (req.method === 'OPTIONS') {
@@ -48,16 +49,20 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  // Set content type to JSON
-  res.setHeader('Content-Type', 'application/json');
-
   try {
+    // Log request body for debugging
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+
     // Validate environment variables
     if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error('Stripe secret key is not configured');
+      console.error('Missing STRIPE_SECRET_KEY environment variable');
+      res.status(500).json({ error: 'Server configuration error' });
+      return;
     }
     if (!process.env.FRONTEND_URL) {
-      throw new Error('Frontend URL is not configured');
+      console.error('Missing FRONTEND_URL environment variable');
+      res.status(500).json({ error: 'Server configuration error' });
+      return;
     }
 
     const { items } = req.body;
@@ -71,6 +76,7 @@ module.exports = async function handler(req, res) {
     try {
       validateCartItems(items);
     } catch (error) {
+      console.error('Cart validation error:', error.message);
       res.status(400).json({ error: error.message });
       return;
     }
@@ -130,8 +136,10 @@ module.exports = async function handler(req, res) {
     res.status(200).json({ sessionId: session.id });
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    res.status(error.message.includes('valid') ? 400 : 500).json({
-      error: error.message || 'An unexpected error occurred'
+    // Ensure we're sending a proper JSON response even for errors
+    res.status(500).json({
+      error: 'An unexpected error occurred',
+      details: error.message
     });
   }
 }; 
