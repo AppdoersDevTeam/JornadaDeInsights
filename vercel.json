@@ -8,7 +8,10 @@
     },
     {
       "src": "api/create-checkout-session.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["api/**/*.js"]
+      }
     }
   ],
   "routes": [

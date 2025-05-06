@@ -1,4 +1,3 @@
-const { VercelRequest, VercelResponse } = require('@vercel/node');
 const Stripe = require('stripe');
 
 // Initialize Stripe
@@ -26,7 +25,7 @@ const validateCartItems = (items) => {
   });
 };
 
-module.exports = async function handler(req, res) {
+module.exports = async (req, res) => {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', 'https://jornadadeinsights.com');
