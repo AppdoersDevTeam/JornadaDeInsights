@@ -29,9 +29,7 @@ const validateCartItems = (items) => {
 module.exports = async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
-    ? 'https://jornadadeinsights.com'
-    : '*');
+  res.setHeader('Access-Control-Allow-Origin', 'https://jornadadeinsights.com');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
   res.setHeader(
     'Access-Control-Allow-Headers',
@@ -46,7 +44,8 @@ module.exports = async function handler(req, res) {
 
   // Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
   }
 
   try {
@@ -61,14 +60,16 @@ module.exports = async function handler(req, res) {
     const { items } = req.body;
 
     if (!items) {
-      return res.status(400).json({ error: 'No items provided' });
+      res.status(400).json({ error: 'No items provided' });
+      return;
     }
 
     // Validate cart items
     try {
       validateCartItems(items);
     } catch (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
     // Create Stripe checkout session
@@ -123,10 +124,10 @@ module.exports = async function handler(req, res) {
       billing_address_collection: 'required'
     });
 
-    return res.status(200).json({ sessionId: session.id });
+    res.status(200).json({ sessionId: session.id });
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    return res.status(error.message.includes('valid') ? 400 : 500).json({
+    res.status(error.message.includes('valid') ? 400 : 500).json({
       error: error.message || 'An unexpected error occurred'
     });
   }
