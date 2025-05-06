@@ -234,6 +234,24 @@ app.get('/stats', async (req, res) => {
 
 // Endpoint to list all completed checkout orders
 app.get('/completed-orders', async (req, res) => {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
+    ? 'https://jornadadeinsights.com'
+    : '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, X-Requested-With'
+  );
+  res.setHeader('Content-Type', 'application/json');
+
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+
   try {
     // List all checkout sessions and filter for paid sessions
     const allSessionsList = await stripe.checkout.sessions.list({ limit: 100 });
