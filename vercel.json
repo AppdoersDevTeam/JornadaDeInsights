@@ -26,6 +26,13 @@
       "config": {
         "includeFiles": ["api/**/*.js"]
       }
+    },
+    {
+      "src": "api/stats.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["api/**/*.js"]
+      }
     }
   ],
   "routes": [
@@ -56,6 +63,18 @@
     {
       "src": "/api/completed-orders",
       "dest": "/api/completed-orders.js",
+      "methods": ["GET", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+        "Access-Control-Allow-Credentials": "true",
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "src": "/api/stats",
+      "dest": "/api/stats.js",
       "methods": ["GET", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
