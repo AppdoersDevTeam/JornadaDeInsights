@@ -14,6 +14,19 @@ export function Header() {
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (isOpen && !target.closest('.mobile-menu') && !target.closest('.menu-toggle')) {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isOpen]);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -22,6 +35,18 @@ export function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   return (
     <header className={cn(
@@ -67,7 +92,7 @@ export function Header() {
         {/* Mobile Menu Toggle */}
         <button 
           onClick={toggleMenu}
-          className="md:hidden text-foreground p-2 bg-background rounded-full shadow"
+          className="menu-toggle md:hidden text-foreground p-2 bg-background rounded-full shadow"
           aria-label="Toggle menu"
         >
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -76,40 +101,55 @@ export function Header() {
 
       {/* Mobile Navigation */}
       <div className={cn(
-        "fixed inset-0 top-[60px] bg-secondary z-40 transform transition-transform duration-300 ease-in-out md:hidden",
-        isOpen ? "translate-x-0" : "translate-x-full"
+        "mobile-menu fixed inset-0 top-[60px] bg-secondary z-40 transform transition-all duration-300 ease-in-out md:hidden",
+        isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
       )}>
-        <nav className="bg-secondary container mx-auto px-4 py-8 flex flex-col gap-4 items-center text-white">
+        <nav className="bg-secondary container mx-auto px-4 py-8 flex flex-col gap-4 items-center text-white h-full overflow-y-auto">
           <NavLink 
-            to="/" end className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+            to="/" end 
+            className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
             onClick={closeMenu}
           >
             Início
           </NavLink>
           <NavLink 
-            to="/about" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+            to="/about" 
+            className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
             onClick={closeMenu}
           >
             Sobre
           </NavLink>
           <NavLink 
-            to="/podcast" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+            to="/podcast" 
+            className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
             onClick={closeMenu}
           >
             Podcast
           </NavLink>
           <NavLink 
-            to="/shop" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+            to="/shop" 
+            className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
             onClick={closeMenu}
           >
             Loja
           </NavLink>
           <NavLink 
-            to="/contact" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+            to="/contact" 
+            className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
             onClick={closeMenu}
           >
             Contato
           </NavLink>
+          <div className="w-full border-t border-white/10 my-4" />
+          <Link 
+            to="/shop" 
+            className="w-full"
+            onClick={closeMenu}
+          >
+            <Button variant="outline" className="w-full justify-center">
+              Adquirir Meus eBooks
+            </Button>
+          </Link>
           <Link 
             to="/signin" 
             className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
@@ -120,6 +160,9 @@ export function Header() {
               <span>Entrar</span>
             </div>
           </Link>
+          <div className="mt-4">
+            <AnimatedCartIcon count={totalCount} className="text-white hover:text-secondary transition-colors" />
+          </div>
         </nav>
       </div>
     </header>

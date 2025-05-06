@@ -143,15 +143,15 @@ export function HomePage() {
         viewport={{ amount: 0.3 }}
         className="relative bg-fixed bg-center bg-gradient-to-br from-primary/5 to-background pt-20 pb-16 md:pt-32 md:pb-24"
       >
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <div className="flex flex-col md:flex-row items-center">
-            <div className="w-full md:w-1/2 mb-10 md:mb-0">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+            <div className="w-full lg:w-1/2 text-center lg:text-left">
               <motion.h1
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
                 viewport={{ amount: 0.3 }}
-                className="text-3xl md:text-5xl font-heading font-bold mb-4 leading-tight"
+                className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-4 leading-tight"
               >
                 Uma Jornada de <span className="text-primary">Insights</span>
               </motion.h1>
@@ -160,7 +160,7 @@ export function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ amount: 0.3 }}
-                className="text-lg text-muted-foreground mb-6 md:max-w-md"
+                className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto lg:mx-0"
               >
                 A verdade da biblia e eterna, mas sempre ha novos insights a serem descobertos.
               </motion.p>
@@ -169,15 +169,15 @@ export function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.6 }}
                 viewport={{ amount: 0.3 }}
-                className="flex flex-col sm:flex-row gap-4"
+                className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className="inline-block"
+                  className="w-full sm:w-auto"
                 >
-                  <Button asChild size="lg">
+                  <Button asChild size="lg" className="w-full sm:w-auto">
                     <Link to="/podcast">
                       Ouvir o Podcast <Play className="ml-2 h-4 w-4" />
                     </Link>
@@ -187,9 +187,9 @@ export function HomePage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className="inline-block"
+                  className="w-full sm:w-auto"
                 >
-                  <Button variant="outline" size="lg" asChild>
+                  <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
                     <Link to="/shop">
                       Explorar eBooks <Bookmark className="ml-2 h-4 w-4" />
                     </Link>
@@ -197,17 +197,17 @@ export function HomePage() {
                 </motion.div>
               </motion.div>
             </div>
-            <div className="w-full md:w-1/2">
-              <div className="relative rounded-lg overflow-hidden shadow-xl">
+            <div className="w-full lg:w-1/2">
+              <div className="relative rounded-lg overflow-hidden shadow-xl aspect-video">
                 {(isLoading || hasError) ? (
-                  <div className="w-full aspect-video bg-black" />
+                  <div className="w-full h-full bg-black animate-pulse" />
                 ) : heroVideo ? (
                   <iframe
                     src={`https://www.youtube.com/embed/${heroVideo.id.videoId}?hl=pt-BR&controls=0&modestbranding=1&rel=0`}
                     title={heroVideo.snippet.title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
-                    className="w-full aspect-video"
+                    className="w-full h-full"
                     onLoad={(e) => {
                       try {
                         const iframe = e.target as HTMLIFrameElement;
@@ -239,35 +239,19 @@ export function HomePage() {
         viewport={{ amount: 0.3 }}
         className="py-16 bg-background"
       >
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold">Episódios Recentes</h2>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-semibold">Episódios Recentes</h2>
             <Button variant="ghost" asChild>
               <Link to="/podcast" className="flex items-center">
                 Ver Todos <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoading ? (
-              Array(3).fill(0).map((_, i) => (
-                <div key={i} className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 animate-pulse">
-                  <div className="aspect-video bg-muted" />
-                  <div className="p-4">
-                    <div className="h-4 w-3/4 bg-muted rounded mb-2" />
-                    <div className="h-4 w-1/2 bg-muted rounded" />
-                  </div>
-                </div>
-              ))
-            ) : hasError ? (
-              <div className="col-span-full text-center py-12">
-                <p className="text-lg text-muted-foreground">Não foi possível carregar os episódios. Por favor, tente novamente mais tarde.</p>
-              </div>
-            ) : (
-              videos.slice(0, 3).map((video) => (
-                <PodcastCard key={video.id.videoId} video={video} />
-              ))
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {videos.slice(0, 3).map((video) => (
+              <PodcastCard key={video.id.videoId} video={video} />
+            ))}
           </div>
         </div>
       </motion.section>
@@ -326,34 +310,21 @@ export function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         viewport={{ amount: 0.3 }}
-        className="py-16 bg-muted/30"
+        className="py-16 bg-muted/50"
       >
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold">eBooks em Destaque</h2>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-semibold">eBooks em Destaque</h2>
             <Button variant="ghost" asChild>
               <Link to="/shop" className="flex items-center">
                 Ver Todos <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoadingEbooks ? (
-              Array(3).fill(0).map((_, i) => (
-                <div key={i} className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 animate-pulse">
-                  <div className="aspect-[3/4] bg-muted" />
-                  <div className="p-4">
-                    <div className="h-4 w-3/4 bg-muted rounded mb-2" />
-                    <div className="h-4 w-1/2 bg-muted rounded mb-4" />
-                    <div className="h-4 w-1/4 bg-muted rounded" />
-                  </div>
-                </div>
-              ))
-            ) : (
-              featuredEbooks.slice(0, 3).map((ebook) => (
-                <EbookCard key={ebook.id} book={ebook} />
-              ))
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredEbooks.slice(0, 3).map((ebook) => (
+              <EbookCard key={ebook.id} book={ebook} />
+            ))}
           </div>
         </div>
       </motion.section>
@@ -366,21 +337,23 @@ export function HomePage() {
         viewport={{ amount: 0.3 }}
         className="py-16 bg-background"
       >
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-12 text-center">Depoimentos</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-semibold text-center mb-12">
+            O que dizem nossos leitores
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {testimonials.map((testimonial) => (
               <motion.div
                 key={testimonial.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.4 }}
                 viewport={{ amount: 0.3 }}
-                className="bg-card rounded-lg shadow-md p-6 border border-border/50"
+                className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
               >
                 <p className="text-muted-foreground mb-4 italic">"{testimonial.quote}"</p>
                 <div>
-                  <p className="font-medium">{testimonial.author}</p>
+                  <p className="font-semibold">{testimonial.author}</p>
                   <p className="text-sm text-muted-foreground">{testimonial.title}</p>
                 </div>
               </motion.div>
@@ -389,16 +362,24 @@ export function HomePage() {
         </div>
       </motion.section>
 
-      {/* Newsletter */}
+      {/* Newsletter Section */}
       <motion.section
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         viewport={{ amount: 0.3 }}
-        className="py-16 bg-muted/30"
+        className="py-16 bg-primary text-white"
       >
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 max-w-4xl">
-          <NewsletterForm />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-semibold mb-4">
+              Fique por dentro das novidades
+            </h2>
+            <p className="text-lg text-white/80 mb-8">
+              Receba atualizações sobre novos episódios, eBooks e conteúdos exclusivos.
+            </p>
+            <NewsletterForm />
+          </div>
         </div>
       </motion.section>
     </>

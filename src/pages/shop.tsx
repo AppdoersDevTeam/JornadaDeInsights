@@ -115,7 +115,7 @@ export function ShopPage() {
     <div style={{ scrollBehavior: 'smooth' }}>
       {/* Hero Section */}
       <motion.section 
-        className="relative h-[60vh] flex items-center justify-center bg-gradient-to-b from-primary/10 to-background overflow-hidden"
+        className="relative min-h-[60vh] sm:h-[60vh] flex items-center justify-center bg-gradient-to-b from-primary/10 to-background overflow-hidden py-12 sm:py-0"
         style={{ y: heroY, opacity: heroOpacity }}
       >
         <motion.div 
@@ -133,7 +133,7 @@ export function ShopPage() {
             ease: "easeInOut",
           }}
         />
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <motion.div
               animate={{
@@ -146,7 +146,7 @@ export function ShopPage() {
               }}
               className="mb-6"
             >
-              <BookOpen className="h-16 w-16 mx-auto text-primary" />
+              <BookOpen className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-primary" />
             </motion.div>
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
@@ -164,7 +164,7 @@ export function ShopPage() {
                   ease: "easeInOut",
                 }
               }}
-              className="text-3xl md:text-5xl font-heading font-bold mb-4"
+              className="text-2xl sm:text-3xl md:text-5xl font-heading font-bold mb-4 px-4"
             >
               Descubra Nossa Coleção de eBooks
             </motion.h1>
@@ -172,7 +172,7 @@ export function ShopPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="text-lg text-muted-foreground mb-6"
+              className="text-base sm:text-lg text-muted-foreground mb-6 px-4"
             >
               Explore nossa seleção curada de eBooks projetados para inspirar e transformar sua vida.
             </motion.p>
@@ -181,15 +181,15 @@ export function ShopPage() {
       </motion.section>
 
       {/* Featured eBook */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">eBook em Destaque</h2>
+      <section className="py-12 sm:py-16 bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-heading font-semibold mb-6 sm:mb-8">eBook em Destaque</h2>
           
           {isLoading ? (
             <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 animate-pulse">
-              <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="md:order-2 aspect-[3/4] md:aspect-auto md:h-full max-h-[400px] md:max-h-none bg-muted" />
-                <div className="p-6 md:p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2">
+                <div className="lg:order-2 aspect-[3/4] lg:aspect-auto lg:h-full max-h-[400px] lg:max-h-none bg-muted" />
+                <div className="p-4 sm:p-6 lg:p-8">
                   <div className="h-4 w-24 bg-muted rounded mb-2" />
                   <div className="h-6 w-3/4 bg-muted rounded mb-3" />
                   <div className="h-4 w-32 bg-muted rounded mb-4" />
@@ -203,23 +203,23 @@ export function ShopPage() {
             </div>
           ) : featuredEbook ? (
             <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 transition-all duration-300 hover:shadow-lg hover:border-primary/20 group">
-              <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="md:order-2 aspect-[3/4] md:aspect-auto md:h-full max-h-[400px] md:max-h-none overflow-hidden">
+              <div className="grid grid-cols-1 lg:grid-cols-2">
+                <div className="lg:order-2 aspect-[3/4] lg:aspect-auto lg:h-full max-h-[400px] lg:max-h-none overflow-hidden">
                   <LazyImage 
                     src={featuredEbook.cover_url || ''} 
                     alt={featuredEbook.title}
-                    className="w-full h-full transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
-                <div className="p-6 md:p-8 flex flex-col justify-between">
+                <div className="p-4 sm:p-6 lg:p-8 flex flex-col justify-between">
                   <div>
                     <p className="text-sm text-purple-600 uppercase tracking-wider mb-2">Mais Vendido</p>
-                    <h3 className="font-heading text-xl md:text-2xl font-semibold mb-3 group-hover:text-primary transition-colors">{featuredEbook.title}</h3>
+                    <h3 className="font-heading text-lg sm:text-xl lg:text-2xl font-semibold mb-3 group-hover:text-primary transition-colors">{featuredEbook.title}</h3>
                     <p className="text-sm text-muted-foreground mb-4">por Patricia</p>
-                    <p className="text-muted-foreground mb-4">
+                    <p className="text-sm sm:text-base text-muted-foreground mb-4">
                       {featuredEbook.description}
                     </p>
-                    <div className="flex items-center gap-2 mb-6">
+                    <div className="flex items-center gap-2 mb-4 sm:mb-6">
                       <div className="text-yellow-400 flex">
                         {Array(5).fill(0).map((_, i) => (
                           <motion.span 
@@ -244,20 +244,26 @@ export function ShopPage() {
                           </motion.span>
                         ))}
                       </div>
-                      <span className="text-sm text-muted-foreground">(128 avaliações)</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">(128 avaliações)</span>
                     </div>
-                    <p className="text-2xl font-medium mb-6 group-hover:text-primary transition-colors">R${featuredEbook.price.toFixed(2)}</p>
+                    <p className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6 group-hover:text-primary transition-colors">R${featuredEbook.price.toFixed(2)}</p>
                   </div>
-                  <div>
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <Button 
-                      className="w-full mb-2 transition-all duration-300 hover:scale-105 hover:shadow-md" 
+                      size="lg" 
+                      className="w-full sm:w-auto"
                       onClick={() => addItem(featuredEbook)}
                     >
-                      <ShoppingCart className="mr-2 h-4 w-4" /> Adicionar ao Carrinho
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Adicionar ao Carrinho
                     </Button>
-                    <p className="text-xs text-muted-foreground text-center">
-                      Entrega digital • Download instantâneo após a compra
-                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      className="w-full sm:w-auto"
+                    >
+                      Saiba Mais
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -266,247 +272,64 @@ export function ShopPage() {
         </div>
       </section>
 
-      {/* All eBooks with Search and Filter */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold">Todos os eBooks</h2>
-            <AnimatedCartIcon count={totalCount} />
-          </div>
-          
-          {/* Search */}
-          <div className="mb-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Pesquisar eBooks..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full rounded-md border border-input bg-background cursor-text"
-              />
+      {/* Search and Filter Section */}
+      <section className="py-12 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8">
+            <div className="w-full sm:w-auto">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="search"
+                  placeholder="Buscar eBooks..."
+                  className="w-full sm:w-[300px] pl-10 pr-4 py-2 rounded-md border border-border bg-background"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <AnimatedCartIcon count={totalCount} />
             </div>
           </div>
 
-          {/* Ebooks Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredEbooks.map((book) => (
-              <AnimatedGridItem key={book.id}>
-                <EbookCard book={book} />
-              </AnimatedGridItem>
+          {/* Categories */}
+          <div className="flex flex-wrap gap-2 mb-8">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant="outline"
+                size="sm"
+                className="text-sm"
+              >
+                {category}
+              </Button>
             ))}
           </div>
 
-          {filteredEbooks.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">Nenhum eBook encontrado para sua pesquisa.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Why Buy From Me */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="text-2xl md:text-3xl font-heading font-semibold mb-12 text-center"
-          >
-            Por que comprar meus eBooks?
-          </motion.h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="text-center p-6"
-            >
-              <motion.div 
-                initial={{ scale: 0.9 }}
-                whileInView={{ scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-                className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z"/><line x1="16" x2="2" y1="8" y2="22"/><line x1="17.5" x2="9" y1="15" y2="15"/></svg>
-              </motion.div>
-              <motion.h3 
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.4 }}
-                className="font-heading font-medium text-lg mb-2"
-              >
-                Sabedoria Prática
-              </motion.h3>
-              <motion.p 
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.5 }}
-                className="text-muted-foreground"
-              >
-                Conselhos acionáveis que você pode implementar imediatamente, não apenas conceitos teóricos.
-              </motion.p>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-              className="text-center p-6"
-            >
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m14.5 9-5 5"/><path d="m9.5 9 5 5"/></svg>
-              </motion.div>
-              <motion.h3 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-                className="font-heading font-medium text-lg mb-2"
-              >
-                Entrega Segura
-              </motion.h3>
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                className="text-muted-foreground"
-              >
-                Acesso instantâneo à sua compra com processamento de pagamento seguro.
-              </motion.p>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-              className="text-center p-6 relative overflow-hidden"
-            >
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5"
-                animate={{
-                  background: [
-                    'linear-gradient(to bottom right, var(--primary) 5%, var(--primary) 10%, var(--primary) 5%)',
-                    'linear-gradient(to bottom right, var(--primary) 10%, var(--primary) 5%, var(--primary) 10%)',
-                    'linear-gradient(to bottom right, var(--primary) 5%, var(--primary) 10%, var(--primary) 5%)',
-                  ],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <div className="relative z-10">
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.5 }}
-                  className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M4 4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2"/><polyline points="14 2 14 8 20 8"/><path d="m10 12.5 2 2 4-4"/></svg>
-                </motion.div>
-                <motion.h3 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.6 }}
-                  className="font-heading font-medium text-lg mb-2"
-                >
-                  Conteúdo de Qualidade
-                </motion.h3>
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.7 }}
-                  className="text-muted-foreground"
-                >
-                  Guias bem pesquisados e profissionalmente editados, baseados em métodos comprovados.
-                </motion.p>
-              </div>
-            </motion.div>
+          {/* eBooks Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {filteredEbooks.map((ebook, index) => (
+              <AnimatedGridItem key={ebook.id} index={index}>
+                <EbookCard book={ebook} />
+              </AnimatedGridItem>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <motion.section
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        viewport={{ amount: 0.3 }}
-        className="py-16 bg-background"
-      >
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-12 text-center">Depoimentos de Leitores</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ amount: 0.3 }}
-              className="bg-card rounded-lg shadow-md p-6 border border-border/50"
-            >
-              <p className="text-muted-foreground mb-4 italic">"O eBook Digital Detox me ajudou a recuperar o controle sobre o uso do meu smartphone. Agora estou mais produtivo e presente."</p>
-              <div>
-                <p className="font-medium">Michael T.</p>
-                <p className="text-sm text-muted-foreground">Engenheiro de Software</p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ amount: 0.3 }}
-              className="bg-card rounded-lg shadow-md p-6 border border-border/50"
-            >
-              <p className="text-muted-foreground mb-4 italic">"Vida Consciente transformou minha rotina diária. O plano de 30 dias foi fácil de seguir e vi melhorias reais nos meus níveis de estresse."</p>
-              <div>
-                <p className="font-medium">Jennifer L.</p>
-                <p className="text-sm text-muted-foreground">Diretora de Marketing</p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ amount: 0.3 }}
-              className="bg-card rounded-lg shadow-md p-6 border border-border/50"
-            >
-              <p className="text-muted-foreground mb-4 italic">"A Arte de Viver em Equilíbrio é agora minha referência sempre que me sinto sobrecarregado. Os conselhos da Patricia são práticos e transformadores."</p>
-              <div>
-                <p className="font-medium">David R.</p>
-                <p className="text-sm text-muted-foreground">Profissional de Saúde</p>
-              </div>
-            </motion.div>
+      {/* Newsletter Section */}
+      <section className="py-12 sm:py-16 bg-primary text-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-heading font-semibold mb-4">
+              Fique por dentro das novidades
+            </h2>
+            <p className="text-sm sm:text-base text-white/80 mb-8">
+              Receba atualizações sobre novos eBooks e conteúdos exclusivos.
+            </p>
+            <NewsletterForm />
           </div>
-        </div>
-      </motion.section>
-
-      {/* Newsletter */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 max-w-4xl">
-          <NewsletterForm />
         </div>
       </section>
     </div>
