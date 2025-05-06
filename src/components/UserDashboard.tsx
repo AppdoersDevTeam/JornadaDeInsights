@@ -49,7 +49,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
 
   const fetchUserOrders = async () => {
     try {
-      const res = await fetch(`${SERVER_URL}/completed-orders`);
+      const res = await fetch(`${SERVER_URL}/api/completed-orders`);
       if (!res.ok) throw new Error('Failed to fetch orders');
       const { orders } = await res.json();
       if (user?.email) {

@@ -147,7 +147,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   };
   const fetchCompletedOrders = async () => {
     try {
-      const res = await fetch(`${SERVER_URL}/completed-orders`);
+      const res = await fetch(`${SERVER_URL}/api/completed-orders`);
       if (!res.ok) throw new Error('Failed to load orders');
       const { orders } = await res.json();
       setCompletedOrdersList(orders);

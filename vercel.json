@@ -19,6 +19,13 @@
       "config": {
         "includeFiles": ["api/**/*.js"]
       }
+    },
+    {
+      "src": "api/completed-orders.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["api/**/*.js"]
+      }
     }
   ],
   "routes": [
@@ -35,7 +42,7 @@
       }
     },
     {
-      "src": "/send-purchase-email",
+      "src": "/api/send-purchase-email",
       "dest": "/api/send-purchase-email.js",
       "methods": ["POST", "OPTIONS"],
       "headers": {
@@ -47,7 +54,7 @@
       }
     },
     {
-      "src": "/completed-orders",
+      "src": "/api/completed-orders",
       "dest": "/api/completed-orders.js",
       "methods": ["GET", "OPTIONS"],
       "headers": {
