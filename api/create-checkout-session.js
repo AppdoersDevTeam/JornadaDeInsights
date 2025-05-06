@@ -1,4 +1,4 @@
-const Stripe = require('stripe');
+import Stripe from 'stripe';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -25,7 +25,7 @@ const validateCartItems = (items) => {
   });
 };
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', 'https://jornadadeinsights.com');
@@ -55,18 +55,19 @@ module.exports = async (req, res) => {
     // Validate environment variables
     if (!process.env.STRIPE_SECRET_KEY) {
       console.error('Missing STRIPE_SECRET_KEY environment variable');
-      res.status(500).json({ error: 'Server configuration error' });
+      res.status(500).json({ error: 'Server configuration error: Missing STRIPE_SECRET_KEY' });
       return;
     }
     if (!process.env.FRONTEND_URL) {
       console.error('Missing FRONTEND_URL environment variable');
-      res.status(500).json({ error: 'Server configuration error' });
+      res.status(500).json({ error: 'Server configuration error: Missing FRONTEND_URL' });
       return;
     }
 
     const { items } = req.body;
 
     if (!items) {
+      console.error('No items provided in request body');
       res.status(400).json({ error: 'No items provided' });
       return;
     }
@@ -141,4 +142,4 @@ module.exports = async (req, res) => {
       details: error.message
     });
   }
-}; 
+} 
