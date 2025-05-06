@@ -59,7 +59,7 @@ export function SuccessPage() {
         }
 
         // Send purchase confirmation email
-        const response = await fetch(`${SERVER_URL}/api/send-purchase-email`, {
+        const response = await fetch(`${SERVER_URL}/send-purchase-email`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
