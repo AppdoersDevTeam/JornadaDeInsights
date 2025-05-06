@@ -48,6 +48,9 @@ module.exports = async function handler(req, res) {
     return;
   }
 
+  // Set content type to JSON
+  res.setHeader('Content-Type', 'application/json');
+
   try {
     // Validate environment variables
     if (!process.env.STRIPE_SECRET_KEY) {
