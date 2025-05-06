@@ -828,7 +828,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                               <div className="space-y-4">
                                 {o.items.map((item, i) => (
                                   <div key={i} className="grid grid-cols-3 gap-4 items-center">
-                                    <div style={{ color: '#808000' }} className="font-medium">{item.name}</div>
+                                    <div style={{ color: '#808000' }} className="font-medium" title={item.name}>
+                                      {item.name.length > 40 ? item.name.slice(0, 40) + '...' : item.name}
+                                    </div>
                                     <div className="text-gray-600">Format: PDF</div>
                                     <div className="text-gray-600">Price: {new Intl.NumberFormat('en-US', {style:'currency',currency:'USD'}).format(item.price)}</div>
                                   </div>
