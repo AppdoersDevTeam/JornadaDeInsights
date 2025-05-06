@@ -65,10 +65,10 @@ export function AdminFooter() {
             {open === 'legal' && (
               <ul className="space-y-3 py-2 px-4">
                 <li>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">Terms of Service</a>
+                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Terms of Service</Link>
                 </li>
                 <li>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">Privacy Policy</a>
+                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Privacy Policy</Link>
                 </li>
               </ul>
             )}
@@ -127,10 +127,10 @@ export function AdminFooter() {
             <h3 className="text-base font-medium mb-4 text-foreground">Legal</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">Terms of Service</a>
+                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Terms of Service</Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">Privacy Policy</a>
+                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Privacy Policy</Link>
               </li>
             </ul>
           </div>

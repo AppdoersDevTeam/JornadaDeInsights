@@ -76,10 +76,10 @@ export function Footer() {
             </button>
             <ul className={`${resourcesOpen ? 'block' : 'hidden'} space-y-3 py-2 px-4`}>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</a>
+                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</a>
+                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
               </li>
               <li>
                 <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</a>
@@ -166,10 +166,10 @@ export function Footer() {
             <h3 className="text-base font-medium mb-4 text-foreground">Recursos</h3>
             <ul className="space-y-3 md:block">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</a>
+                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</a>
+                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
               </li>
               <li>
                 <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</a>
