@@ -174,12 +174,6 @@ export function ShopPage() {
             </motion.p>
           </div>
         </div>
-        {/* Wave SVG at bottom */}
-        <div className="absolute bottom-0 left-0 w-full overflow-hidden pointer-events-none h-10">
-          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-[200%] h-full" style={{ animation: 'waveScroll 8s linear infinite' }} xmlns="http://www.w3.org/2000/svg">
-            <path d="M0,50 C300,150 900,-50 1200,50 L1200,0 L0,0 Z" fill="hsl(var(--background))" />
-          </svg>
-        </div>
       </motion.section>
 
       {/* Featured eBook */}
