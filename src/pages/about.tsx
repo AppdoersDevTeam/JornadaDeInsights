@@ -266,7 +266,7 @@ export function AboutPage() {
                 viewport={{ amount: 0.3 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2 w-4 h-4 rounded-full bg-primary" />
+                <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2 w-4 h-4 rounded-full bg-primary hidden md:block" />
                 <div className="ml-auto w-5/6 md:w-1/2 pl-8">
                   <div className="bg-card p-6 rounded-lg border border-border/50 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
@@ -288,7 +288,7 @@ export function AboutPage() {
                 viewport={{ amount: 0.3 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2 w-4 h-4 rounded-full bg-primary" />
+                <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2 w-4 h-4 rounded-full bg-primary hidden md:block" />
                 <div className="w-5/6 md:w-1/2 pr-8">
                   <div className="bg-card p-6 rounded-lg border border-border/50 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
@@ -310,7 +310,7 @@ export function AboutPage() {
                 viewport={{ amount: 0.3 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
               >
-                <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2 w-4 h-4 rounded-full bg-primary" />
+                <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2 w-4 h-4 rounded-full bg-primary hidden md:block" />
                 <div className="ml-auto w-5/6 md:w-1/2 pl-8">
                   <div className="bg-card p-6 rounded-lg border border-border/50 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
@@ -332,7 +332,7 @@ export function AboutPage() {
                 viewport={{ amount: 0.3 }}
                 transition={{ duration: 0.6, delay: 0.8 }}
               >
-                <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2 w-4 h-4 rounded-full bg-primary" />
+                <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2 w-4 h-4 rounded-full bg-primary hidden md:block" />
                 <div className="w-5/6 md:w-1/2 pr-8">
                   <div className="bg-card p-6 rounded-lg border border-border/50 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
