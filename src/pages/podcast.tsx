@@ -285,7 +285,7 @@ export function PodcastPage() {
       <motion.section
         initial="hidden"
         animate="visible"
-        className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-br from-primary/5 to-background"
+        className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-br from-primary/5 to-background pt-16"
       >
         <motion.div
           variants={ringVariants}

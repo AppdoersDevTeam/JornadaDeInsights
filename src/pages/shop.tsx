@@ -115,7 +115,7 @@ export function ShopPage() {
     <div style={{ scrollBehavior: 'smooth' }}>
       {/* Hero Section */}
       <motion.section 
-        className="relative h-[60vh] flex items-center justify-center bg-gradient-to-b from-primary/10 to-background overflow-hidden"
+        className="relative h-[60vh] flex items-center justify-center bg-gradient-to-b from-primary/10 to-background overflow-hidden pt-16"
         style={{ y: heroY, opacity: heroOpacity }}
       >
         <motion.div 

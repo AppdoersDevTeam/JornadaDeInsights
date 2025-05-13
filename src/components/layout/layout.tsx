@@ -23,7 +23,7 @@ export function Layout({ children }: LayoutProps) {
       </StickyHeader>
       <Toaster position="top-right" />
       <motion.main 
-        className="flex-grow pt-20"
+        className="flex-grow"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
