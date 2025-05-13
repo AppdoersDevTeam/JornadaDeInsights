@@ -292,7 +292,7 @@ export function PodcastPage() {
           className="absolute inset-0 bg-primary/5 rounded-full"
           style={{ transform: 'translate(-50%, -50%)' }}
         />
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10 pt-16">
           <motion.div
             variants={headlineContainerVariants}
             className="max-w-3xl mx-auto text-center mb-8"

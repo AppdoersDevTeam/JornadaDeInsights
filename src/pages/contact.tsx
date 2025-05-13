@@ -56,7 +56,7 @@ export function ContactPage() {
       {/* Hero Section */}
       <section className="pt-24 pb-12 bg-gradient-to-br from-primary/10 to-background">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
+          <div className="max-w-3xl mx-auto text-center pt-16">
             <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4 animate-in fade-in duration-1000 slide-in-from-bottom-4">Entre em Contato</h1>
             <p className="text-lg text-muted-foreground mb-6 animate-in fade-in duration-1000 slide-in-from-bottom-4 delay-500">
               Tem perguntas sobre meu podcast, eBooks ou palestras? Vamos nos conectar!

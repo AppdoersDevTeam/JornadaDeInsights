@@ -31,21 +31,20 @@ export function AboutPage() {
           animate={{ x: [0, -20, 0], y: [0, -10, 0] }}
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">
-              {text}
-              <Cursor cursorStyle="|" />
-            </h1>
-            <motion.p className="text-lg text-muted-foreground mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ amount: 0.3 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              Podcaster, autora e criadora de conteúdo, compartilhando insights sobre crescimento pessoal e bem-estar.
-            </motion.p>
-          </div>
+        
+        <div className="max-w-3xl mx-auto text-center pt-16">
+          <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">
+            {text}
+            <Cursor cursorStyle="|" />
+          </h1>
+          <motion.p className="text-lg text-muted-foreground mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Podcaster, autora e criadora de conteúdo, compartilhando insights sobre crescimento pessoal e bem-estar.
+          </motion.p>
         </div>
       </motion.section>
 
