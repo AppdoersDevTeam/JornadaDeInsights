@@ -115,7 +115,7 @@ export function ShopPage() {
     <div style={{ scrollBehavior: 'smooth' }}>
       {/* Hero Section */}
       <motion.section 
-        className="relative h-[60vh] flex items-center justify-center overflow-hidden pt-16 bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
         style={{ y: heroY, opacity: heroOpacity }}
       >
         {/* Background blurred blobs */}

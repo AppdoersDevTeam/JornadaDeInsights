@@ -285,14 +285,14 @@ export function PodcastPage() {
       <motion.section
         initial="hidden"
         animate="visible"
-        className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-br from-primary/5 to-background pt-16"
+        className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
       >
         <motion.div
           variants={ringVariants}
           className="absolute inset-0 bg-primary/5 rounded-full"
           style={{ transform: 'translate(-50%, -50%)' }}
         />
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10 pt-16">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10">
           <motion.div
             variants={headlineContainerVariants}
             className="max-w-3xl mx-auto text-center mb-8"
