@@ -115,7 +115,7 @@ export function ShopPage() {
     <div style={{ scrollBehavior: 'smooth' }}>
       {/* Hero Section */}
       <motion.section 
-        className="relative h-[60vh] flex items-center justify-center overflow-hidden pt-16"
+        className="relative h-[60vh] flex items-center justify-center overflow-hidden pt-16 bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
         style={{ y: heroY, opacity: heroOpacity }}
       >
         {/* Background blurred blobs */}
@@ -128,21 +128,6 @@ export function ShopPage() {
           className="absolute bottom-0 -right-8 w-72 h-72 bg-primary/20 rounded-full blur-3xl"
           animate={{ x: [0, -20, 0], y: [0, -10, 0] }}
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div 
-          className="absolute inset-0 bg-gradient-to-br from-primary/10 to-background"
-          animate={{
-            background: [
-              'linear-gradient(to bottom right, rgba(var(--primary-rgb), 0.1), rgba(var(--primary-rgb), 0.05), var(--background))',
-              'linear-gradient(to bottom right, rgba(var(--primary-rgb), 0.05), rgba(var(--primary-rgb), 0.1), var(--background))',
-              'linear-gradient(to bottom right, rgba(var(--primary-rgb), 0.1), rgba(var(--primary-rgb), 0.05), var(--background))',
-            ],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
         />
         <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
