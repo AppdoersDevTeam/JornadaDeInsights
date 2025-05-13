@@ -204,11 +204,11 @@ export function ShopPage() {
           ) : featuredEbook ? (
             <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 transition-all duration-300 hover:shadow-lg hover:border-primary/20 group">
               <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="md:order-2 aspect-[3/4] md:aspect-auto md:h-full max-h-[400px] md:max-h-none overflow-hidden">
+                <div className="md:order-2 aspect-square md:aspect-[3/4] md:h-full max-h-[400px] md:max-h-none overflow-hidden">
                   <LazyImage 
                     src={featuredEbook.cover_url || ''} 
                     alt={featuredEbook.title}
-                    className="w-full h-full transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
                 <div className="p-6 md:p-8 flex flex-col justify-between">
