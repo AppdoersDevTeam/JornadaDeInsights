@@ -101,7 +101,7 @@ const allEpisodes: PodcastEpisode[] = [
 
 const categories = [
   "Todos",
-  "Ruth",
+  "Rute",
   "Sobrenatural",
   "Apocalipse"
 ];
@@ -402,7 +402,9 @@ export function PodcastPage() {
                   const matchesSearch = episode.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     episode.description.toLowerCase().includes(searchTerm.toLowerCase());
                   const matchesCategory = selectedCategory === "Todos" || 
-                    episode.title.toLowerCase().includes(selectedCategory.toLowerCase());
+                    (selectedCategory === "Rute" ? 
+                      (episode.title.toLowerCase().includes("rute") || episode.title.toLowerCase().includes("ruth")) :
+                      episode.title.toLowerCase().includes(selectedCategory.toLowerCase()));
                   return matchesSearch && matchesCategory;
                 })
                 .slice(0, visibleCount)
