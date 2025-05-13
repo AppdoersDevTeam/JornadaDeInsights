@@ -46,7 +46,7 @@ export function EbookCard({ book }: EbookCardProps) {
               onClick={handleAddToCart}
               className="transition-all duration-300 hover:scale-105 hover:shadow-md"
             >
-              <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
+              <ShoppingCart className="mr-2 h-4 w-4" /> Adicionar ao carrinho
             </Button>
           </div>
         </div>

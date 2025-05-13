@@ -52,19 +52,19 @@ export function Footer() {
                 <Link to="/user-dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">Dashboard</Link>
               </li>
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Home</Link>
+                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Início</Link>
               </li>
               <li>
-                <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">About</Link>
+                <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">Sobre</Link>
               </li>
               <li>
                 <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">Podcast</Link>
               </li>
               <li>
-                <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Ebooks</Link>
+                <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Loja</Link>
               </li>
               <li>
-                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contact</Link>
+                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contato</Link>
               </li>
             </ul>
           </div>
