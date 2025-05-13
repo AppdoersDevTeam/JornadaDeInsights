@@ -318,17 +318,17 @@ export function PodcastPage() {
           </motion.p>
           <motion.div
             variants={ctaContainerVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full"
           >
-            <motion.div variants={ctaButtonVariants}>
-              <Button size="lg" asChild>
+            <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+              <Button size="lg" asChild className="w-full sm:w-auto">
                 <a href="https://www.youtube.com/@Umajornadadeinsights" target="_blank" rel="noopener noreferrer">
                   <Play className="mr-2 h-4 w-4" /> Assista no YouTube
                 </a>
               </Button>
             </motion.div>
-            <motion.div variants={ctaButtonVariants}>
-              <Button variant="outline" size="lg" asChild>
+            <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
                 <a href="https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW" target="_blank" rel="noopener noreferrer">
                   <Play className="mr-2 h-4 w-4" /> Ouça no Spotify
                 </a>
