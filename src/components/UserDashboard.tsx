@@ -401,7 +401,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-4xl mx-auto">
                       {userEbooks.slice(0, 2).map((ebook) => (
                         <Card key={ebook.id} className="overflow-hidden">
                           <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-6">
@@ -818,41 +818,45 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
               <div className="space-y-6">
                 <div className="space-y-4">
                   {items.map(item => (
-                    <div key={item.id} className="bg-card rounded-lg p-4 flex justify-between items-center">
-                      <div className="flex items-center space-x-4">
-                        <LazyImage
-                          src={item.cover_url || ''}
-                          alt={item.title}
-                          className="w-20 h-20 object-cover rounded"
-                        />
-                        <div>
-                          <h3 className="font-semibold">{item.title}</h3>
-                          <p className="text-muted-foreground">
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
-                          </p>
+                    <div key={item.id} className="bg-card rounded-lg p-4">
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-4">
+                          <LazyImage
+                            src={item.cover_url || ''}
+                            alt={item.title}
+                            className="w-20 h-20 object-cover rounded"
+                          />
+                          <div className="flex-1">
+                            <h3 className="font-semibold">{item.title}</h3>
+                            <p className="text-muted-foreground">
+                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => decrementItem(item.id)}
-                          className="p-1 rounded border hover:bg-muted"
-                          disabled={item.quantity <= 1}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </button>
-                        <span>{item.quantity}</span>
-                        <button
-                          onClick={() => addItem(item)}
-                          className="p-1 rounded border hover:bg-muted"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="p-1 rounded border border-destructive text-destructive hover:bg-destructive/10"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => decrementItem(item.id)}
+                              className="p-2 rounded border hover:bg-muted"
+                              disabled={item.quantity <= 1}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </button>
+                            <span className="w-8 text-center">{item.quantity}</span>
+                            <button
+                              onClick={() => addItem(item)}
+                              className="p-2 rounded border hover:bg-muted"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <button
+                            onClick={() => removeItem(item.id)}
+                            className="p-2 rounded border border-destructive text-destructive hover:bg-destructive/10"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
