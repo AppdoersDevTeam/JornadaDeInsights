@@ -9,9 +9,11 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+type TabType = 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'cart' | 'analytics' | 'content' | 'users';
+
 interface DashboardSidePanelProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab: TabType;
+  onTabChange: (tab: TabType) => void;
 }
 
 export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePanelProps) {

@@ -13,9 +13,11 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useCart } from '@/context/cart-context';
 
+type TabType = 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'cart' | 'analytics' | 'content' | 'users';
+
 interface UserDashboardSidePanelProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab: TabType;
+  onTabChange: (tab: TabType) => void;
 }
 
 export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboardSidePanelProps) {

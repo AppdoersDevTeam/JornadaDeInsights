@@ -36,8 +36,10 @@ interface CompletedOrder {
   }>;
 }
 
+type TabType = 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'cart' | 'analytics' | 'content' | 'users';
+
 interface UserDashboardProps {
-  activeTab: 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'cart';
+  activeTab: TabType;
 }
 
 interface CartItem {

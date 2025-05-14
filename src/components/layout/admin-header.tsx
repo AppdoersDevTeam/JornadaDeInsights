@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Search, LogOut, Headphones, Menu } from 'lucide-react';
+import { LogOut, Headphones, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -42,17 +41,21 @@ export function AdminHeader({ onMenuToggle, isMenuOpen }: AdminHeaderProps) {
           </Link>
         </div>
 
-        {/* Search Section */}
-        <div className="hidden md:flex items-center gap-2 max-w-md w-full mx-4">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-background/70" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full pl-9 bg-background/10 text-background placeholder:text-background/70 border-background/20"
-            />
-          </div>
-        </div>
+        {/* Navigation Links */}
+        <nav className="hidden md:flex items-center gap-6">
+          <Link to="/dashboard" className="text-background hover:text-secondary transition-colors">
+            Dashboard
+          </Link>
+          <Link to="/" className="text-background hover:text-secondary transition-colors">
+            Home
+          </Link>
+          <Link to="/shop" className="text-background hover:text-secondary transition-colors">
+            Shop
+          </Link>
+          <Link to="/podcast" className="text-background hover:text-secondary transition-colors">
+            Podcast
+          </Link>
+        </nav>
 
         {/* Logout Button */}
         <Button variant="ghost" size="icon" className="text-background hover:text-secondary" onClick={handleSignOut}>

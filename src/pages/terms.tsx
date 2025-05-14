@@ -17,7 +17,7 @@ export function TermsPage() {
           <Button variant="ghost" asChild className="gap-2">
             <Link to="/">
               <ArrowLeft className="h-4 w-4" />
-              Voltar para Home Page
+              Voltar para Home
             </Link>
           </Button>
         </motion.div>

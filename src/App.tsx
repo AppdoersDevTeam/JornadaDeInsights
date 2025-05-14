@@ -20,64 +20,62 @@ import UserDashboard from '@/components/UserDashboard';
 import { UserDashboardSidePanel } from '@/components/dashboard/user-dashboard-side-panel';
 import { Toaster } from 'react-hot-toast';
 import { CartProvider } from '@/context/cart-context';
+import { AuthProvider } from '@/context/auth-context';
 import { EbookDetailsPage } from '@/pages/ebook-details';
 import { TermsPage } from '@/pages/terms';
 import { PrivacyPage } from '@/pages/privacy';
 
+type TabType = 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'cart' | 'analytics' | 'content' | 'users';
+
 function App() {
-  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
 
   return (
-    <>
-      <Toaster position="top-right" />
-      <Routes>
-        <Route path="/dashboard" element={
-          <AdminLayout 
-            sidePanel={
-              <DashboardSidePanel 
-                activeTab={activeTab} 
-                onTabChange={setActiveTab} 
-              />
-            }
-          >
-            <DashboardPage activeTab={activeTab} onTabChange={setActiveTab} />
-          </AdminLayout>
-        } />
-        <Route path="/user-dashboard" element={
-          <AdminLayout 
-            sidePanel={
-              <UserDashboardSidePanel 
-                activeTab={activeTab} 
-                onTabChange={setActiveTab} 
-              />
-            }
-          >
-            <UserDashboard activeTab={activeTab} />
-          </AdminLayout>
-        } />
-        <Route path="/*" element={
-          <Layout>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/podcast" element={<PodcastPage />} />
-              <Route path="/shop" element={<ShopPage />} />
-              <Route path="/shop/ebook/:id" element={<EbookDetailsPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/success" element={<SuccessPage />} />
-              <Route path="/cancel" element={<CancelPage />} />
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/check-email" element={<CheckEmailPage />} />
-              <Route path="/confirm-email" element={<ConfirmEmailPage />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="/privacy" element={<PrivacyPage />} />
-            </Routes>
-          </Layout>
-        } />
-      </Routes>
-    </>
+    <AuthProvider>
+      <CartProvider>
+        <Routes>
+          <Route path="/" element={<Layout><HomePage /></Layout>} />
+          <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+          <Route path="/podcast" element={<Layout><PodcastPage /></Layout>} />
+          <Route path="/shop" element={<Layout><ShopPage /></Layout>} />
+          <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
+          <Route path="/cart" element={<Layout><CartPage /></Layout>} />
+          <Route path="/success" element={<Layout><SuccessPage /></Layout>} />
+          <Route path="/cancel" element={<Layout><CancelPage /></Layout>} />
+          <Route path="/signin" element={<Layout><SignIn /></Layout>} />
+          <Route path="/signup" element={<Layout><SignUp /></Layout>} />
+          <Route path="/check-email" element={<Layout><CheckEmailPage /></Layout>} />
+          <Route path="/confirm-email" element={<Layout><ConfirmEmailPage /></Layout>} />
+          <Route path="/ebook/:id" element={<Layout><EbookDetailsPage /></Layout>} />
+          <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
+          <Route path="/privacy" element={<Layout><PrivacyPage /></Layout>} />
+          <Route path="/dashboard" element={
+            <AdminLayout 
+              sidePanel={
+                <DashboardSidePanel 
+                  activeTab={activeTab} 
+                  onTabChange={setActiveTab} 
+                />
+              }
+            >
+              <DashboardPage activeTab={activeTab} onTabChange={setActiveTab} />
+            </AdminLayout>
+          } />
+          <Route path="/user-dashboard" element={
+            <AdminLayout 
+              sidePanel={
+                <UserDashboardSidePanel 
+                  activeTab={activeTab} 
+                  onTabChange={setActiveTab} 
+                />
+              }
+            >
+              <UserDashboard activeTab={activeTab} />
+            </AdminLayout>
+          } />
+        </Routes>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 
