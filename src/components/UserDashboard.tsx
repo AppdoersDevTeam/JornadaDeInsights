@@ -55,6 +55,13 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
   const [selectedOrder, setSelectedOrder] = useState<CompletedOrder | null>(null);
   const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 
+  const capitalizeName = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   const fetchUserOrders = async () => {
     try {
       const res = await fetch(`${SERVER_URL}/api/completed-orders`);
@@ -174,11 +181,11 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-8 max-w-3xl mx-auto">
+              <div className="grid grid-cols-1 gap-8">
                 {userEbooks.map((ebook) => (
                   <Card key={ebook.id} className="overflow-hidden">
-                    <div className="flex gap-6 p-8">
-                      <div className="w-32 h-40 overflow-hidden rounded-md relative bg-muted">
+                    <div className="flex flex-col md:flex-row gap-6 p-8">
+                      <div className="w-full md:w-32 h-40 overflow-hidden rounded-md relative bg-muted">
                         <img
                           src={ebook.cover_url}
                           alt={ebook.title}
@@ -191,13 +198,13 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                           loading="lazy"
                         />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 flex flex-col gap-4">
                         <CardHeader className="p-0">
                           <CardTitle className="text-xl">{ebook.title}</CardTitle>
                           <CardDescription className="line-clamp-2">{ebook.description}</CardDescription>
                         </CardHeader>
-                        <CardContent className="p-0 mt-4">
-                          <div className="flex gap-2">
+                        <CardContent className="p-0">
+                          <div className="flex flex-col sm:flex-row gap-2">
                             <Button 
                               variant="outline" 
                               size="sm" 
@@ -293,12 +300,12 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                           >
                             <td className="py-3 px-4 hidden md:table-cell">
                               {new Date(order.date).toLocaleDateString('pt-BR', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
                               })}
                             </td>
-                            <td className="py-3 px-4 hidden md:table-cell">{order.name}</td>
+                            <td className="py-3 px-4 hidden md:table-cell">{capitalizeName(order.name)}</td>
                             <td className="py-3 px-4 hidden md:table-cell">{order.email}</td>
                             <td className="py-3 px-4">
                               {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(order.total)}
@@ -324,18 +331,25 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
               <DialogTitle>Detalhes do Pedido</DialogTitle>
               <DialogDescription>
                 {selectedOrder && new Date(selectedOrder.date).toLocaleDateString('pt-BR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric'
                 })}
               </DialogDescription>
+              <button
+                onClick={() => setSelectedOrder(null)}
+                className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 hover:bg-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Fechar</span>
+              </button>
             </DialogHeader>
             {selectedOrder && (
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <h4 className="text-sm font-medium text-muted-foreground">Nome</h4>
-                    <p>{selectedOrder.name}</p>
+                    <p>{capitalizeName(selectedOrder.name)}</p>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-muted-foreground">Email</h4>
