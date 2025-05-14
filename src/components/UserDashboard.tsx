@@ -871,7 +871,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                   </p>
                   <div className="flex items-center gap-4">
                     <Button
-                      onClick={handleNewsletterToggle}
+                      onClick={() => setShowComingSoonDialog(true)}
                       variant={isSubscribed ? 'outline' : 'default'}
                     >
                       {isSubscribed ? 'Cancelar Inscrição' : 'Inscrever-se'}
