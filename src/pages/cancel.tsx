@@ -9,18 +9,18 @@ export function CancelPage() {
         <div className="max-w-2xl mx-auto text-center">
           <XCircle className="mx-auto mb-6 h-16 w-16 text-destructive" />
           <h1 className="text-3xl md:text-4xl font-heading font-bold mb-4">
-            Checkout Cancelled
+            Checkout Cancelado
           </h1>
           <p className="text-lg text-muted-foreground mb-8">
-            Your checkout process was cancelled. No charges were made to your account.
-            Feel free to try again when you're ready.
+            Seu processo de checkout foi cancelado. Nenhuma cobrança foi feita em sua conta.
+            Sinta-se à vontade para tentar novamente quando estiver pronto.
           </p>
           <div className="space-y-4">
             <Button asChild size="lg">
-              <Link to="/cart">Return to Cart</Link>
+              <Link to="/cart">Voltar para o carrinho</Link>
             </Button>
             <p className="text-sm text-muted-foreground">
-              Need help? <Link to="/contact" className="text-primary hover:underline">Contact us</Link>
+              Precisa de ajuda? <Link to="/contact" className="text-primary hover:underline">Contate-nos</Link>
             </p>
           </div>
         </div>

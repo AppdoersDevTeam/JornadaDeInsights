@@ -307,8 +307,8 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         <div>
           {activeTab === 'overview' ? (
             <>
-              <h1 className="text-3xl font-bold">Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back, Admin</p>
+              <h1 className="text-3xl font-bold">Painel de Controle</h1>
+              <p className="text-muted-foreground">Bem-vindo de volta, Administrador</p>
             </>
           ) : (
             <h1 className="text-3xl font-bold">
@@ -320,14 +320,14 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           <div className="flex w-full sm:w-auto items-center gap-2">
             <Input
               type="search"
-              placeholder="Search..."
+              placeholder="Pesquisar..."
               className="w-full max-w-xs md:w-64"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <Button variant="outline" className="shrink-0">
               <Bell className="mr-2 h-4 w-4" />
-              Notifications
+              Notificações
             </Button>
           </div>
         )}
@@ -341,7 +341,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Today's Purchases</p>
+                  <p className="text-sm font-medium text-muted-foreground">Compras de Hoje</p>
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
@@ -356,7 +356,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Weekly Purchases</p>
+                  <p className="text-sm font-medium text-muted-foreground">Compras da Semana</p>
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
@@ -371,7 +371,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Monthly Purchases</p>
+                  <p className="text-sm font-medium text-muted-foreground">Compras do Mês</p>
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
@@ -386,7 +386,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total de Usuários</p>
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
@@ -394,7 +394,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                     }
                   </h3>
                   <div className="flex items-center mt-1">
-                    <Badge variant="secondary">New this week: {stats.users.newThisWeek}</Badge>
+                    <Badge variant="secondary">Novos esta semana: {stats.users.newThisWeek}</Badge>
                   </div>
                 </div>
                 <Users className="h-8 w-8 text-primary" />
@@ -407,7 +407,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Completed Orders</p>
+                  <p className="text-sm font-medium text-muted-foreground">Pedidos Concluídos</p>
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
@@ -418,13 +418,13 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <Check className="h-8 w-8 text-green-500" />
               </div>
               <Button variant="outline" className="w-full mt-4" onClick={() => onTabChange('orders')}>
-                View Completed Orders
+                Ver Pedidos Concluídos
               </Button>
             </Card>
             <Card className="p-6">
               <CardHeader>
-                <CardTitle>Top Products</CardTitle>
-                <CardDescription>Best selling products this month</CardDescription>
+                <CardTitle>Produtos Mais Vendidos</CardTitle>
+                <CardDescription>Produtos mais vendidos este mês</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -433,7 +433,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       <div>
                         <p className="font-medium">{product.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {product.sales} sales
+                          {product.sales} vendas
                         </p>
                       </div>
                       <p className="font-medium">${product.revenue}</p>
@@ -443,14 +443,14 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full">
-                  View All Products
+                  Ver Todos os Produtos
                 </Button>
               </CardFooter>
             </Card>
             <Card className="p-6">
               <CardHeader>
-                <CardTitle>Latest Content Updates</CardTitle>
-                <CardDescription>Recent changes to your website content</CardDescription>
+                <CardTitle>Atualizações Recentes de Conteúdo</CardTitle>
+                <CardDescription>Alterações recentes no conteúdo do seu site</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -471,7 +471,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full">
-                  View All Updates
+                  Ver Todas as Atualizações
                 </Button>
               </CardFooter>
             </Card>
@@ -483,8 +483,8 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Upload New eBook</CardTitle>
-              <CardDescription>Add a new eBook to the store</CardDescription>
+              <CardTitle>Enviar Novo eBook</CardTitle>
+              <CardDescription>Adicionar um novo eBook à loja</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -494,7 +494,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           </Card>
 
           <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-6">Uploaded eBooks</h2>
+            <h2 className="text-xl font-semibold mb-6">eBooks Enviados</h2>
             <EbookList key={refreshKey} />
           </Card>
         </div>
@@ -505,39 +505,39 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
             <Card className="p-6 w-full">
               <CardHeader>
-                <CardTitle>Sales Trends</CardTitle>
-                <CardDescription>Daily, weekly, and monthly sales data</CardDescription>
+                <CardTitle>Tendências de Vendas</CardTitle>
+                <CardDescription>Dados de vendas diários, semanais e mensais</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center w-full min-h-[120px]">
                   <div className="text-center w-full">
                     <LineChart className="h-12 w-12 mx-auto text-primary mb-2" />
-                    <p className="text-sm text-muted-foreground">Sales trends chart will be displayed here</p>
+                    <p className="text-sm text-muted-foreground">O gráfico de tendências de vendas será exibido aqui</p>
                   </div>
                 </div>
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full">
-                  View Detailed Trends
+                  Ver Tendências Detalhadas
                 </Button>
               </CardFooter>
             </Card>
             <Card className="p-6 w-full">
               <CardHeader>
-                <CardTitle>Revenue Breakdown</CardTitle>
-                <CardDescription>Revenue distribution by product</CardDescription>
+                <CardTitle>Análise de Receita</CardTitle>
+                <CardDescription>Distribuição de receita por produto</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center w-full min-h-[120px]">
                   <div className="text-center w-full">
                     <PieChart className="h-12 w-12 mx-auto text-primary mb-2" />
-                    <p className="text-sm text-muted-foreground">Revenue breakdown chart will be displayed here</p>
+                    <p className="text-sm text-muted-foreground">O gráfico de análise de receita será exibido aqui</p>
                   </div>
                 </div>
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full">
-                  View Revenue Details
+                  Ver Detalhes da Receita
                 </Button>
               </CardFooter>
             </Card>
@@ -546,22 +546,22 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           {/* Export Options */}
           <Card className="p-6 w-full">
             <CardHeader>
-              <CardTitle>Export Reports</CardTitle>
-              <CardDescription>Download sales reports in various formats</CardDescription>
+              <CardTitle>Exportar Relatórios</CardTitle>
+              <CardDescription>Baixar relatórios de vendas em vários formatos</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 w-full">
                 <Button variant="outline" className="flex-1 w-full">
                   <Download className="mr-2 h-4 w-4" />
-                  Export as CSV
+                  Exportar como CSV
                 </Button>
                 <Button variant="outline" className="flex-1 w-full">
                   <Download className="mr-2 h-4 w-4" />
-                  Export as PDF
+                  Exportar como PDF
                 </Button>
                 <Button variant="outline" className="flex-1 w-full">
                   <Download className="mr-2 h-4 w-4" />
-                  Export as Excel
+                  Exportar como Excel
                 </Button>
               </div>
             </CardContent>
@@ -578,15 +578,15 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <nav className="space-y-1">
                   <Button variant="ghost" className="w-full justify-start">
                     <Edit className="mr-2 h-4 w-4" />
-                    Edit Pages
+                    Editar Páginas
                   </Button>
                   <Button variant="ghost" className="w-full justify-start">
                     <FileText className="mr-2 h-4 w-4" />
-                    Blog Posts
+                    Posts do Blog
                   </Button>
                   <Button variant="ghost" className="w-full justify-start">
                     <IconImage className="mr-2 h-4 w-4" />
-                    Media Library
+                    Biblioteca de Mídia
                   </Button>
                   <Button variant="ghost" className="w-full justify-start">
                     <IconLink className="mr-2 h-4 w-4" />
@@ -601,16 +601,16 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               <Card className="p-6">
                 <div className="space-y-6">
                   <div>
-                    <Label htmlFor="page-title" className="text-sm font-medium">Page Title</Label>
+                    <Label htmlFor="page-title" className="text-sm font-medium">Título da Página</Label>
                     <Input
                       id="page-title"
-                      placeholder="Enter page title"
+                      placeholder="Digite o título da página"
                       className="mt-2"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="page-content" className="text-sm font-medium">Content</Label>
+                    <Label htmlFor="page-content" className="text-sm font-medium">Conteúdo</Label>
                     <div className="mt-2 border rounded-lg">
                       <div className="border-b p-2 flex items-center gap-2">
                         <Button variant="ghost" size="icon">
@@ -632,7 +632,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       </div>
                       <Textarea
                         id="page-content"
-                        placeholder="Enter page content..."
+                        placeholder="Digite o conteúdo da página..."
                         rows={10}
                         className="border-0 focus-visible:ring-0"
                       />
@@ -642,7 +642,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                   {/* Save Changes Button */}
                   <div className="flex justify-end">
                     <Button className="w-full sm:w-auto">
-                      Save Changes
+                      Salvar Alterações
                     </Button>
                   </div>
                 </div>
@@ -655,7 +655,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       {activeTab === 'users' && (
         <div className="space-y-6 w-full">
           <Card className="p-6 w-full">
-            <h2 className="text-xl font-semibold mb-6">User Management</h2>
+            <h2 className="text-xl font-semibold mb-6">Gerenciamento de Usuários</h2>
             <div className="space-y-4 w-full">
               {usersList.map((user) => (
                 <div
@@ -697,7 +697,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           {/* Settings Header */}
           <div className="mb-8">
             <p className="text-muted-foreground">
-              Customize basic site settings and enable features like dark mode or maintenance mode.
+              Personalize as configurações básicas do site e ative recursos como modo escuro ou modo de manutenção.
             </p>
           </div>
 
@@ -705,22 +705,22 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <div className="space-y-8">
               {/* Site Title */}
               <div>
-                <Label htmlFor="site-title" className="text-sm font-medium">Site Title</Label>
+                <Label htmlFor="site-title" className="text-sm font-medium">Título do Site</Label>
                 <Input
                   id="site-title"
-                  placeholder="Enter your site title here"
-                  defaultValue="My Platform"
+                  placeholder="Digite o título do seu site aqui"
+                  defaultValue="Minha Plataforma"
                   className="mt-2"
                 />
               </div>
 
               {/* Site Description */}
               <div>
-                <Label htmlFor="site-description" className="text-sm font-medium">Site Description</Label>
+                <Label htmlFor="site-description" className="text-sm font-medium">Descrição do Site</Label>
                 <Textarea
                   id="site-description"
-                  placeholder="Enter a brief description of your platform"
-                  defaultValue="Welcome to our platform..."
+                  placeholder="Digite uma breve descrição da sua plataforma"
+                  defaultValue="Bem-vindo à nossa plataforma..."
                   rows={4}
                   className="mt-2"
                 />
@@ -729,9 +729,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               {/* Maintenance Mode */}
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="maintenance-mode" className="text-sm font-medium">Maintenance Mode</Label>
+                  <Label htmlFor="maintenance-mode" className="text-sm font-medium">Modo de Manutenção</Label>
                   <p className="text-sm text-muted-foreground">
-                    Enable maintenance mode to temporarily disable the site
+                    Ative o modo de manutenção para desativar temporariamente o site
                   </p>
                 </div>
                 <Switch id="maintenance-mode" />
@@ -740,9 +740,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               {/* Dark Mode */}
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="dark-mode" className="text-sm font-medium">Dark Mode</Label>
+                  <Label htmlFor="dark-mode" className="text-sm font-medium">Modo Escuro</Label>
                   <p className="text-sm text-muted-foreground">
-                    Enable dark mode for the admin interface
+                    Ative o modo escuro para a interface administrativa
                   </p>
                 </div>
                 <Switch id="dark-mode" />
@@ -757,7 +757,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         <div className="space-y-6 w-full">
           <Card className="p-6 w-full">
             <CardHeader>
-              <CardTitle>All Completed Orders</CardTitle>
+              <CardTitle>Todos os Pedidos Concluídos</CardTitle>
             </CardHeader>
             <CardContent>
               {/* Filters */}
@@ -765,7 +765,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <div className="flex-grow w-full">
                   <input
                     type="text"
-                    placeholder="Search by name, email, date or item"
+                    placeholder="Pesquisar por nome, email, data ou item"
                     value={searchQuery}
                     onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                     className="w-full border px-3 py-1 rounded"
@@ -868,9 +868,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               </div>
               {/* Pagination */}
               <div className="flex justify-center mt-4 space-x-2">
-                <Button variant="outline" disabled={currentPage===1} onClick={()=>setCurrentPage(p=>p-1)}>Prev</Button>
-                <span>Page {currentPage} of {totalPages}</span>
-                <Button variant="outline" disabled={currentPage===totalPages} onClick={()=>setCurrentPage(p=>p+1)}>Next</Button>
+                <Button variant="outline" disabled={currentPage===1} onClick={()=>setCurrentPage(p=>p-1)}>Anterior</Button>
+                <span>Página {currentPage} de {totalPages}</span>
+                <Button variant="outline" disabled={currentPage===totalPages} onClick={()=>setCurrentPage(p=>p+1)}>Próximo</Button>
               </div>
             </CardContent>
           </Card>

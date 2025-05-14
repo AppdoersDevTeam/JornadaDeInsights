@@ -172,8 +172,8 @@ export function CartPage() {
         throw new Error(result.error.message);
       }
     } catch (error) {
-      console.error('Checkout error:', error);
-      toast.error('Failed to start checkout process. Please try again.');
+      console.error('Erro ao iniciar o processo de checkout:', error);
+      toast.error('Falha ao iniciar o processo de checkout. Por favor, tente novamente.');
     }
   };
 

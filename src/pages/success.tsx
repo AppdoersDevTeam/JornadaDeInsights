@@ -53,7 +53,7 @@ export function SuccessPage() {
         const user = auth.currentUser;
         if (!user) {
           console.error('No authenticated user found');
-          toast.error('Please sign in to receive your purchase confirmation email');
+          toast.error('Por favor, faça login para receber o e-mail de confirmação da compra');
           setIsLoading(false);
           return;
         }
@@ -85,14 +85,14 @@ export function SuccessPage() {
         }));
         
         console.log('Email sent successfully for session:', sessionId);
-        toast.success('Purchase confirmation email sent!');
+        toast.success('E-mail de confirmação de compra enviado!');
       } catch (error: any) {
-        console.error('Error sending purchase confirmation email:', error);
-        const errorMessage = error.message || 'Failed to send purchase confirmation email';
+        console.error('Erro ao enviar e-mail de confirmação de compra:', error);
+        const errorMessage = error.message || 'Falha ao enviar e-mail de confirmação de compra';
         toast.error(
           <div>
             <p>{errorMessage}</p>
-            <p className="text-sm mt-1">You can still access your eBooks in your dashboard.</p>
+            <p className="text-sm mt-1">Você ainda pode acessar seus eBooks no seu painel.</p>
           </div>,
           { duration: 5000 }
         );
@@ -112,7 +112,7 @@ export function SuccessPage() {
   useEffect(() => {
     // Only show toast if we have a session ID and haven't shown it before
     if (sessionId && !sessionStorage.getItem(`toast_shown_${sessionId}`)) {
-      toast.success('Payment Successful!', {
+      toast.success('Pagamento realizado com sucesso!', {
         duration: 4000,
         position: 'top-right',
       });
@@ -127,24 +127,24 @@ export function SuccessPage() {
         <div className="max-w-2xl mx-auto text-center">
           <CheckCircle className="mx-auto mb-6 h-16 w-16 text-primary" />
           <h1 className="text-3xl md:text-4xl font-heading font-bold mb-4">
-            Thank You for Your Purchase!
+            Obrigado pela sua compra!
           </h1>
           <p className="text-lg text-muted-foreground mb-8">
             {isLoading ? (
-              'Processing your purchase...'
+              'Processando sua compra...'
             ) : (
-              'Your payment was successful. You can access your eBooks in your dashboard. A confirmation email has been sent with more details.'
+              'Seu pagamento foi realizado com sucesso. Você pode acessar seus eBooks no seu painel. Um e-mail de confirmação foi enviado com mais detalhes.'
             )}
           </p>
           <div className="space-y-4">
             <Button asChild size="lg">
-              <Link to="/user-dashboard?tab=ebooks">Go to My eBooks</Link>
+              <Link to="/user-dashboard?tab=ebooks">Ir para meus eBooks</Link>
             </Button>
             <Button variant="outline" asChild size="lg">
-              <Link to="/shop">Continue Shopping</Link>
+              <Link to="/shop">Continuar comprando</Link>
             </Button>
             <p className="text-sm text-muted-foreground">
-              Need help? <Link to="/contact" className="text-primary hover:underline">Contact us</Link>
+              Precisa de ajuda? <Link to="/contact" className="text-primary hover:underline">Contate-nos</Link>
             </p>
           </div>
         </div>

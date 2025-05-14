@@ -20,7 +20,7 @@ export function ConfirmEmailPage() {
         setStatus('success');
       })
       .catch((error) => {
-        console.error('Error verifying email:', error);
+        console.error('Erro ao verificar o email:', error);
         setStatus('error');
       });
   }, [code]);
@@ -47,7 +47,7 @@ export function ConfirmEmailPage() {
                 Seu email foi verificado. Agora você pode acessar seu painel.
               </p>
               <Button asChild size="lg">
-                <Link to="/user-dashboard">Ir para Dashboard</Link>
+                <Link to="/user-dashboard">Ir para o painel</Link>
               </Button>
             </>
           ) : (
