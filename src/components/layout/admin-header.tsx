@@ -35,9 +35,19 @@ export function AdminHeader({ onMenuToggle, isMenuOpen }: AdminHeaderProps) {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-primary border-b">
-        <div className="container mx-auto px-4 h-16 flex items-center">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo Section - Left */}
-          <div className="flex items-center gap-4 w-1/4">
+          <Link to="/dashboard" className="flex items-center gap-2 text-background">
+            <Headphones className="h-6 w-6 text-current" />
+            <span className="text-xl font-heading font-semibold">Patricia</span>
+          </Link>
+
+          {/* Right Section - Menu and Logout */}
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="text-background hover:text-secondary" onClick={() => setShowSignOutDialog(true)}>
+              <LogOut className="h-5 w-5" />
+              <span className="sr-only">Sair</span>
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -46,34 +56,6 @@ export function AdminHeader({ onMenuToggle, isMenuOpen }: AdminHeaderProps) {
             >
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
-            </Button>
-            <Link to="/dashboard" className="flex items-center gap-2 text-background">
-              <Headphones className="h-6 w-6 text-current" />
-              <span className="text-xl font-heading font-semibold">Patricia</span>
-            </Link>
-          </div>
-
-          {/* Navigation Links - Center */}
-          <nav className="hidden md:flex items-center justify-center gap-6 flex-1">
-            <Link to="/dashboard" className="text-background hover:text-secondary transition-colors">
-              Dashboard
-            </Link>
-            <Link to="/" className="text-background hover:text-secondary transition-colors">
-              Início
-            </Link>
-            <Link to="/shop" className="text-background hover:text-secondary transition-colors">
-              Loja
-            </Link>
-            <Link to="/podcast" className="text-background hover:text-secondary transition-colors">
-              Podcast
-            </Link>
-          </nav>
-
-          {/* Logout Button - Right */}
-          <div className="w-1/4 flex justify-end">
-            <Button variant="ghost" size="icon" className="text-background hover:text-secondary" onClick={() => setShowSignOutDialog(true)}>
-              <LogOut className="h-5 w-5" />
-              <span className="sr-only">Sair</span>
             </Button>
           </div>
         </div>
