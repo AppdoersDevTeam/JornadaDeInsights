@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, Headphones, User } from 'lucide-react';
+import { Menu, X, Headphones, User, Home, Info, Mic, ShoppingBag, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
@@ -95,18 +95,47 @@ export function Header() {
         "fixed inset-0 top-[60px] bg-white z-40 transform transition-transform duration-300 ease-in-out md:hidden",
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
-        <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-4 items-center">
-          {navLinks.map((link) => (
-            <NavLink 
-              key={link.to}
-              to={link.to}
-              end={link.to === '/'}
-              className="text-lg py-3 w-full text-center text-[#808000] font-normal hover:bg-[#808000] hover:text-white transition-colors"
-              onClick={closeMenu}
-            >
-              {link.label}
-            </NavLink>
-          ))}
+        <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-2 items-start">
+          {navLinks.map((link) => {
+            let Icon;
+            switch (link.to) {
+              case '/':
+                Icon = Home;
+                break;
+              case '/about':
+                Icon = Info;
+                break;
+              case '/podcast':
+                Icon = Mic;
+                break;
+              case '/shop':
+                Icon = ShoppingBag;
+                break;
+              case '/contact':
+                Icon = Mail;
+                break;
+              default:
+                Icon = null;
+            }
+            return (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.to === '/'}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
+                    isActive
+                      ? 'bg-[#606C38] text-white'
+                      : 'hover:bg-[#606C38] hover:text-white'
+                  }`
+                }
+                onClick={closeMenu}
+              >
+                {Icon && <Icon className="h-5 w-5" />}
+                {link.label}
+              </NavLink>
+            );
+          })}
         </nav>
       </div>
     </header>
