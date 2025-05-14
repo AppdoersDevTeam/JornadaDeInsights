@@ -100,7 +100,7 @@ const SignIn = () => {
   };
 
   return (
-    <section className="min-h-screen flex items-center bg-gradient-to-br from-primary/10 to-background py-16">
+    <section className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-primary/10 to-background py-16 mt-16">
       <div className="container mx-auto px-6 sm:px-8 lg:px-10">
         <motion.div 
           className="max-w-6xl mx-auto"
