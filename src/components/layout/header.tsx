@@ -92,16 +92,16 @@ export function Header() {
 
       {/* Mobile Navigation */}
       <div className={cn(
-        "fixed inset-0 top-[60px] bg-secondary z-40 transform transition-transform duration-300 ease-in-out md:hidden",
+        "fixed inset-0 top-[60px] bg-white z-40 transform transition-transform duration-300 ease-in-out md:hidden",
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
-        <nav className="bg-secondary container mx-auto px-4 py-8 flex flex-col gap-4 items-center text-white">
+        <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-4 items-center">
           {navLinks.map((link) => (
             <NavLink 
               key={link.to}
               to={link.to}
               end={link.to === '/'}
-              className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+              className="text-lg py-3 w-full text-center text-[#808000] font-normal hover:bg-[#808000] hover:text-white transition-colors"
               onClick={closeMenu}
             >
               {link.label}
