@@ -76,6 +76,11 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Add effect to scroll to top when tab changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab]);
+
   const capitalizeName = (name: string) => {
     return name
       .split(' ')
