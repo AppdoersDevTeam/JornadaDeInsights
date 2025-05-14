@@ -55,6 +55,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
   const [completedOrdersList, setCompletedOrdersList] = useState<CompletedOrder[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<CompletedOrder | null>(null);
   const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
+  const [latestEbooks, setLatestEbooks] = useState<Ebook[]>([]);
 
   const capitalizeName = (name: string) => {
     return name
@@ -101,6 +102,31 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
     }
   };
 
+  const fetchLatestEbooks = async () => {
+    try {
+      const { data: ebooks, error } = await supabase
+        .from('ebooks_metadata')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+
+      if (ebooks) {
+        const ebooksWithCoverUrls = ebooks.map(ebook => ({
+          ...ebook,
+          cover_url: ebook.filename 
+            ? supabase.storage.from('store-assets').getPublicUrl(`covers/${ebook.filename}`).data.publicUrl 
+            : DEFAULT_COVER_DATA_URL
+        }));
+        setLatestEbooks(ebooksWithCoverUrls);
+      }
+    } catch (err) {
+      console.error('Error fetching latest ebooks:', err);
+      toast.error('Failed to load latest ebooks');
+    }
+  };
+
   const toggleRow = (id: string) => {
     setExpandedRows(prev => {
       const next = new Set(prev);
@@ -133,10 +159,16 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
   }, [navigate]);
 
   useEffect(() => {
-    if ((activeTab === 'orders' || activeTab === 'ebooks') && user) {
+    if ((activeTab === 'orders' || activeTab === 'ebooks' || activeTab === 'overview') && user) {
       fetchUserOrders();
     }
   }, [activeTab, user]);
+
+  useEffect(() => {
+    if (activeTab === 'overview') {
+      fetchLatestEbooks();
+    }
+  }, [activeTab]);
 
   const handleNewsletterToggle = () => {
     setIsSubscribed(!isSubscribed);
@@ -361,6 +393,66 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                   </div>
                   <Button variant="outline" onClick={handleNewsletterToggle}>
                     {isSubscribed ? 'Cancelar Inscrição' : 'Inscrever-se'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recommended Ebooks Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Ebooks que você pode gostar</CardTitle>
+                <CardDescription>
+                  Confira nossas últimas publicações
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {latestEbooks.map((ebook) => (
+                    <div key={ebook.id} className="group relative">
+                      <div className="aspect-[3/4] overflow-hidden rounded-lg bg-muted">
+                        <img
+                          src={ebook.cover_url}
+                          alt={ebook.title}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = DEFAULT_COVER_DATA_URL;
+                            target.onerror = null;
+                          }}
+                        />
+                      </div>
+                      <div className="mt-4 space-y-2">
+                        <h3 className="font-medium line-clamp-1">{ebook.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {ebook.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium">
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL'
+                            }).format(ebook.price)}
+                          </p>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigate(`/store?ebook=${ebook.id}`)}
+                          >
+                            Ver detalhes
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 flex justify-center">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate('/store')}
+                    className="w-full sm:w-auto"
+                  >
+                    Ver todos os ebooks
                   </Button>
                 </div>
               </CardContent>
