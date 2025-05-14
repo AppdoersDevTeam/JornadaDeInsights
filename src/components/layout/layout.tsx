@@ -24,13 +24,10 @@ export function Layout({ children }: LayoutProps) {
     return null; // Don't render anything while checking auth
   }
 
-  // Check if we're on a dashboard route
-  const isDashboardRoute = location.pathname.startsWith('/dashboard');
-
   return (
     <div className="flex flex-col min-h-screen">
       <StickyHeader>
-        {isDashboardRoute ? <AdminHeader /> : <Header />}
+        {user ? <AdminHeader /> : <Header />}
       </StickyHeader>
       <Toaster position="top-right" />
       <motion.main 
