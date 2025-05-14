@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useAuth } from '@/context/auth-context';
 import {
   Dialog,
   DialogContent,
@@ -20,9 +21,18 @@ export function AdminHeader() {
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
-  const toggleMenu = () => setIsOpen(!isOpen);
-  const closeMenu = () => setIsOpen(false);
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+    if (!isOpen) {
+      setIsDashboardOpen(false);
+    }
+  };
+  const closeMenu = () => {
+    setIsOpen(false);
+    setIsDashboardOpen(false);
+  };
 
   const handleSignOut = async () => {
     try {
@@ -90,30 +100,39 @@ export function AdminHeader() {
 
         {/* Desktop User Menu */}
         <div className="hidden md:flex items-center gap-4">
-          <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="text-secondary border-background hover:bg-background/10">
-                <LogOut className="h-4 w-4 mr-2" />
-                Sair
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Confirmar saída</DialogTitle>
-                <DialogDescription>
-                  Tem certeza que deseja sair da sua conta?
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex justify-end gap-4 mt-4">
-                <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
-                  Cancelar
-                </Button>
-                <Button variant="destructive" onClick={handleSignOut}>
+          {user ? (
+            <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="text-secondary border-background hover:bg-background/10">
+                  <LogOut className="h-4 w-4 mr-2" />
                   Sair
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Confirmar saída</DialogTitle>
+                  <DialogDescription>
+                    Tem certeza que deseja sair da sua conta?
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex justify-end gap-4 mt-4">
+                  <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
+                    Cancelar
+                  </Button>
+                  <Button variant="destructive" onClick={handleSignOut}>
+                    Sair
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          ) : (
+            <Link to="/signin">
+              <Button variant="outline" className="text-secondary border-background hover:bg-background/10">
+                <User className="h-4 w-4 mr-2" />
+                Entrar
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -178,17 +197,27 @@ export function AdminHeader() {
               ))}
             </>
           )}
-          <Button 
-            variant="outline" 
-            className="w-full text-white border-white hover:bg-white/10 bg-secondary/80"
-            onClick={() => {
-              closeMenu();
-              setShowSignOutDialog(true);
-            }}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Sair
-          </Button>
+          {user ? (
+            <Button 
+              variant="outline" 
+              className="w-full text-white border-white hover:bg-white/10 bg-secondary/80"
+              onClick={() => {
+                closeMenu();
+                setShowSignOutDialog(true);
+              }}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </Button>
+          ) : (
+            <Link 
+              to="/signin"
+              className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+              onClick={closeMenu}
+            >
+              Entrar
+            </Link>
+          )}
         </nav>
       </div>
     </header>
