@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Headphones, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings } from 'lucide-react';
+import { Menu, X, Headphones, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'firebase/auth';
@@ -47,11 +47,12 @@ export function AdminHeader() {
   const isDashboard = location.pathname.startsWith('/dashboard');
 
   const dashboardLinks = [
-    { to: '/dashboard', label: 'Visão Geral', icon: LayoutDashboard },
-    { to: '/dashboard/orders', label: 'Pedidos', icon: ShoppingBag },
-    { to: '/dashboard/ebooks', label: 'Meus eBooks', icon: Book },
-    { to: '/dashboard/newsletter', label: 'Newsletter', icon: Mail },
-    { to: '/dashboard/settings', label: 'Configurações', icon: Settings }
+    { to: '/user-dashboard?tab=overview', label: 'Visão Geral', icon: LayoutDashboard },
+    { to: '/user-dashboard?tab=ebooks', label: 'Meus eBooks', icon: Book },
+    { to: '/user-dashboard?tab=orders', label: 'Pedidos', icon: ShoppingBag },
+    { to: '/user-dashboard?tab=newsletter', label: 'Newsletter', icon: Mail },
+    { to: '/user-dashboard?tab=settings', label: 'Configurações', icon: Settings },
+    { to: '/user-dashboard?tab=cart', label: 'Carrinho', icon: ShoppingCart }
   ];
 
   const mainLinks = [
@@ -151,22 +152,68 @@ export function AdminHeader() {
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-2 items-start">
-          {dashboardLinks.map((link) => {
-            const Icon = link.icon;
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
-                onClick={closeMenu}
-              >
-                <Icon className="h-5 w-5" />
-                {link.label}
-              </Link>
-            );
-          })}
+          {/* Dashboard Dropdown */}
           <button
-            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
+            onClick={() => setIsDashboardOpen(!isDashboardOpen)}
+            className="flex items-center justify-between w-full text-lg px-4 py-3 rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+          >
+            <div className="flex items-center gap-3">
+              <LayoutDashboard className="h-5 w-5" />
+              <span>Dashboard</span>
+            </div>
+            {isDashboardOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          </button>
+          
+          {/* Dashboard Links Dropdown */}
+          <div className={cn(
+            "w-full flex flex-col gap-2 pl-12 overflow-hidden transition-all duration-300",
+            isDashboardOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          )}>
+            {dashboardLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="flex items-center gap-3 text-base py-2 text-[#606C38] font-normal transition-colors hover:text-[#606C38]/80"
+                  onClick={closeMenu}
+                >
+                  <Icon className="h-4 w-4" />
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Main Navigation Links */}
+          <Link
+            to="/"
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+            onClick={closeMenu}
+          >
+            <Home className="h-5 w-5" />
+            Início
+          </Link>
+          <Link
+            to="/podcast"
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+            onClick={closeMenu}
+          >
+            <Mic className="h-5 w-5" />
+            Podcast
+          </Link>
+          <Link
+            to="/shop"
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+            onClick={closeMenu}
+          >
+            <ShoppingBag className="h-5 w-5" />
+            Loja
+          </Link>
+
+          {/* Logout Button */}
+          <button
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
             onClick={() => {
               closeMenu();
               setShowSignOutDialog(true);
