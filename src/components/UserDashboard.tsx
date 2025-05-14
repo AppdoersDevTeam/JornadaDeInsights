@@ -792,68 +792,59 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                 </Button>
               </div>
             ) : (
-              <>
+              <div className="space-y-6">
                 <div className="space-y-4">
-                  {items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center gap-4 p-4 border rounded-lg"
-                    >
-                      <div className="relative w-20 h-20 flex-shrink-0">
+                  {items.map(item => (
+                    <div key={item.id} className="bg-card rounded-lg p-4 flex justify-between items-center">
+                      <div className="flex items-center space-x-4">
                         <LazyImage
                           src={item.cover_url || ''}
                           alt={item.title}
-                          className="object-cover rounded-md"
+                          className="w-20 h-20 object-cover rounded"
                         />
+                        <div>
+                          <h3 className="font-semibold">{item.title}</h3>
+                          <p className="text-muted-foreground">
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-grow">
-                        <h3 className="font-medium">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
+                      <div className="flex items-center space-x-2">
+                        <button
                           onClick={() => decrementItem(item.id)}
+                          className="p-1 rounded border hover:bg-muted"
                           disabled={item.quantity <= 1}
                         >
-                          -
-                        </Button>
-                        <span className="w-8 text-center">{item.quantity}</span>
-                        <Button
-                          variant="outline"
-                          size="icon"
+                          <Minus className="h-4 w-4" />
+                        </button>
+                        <span>{item.quantity}</span>
+                        <button
                           onClick={() => addItem(item)}
+                          className="p-1 rounded border hover:bg-muted"
                         >
-                          +
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
+                          <Plus className="h-4 w-4" />
+                        </button>
+                        <button
                           onClick={() => removeItem(item.id)}
+                          className="p-1 rounded border border-destructive text-destructive hover:bg-destructive/10"
                         >
                           <X className="h-4 w-4" />
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
-
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="font-medium">Total</span>
-                    <span className="text-lg font-bold">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalPrice)}</span>
-                  </div>
-                  <Button
-                    className="w-full"
-                    onClick={handleCheckout}
-                  >
-                    Finalizar Compra
-                  </Button>
+                <div className="flex justify-between items-center mt-8">
+                  <p className="text-xl font-semibold">Total:</p>
+                  <p className="text-2xl font-bold">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalPrice)}
+                  </p>
                 </div>
-              </>
+                <div className="flex justify-center gap-4 mt-6">
+                  <Button variant="outline" onClick={clearCart}>Limpar Carrinho</Button>
+                  <Button onClick={handleCheckout}>Finalizar Compra</Button>
+                </div>
+              </div>
             )}
           </div>
         )}
