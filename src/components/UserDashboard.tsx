@@ -392,8 +392,11 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                       <thead className="bg-muted/50">
                         <tr>
                           <th className="py-2 px-1 sm:px-4 border-b font-medium">Data</th>
+                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Nome</th>
+                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Email</th>
                           <th className="py-2 px-1 sm:px-4 border-b font-medium">Itens</th>
                           <th className="py-2 px-1 sm:px-4 border-b font-medium">Total</th>
+                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Status</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -410,11 +413,22 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                                 year: 'numeric'
                               })}
                             </td>
+                            <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
+                              {capitalizeName(order.name)}
+                            </td>
+                            <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
+                              {order.email}
+                            </td>
                             <td className="py-2 px-1 sm:px-4">
                               {order.items.length} item{order.items.length>1?'s':''}
                             </td>
                             <td className="py-2 px-1 sm:px-4">
                               {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(order.total)}
+                            </td>
+                            <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
+                              <Badge variant="outline">
+                                {order.total > 0 ? 'Concluído' : 'Em processamento'}
+                              </Badge>
                             </td>
                           </tr>
                         ))}
