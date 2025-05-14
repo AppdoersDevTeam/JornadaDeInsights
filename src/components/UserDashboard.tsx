@@ -3,11 +3,18 @@ import { auth } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
-import { Download, Eye, Copy } from 'lucide-react';
+import { Download, Eye, Copy, X } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { toast } from 'react-hot-toast';
 import { Fragment } from 'react';
 import { supabase } from '@/lib/supabase';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface Ebook {
   id: string;
@@ -45,6 +52,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
   const [hoverEmail, setHoverEmail] = useState<string | null>(null);
   const [userEbooks, setUserEbooks] = useState<Ebook[]>([]);
   const [completedOrdersList, setCompletedOrdersList] = useState<CompletedOrder[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<CompletedOrder | null>(null);
   const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 
   const fetchUserOrders = async () => {
@@ -267,7 +275,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left whitespace-nowrap">
-                      <thead>
+                      <thead className="hidden md:table-header-group">
                         <tr>
                           <th className="py-3 px-4 border-b">Data</th>
                           <th className="py-3 px-4 border-b">Nome</th>
@@ -278,56 +286,27 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                       </thead>
                       <tbody>
                         {completedOrdersList.map((order: CompletedOrder) => (
-                          <Fragment key={order.id}>
-                            <tr className="border-t hover:bg-gray-50">
-                              <td className="py-3 px-4">{new Date(order.date).toLocaleDateString('en-US', {
+                          <tr 
+                            key={order.id}
+                            className="border-t hover:bg-gray-50 cursor-pointer"
+                            onClick={() => setSelectedOrder(order)}
+                          >
+                            <td className="py-3 px-4 hidden md:table-cell">
+                              {new Date(order.date).toLocaleDateString('pt-BR', {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric'
-                              })}</td>
-                              <td className="py-3 px-4">{order.name}</td>
-                              <td
-                                className="py-3 px-4 relative"
-                                onMouseEnter={() => setHoverEmail(order.id)}
-                                onMouseLeave={() => setHoverEmail(null)}
-                              >
-                                {order.email}
-                                {hoverEmail === order.id && (
-                                  <Copy 
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-primary" 
-                                    onClick={() => copyEmail(order.email)}
-                                  />
-                                )}
-                              </td>
-                              <td className="py-3 px-4">{new Intl.NumberFormat('en-US', {style:'currency',currency:'USD'}).format(order.total)}</td>
-                              <td className="py-3 px-4">
-                                <button 
-                                  className="text-primary hover:underline" 
-                                  onClick={() => toggleRow(order.id)}
-                                >
-                                  {order.items.length} item{order.items.length>1?'s':''}
-                                </button>
-                              </td>
-                            </tr>
-                            {expandedRows.has(order.id) && (
-                              <tr className="bg-muted/30">
-                                <td colSpan={5}>
-                                  <div className="p-4">
-                                    <ul className="space-y-2">
-                                      {order.items.map((item: { name: string; price: number }, index: number) => (
-                                        <li key={index} className="flex justify-between items-center">
-                                          <span>{item.name}</span>
-                                          <span className="text-muted-foreground">
-                                            {new Intl.NumberFormat('en-US', {style:'currency',currency:'USD'}).format(item.price)}
-                                          </span>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </Fragment>
+                              })}
+                            </td>
+                            <td className="py-3 px-4 hidden md:table-cell">{order.name}</td>
+                            <td className="py-3 px-4 hidden md:table-cell">{order.email}</td>
+                            <td className="py-3 px-4">
+                              {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(order.total)}
+                            </td>
+                            <td className="py-3 px-4">
+                              {order.items.length} item{order.items.length>1?'s':''}
+                            </td>
+                          </tr>
                         ))}
                       </tbody>
                     </table>
@@ -337,6 +316,55 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
             </Card>
           </div>
         )}
+
+        {/* Order Details Dialog */}
+        <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Detalhes do Pedido</DialogTitle>
+              <DialogDescription>
+                {selectedOrder && new Date(selectedOrder.date).toLocaleDateString('pt-BR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedOrder && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground">Nome</h4>
+                    <p>{selectedOrder.name}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground">Email</h4>
+                    <p>{selectedOrder.email}</p>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Itens</h4>
+                  <div className="space-y-2">
+                    {selectedOrder.items.map((item, index) => (
+                      <div key={index} className="flex justify-between items-center py-2 border-b last:border-0">
+                        <span>{item.name}</span>
+                        <span className="text-muted-foreground">
+                          {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(item.price)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center pt-4 border-t">
+                  <span className="font-medium">Total</span>
+                  <span className="font-medium">
+                    {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(selectedOrder.total)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {activeTab === 'newsletter' && (
           <div className="space-y-8">
