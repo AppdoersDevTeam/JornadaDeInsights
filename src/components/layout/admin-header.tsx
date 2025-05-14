@@ -4,6 +4,15 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface AdminHeaderProps {
   onMenuToggle?: () => void;
@@ -12,6 +21,8 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ onMenuToggle, isMenuOpen }: AdminHeaderProps) {
   const navigate = useNavigate();
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -22,49 +33,71 @@ export function AdminHeader({ onMenuToggle, isMenuOpen }: AdminHeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-primary border-b">
-      <div className="container mx-auto px-4 h-16 flex items-center">
-        {/* Logo Section - Left */}
-        <div className="flex items-center gap-4 w-1/4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-background hover:text-secondary md:hidden"
-            onClick={onMenuToggle}
-          >
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle menu</span>
-          </Button>
-          <Link to="/dashboard" className="flex items-center gap-2 text-background">
-            <Headphones className="h-6 w-6 text-current" />
-            <span className="text-xl font-heading font-semibold">Patricia</span>
-          </Link>
-        </div>
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-primary border-b">
+        <div className="container mx-auto px-4 h-16 flex items-center">
+          {/* Logo Section - Left */}
+          <div className="flex items-center gap-4 w-1/4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-background hover:text-secondary md:hidden"
+              onClick={onMenuToggle}
+            >
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+            <Link to="/dashboard" className="flex items-center gap-2 text-background">
+              <Headphones className="h-6 w-6 text-current" />
+              <span className="text-xl font-heading font-semibold">Patricia</span>
+            </Link>
+          </div>
 
-        {/* Navigation Links - Center */}
-        <nav className="hidden md:flex items-center justify-center gap-6 flex-1">
-          <Link to="/dashboard" className="text-background hover:text-secondary transition-colors">
-            Dashboard
-          </Link>
-          <Link to="/" className="text-background hover:text-secondary transition-colors">
-            Início
-          </Link>
-          <Link to="/shop" className="text-background hover:text-secondary transition-colors">
-            Loja
-          </Link>
-          <Link to="/podcast" className="text-background hover:text-secondary transition-colors">
-            Podcast
-          </Link>
-        </nav>
+          {/* Navigation Links - Center */}
+          <nav className="hidden md:flex items-center justify-center gap-6 flex-1">
+            <Link to="/dashboard" className="text-background hover:text-secondary transition-colors">
+              Dashboard
+            </Link>
+            <Link to="/" className="text-background hover:text-secondary transition-colors">
+              Início
+            </Link>
+            <Link to="/shop" className="text-background hover:text-secondary transition-colors">
+              Loja
+            </Link>
+            <Link to="/podcast" className="text-background hover:text-secondary transition-colors">
+              Podcast
+            </Link>
+          </nav>
 
-        {/* Logout Button - Right */}
-        <div className="w-1/4 flex justify-end">
-          <Button variant="ghost" size="icon" className="text-background hover:text-secondary" onClick={handleSignOut}>
-            <LogOut className="h-5 w-5" />
-            <span className="sr-only">Sair</span>
-          </Button>
+          {/* Logout Button - Right */}
+          <div className="w-1/4 flex justify-end">
+            <Button variant="ghost" size="icon" className="text-background hover:text-secondary" onClick={() => setShowSignOutDialog(true)}>
+              <LogOut className="h-5 w-5" />
+              <span className="sr-only">Sair</span>
+            </Button>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Sign Out Confirmation Dialog */}
+      <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Saída</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja sair da sua conta?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleSignOut}>
+              Sair
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 } 
