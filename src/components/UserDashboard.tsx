@@ -208,7 +208,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="flex-1 h-12 sm:h-9"
+                              className="flex-1"
                               onClick={() => {
                                 const pdfUrl = supabase.storage
                                   .from('store-assets')
@@ -222,7 +222,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="flex-1 h-12 sm:h-9"
+                              className="flex-1"
                               onClick={async () => {
                                 try {
                                   const { data, error } = await supabase.storage
