@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Headphones, User, LogOut } from 'lucide-react';
+import { Menu, X, Headphones, User, LogOut, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'firebase/auth';
@@ -17,6 +17,7 @@ import {
 export function AdminHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -35,16 +36,15 @@ export function AdminHeader() {
 
   const isDashboard = location.pathname.startsWith('/dashboard');
 
-  const navLinks = isDashboard ? [
-    { to: '/dashboard', label: 'Meu Dashboard' },
+  const dashboardLinks = [
     { to: '/dashboard', label: 'Visão Geral' },
-    { to: '/dashboard/ebooks', label: 'Meus eBooks' },
     { to: '/dashboard/orders', label: 'Pedidos' },
-    { to: '/dashboard/cart', label: 'Meu Carrinho' },
+    { to: '/dashboard/ebooks', label: 'Meus eBooks' },
     { to: '/dashboard/newsletter', label: 'Newsletter' },
     { to: '/dashboard/settings', label: 'Configurações' }
-  ] : [
-    { to: '/dashboard', label: 'Dashboard' },
+  ];
+
+  const mainLinks = [
     { to: '/', label: 'Home' },
     { to: '/podcast', label: 'Podcast' },
     { to: '/shop', label: 'Store' }
@@ -60,15 +60,32 @@ export function AdminHeader() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-8">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.to}
-              to={link.to} 
-              className="text-base text-background font-normal hover:text-secondary transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {isDashboard ? (
+            dashboardLinks.map((link) => (
+              <Link 
+                key={link.to}
+                to={link.to} 
+                className="text-base text-background font-normal hover:text-secondary transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))
+          ) : (
+            <>
+              <Link to="/dashboard" className="text-base text-background font-normal hover:text-secondary transition-colors">
+                Dashboard
+              </Link>
+              {mainLinks.map((link) => (
+                <Link 
+                  key={link.to}
+                  to={link.to} 
+                  className="text-base text-background font-normal hover:text-secondary transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </>
+          )}
         </nav>
 
         {/* Desktop User Menu */}
@@ -115,16 +132,51 @@ export function AdminHeader() {
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-secondary container mx-auto px-4 py-8 flex flex-col gap-4 items-center text-white">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.to}
-              to={link.to}
-              className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
-              onClick={closeMenu}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {isDashboard ? (
+            <>
+              <button
+                onClick={() => setIsDashboardOpen(!isDashboardOpen)}
+                className="w-full flex items-center justify-between text-lg py-3 text-white font-normal hover:text-secondary transition-colors"
+              >
+                <span>Dashboard</span>
+                {isDashboardOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              </button>
+              {isDashboardOpen && (
+                <div className="w-full flex flex-col gap-2 pl-4">
+                  {dashboardLinks.map((link) => (
+                    <Link 
+                      key={link.to}
+                      to={link.to}
+                      className="text-base py-2 text-white/80 font-normal hover:text-white transition-colors"
+                      onClick={closeMenu}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <Link 
+                to="/dashboard"
+                className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+                onClick={closeMenu}
+              >
+                Dashboard
+              </Link>
+              {mainLinks.map((link) => (
+                <Link 
+                  key={link.to}
+                  to={link.to}
+                  className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+                  onClick={closeMenu}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </>
+          )}
           <Button 
             variant="outline" 
             className="w-full text-white border-white hover:bg-white/10 bg-secondary/80"
