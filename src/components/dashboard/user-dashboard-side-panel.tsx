@@ -3,7 +3,8 @@ import {
   ShoppingBag, 
   Mail, 
   Settings,
-  LogOut
+  LogOut,
+  LayoutDashboard
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -33,6 +34,14 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
         <h2 className="text-lg font-semibold">Meu Dashboard</h2>
       </div>
       <nav className="space-y-1 p-4">
+        <Button
+          variant={activeTab === 'overview' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('overview')}
+        >
+          <LayoutDashboard className="mr-2 h-4 w-4" />
+          Visão Geral
+        </Button>
         <Button
           variant={activeTab === 'ebooks' ? 'secondary' : 'ghost'}
           className="w-full justify-start"

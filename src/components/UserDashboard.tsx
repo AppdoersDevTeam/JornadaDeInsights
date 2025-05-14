@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Badge } from '@/components/ui/badge';
 
 interface Ebook {
   id: string;
@@ -39,7 +40,7 @@ interface CompletedOrder {
 }
 
 interface UserDashboardProps {
-  activeTab: string;
+  activeTab: 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings';
 }
 
 const DEFAULT_COVER_DATA_URL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2UyZThmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBDb3ZlcjwvdGV4dD48L3N2Zz4=';
@@ -155,12 +156,14 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
       <div className="mb-12 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">
+            {activeTab === 'overview' && 'Visão Geral'}
             {activeTab === 'ebooks' && 'Meus eBooks'}
             {activeTab === 'orders' && 'Meus Pedidos'}
             {activeTab === 'newsletter' && 'Newsletter'}
             {activeTab === 'settings' && 'Configurações'}
           </h1>
           <p className="text-muted-foreground mt-2">
+            {activeTab === 'overview' && 'Uma visão geral da sua conta e atividades'}
             {activeTab === 'ebooks' && 'Gerencie seus eBooks e downloads'}
             {activeTab === 'orders' && 'Acompanhe seus pedidos e compras'}
             {activeTab === 'newsletter' && 'Gerencie suas preferências de newsletter'}
@@ -171,6 +174,112 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
 
       {/* Content */}
       <div className="space-y-8">
+        {activeTab === 'overview' && (
+          <div className="space-y-8">
+            {/* Purchased eBooks Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Meus eBooks</CardTitle>
+                <CardDescription>
+                  {userEbooks.length > 0 
+                    ? `Você tem ${userEbooks.length} eBook${userEbooks.length !== 1 ? 's' : ''}`
+                    : 'Você ainda não comprou nenhum eBook'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {userEbooks.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {userEbooks.slice(0, 3).map((ebook) => (
+                      <div key={ebook.id} className="flex items-center space-x-4">
+                        <img
+                          src={ebook.cover_url || DEFAULT_COVER_DATA_URL}
+                          alt={ebook.title}
+                          className="w-16 h-20 object-cover rounded"
+                        />
+                        <div>
+                          <h3 className="font-medium">{ebook.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Comprado em {new Date(ebook.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <Button onClick={() => navigate('/shop')}>
+                    Explorar eBooks
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Orders Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Últimos Pedidos</CardTitle>
+                <CardDescription>
+                  {completedOrdersList.length > 0 
+                    ? `Você tem ${completedOrdersList.length} pedido${completedOrdersList.length !== 1 ? 's' : ''}`
+                    : 'Você ainda não fez nenhum pedido'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {completedOrdersList.length > 0 ? (
+                  <div className="space-y-4">
+                    {completedOrdersList.slice(0, 3).map((order) => (
+                      <div key={order.id} className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{order.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Pedido em {new Date(order.date).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Badge variant="outline">
+                          {order.total > 0 ? 'Concluído' : 'Em processamento'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <Button onClick={() => navigate('/shop')}>
+                    Ver Pedidos
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Newsletter Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Newsletter</CardTitle>
+                <CardDescription>
+                  Mantenha-se atualizado com nossas novidades
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Status da Inscrição</p>
+                    <p className="text-sm text-muted-foreground">
+                      {isSubscribed ? 'Inscrito' : 'Não inscrito'}
+                    </p>
+                  </div>
+                  <Button variant="outline" onClick={handleNewsletterToggle}>
+                    {isSubscribed ? 'Cancelar Inscrição' : 'Inscrever-se'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Store Button */}
+            <div className="flex justify-center pt-4">
+              <Button variant="outline" onClick={() => navigate('/store')}>
+                Ver Nossa Loja
+              </Button>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'ebooks' && (
           <div className="space-y-8">
             {userEbooks.length === 0 ? (
