@@ -26,13 +26,13 @@ export function AdminFooter() {
               <span className="text-xl font-heading font-semibold">Patricia Dashboard</span>
             </Link>
             <p className="text-muted-foreground text-base mb-2">
-              Admin Dashboard - Your control center
+              Painel de Controle - Seu centro de controle
             </p>
           </div>
           {/* Quick Links Accordion */}
           <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
             <button className="flex justify-between items-center w-full text-base font-medium text-foreground py-3 px-4 focus:outline-none" onClick={() => toggle('quick')}>
-              Quick Links {open === 'quick' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              Links Rápidos {open === 'quick' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
             {open === 'quick' && (
               <ul className="space-y-3 py-2 px-4">
@@ -40,10 +40,10 @@ export function AdminFooter() {
                   <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">Dashboard</Link>
                 </li>
                 <li>
-                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Home</Link>
+                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Início</Link>
                 </li>
                 <li>
-                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">About</Link>
+                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">Sobre</Link>
                 </li>
                 <li>
                   <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">Podcast</Link>
@@ -52,7 +52,7 @@ export function AdminFooter() {
                   <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Ebooks</Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contact</Link>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contato</Link>
                 </li>
               </ul>
             )}
@@ -65,10 +65,10 @@ export function AdminFooter() {
             {open === 'legal' && (
               <ul className="space-y-3 py-2 px-4">
                 <li>
-                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Terms of Service</Link>
+                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
                 </li>
                 <li>
-                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Privacy Policy</Link>
+                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
                 </li>
               </ul>
             )}
@@ -76,12 +76,12 @@ export function AdminFooter() {
           {/* Support Accordion */}
           <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
             <button className="flex justify-between items-center w-full text-base font-medium text-foreground py-3 px-4 focus:outline-none" onClick={() => toggle('support')}>
-              Need Help? {open === 'support' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              Precisa de Ajuda? {open === 'support' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
             {open === 'support' && (
               <div className="py-2 px-4">
-                <p className="text-muted-foreground text-base mb-2">Contact our support team for assistance with your admin dashboard.</p>
-                <Link to="/dashboard/support" className="text-primary hover:underline text-base">Get Support →</Link>
+                <p className="text-muted-foreground text-base mb-2">Entre em contato com nossa equipe de suporte para obter ajuda com seu painel de controle.</p>
+                <Link to="/dashboard/support" className="text-primary hover:underline text-base">Obter Suporte →</Link>
               </div>
             )}
           </div>
@@ -95,21 +95,21 @@ export function AdminFooter() {
               <span className="text-xl font-heading font-semibold">Patricia Dashboard</span>
             </Link>
             <p className="text-muted-foreground text-base mb-2">
-              Admin Dashboard - Your control center
+              Painel de Controle - Seu centro de controle
             </p>
           </div>
           {/* Quick Links */}
           <div>
-            <h3 className="text-base font-medium mb-4 text-foreground">Quick Links</h3>
+            <h3 className="text-base font-medium mb-4 text-foreground">Links Rápidos</h3>
             <ul className="space-y-3">
               <li>
                 <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">Dashboard</Link>
               </li>
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Home</Link>
+                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Início</Link>
               </li>
               <li>
-                <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">About</Link>
+                <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">Sobre</Link>
               </li>
               <li>
                 <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">Podcast</Link>
@@ -118,7 +118,7 @@ export function AdminFooter() {
                 <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Ebooks</Link>
               </li>
               <li>
-                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contact</Link>
+                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contato</Link>
               </li>
             </ul>
           </div>
@@ -127,23 +127,23 @@ export function AdminFooter() {
             <h3 className="text-base font-medium mb-4 text-foreground">Legal</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Terms of Service</Link>
+                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Privacy Policy</Link>
+                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
               </li>
             </ul>
           </div>
           {/* Support Section */}
           <div>
-            <h3 className="text-base font-medium mb-4 text-foreground">Need Help?</h3>
-            <p className="text-muted-foreground text-base mb-2">Contact our support team for assistance with your admin dashboard.</p>
-            <Link to="/dashboard/support" className="text-primary hover:underline text-base">Get Support →</Link>
+            <h3 className="text-base font-medium mb-4 text-foreground">Precisa de Ajuda?</h3>
+            <p className="text-muted-foreground text-base mb-2">Entre em contato com nossa equipe de suporte para obter ajuda com seu painel de controle.</p>
+            <Link to="/dashboard/support" className="text-primary hover:underline text-base">Obter Suporte →</Link>
           </div>
         </div>
         <div className="border-t border-border/50 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-muted-foreground">© {currentYear} Patricia. All rights reserved.</p>
-          <p className="text-sm text-muted-foreground mt-2 md:mt-0">Website developed by <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">buildwithsds.com</a></p>
+          <p className="text-sm text-muted-foreground">© {currentYear} Patricia. Todos os direitos reservados.</p>
+          <p className="text-sm text-muted-foreground mt-2 md:mt-0">Website desenvolvido por <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">buildwithsds.com</a></p>
         </div>
       </div>
     </footer>

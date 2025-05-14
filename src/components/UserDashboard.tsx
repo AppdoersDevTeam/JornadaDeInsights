@@ -401,11 +401,11 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-4xl mx-auto">
+                    <div className="grid grid-cols-1 gap-8 max-w-2xl mx-auto">
                       {userEbooks.slice(0, 2).map((ebook) => (
                         <Card key={ebook.id} className="overflow-hidden">
-                          <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-6">
-                            <div className="w-full sm:w-32 h-48 sm:h-32 overflow-hidden rounded-md relative bg-muted">
+                          <div className="flex flex-col md:flex-row gap-6 p-8">
+                            <div className="w-full md:w-32 h-56 md:h-40 overflow-hidden rounded-md relative bg-muted">
                               <img
                                 src={ebook.cover_url}
                                 alt={ebook.title}
@@ -418,16 +418,16 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                                 loading="lazy"
                               />
                             </div>
-                            <div className="flex-1 flex flex-col gap-4">
+                            <div className="flex-1 flex flex-col gap-6">
                               <CardHeader className="p-0">
-                                <CardTitle className="text-lg sm:text-xl">{ebook.title}</CardTitle>
+                                <CardTitle className="text-xl">{ebook.title}</CardTitle>
                                 <CardDescription className="line-clamp-2">{ebook.description}</CardDescription>
                               </CardHeader>
                               <CardContent className="p-0">
                                 <div className="flex flex-col sm:flex-row gap-2">
                                   <Button 
                                     variant="outline" 
-                                    className="flex-1 h-10"
+                                    className="flex-1 h-14 sm:h-9"
                                     onClick={() => {
                                       const pdfUrl = supabase.storage
                                         .from('store-assets')
@@ -435,12 +435,12 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                                       window.open(pdfUrl, '_blank');
                                     }}
                                   >
-                                    <Eye className="mr-2 h-4 w-4" />
+                                    <Eye className="mr-2 h-5 w-5 sm:h-4 sm:w-4" />
                                     Visualizar
                                   </Button>
                                   <Button 
                                     variant="outline" 
-                                    className="flex-1 h-10"
+                                    className="flex-1 h-14 sm:h-9"
                                     onClick={async () => {
                                       try {
                                         const { data, error } = await supabase.storage
