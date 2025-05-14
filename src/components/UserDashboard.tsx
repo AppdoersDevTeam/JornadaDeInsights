@@ -772,7 +772,6 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
         {activeTab === 'cart' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Meu Carrinho</h2>
               {totalCount > 0 && (
                 <span className="text-sm text-muted-foreground">
                   {totalCount} {totalCount === 1 ? 'item' : 'itens'}
@@ -855,94 +854,6 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                 </div>
               </>
             )}
-          </div>
-        )}
-
-        {activeTab === 'newsletter' && (
-          <div className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Meu Carrinho</CardTitle>
-                <CardDescription>
-                  {totalCount > 0 
-                    ? `Você tem ${totalCount} item${totalCount !== 1 ? 's' : ''} no carrinho`
-                    : 'Seu carrinho está vazio'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {totalCount === 0 ? (
-                  <div className="text-center py-12">
-                    <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-lg text-muted-foreground mb-6">Seu carrinho está vazio no momento.</p>
-                    <Button variant="outline" onClick={() => navigate('/shop')}>
-                      Continuar Comprando
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="space-y-4">
-                      {items.map(item => (
-                        <div key={item.id} className="bg-card rounded-lg p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-                          <div className="flex items-center space-x-4">
-                            <LazyImage
-                              src={item.cover_url || ''}
-                              alt={item.title}
-                              className="w-20 h-20 object-cover rounded"
-                            />
-                            <div>
-                              <h3 className="font-semibold">{item.title}</h3>
-                              <p className="text-muted-foreground">
-                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => decrementItem(item.id)}
-                                className="h-8 w-8"
-                              >
-                                <Minus className="h-4 w-4" />
-                              </Button>
-                              <span className="w-8 text-center">{item.quantity}</span>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => addItem(item)}
-                                className="h-8 w-8"
-                              >
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeItem(item.id)}
-                              className="h-8 w-8 text-destructive hover:text-destructive"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="border-t pt-4">
-                      <div className="flex justify-between items-center mb-4">
-                        <span className="font-medium">Total</span>
-                        <span className="font-medium">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalPrice)}
-                        </span>
-                      </div>
-                      <Button className="w-full" onClick={() => navigate('/checkout')}>
-                        Finalizar Compra
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
         )}
 
