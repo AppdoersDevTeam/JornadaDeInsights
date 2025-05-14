@@ -371,7 +371,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       {/* Content */}
       <div className="space-y-8">
         {activeTab === 'overview' && (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Purchased eBooks Section */}
             <Card>
               <CardHeader>
@@ -384,7 +384,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
               </CardHeader>
               <CardContent>
                 {userEbooks.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-8">
                     <p className="text-lg text-muted-foreground">Você ainda não comprou nenhum eBook.</p>
                     <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
                       Procurar eBooks
@@ -392,11 +392,11 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 gap-8 max-w-2xl">
+                    <div className="grid grid-cols-1 gap-4">
                       {userEbooks.slice(0, 2).map((ebook) => (
                         <Card key={ebook.id} className="overflow-hidden">
-                          <div className="flex flex-col md:flex-row gap-6 p-8">
-                            <div className="w-full md:w-32 h-56 md:h-40 overflow-hidden rounded-md relative bg-muted">
+                          <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-6">
+                            <div className="w-full sm:w-32 h-48 sm:h-32 overflow-hidden rounded-md relative bg-muted">
                               <img
                                 src={ebook.cover_url}
                                 alt={ebook.title}
@@ -409,16 +409,16 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                                 loading="lazy"
                               />
                             </div>
-                            <div className="flex-1 flex flex-col gap-6">
+                            <div className="flex-1 flex flex-col gap-4">
                               <CardHeader className="p-0">
-                                <CardTitle className="text-xl">{ebook.title}</CardTitle>
+                                <CardTitle className="text-lg sm:text-xl">{ebook.title}</CardTitle>
                                 <CardDescription className="line-clamp-2">{ebook.description}</CardDescription>
                               </CardHeader>
                               <CardContent className="p-0">
                                 <div className="flex flex-col sm:flex-row gap-2">
                                   <Button 
                                     variant="outline" 
-                                    className="flex-1 h-14 sm:h-9"
+                                    className="flex-1 h-10"
                                     onClick={() => {
                                       const pdfUrl = supabase.storage
                                         .from('store-assets')
@@ -426,12 +426,12 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                                       window.open(pdfUrl, '_blank');
                                     }}
                                   >
-                                    <Eye className="mr-2 h-5 w-5 sm:h-4 sm:w-4" />
+                                    <Eye className="mr-2 h-4 w-4" />
                                     Visualizar
                                   </Button>
                                   <Button 
                                     variant="outline" 
-                                    className="flex-1 h-14 sm:h-9"
+                                    className="flex-1 h-10"
                                     onClick={async () => {
                                       try {
                                         const { data, error } = await supabase.storage
@@ -499,16 +499,16 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="overflow-x-auto -mx-6 sm:mx-0">
+                    <div className="overflow-x-auto -mx-4 sm:mx-0">
                       <table className="w-full text-left whitespace-nowrap min-w-[300px]">
                         <thead className="bg-muted/50">
                           <tr>
-                            <th className="py-2 px-1 sm:px-4 border-b font-medium">Data</th>
-                            <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Nome</th>
-                            <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Email</th>
-                            <th className="py-2 px-1 sm:px-4 border-b font-medium">Itens</th>
-                            <th className="py-2 px-1 sm:px-4 border-b font-medium">Total</th>
-                            <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Status</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium">Data</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium hidden sm:table-cell">Nome</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium hidden sm:table-cell">Email</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium">Itens</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium">Total</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium hidden sm:table-cell">Status</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -518,26 +518,26 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                               className="border-t hover:bg-gray-50 cursor-pointer"
                               onClick={() => setSelectedOrder(order)}
                             >
-                              <td className="py-2 px-1 sm:px-4">
+                              <td className="py-2 px-2 sm:px-4">
                                 {new Date(order.date).toLocaleDateString('pt-BR', {
                                   day: '2-digit',
                                   month: '2-digit',
                                   year: 'numeric'
                                 })}
                               </td>
-                              <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
+                              <td className="py-2 px-2 sm:px-4 hidden sm:table-cell">
                                 {capitalizeName(order.name)}
                               </td>
-                              <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
+                              <td className="py-2 px-2 sm:px-4 hidden sm:table-cell">
                                 {order.email}
                               </td>
-                              <td className="py-2 px-1 sm:px-4">
+                              <td className="py-2 px-2 sm:px-4">
                                 {order.items.length} item{order.items.length>1?'s':''}
                               </td>
-                              <td className="py-2 px-1 sm:px-4">
+                              <td className="py-2 px-2 sm:px-4">
                                 {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(order.total)}
                               </td>
-                              <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
+                              <td className="py-2 px-2 sm:px-4 hidden sm:table-cell">
                                 <Badge variant="outline">
                                   {order.total > 0 ? 'Concluído' : 'Em processamento'}
                                 </Badge>
@@ -572,14 +572,14 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
                     <p className="font-medium">Status da Inscrição</p>
                     <p className="text-sm text-muted-foreground">
                       {isSubscribed ? 'Inscrito' : 'Não inscrito'}
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Button variant="outline" onClick={() => setShowComingSoonDialog(true)}>
                       {isSubscribed ? 'Cancelar Inscrição' : 'Inscrever-se'}
                     </Button>
@@ -603,7 +603,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {latestEbooks.map((ebook) => (
                     <EbookCard key={ebook.id} book={ebook} />
                   ))}
