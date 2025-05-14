@@ -25,6 +25,19 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const navLinks = user ? [
+    { to: '/dashboard', label: 'Dashboard' },
+    { to: '/', label: 'Home' },
+    { to: '/podcast', label: 'Podcast' },
+    { to: '/shop', label: 'Store' }
+  ] : [
+    { to: '/', label: 'Início' },
+    { to: '/about', label: 'Sobre' },
+    { to: '/podcast', label: 'Podcast' },
+    { to: '/shop', label: 'Loja' },
+    { to: '/contact', label: 'Contato' }
+  ];
+
   return (
     <header className={cn(
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 bg-primary",
@@ -38,21 +51,16 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-8">
-          <NavLink to="/" end className="text-base text-background font-normal hover:text-secondary transition-colors">
-            Início
-          </NavLink>
-          <NavLink to="/about" className="text-base text-background font-normal hover:text-secondary transition-colors">
-            Sobre
-          </NavLink>
-          <NavLink to="/podcast" className="text-base text-background font-normal hover:text-secondary transition-colors">
-            Podcast
-          </NavLink>
-          <NavLink to="/shop" className="text-base text-background font-normal hover:text-secondary transition-colors">
-            Loja
-          </NavLink>
-          <NavLink to="/contact" className="text-base text-background font-normal hover:text-secondary transition-colors">
-            Contato
-          </NavLink>
+          {navLinks.map((link) => (
+            <NavLink 
+              key={link.to}
+              to={link.to} 
+              end={link.to === '/'}
+              className="text-base text-background font-normal hover:text-secondary transition-colors"
+            >
+              {link.label}
+            </NavLink>
+          ))}
         </nav>
 
         {/* CTA Button and User Icon (Desktop) */}
@@ -88,51 +96,17 @@ export function Header() {
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-secondary container mx-auto px-4 py-8 flex flex-col gap-4 items-center text-white">
-          <NavLink 
-            to="/" end className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
-            onClick={closeMenu}
-          >
-            Início
-          </NavLink>
-          <NavLink 
-            to="/about" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
-            onClick={closeMenu}
-          >
-            Sobre
-          </NavLink>
-          <NavLink 
-            to="/podcast" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
-            onClick={closeMenu}
-          >
-            Podcast
-          </NavLink>
-          <NavLink 
-            to="/shop" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
-            onClick={closeMenu}
-          >
-            Loja
-          </NavLink>
-          <NavLink 
-            to="/contact" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
-            onClick={closeMenu}
-          >
-            Contato
-          </NavLink>
-          {user ? (
+          {navLinks.map((link) => (
             <NavLink 
-              to="/dashboard" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+              key={link.to}
+              to={link.to}
+              end={link.to === '/'}
+              className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
               onClick={closeMenu}
             >
-              Dashboard
+              {link.label}
             </NavLink>
-          ) : (
-            <NavLink 
-              to="/signin" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
-              onClick={closeMenu}
-            >
-              Entrar
-            </NavLink>
-          )}
+          ))}
         </nav>
       </div>
     </header>
