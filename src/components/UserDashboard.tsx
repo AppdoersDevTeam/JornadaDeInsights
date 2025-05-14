@@ -75,6 +75,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   const { state: { items }, totalCount, totalPrice, addItem, removeItem, decrementItem, clearCart } = useCart();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showComingSoonDialog, setShowComingSoonDialog] = useState(false);
 
   // Add effect to scroll to top when tab changes
   useEffect(() => {
@@ -571,7 +572,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={handleNewsletterToggle}>
+                    <Button variant="outline" onClick={() => setShowComingSoonDialog(true)}>
                       {isSubscribed ? 'Cancelar Inscrição' : 'Inscrever-se'}
                     </Button>
                     <Button 
@@ -925,6 +926,23 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           </div>
         )}
       </div>
+
+      {/* Coming Soon Dialog */}
+      <Dialog open={showComingSoonDialog} onOpenChange={setShowComingSoonDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Em Breve!</DialogTitle>
+            <DialogDescription>
+              A funcionalidade de newsletter está em desenvolvimento. Fique ligado para novidades em breve!
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setShowComingSoonDialog(false)}>
+              Entendi
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
