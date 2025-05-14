@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, Headphones, User, Home, Info, Mic, ShoppingBag, Mail } from 'lucide-react';
+import { Menu, X, Headphones, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
@@ -114,6 +114,9 @@ export function Header() {
               case '/contact':
                 Icon = Mail;
                 break;
+              case '/dashboard':
+                Icon = LayoutDashboard;
+                break;
               default:
                 Icon = null;
             }
@@ -136,21 +139,23 @@ export function Header() {
               </NavLink>
             );
           })}
-          {/* Entrar link for sign in */}
-          <NavLink
-            to="/signin"
-            className={({ isActive }) =>
-              `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
-                isActive
-                  ? 'bg-[#606C38] text-white'
-                  : 'hover:bg-[#606C38] hover:text-white'
-              }`
-            }
-            onClick={closeMenu}
-          >
-            <User className="h-5 w-5" />
-            Entrar
-          </NavLink>
+          {/* Entrar link for sign in (only if not signed in) */}
+          {!user && (
+            <NavLink
+              to="/signin"
+              className={({ isActive }) =>
+                `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
+                  isActive
+                    ? 'bg-[#606C38] text-white'
+                    : 'hover:bg-[#606C38] hover:text-white'
+                }`
+              }
+              onClick={closeMenu}
+            >
+              <User className="h-5 w-5" />
+              Entrar
+            </NavLink>
+          )}
         </nav>
       </div>
     </header>
