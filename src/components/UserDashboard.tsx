@@ -315,7 +315,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                       <div className="flex justify-center">
                         <Button 
                           variant="outline" 
-                          onClick={() => navigate('/ebooks')}
+                          onClick={() => navigate('/dashboard?tab=ebooks')}
                           className="w-full sm:w-auto"
                         >
                           Ver todos os meus eBooks
@@ -395,80 +395,13 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                       <div className="flex justify-center">
                         <Button 
                           variant="outline" 
-                          onClick={() => navigate('/orders')}
+                          onClick={() => navigate('/dashboard?tab=orders')}
                           className="w-full sm:w-auto"
                         >
                           Ver todo o histórico de pedidos
                         </Button>
                       </div>
                     )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Orders Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Histórico de Pedidos</CardTitle>
-                <CardDescription>Visualize todos os seus pedidos e compras</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {completedOrdersList.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-lg text-muted-foreground">Você ainda não fez nenhuma compra.</p>
-                    <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
-                      Procurar eBooks
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto -mx-6 sm:mx-0">
-                    <table className="w-full text-left whitespace-nowrap min-w-[300px]">
-                      <thead className="bg-muted/50">
-                        <tr>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium">Data</th>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Nome</th>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Email</th>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium">Itens</th>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium">Total</th>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {completedOrdersList.map((order: CompletedOrder) => (
-                          <tr 
-                            key={order.id}
-                            className="border-t hover:bg-gray-50 cursor-pointer"
-                            onClick={() => setSelectedOrder(order)}
-                          >
-                            <td className="py-2 px-1 sm:px-4">
-                              {new Date(order.date).toLocaleDateString('pt-BR', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric'
-                              })}
-                            </td>
-                            <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
-                              {capitalizeName(order.name)}
-                            </td>
-                            <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
-                              {order.email}
-                            </td>
-                            <td className="py-2 px-1 sm:px-4">
-                              {order.items.length} item{order.items.length>1?'s':''}
-                            </td>
-                            <td className="py-2 px-1 sm:px-4">
-                              {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(order.total)}
-                            </td>
-                            <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
-                              <Badge variant="outline">
-                                {order.total > 0 ? 'Concluído' : 'Em processamento'}
-                              </Badge>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
                   </div>
                 )}
               </CardContent>
@@ -490,9 +423,17 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                       {isSubscribed ? 'Inscrito' : 'Não inscrito'}
                     </p>
                   </div>
-                  <Button variant="outline" onClick={handleNewsletterToggle}>
-                    {isSubscribed ? 'Cancelar Inscrição' : 'Inscrever-se'}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={handleNewsletterToggle}>
+                      {isSubscribed ? 'Cancelar Inscrição' : 'Inscrever-se'}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => navigate('/dashboard?tab=newsletter')}
+                    >
+                      Ver detalhes
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

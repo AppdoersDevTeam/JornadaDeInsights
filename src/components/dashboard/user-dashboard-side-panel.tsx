@@ -4,12 +4,14 @@ import {
   Mail, 
   Settings,
   LogOut,
-  LayoutDashboard
+  LayoutDashboard,
+  ShoppingCart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useCart } from '@/context/cart-context';
 
 interface UserDashboardSidePanelProps {
   activeTab: string;
@@ -18,6 +20,7 @@ interface UserDashboardSidePanelProps {
 
 export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboardSidePanelProps) {
   const navigate = useNavigate();
+  const { totalCount } = useCart();
 
   const handleSignOut = async () => {
     try {
@@ -57,6 +60,19 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
         >
           <ShoppingBag className="mr-2 h-4 w-4" />
           Pedidos
+        </Button>
+        <Button
+          variant={activeTab === 'cart' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('cart')}
+        >
+          <ShoppingCart className="mr-2 h-4 w-4" />
+          Meu Carrinho
+          {totalCount > 0 && (
+            <span className="ml-2 bg-primary text-primary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+              {totalCount}
+            </span>
+          )}
         </Button>
         <Button
           variant={activeTab === 'newsletter' ? 'secondary' : 'ghost'}
