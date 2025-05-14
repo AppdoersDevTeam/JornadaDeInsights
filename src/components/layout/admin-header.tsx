@@ -223,25 +223,27 @@ export function AdminHeader() {
             Sair
           </button>
         </nav>
-        <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Confirmar saída</DialogTitle>
-              <DialogDescription>
-                Tem certeza que deseja sair da sua conta?
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-end gap-4 mt-4">
-              <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
-                Cancelar
-              </Button>
-              <Button variant="destructive" onClick={handleSignOut}>
-                Sair
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
+
+      {/* Sign Out Dialog - Moved outside mobile navigation */}
+      <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar saída</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja sair da sua conta?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-4 mt-4">
+            <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleSignOut}>
+              Sair
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 } 
