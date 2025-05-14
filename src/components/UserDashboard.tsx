@@ -503,7 +503,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {latestEbooks.map((ebook) => (
                     <div key={ebook.id} className="group relative">
-                      <div className="aspect-[3/4] overflow-hidden rounded-lg bg-muted">
+                      <div className="aspect-[3/4] w-32 mx-auto overflow-hidden rounded-lg bg-muted">
                         <img
                           src={ebook.cover_url}
                           alt={ebook.title}
