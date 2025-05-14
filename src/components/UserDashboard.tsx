@@ -166,7 +166,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-8 max-w-3xl mx-auto">
                 {userEbooks.map((ebook) => (
                   <Card key={ebook.id} className="overflow-hidden">
                     <div className="flex gap-6 p-8">
