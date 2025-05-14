@@ -36,9 +36,11 @@ export function AdminHeader() {
   const isDashboard = location.pathname.startsWith('/dashboard');
 
   const navLinks = isDashboard ? [
+    { to: '/dashboard', label: 'Meu Dashboard' },
     { to: '/dashboard', label: 'Visão Geral' },
-    { to: '/dashboard/orders', label: 'Pedidos' },
     { to: '/dashboard/ebooks', label: 'Meus eBooks' },
+    { to: '/dashboard/orders', label: 'Pedidos' },
+    { to: '/dashboard/cart', label: 'Meu Carrinho' },
     { to: '/dashboard/newsletter', label: 'Newsletter' },
     { to: '/dashboard/settings', label: 'Configurações' }
   ] : [
