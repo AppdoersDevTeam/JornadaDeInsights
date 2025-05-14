@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Routes, Route, Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/layout';
 import { AdminLayout } from '@/components/layout/admin-layout';
 import { HomePage } from '@/pages/home';
@@ -28,9 +28,24 @@ import { TabType } from '@/types/dashboard';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const handleTabChange = (tab: TabType) => {
-    setActiveTab(tab);
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tabParam = searchParams.get('tab');
+    const validTabs: TabType[] = ['overview', 'ebooks', 'orders', 'newsletter', 'settings', 'cart'];
+    if (tabParam && validTabs.includes(tabParam as TabType)) {
+      setActiveTab(tabParam as TabType);
+    }
+  }, [location.search]);
+
+  const handleTabChange = (tab: string | TabType) => {
+    const newTab = tab as TabType;
+    setActiveTab(newTab);
+    if (location.pathname === '/user-dashboard') {
+      navigate(`/user-dashboard?tab=${newTab}`);
+    }
   };
 
   return (
