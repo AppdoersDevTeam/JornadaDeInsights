@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Headphones, User, LogOut, ChevronDown, ChevronUp } from 'lucide-react';
+import { Menu, X, Headphones, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'firebase/auth';
@@ -47,11 +47,11 @@ export function AdminHeader() {
   const isDashboard = location.pathname.startsWith('/dashboard');
 
   const dashboardLinks = [
-    { to: '/dashboard', label: 'Visão Geral' },
-    { to: '/dashboard/orders', label: 'Pedidos' },
-    { to: '/dashboard/ebooks', label: 'Meus eBooks' },
-    { to: '/dashboard/newsletter', label: 'Newsletter' },
-    { to: '/dashboard/settings', label: 'Configurações' }
+    { to: '/dashboard', label: 'Visão Geral', icon: LayoutDashboard },
+    { to: '/dashboard/orders', label: 'Pedidos', icon: ShoppingBag },
+    { to: '/dashboard/ebooks', label: 'Meus eBooks', icon: Book },
+    { to: '/dashboard/newsletter', label: 'Newsletter', icon: Mail },
+    { to: '/dashboard/settings', label: 'Configurações', icon: Settings }
   ];
 
   const mainLinks = [
@@ -147,78 +147,53 @@ export function AdminHeader() {
 
       {/* Mobile Navigation */}
       <div className={cn(
-        "fixed inset-0 top-[60px] bg-secondary z-50 transform transition-transform duration-300 ease-in-out md:hidden",
+        "fixed inset-0 top-[60px] bg-white z-40 transform transition-transform duration-300 ease-in-out md:hidden",
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
-        <nav className="bg-secondary container mx-auto px-4 py-8 flex flex-col gap-4 items-center text-white">
-          {isDashboard ? (
-            <>
-              <button
-                onClick={() => setIsDashboardOpen(!isDashboardOpen)}
-                className="w-full flex items-center justify-between text-lg py-3 text-white font-normal hover:text-secondary transition-colors"
-              >
-                <span>Dashboard</span>
-                {isDashboardOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-              </button>
-              <div className={cn(
-                "w-full flex flex-col gap-2 pl-4 overflow-hidden transition-all duration-300",
-                isDashboardOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-              )}>
-                {dashboardLinks.map((link) => (
-                  <Link 
-                    key={link.to}
-                    to={link.to}
-                    className="text-base py-2 text-white/80 font-normal hover:text-white transition-colors"
-                    onClick={closeMenu}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </>
-          ) : (
-            <>
-              <Link 
-                to="/dashboard"
-                className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+        <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-2 items-start">
+          {dashboardLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
                 onClick={closeMenu}
               >
-                Dashboard
+                <Icon className="h-5 w-5" />
+                {link.label}
               </Link>
-              {mainLinks.map((link) => (
-                <Link 
-                  key={link.to}
-                  to={link.to}
-                  className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
-                  onClick={closeMenu}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </>
-          )}
-          {user ? (
-            <Button 
-              variant="outline" 
-              className="w-full text-white border-white hover:bg-white/10 bg-secondary/80"
-              onClick={() => {
-                closeMenu();
-                setShowSignOutDialog(true);
-              }}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
-          ) : (
-            <Link 
-              to="/signin"
-              className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
-              onClick={closeMenu}
-            >
-              Entrar
-            </Link>
-          )}
+            );
+          })}
+          <button
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
+            onClick={() => {
+              closeMenu();
+              setShowSignOutDialog(true);
+            }}
+          >
+            <LogOut className="h-5 w-5" />
+            Sair
+          </button>
         </nav>
+        <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar saída</DialogTitle>
+              <DialogDescription>
+                Tem certeza que deseja sair da sua conta?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-4 mt-4">
+              <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={handleSignOut}>
+                Sair
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </header>
   );
