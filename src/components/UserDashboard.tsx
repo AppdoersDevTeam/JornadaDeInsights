@@ -77,6 +77,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showComingSoonDialog, setShowComingSoonDialog] = useState(false);
   const [showSettingsComingSoonDialog, setShowSettingsComingSoonDialog] = useState(false);
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
 
   // Add effect to scroll to top when tab changes
   useEffect(() => {
@@ -334,6 +335,14 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       console.error('Erro ao iniciar o processo de checkout:', error);
       toast.error('Falha ao iniciar o processo de checkout. Por favor, tente novamente.');
     }
+  };
+
+  const handleSignOut = () => {
+    // Implement the sign out logic
+    console.log('Signing out');
+    // You might want to call a sign out function from your auth provider
+    // and then navigate to signin page
+    navigate('/signin');
   };
 
   if (!user) {
@@ -964,6 +973,87 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           <DialogFooter>
             <Button onClick={() => setShowSettingsComingSoonDialog(false)}>
               Entendi
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sign Out Confirmation Dialog */}
+      <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Saída</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja sair da sua conta?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleSignOut}>
+              Sair
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mobile Order Details Dialog */}
+      <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Pedido</DialogTitle>
+            <DialogDescription>
+              {selectedOrder && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="font-medium text-muted-foreground">Data</p>
+                      <p>{new Date(selectedOrder.date).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      })}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-muted-foreground">Total</p>
+                      <p>{new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(selectedOrder.total)}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-muted-foreground">Nome</p>
+                      <p>{capitalizeName(selectedOrder.name)}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-muted-foreground">Email</p>
+                      <p>{selectedOrder.email}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-medium text-muted-foreground mb-2">Itens</p>
+                    <div className="space-y-2">
+                      {selectedOrder.items.map((item, index) => (
+                        <div key={index} className="flex justify-between text-sm">
+                          <span>{item.name}</span>
+                          <span>{new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(item.price)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <div className="flex justify-between font-medium">
+                      <span>Status</span>
+                      <Badge variant="outline">
+                        {selectedOrder.total > 0 ? 'Concluído' : 'Em processamento'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setSelectedOrder(null)}>
+              Fechar
             </Button>
           </DialogFooter>
         </DialogContent>
