@@ -92,7 +92,7 @@ export function AdminHeader() {
         <div className="hidden md:flex items-center gap-4">
           <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="text-background border-background hover:bg-background/10">
+              <Button variant="outline" className="text-secondary border-background hover:bg-background/10">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair
               </Button>
@@ -128,7 +128,7 @@ export function AdminHeader() {
 
       {/* Mobile Navigation */}
       <div className={cn(
-        "fixed inset-0 top-[60px] bg-secondary z-40 transform transition-transform duration-300 ease-in-out md:hidden",
+        "fixed inset-0 top-[60px] bg-secondary z-50 transform transition-transform duration-300 ease-in-out md:hidden",
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-secondary container mx-auto px-4 py-8 flex flex-col gap-4 items-center text-white">
@@ -141,20 +141,21 @@ export function AdminHeader() {
                 <span>Dashboard</span>
                 {isDashboardOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
               </button>
-              {isDashboardOpen && (
-                <div className="w-full flex flex-col gap-2 pl-4">
-                  {dashboardLinks.map((link) => (
-                    <Link 
-                      key={link.to}
-                      to={link.to}
-                      className="text-base py-2 text-white/80 font-normal hover:text-white transition-colors"
-                      onClick={closeMenu}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
+              <div className={cn(
+                "w-full flex flex-col gap-2 pl-4 overflow-hidden transition-all duration-300",
+                isDashboardOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+              )}>
+                {dashboardLinks.map((link) => (
+                  <Link 
+                    key={link.to}
+                    to={link.to}
+                    className="text-base py-2 text-white/80 font-normal hover:text-white transition-colors"
+                    onClick={closeMenu}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
             </>
           ) : (
             <>
