@@ -537,7 +537,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                       <div className="flex justify-center">
                         <Button 
                           variant="outline" 
-                          onClick={() => navigate('/dashboard?tab=orders')}
+                          onClick={() => onTabChange('orders')}
                           className="w-full sm:w-auto"
                         >
                           Ver todo o histórico de pedidos
@@ -571,7 +571,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                     </Button>
                     <Button 
                       variant="outline" 
-                      onClick={() => navigate('/dashboard?tab=newsletter')}
+                      onClick={() => onTabChange('newsletter')}
                     >
                       Ver detalhes
                     </Button>
