@@ -279,12 +279,12 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                   </div>
                 ) : (
                   <div className="overflow-x-auto -mx-6 sm:mx-0">
-                    <table className="w-full text-left whitespace-nowrap min-w-[600px]">
+                    <table className="w-full text-left whitespace-nowrap min-w-[400px]">
                       <thead className="bg-muted/50">
                         <tr>
-                          <th className="py-3 px-4 border-b font-medium">Data</th>
-                          <th className="py-3 px-4 border-b font-medium">Itens</th>
-                          <th className="py-3 px-4 border-b font-medium">Total</th>
+                          <th className="py-3 px-2 sm:px-4 border-b font-medium">Data</th>
+                          <th className="py-3 px-2 sm:px-4 border-b font-medium">Itens</th>
+                          <th className="py-3 px-2 sm:px-4 border-b font-medium">Total</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -294,17 +294,17 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                             className="border-t hover:bg-gray-50 cursor-pointer"
                             onClick={() => setSelectedOrder(order)}
                           >
-                            <td className="py-3 px-4">
+                            <td className="py-3 px-2 sm:px-4">
                               {new Date(order.date).toLocaleDateString('pt-BR', {
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric'
                               })}
                             </td>
-                            <td className="py-3 px-4">
+                            <td className="py-3 px-2 sm:px-4">
                               {order.items.length} item{order.items.length>1?'s':''}
                             </td>
-                            <td className="py-3 px-4">
+                            <td className="py-3 px-2 sm:px-4">
                               {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(order.total)}
                             </td>
                           </tr>
