@@ -324,7 +324,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
 
         {/* Order Details Dialog */}
         <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[600px] [&>button]:hover:bg-primary [&>button]:hover:text-primary-foreground">
             <DialogHeader>
               <DialogTitle>Detalhes do Pedido</DialogTitle>
               <DialogDescription>
