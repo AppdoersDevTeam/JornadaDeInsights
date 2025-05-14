@@ -3,12 +3,14 @@ import { auth } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
-import { Download, Eye, Copy, X } from 'lucide-react';
+import { Download, Eye, Copy, X, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { toast } from 'react-hot-toast';
 import { Fragment } from 'react';
 import { supabase } from '@/lib/supabase';
 import { EbookCard } from '@/components/shop/ebook-card';
+import { useCart } from '@/context/cart-context';
+import { LazyImage } from '@/components/shop/lazy-image';
 import {
   Dialog,
   DialogContent,
@@ -41,7 +43,7 @@ interface CompletedOrder {
 }
 
 interface UserDashboardProps {
-  activeTab: 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings';
+  activeTab: 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'cart';
 }
 
 const DEFAULT_COVER_DATA_URL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2UyZThmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBDb3ZlcjwvdGV4dD48L3N2Zz4=';
@@ -57,6 +59,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
   const [selectedOrder, setSelectedOrder] = useState<CompletedOrder | null>(null);
   const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
   const [latestEbooks, setLatestEbooks] = useState<Ebook[]>([]);
+  const { state: { items }, totalCount, totalPrice, addItem, removeItem, decrementItem } = useCart();
 
   const capitalizeName = (name: string) => {
     return name
@@ -194,6 +197,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
             {activeTab === 'orders' && 'Meus Pedidos'}
             {activeTab === 'newsletter' && 'Newsletter'}
             {activeTab === 'settings' && 'Configurações'}
+            {activeTab === 'cart' && 'Meu Carrinho'}
           </h1>
           <p className="text-muted-foreground mt-2">
             {activeTab === 'overview' && 'Uma visão geral da sua conta e atividades'}
@@ -201,6 +205,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
             {activeTab === 'orders' && 'Acompanhe seus pedidos e compras'}
             {activeTab === 'newsletter' && 'Gerencie suas preferências de newsletter'}
             {activeTab === 'settings' && 'Configure as configurações da sua conta'}
+            {activeTab === 'cart' && 'Gerencie os itens do seu carrinho'}
           </p>
         </div>
       </div>
@@ -681,54 +686,93 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
           </div>
         )}
 
-        {/* Order Details Dialog */}
-        <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-          <DialogContent className="sm:max-w-[600px] [&>button]:hover:bg-primary [&>button]:hover:text-primary-foreground [&>button]:focus:ring-0 [&>button]:focus:ring-offset-0 [&>button]:hover:ring-0 focus:ring-0 focus:ring-offset-0 hover:ring-0 [&>button]:ring-0 [&>button]:ring-offset-0 [&>button]:outline-none [&>button]:focus:outline-none [&>button]:focus-visible:ring-0 [&>button]:focus-visible:ring-offset-0 [&>button]:focus-visible:outline-none [&_[data-dialog-overlay]]:ring-0 [&_[data-dialog-overlay]]:ring-offset-0 [&_[data-dialog-overlay]]:outline-none [&_[data-dialog-overlay]]:focus:ring-0 [&_[data-dialog-overlay]]:focus:ring-offset-0 [&_[data-dialog-overlay]]:focus:outline-none">
-            <DialogHeader>
-              <DialogTitle>Detalhes do Pedido</DialogTitle>
-              <DialogDescription>
-                {selectedOrder && new Date(selectedOrder.date).toLocaleDateString('pt-BR', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric'
-                })}
-              </DialogDescription>
-            </DialogHeader>
-            {selectedOrder && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Nome</h4>
-                    <p>{capitalizeName(selectedOrder.name)}</p>
+        {activeTab === 'cart' && (
+          <div className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Meu Carrinho</CardTitle>
+                <CardDescription>
+                  {totalCount > 0 
+                    ? `Você tem ${totalCount} item${totalCount !== 1 ? 's' : ''} no carrinho`
+                    : 'Seu carrinho está vazio'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {totalCount === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-lg text-muted-foreground mb-6">Seu carrinho está vazio no momento.</p>
+                    <Button variant="outline" onClick={() => navigate('/shop')}>
+                      Continuar Comprando
+                    </Button>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Email</h4>
-                    <p>{selectedOrder.email}</p>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Itens</h4>
-                  <div className="space-y-2">
-                    {selectedOrder.items.map((item, index) => (
-                      <div key={index} className="flex justify-between items-center py-2 border-b last:border-0">
-                        <span>{item.name}</span>
-                        <span className="text-muted-foreground">
-                          {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(item.price)}
+                ) : (
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      {items.map(item => (
+                        <div key={item.id} className="bg-card rounded-lg p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                          <div className="flex items-center space-x-4">
+                            <LazyImage
+                              src={item.cover_url || ''}
+                              alt={item.title}
+                              className="w-20 h-20 object-cover rounded"
+                            />
+                            <div>
+                              <h3 className="font-semibold">{item.title}</h3>
+                              <p className="text-muted-foreground">
+                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => decrementItem(item.id)}
+                                className="h-8 w-8"
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+                              <span className="w-8 text-center">{item.quantity}</span>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => addItem(item)}
+                                className="h-8 w-8"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeItem(item.id)}
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="border-t pt-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="font-medium">Total</span>
+                        <span className="font-medium">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalPrice)}
                         </span>
                       </div>
-                    ))}
+                      <Button className="w-full" onClick={() => navigate('/checkout')}>
+                        Finalizar Compra
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <div className="flex justify-between items-center pt-4 border-t">
-                  <span className="font-medium">Total</span>
-                  <span className="font-medium">
-                    {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(selectedOrder.total)}
-                  </span>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {activeTab === 'newsletter' && (
           <div className="space-y-8">
