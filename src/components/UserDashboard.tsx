@@ -324,7 +324,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
 
         {/* Order Details Dialog */}
         <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-          <DialogContent className="sm:max-w-[600px] [&>button]:hover:bg-primary [&>button]:hover:text-primary-foreground [&>button]:focus:ring-0 [&>button]:focus:ring-offset-0 [&>button]:hover:ring-0 focus:ring-0 focus:ring-offset-0 hover:ring-0">
+          <DialogContent className="sm:max-w-[600px] [&>button]:hover:bg-primary [&>button]:hover:text-primary-foreground [&>button]:focus:ring-0 [&>button]:focus:ring-offset-0 [&>button]:hover:ring-0 focus:ring-0 focus:ring-offset-0 hover:ring-0 [&>button]:ring-0 [&>button]:ring-offset-0 [&>button]:outline-none [&>button]:focus:outline-none [&>button]:focus-visible:ring-0 [&>button]:focus-visible:ring-offset-0 [&>button]:focus-visible:outline-none [&_[data-dialog-overlay]]:ring-0 [&_[data-dialog-overlay]]:ring-offset-0 [&_[data-dialog-overlay]]:outline-none [&_[data-dialog-overlay]]:focus:ring-0 [&_[data-dialog-overlay]]:focus:ring-offset-0 [&_[data-dialog-overlay]]:focus:outline-none">
             <DialogHeader>
               <DialogTitle>Detalhes do Pedido</DialogTitle>
               <DialogDescription>
