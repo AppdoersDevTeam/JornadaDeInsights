@@ -401,7 +401,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 gap-8 max-w-2xl mx-auto">
+                    <div className="grid grid-cols-1 gap-8 max-w-2xl">
                       {userEbooks.slice(0, 2).map((ebook) => (
                         <Card key={ebook.id} className="overflow-hidden">
                           <div className="flex flex-col md:flex-row gap-6 p-8">
