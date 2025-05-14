@@ -23,9 +23,9 @@ export function AdminHeader({ onMenuToggle, isMenuOpen }: AdminHeaderProps) {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-primary border-b">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo and Menu Section */}
-        <div className="flex items-center gap-4">
+      <div className="container mx-auto px-4 h-16 flex items-center">
+        {/* Logo Section - Left */}
+        <div className="flex items-center gap-4 w-1/4">
           <Button
             variant="ghost"
             size="icon"
@@ -37,12 +37,12 @@ export function AdminHeader({ onMenuToggle, isMenuOpen }: AdminHeaderProps) {
           </Button>
           <Link to="/dashboard" className="flex items-center gap-2 text-background">
             <Headphones className="h-6 w-6 text-current" />
-            <span className="text-xl font-heading font-semibold">Patricia Dashboard</span>
+            <span className="text-xl font-heading font-semibold">Patricia</span>
           </Link>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6">
+        {/* Navigation Links - Center */}
+        <nav className="hidden md:flex items-center justify-center gap-6 flex-1">
           <Link to="/dashboard" className="text-background hover:text-secondary transition-colors">
             Dashboard
           </Link>
@@ -57,11 +57,13 @@ export function AdminHeader({ onMenuToggle, isMenuOpen }: AdminHeaderProps) {
           </Link>
         </nav>
 
-        {/* Logout Button */}
-        <Button variant="ghost" size="icon" className="text-background hover:text-secondary" onClick={handleSignOut}>
-          <LogOut className="h-5 w-5" />
-          <span className="sr-only">Logout</span>
-        </Button>
+        {/* Logout Button - Right */}
+        <div className="w-1/4 flex justify-end">
+          <Button variant="ghost" size="icon" className="text-background hover:text-secondary" onClick={handleSignOut}>
+            <LogOut className="h-5 w-5" />
+            <span className="sr-only">Logout</span>
+          </Button>
+        </div>
       </div>
     </header>
   );
