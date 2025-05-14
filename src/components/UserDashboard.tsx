@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { auth } from '../lib/firebase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Download, Eye, Copy, X, Plus, Minus, ShoppingCart } from 'lucide-react';
@@ -17,18 +17,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Badge } from '@/components/ui/badge';
-
-interface Ebook {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  filename: string;
-  cover_url: string;
-  created_at: string;
-}
+import { loadStripe } from '@stripe/stripe-js';
+import type { Ebook } from '@/components/shop/ebook-card';
 
 interface CompletedOrder {
   id: string;
@@ -46,20 +40,39 @@ interface UserDashboardProps {
   activeTab: 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'cart';
 }
 
+interface CartItem {
+  id: string;
+  title: string;
+  price: number;
+  quantity: number;
+  cover_url?: string;
+  description?: string;
+  filename?: string;
+  created_at: string;
+}
+
 const DEFAULT_COVER_DATA_URL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2UyZThmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBDb3ZlcjwvdGV4dD48L3N2Zz4=';
+
+// Initialize Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+// Server URL
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 
 const UserDashboard = ({ activeTab }: UserDashboardProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [hoverEmail, setHoverEmail] = useState<string | null>(null);
   const [userEbooks, setUserEbooks] = useState<Ebook[]>([]);
   const [completedOrdersList, setCompletedOrdersList] = useState<CompletedOrder[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<CompletedOrder | null>(null);
-  const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
   const [latestEbooks, setLatestEbooks] = useState<Ebook[]>([]);
-  const { state: { items }, totalCount, totalPrice, addItem, removeItem, decrementItem } = useCart();
+  const { state: { items }, totalCount, totalPrice, addItem, removeItem, decrementItem, clearCart } = useCart();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const capitalizeName = (name: string) => {
     return name
@@ -174,8 +187,137 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
     }
   }, [activeTab]);
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setIsAuthenticated(!!user);
+      // If user just signed in and we have saved cart state, restore it
+      if (user) {
+        const savedCart = sessionStorage.getItem('cartState');
+        if (savedCart) {
+          try {
+            const parsedCart = JSON.parse(savedCart) as CartItem[];
+            // Clear current cart and restore saved items
+            clearCart();
+            parsedCart.forEach((item) => {
+              // Convert CartItem to Ebook for addItem
+              const ebook: Ebook = {
+                id: item.id,
+                title: item.title,
+                description: item.description || '',
+                price: item.price,
+                filename: item.filename || item.id,
+                cover_url: item.cover_url,
+                created_at: item.created_at
+              };
+              addItem(ebook);
+            });
+            sessionStorage.removeItem('cartState');
+            // Close auth modal if open
+            setShowAuthModal(false);
+          } catch (error) {
+            console.error('Error restoring cart state:', error);
+          }
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [clearCart, addItem]);
+
   const handleNewsletterToggle = () => {
     setIsSubscribed(!isSubscribed);
+  };
+
+  const handleCheckout = async () => {
+    // If not authenticated, show auth modal and redirect to sign in
+    if (!isAuthenticated) {
+      // Store current cart state in sessionStorage
+      sessionStorage.setItem('cartState', JSON.stringify(items));
+      // Navigate to sign in with return path
+      navigate('/signin', { 
+        state: { 
+          from: location.pathname,
+          returnTo: '/dashboard?tab=cart'
+        } 
+      });
+      return;
+    }
+
+    try {
+      const stripe = await stripePromise;
+      if (!stripe) throw new Error('Stripe failed to initialize');
+
+      // Get the correct API URL based on environment
+      const apiUrl = process.env.NODE_ENV === 'production'
+        ? 'https://jornadadeinsights.com'
+        : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+      // Create checkout session
+      const response = await fetch(`${apiUrl}/api/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: items.map(item => {
+            // Ensure image URL is absolute and uses HTTPS
+            let imageUrl = item.cover_url || '';
+            if (imageUrl) {
+              try {
+                // Parse the URL to handle it properly
+                const url = new URL(imageUrl, window.location.origin);
+                
+                // Remove any query parameters or fragments
+                url.search = '';
+                url.hash = '';
+                
+                // Ensure HTTPS
+                url.protocol = 'https:';
+                
+                // Get the final URL
+                imageUrl = url.toString();
+              } catch (error) {
+                console.error('Error processing image URL:', error);
+                imageUrl = '';
+              }
+            }
+
+            return {
+              id: item.id,
+              name: item.title,
+              description: `Digital eBook${item.description ? ` - ${item.description}` : ''}`,
+              price: Math.round(item.price * 100), // Convert to cents
+              quantity: item.quantity,
+              image: imageUrl || undefined, // Use formatted image URL
+              metadata: {
+                type: 'ebook',
+                layout: 'preppy',
+                displayStyle: 'large_cover'
+              }
+            };
+          }),
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create checkout session');
+      }
+
+      const { sessionId } = await response.json();
+
+      // Redirect to Stripe Checkout
+      const result = await stripe.redirectToCheckout({
+        sessionId,
+      });
+
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+    } catch (error) {
+      console.error('Erro ao iniciar o processo de checkout:', error);
+      toast.error('Falha ao iniciar o processo de checkout. Por favor, tente novamente.');
+    }
   };
 
   if (!user) {
@@ -628,6 +770,95 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
         )}
 
         {activeTab === 'cart' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Meu Carrinho</h2>
+              {totalCount > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  {totalCount} {totalCount === 1 ? 'item' : 'itens'}
+                </span>
+              )}
+            </div>
+
+            {items.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Seu carrinho está vazio</p>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => navigate('/shop')}
+                >
+                  Ver Loja
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-4">
+                  {items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-4 p-4 border rounded-lg"
+                    >
+                      <div className="relative w-20 h-20 flex-shrink-0">
+                        <LazyImage
+                          src={item.cover_url || ''}
+                          alt={item.title}
+                          className="object-cover rounded-md"
+                        />
+                      </div>
+                      <div className="flex-grow">
+                        <h3 className="font-medium">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => decrementItem(item.id)}
+                          disabled={item.quantity <= 1}
+                        >
+                          -
+                        </Button>
+                        <span className="w-8 text-center">{item.quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => addItem(item)}
+                        >
+                          +
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeItem(item.id)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t pt-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="font-medium">Total</span>
+                    <span className="text-lg font-bold">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalPrice)}</span>
+                  </div>
+                  <Button
+                    className="w-full"
+                    onClick={handleCheckout}
+                  >
+                    Finalizar Compra
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'newsletter' && (
           <div className="space-y-8">
             <Card>
               <CardHeader>
