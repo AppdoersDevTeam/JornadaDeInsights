@@ -47,10 +47,10 @@ export function AdminHeader({ onMenuToggle, isMenuOpen }: AdminHeaderProps) {
             Dashboard
           </Link>
           <Link to="/" className="text-background hover:text-secondary transition-colors">
-            Home
+            Início
           </Link>
           <Link to="/shop" className="text-background hover:text-secondary transition-colors">
-            Shop
+            Loja
           </Link>
           <Link to="/podcast" className="text-background hover:text-secondary transition-colors">
             Podcast
@@ -61,7 +61,7 @@ export function AdminHeader({ onMenuToggle, isMenuOpen }: AdminHeaderProps) {
         <div className="w-1/4 flex justify-end">
           <Button variant="ghost" size="icon" className="text-background hover:text-secondary" onClick={handleSignOut}>
             <LogOut className="h-5 w-5" />
-            <span className="sr-only">Logout</span>
+            <span className="sr-only">Sair</span>
           </Button>
         </div>
       </div>
