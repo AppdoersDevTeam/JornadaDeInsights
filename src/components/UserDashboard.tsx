@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { toast } from 'react-hot-toast';
 import { Fragment } from 'react';
 import { supabase } from '@/lib/supabase';
+import { EbookCard } from '@/components/shop/ebook-card';
 import {
   Dialog,
   DialogContent,
@@ -500,49 +501,15 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {latestEbooks.map((ebook) => (
-                    <div key={ebook.id} className="group relative">
-                      <div className="aspect-[3/4] w-32 mx-auto overflow-hidden rounded-lg bg-muted">
-                        <img
-                          src={ebook.cover_url}
-                          alt={ebook.title}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = DEFAULT_COVER_DATA_URL;
-                            target.onerror = null;
-                          }}
-                        />
-                      </div>
-                      <div className="mt-4 space-y-2">
-                        <h3 className="font-medium line-clamp-1">{ebook.title}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {ebook.description}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">
-                            {new Intl.NumberFormat('pt-BR', {
-                              style: 'currency',
-                              currency: 'BRL'
-                            }).format(ebook.price)}
-                          </p>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => navigate(`/store?ebook=${ebook.id}`)}
-                          >
-                            Ver detalhes
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                    <EbookCard key={ebook.id} book={ebook} />
                   ))}
                 </div>
                 <div className="mt-6 flex justify-center">
                   <Button 
                     variant="outline" 
-                    onClick={() => navigate('/store')}
+                    onClick={() => navigate('/shop')}
                     className="w-full sm:w-auto"
                   >
                     Ver todos os ebooks
@@ -550,13 +517,6 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Store Button */}
-            <div className="flex justify-center pt-4">
-              <Button variant="outline" onClick={() => navigate('/store')}>
-                Ver Nossa Loja
-              </Button>
-            </div>
           </div>
         )}
 
