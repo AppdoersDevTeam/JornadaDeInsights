@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Headphones, User, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ export function AdminHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -32,7 +33,15 @@ export function AdminHeader() {
     }
   };
 
-  const navLinks = [
+  const isDashboard = location.pathname.startsWith('/dashboard');
+
+  const navLinks = isDashboard ? [
+    { to: '/dashboard', label: 'Visão Geral' },
+    { to: '/dashboard/orders', label: 'Pedidos' },
+    { to: '/dashboard/ebooks', label: 'Meus eBooks' },
+    { to: '/dashboard/newsletter', label: 'Newsletter' },
+    { to: '/dashboard/settings', label: 'Configurações' }
+  ] : [
     { to: '/dashboard', label: 'Dashboard' },
     { to: '/', label: 'Home' },
     { to: '/podcast', label: 'Podcast' },
@@ -116,7 +125,7 @@ export function AdminHeader() {
           ))}
           <Button 
             variant="outline" 
-            className="w-full text-white border-white hover:bg-white/10"
+            className="w-full text-white border-white hover:bg-white/10 bg-secondary/80"
             onClick={() => {
               closeMenu();
               setShowSignOutDialog(true);
