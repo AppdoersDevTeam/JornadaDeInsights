@@ -24,7 +24,7 @@ export function EbookDetailsPage() {
         const data = await getEbookById(id);
         setEbook(data);
       } catch (err) {
-        setError('Failed to load ebook details. Please try again later.');
+        setError('Falha ao carregar detalhes do ebook. Por favor, tente novamente mais tarde.');
         console.error(err);
       } finally {
         setIsLoading(false);
@@ -46,12 +46,12 @@ export function EbookDetailsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-red-500 mb-4">Error</h2>
-          <p className="text-gray-600">{error || 'Ebook not found'}</p>
+          <h2 className="text-2xl font-semibold text-red-500 mb-4">Erro</h2>
+          <p className="text-gray-600">{error || 'Ebook não encontrado'}</p>
           <Button asChild className="mt-4">
             <Link to="/shop">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Shop
+              Voltar para a Loja
             </Link>
           </Button>
         </div>
@@ -70,7 +70,7 @@ export function EbookDetailsPage() {
         <Button asChild variant="ghost" className="mb-8">
           <Link to="/shop">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Shop
+            Voltar para a Loja
           </Link>
         </Button>
 
@@ -97,7 +97,7 @@ export function EbookDetailsPage() {
             className="flex flex-col justify-center"
           >
             <h1 className="text-3xl md:text-4xl font-heading font-bold mb-4">{ebook.title}</h1>
-            <p className="text-xl text-primary font-medium mb-6">${ebook.price.toFixed(2)}</p>
+            <p className="text-xl text-primary font-medium mb-6">R$ {ebook.price.toFixed(2)}</p>
             <p className="text-lg text-muted-foreground mb-8 whitespace-pre-line">{ebook.description}</p>
             
             <div className="flex flex-col sm:flex-row gap-4">
@@ -107,7 +107,7 @@ export function EbookDetailsPage() {
                 className="flex-1"
               >
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Cart
+                Adicionar ao Carrinho
               </Button>
             </div>
           </motion.div>

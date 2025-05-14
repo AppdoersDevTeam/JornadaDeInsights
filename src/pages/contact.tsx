@@ -212,7 +212,7 @@ export function ContactPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 bg-muted/30">
+      <section id="faq-section" className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">Perguntas Frequentes</h2>
           

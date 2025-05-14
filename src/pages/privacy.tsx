@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 export function PrivacyPage() {
   return (
     <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 sm:px-8 lg:px-10 py-12">
+      <div className="container mx-auto px-6 sm:px-8 lg:px-10 py-12 pt-24">
         {/* Back to Home Link */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -51,11 +51,11 @@ export function PrivacyPage() {
             <h2 className="text-2xl font-heading font-semibold mb-4">2. Informações que Coletamos</h2>
             <p className="text-muted-foreground mb-4">Podemos coletar as seguintes informações pessoais:</p>
             <ul className="list-disc pl-6 text-muted-foreground mb-4">
-              <li>Nome e informações de contato.</li>
-              <li>Informações de faturamento e pagamento.</li>
-              <li>Credenciais de conta.</li>
-              <li>Dados de uso e análises.</li>
-              <li>Qualquer outra informação que você forneça voluntariamente.</li>
+              <li>Nome e informações de contato</li>
+              <li>Informações de faturamento e pagamento</li>
+              <li>Credenciais de conta</li>
+              <li>Dados de uso e análises</li>
+              <li>Qualquer outra informação que você forneça voluntariamente</li>
             </ul>
           </section>
 
@@ -63,10 +63,10 @@ export function PrivacyPage() {
             <h2 className="text-2xl font-heading font-semibold mb-4">3. Como Usamos Suas Informações</h2>
             <p className="text-muted-foreground mb-4">Suas informações podem ser usadas para:</p>
             <ul className="list-disc pl-6 text-muted-foreground mb-4">
-              <li>Processar transações e entregar serviços.</li>
-              <li>Comunicar-se com você sobre sua conta ou compras.</li>
-              <li>Enviar newsletters ou materiais promocionais (com seu consentimento).</li>
-              <li>Melhorar nosso site e serviços.</li>
+              <li>Processar transações e entregar serviços</li>
+              <li>Comunicar-se com você sobre sua conta ou compras</li>
+              <li>Enviar newsletters ou materiais promocionais (com seu consentimento)</li>
+              <li>Melhorar nosso site e serviços</li>
             </ul>
           </section>
 
@@ -108,7 +108,7 @@ export function PrivacyPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-heading font-semibold mb-4">Contato</h2>
             <p className="text-muted-foreground mb-4">
-              Se você tiver dúvidas sobre nossos Termos de Serviço ou Política de Privacidade, entre em contato conosco:
+              Se você tiver dúvidas sobre nossa Política de Privacidade, entre em contato conosco:
             </p>
             <div className="bg-muted/30 p-6 rounded-lg">
               <p className="text-muted-foreground mb-2">Jornada de Insights</p>

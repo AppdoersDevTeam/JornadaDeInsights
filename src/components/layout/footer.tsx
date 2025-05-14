@@ -82,10 +82,10 @@ export function Footer() {
                 <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</a>
+                <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</a>
+                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</Link>
               </li>
             </ul>
           </div>
@@ -172,10 +172,10 @@ export function Footer() {
                 <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</a>
+                <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</a>
+                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</Link>
               </li>
             </ul>
           </div>

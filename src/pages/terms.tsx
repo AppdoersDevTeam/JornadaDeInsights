@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 export function TermsPage() {
   return (
     <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 sm:px-8 lg:px-10 py-12">
+      <div className="container mx-auto px-6 sm:px-8 lg:px-10 py-12 pt-24">
         {/* Back to Home Link */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
