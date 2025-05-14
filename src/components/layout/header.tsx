@@ -5,11 +5,13 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
 import { AnimatedCartIcon } from '@/components/shop/animated-cart-icon';
+import { useAuth } from '@/context/auth-context';
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { totalCount } = useCart();
+  const { user } = useAuth();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -59,9 +61,15 @@ export function Header() {
             <Link to="/shop">Adquirir Meus eBooks</Link>
           </Button>
           <AnimatedCartIcon count={totalCount} className="text-background hover:text-secondary transition-colors" />
-          <Link to="/signin" className="p-2 rounded-full hover:bg-background/10 transition-colors">
-            <User className="h-6 w-6 text-background" />
-          </Link>
+          {user ? (
+            <Link to="/dashboard" className="p-2 rounded-full hover:bg-background/10 transition-colors">
+              <User className="h-6 w-6 text-background" />
+            </Link>
+          ) : (
+            <Link to="/signin" className="p-2 rounded-full hover:bg-background/10 transition-colors">
+              <User className="h-6 w-6 text-background" />
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -110,16 +118,21 @@ export function Header() {
           >
             Contato
           </NavLink>
-          <Link 
-            to="/signin" 
-            className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
-            onClick={closeMenu}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <User className="h-5 w-5" />
-              <span>Entrar</span>
-            </div>
-          </Link>
+          {user ? (
+            <NavLink 
+              to="/dashboard" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+              onClick={closeMenu}
+            >
+              Dashboard
+            </NavLink>
+          ) : (
+            <NavLink 
+              to="/signin" className="text-lg py-3 w-full text-center text-white font-normal hover:text-secondary transition-colors"
+              onClick={closeMenu}
+            >
+              Entrar
+            </NavLink>
+          )}
         </nav>
       </div>
     </header>
