@@ -76,10 +76,18 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showComingSoonDialog, setShowComingSoonDialog] = useState(false);
+  const [showSettingsComingSoonDialog, setShowSettingsComingSoonDialog] = useState(false);
 
   // Add effect to scroll to top when tab changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab]);
+
+  // Add effect to show settings coming soon dialog
+  useEffect(() => {
+    if (activeTab === 'settings') {
+      setShowSettingsComingSoonDialog(true);
+    }
   }, [activeTab]);
 
   const capitalizeName = (name: string) => {
@@ -938,6 +946,23 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           </DialogHeader>
           <DialogFooter>
             <Button onClick={() => setShowComingSoonDialog(false)}>
+              Entendi
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Coming Soon Dialog */}
+      <Dialog open={showSettingsComingSoonDialog} onOpenChange={setShowSettingsComingSoonDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Em Breve!</DialogTitle>
+            <DialogDescription>
+              A funcionalidade de configurações está em desenvolvimento. Em breve você poderá personalizar sua experiência!
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setShowSettingsComingSoonDialog(false)}>
               Entendi
             </Button>
           </DialogFooter>
