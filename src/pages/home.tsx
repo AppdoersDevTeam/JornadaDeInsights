@@ -219,7 +219,7 @@ export function HomePage() {
                     }}
                   />
                 ) : null}
-                <div className="absolute bottom-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 rounded-tl-lg z-10">
+                <div className="absolute bottom-0 left-0 bg-gradient-to-t from-black/80 to-transparent p-4 rounded-tr-lg z-10">
                   <div className="flex items-center gap-2 text-white">
                     <Award className="h-5 w-5" />
                     <span className="text-sm font-medium">Vídeo em Destaque</span>
