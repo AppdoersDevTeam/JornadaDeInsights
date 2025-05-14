@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Outlet } from 'react-router-dom';
 import { Layout } from '@/components/layout/layout';
 import { AdminLayout } from '@/components/layout/admin-layout';
 import { HomePage } from '@/pages/home';
@@ -24,56 +24,65 @@ import { AuthProvider } from '@/context/auth-context';
 import { EbookDetailsPage } from '@/pages/ebook-details';
 import { TermsPage } from '@/pages/terms';
 import { PrivacyPage } from '@/pages/privacy';
-
-type TabType = 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'cart' | 'analytics' | 'content' | 'users';
+import { TabType } from '@/types/dashboard';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+  };
 
   return (
     <AuthProvider>
       <CartProvider>
         <Routes>
-          <Route path="/" element={<Layout><HomePage /></Layout>} />
-          <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-          <Route path="/podcast" element={<Layout><PodcastPage /></Layout>} />
-          <Route path="/shop" element={<Layout><ShopPage /></Layout>} />
-          <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
-          <Route path="/cart" element={<Layout><CartPage /></Layout>} />
-          <Route path="/success" element={<Layout><SuccessPage /></Layout>} />
-          <Route path="/cancel" element={<Layout><CancelPage /></Layout>} />
-          <Route path="/signin" element={<Layout><SignIn /></Layout>} />
-          <Route path="/signup" element={<Layout><SignUp /></Layout>} />
-          <Route path="/check-email" element={<Layout><CheckEmailPage /></Layout>} />
-          <Route path="/confirm-email" element={<Layout><ConfirmEmailPage /></Layout>} />
-          <Route path="/ebook/:id" element={<Layout><EbookDetailsPage /></Layout>} />
-          <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
-          <Route path="/privacy" element={<Layout><PrivacyPage /></Layout>} />
+          <Route path="/" element={<Layout><Outlet /></Layout>}>
+            <Route index element={<HomePage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="podcast" element={<PodcastPage />} />
+            <Route path="shop" element={<ShopPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="cart" element={<CartPage />} />
+            <Route path="success" element={<SuccessPage />} />
+            <Route path="cancel" element={<CancelPage />} />
+            <Route path="terms" element={<TermsPage />} />
+            <Route path="privacy" element={<PrivacyPage />} />
+            <Route path="ebook/:id" element={<EbookDetailsPage />} />
+          </Route>
+
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/check-email" element={<CheckEmailPage />} />
+          <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+
           <Route path="/dashboard" element={
             <AdminLayout 
               sidePanel={
                 <DashboardSidePanel 
                   activeTab={activeTab} 
-                  onTabChange={setActiveTab} 
+                  onTabChange={handleTabChange} 
                 />
               }
             >
-              <DashboardPage activeTab={activeTab} onTabChange={setActiveTab} />
+              <DashboardPage activeTab={activeTab} onTabChange={handleTabChange} />
             </AdminLayout>
           } />
+
           <Route path="/user-dashboard" element={
             <AdminLayout 
               sidePanel={
                 <UserDashboardSidePanel 
                   activeTab={activeTab} 
-                  onTabChange={setActiveTab} 
+                  onTabChange={handleTabChange} 
                 />
               }
             >
-              <UserDashboard activeTab={activeTab} />
+              <UserDashboard activeTab={activeTab} onTabChange={handleTabChange} />
             </AdminLayout>
           } />
         </Routes>
+        <Toaster />
       </CartProvider>
     </AuthProvider>
   );

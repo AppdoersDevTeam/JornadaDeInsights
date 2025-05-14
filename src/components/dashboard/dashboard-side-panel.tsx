@@ -8,8 +8,7 @@ import {
   ShoppingCart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-type TabType = 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'cart' | 'analytics' | 'content' | 'users';
+import { TabType } from '@/types/dashboard';
 
 interface DashboardSidePanelProps {
   activeTab: TabType;

@@ -23,6 +23,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { loadStripe } from '@stripe/stripe-js';
 import type { Ebook } from '@/components/shop/ebook-card';
+import { TabType } from '@/types/dashboard';
 
 interface CompletedOrder {
   id: string;
@@ -35,8 +36,6 @@ interface CompletedOrder {
     price: number;
   }>;
 }
-
-type TabType = 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'cart' | 'analytics' | 'content' | 'users';
 
 interface UserDashboardProps {
   activeTab: TabType;

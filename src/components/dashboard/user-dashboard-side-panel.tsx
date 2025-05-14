@@ -21,8 +21,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-
-type TabType = 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'cart' | 'analytics' | 'content' | 'users';
+import { TabType } from '@/types/dashboard';
 
 interface UserDashboardSidePanelProps {
   activeTab: TabType;
