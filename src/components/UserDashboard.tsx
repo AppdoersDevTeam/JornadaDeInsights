@@ -40,6 +40,7 @@ type TabType = 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'settings' | 'c
 
 interface UserDashboardProps {
   activeTab: TabType;
+  onTabChange: (tab: TabType) => void;
 }
 
 interface CartItem {
@@ -61,7 +62,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 // Server URL
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 
-const UserDashboard = ({ activeTab }: UserDashboardProps) => {
+const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const navigate = useNavigate();
@@ -455,17 +456,15 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                         </Card>
                       ))}
                     </div>
-                    {userEbooks.length > 2 && (
-                      <div className="flex justify-center">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => navigate('/dashboard?tab=ebooks')}
-                          className="w-full sm:w-auto"
-                        >
-                          Ver todos os meus eBooks
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex justify-center">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => onTabChange('ebooks')}
+                        className="w-full sm:w-auto"
+                      >
+                        Ver todos os meus eBooks
+                      </Button>
+                    </div>
                   </div>
                 )}
               </CardContent>
