@@ -780,14 +780,15 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
             </div>
 
             {items.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Seu carrinho está vazio</p>
+              <div className="text-center">
+                <ShoppingCart className="mx-auto mb-4 h-12 w-12 text-primary" />
+                <p className="text-lg text-muted-foreground mb-6">Seu carrinho está vazio no momento.</p>
                 <Button
                   variant="outline"
-                  className="mt-4"
+                  size="lg"
                   onClick={() => navigate('/shop')}
                 >
-                  Ver Loja
+                  Continuar Comprando
                 </Button>
               </div>
             ) : (
