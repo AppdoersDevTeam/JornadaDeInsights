@@ -181,7 +181,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-8">
+              <div className="grid grid-cols-1 gap-8 max-w-2xl">
                 {userEbooks.map((ebook) => (
                   <Card key={ebook.id} className="overflow-hidden">
                     <div className="flex flex-col md:flex-row gap-6 p-8">
@@ -208,7 +208,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="flex-1"
+                              className="flex-1 h-12 sm:h-9"
                               onClick={() => {
                                 const pdfUrl = supabase.storage
                                   .from('store-assets')
@@ -222,7 +222,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="flex-1"
+                              className="flex-1 h-12 sm:h-9"
                               onClick={async () => {
                                 try {
                                   const { data, error } = await supabase.storage
