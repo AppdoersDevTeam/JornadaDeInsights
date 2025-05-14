@@ -227,82 +227,175 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-8 max-w-2xl">
-                    {userEbooks.map((ebook) => (
-                      <Card key={ebook.id} className="overflow-hidden">
-                        <div className="flex flex-col md:flex-row gap-6 p-8">
-                          <div className="w-full md:w-32 h-56 md:h-40 overflow-hidden rounded-md relative bg-muted">
-                            <img
-                              src={ebook.cover_url}
-                              alt={ebook.title}
-                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = DEFAULT_COVER_DATA_URL;
-                                target.onerror = null;
-                              }}
-                              loading="lazy"
-                            />
-                          </div>
-                          <div className="flex-1 flex flex-col gap-6">
-                            <CardHeader className="p-0">
-                              <CardTitle className="text-xl">{ebook.title}</CardTitle>
-                              <CardDescription className="line-clamp-2">{ebook.description}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                              <div className="flex flex-col sm:flex-row gap-2">
-                                <Button 
-                                  variant="outline" 
-                                  className="flex-1 h-14 sm:h-9"
-                                  onClick={() => {
-                                    const pdfUrl = supabase.storage
-                                      .from('store-assets')
-                                      .getPublicUrl(`pdfs/${ebook.filename}`).data.publicUrl;
-                                    window.open(pdfUrl, '_blank');
-                                  }}
-                                >
-                                  <Eye className="mr-2 h-5 w-5 sm:h-4 sm:w-4" />
-                                  Visualizar
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  className="flex-1 h-14 sm:h-9"
-                                  onClick={async () => {
-                                    try {
-                                      const { data, error } = await supabase.storage
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 gap-8 max-w-2xl">
+                      {userEbooks.slice(0, 2).map((ebook) => (
+                        <Card key={ebook.id} className="overflow-hidden">
+                          <div className="flex flex-col md:flex-row gap-6 p-8">
+                            <div className="w-full md:w-32 h-56 md:h-40 overflow-hidden rounded-md relative bg-muted">
+                              <img
+                                src={ebook.cover_url}
+                                alt={ebook.title}
+                                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = DEFAULT_COVER_DATA_URL;
+                                  target.onerror = null;
+                                }}
+                                loading="lazy"
+                              />
+                            </div>
+                            <div className="flex-1 flex flex-col gap-6">
+                              <CardHeader className="p-0">
+                                <CardTitle className="text-xl">{ebook.title}</CardTitle>
+                                <CardDescription className="line-clamp-2">{ebook.description}</CardDescription>
+                              </CardHeader>
+                              <CardContent className="p-0">
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    className="flex-1 h-14 sm:h-9"
+                                    onClick={() => {
+                                      const pdfUrl = supabase.storage
                                         .from('store-assets')
-                                        .download(`pdfs/${ebook.filename}`);
-                                        
-                                      if (error) {
-                                        throw error;
-                                      }
+                                        .getPublicUrl(`pdfs/${ebook.filename}`).data.publicUrl;
+                                      window.open(pdfUrl, '_blank');
+                                    }}
+                                  >
+                                    <Eye className="mr-2 h-5 w-5 sm:h-4 sm:w-4" />
+                                    Visualizar
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    className="flex-1 h-14 sm:h-9"
+                                    onClick={async () => {
+                                      try {
+                                        const { data, error } = await supabase.storage
+                                          .from('store-assets')
+                                          .download(`pdfs/${ebook.filename}`);
+                                          
+                                        if (error) {
+                                          throw error;
+                                        }
 
-                                      if (data) {
-                                        const blob = new Blob([data], { type: 'application/pdf' });
-                                        const url = window.URL.createObjectURL(blob);
-                                        const link = document.createElement('a');
-                                        link.href = url;
-                                        link.download = ebook.filename;
-                                        document.body.appendChild(link);
-                                        link.click();
-                                        window.URL.revokeObjectURL(url);
-                                        document.body.removeChild(link);
+                                        if (data) {
+                                          const blob = new Blob([data], { type: 'application/pdf' });
+                                          const url = window.URL.createObjectURL(blob);
+                                          const link = document.createElement('a');
+                                          link.href = url;
+                                          link.download = ebook.filename;
+                                          document.body.appendChild(link);
+                                          link.click();
+                                          window.URL.revokeObjectURL(url);
+                                          document.body.removeChild(link);
+                                        }
+                                      } catch (err) {
+                                        console.error('Error downloading file:', err);
+                                        toast.error('Failed to download the file');
                                       }
-                                    } catch (err) {
-                                      console.error('Error downloading file:', err);
-                                      toast.error('Failed to download the file');
-                                    }
-                                  }}
-                                >
-                                  <Download className="mr-2 h-4 w-4" />
-                                  Baixar
-                                </Button>
-                              </div>
-                            </CardContent>
+                                    }}
+                                  >
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Baixar
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </div>
                           </div>
-                        </div>
-                      </Card>
-                    ))}
+                        </Card>
+                      ))}
+                    </div>
+                    {userEbooks.length > 2 && (
+                      <div className="flex justify-center">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => navigate('/ebooks')}
+                          className="w-full sm:w-auto"
+                        >
+                          Ver todos os meus eBooks
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Orders Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Histórico de Pedidos</CardTitle>
+                <CardDescription>Visualize seus pedidos e compras</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {completedOrdersList.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-lg text-muted-foreground">Você ainda não fez nenhuma compra.</p>
+                    <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
+                      Procurar eBooks
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="overflow-x-auto -mx-6 sm:mx-0">
+                      <table className="w-full text-left whitespace-nowrap min-w-[300px]">
+                        <thead className="bg-muted/50">
+                          <tr>
+                            <th className="py-2 px-1 sm:px-4 border-b font-medium">Data</th>
+                            <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Nome</th>
+                            <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Email</th>
+                            <th className="py-2 px-1 sm:px-4 border-b font-medium">Itens</th>
+                            <th className="py-2 px-1 sm:px-4 border-b font-medium">Total</th>
+                            <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {completedOrdersList.slice(0, 5).map((order: CompletedOrder) => (
+                            <tr 
+                              key={order.id}
+                              className="border-t hover:bg-gray-50 cursor-pointer"
+                              onClick={() => setSelectedOrder(order)}
+                            >
+                              <td className="py-2 px-1 sm:px-4">
+                                {new Date(order.date).toLocaleDateString('pt-BR', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric'
+                                })}
+                              </td>
+                              <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
+                                {capitalizeName(order.name)}
+                              </td>
+                              <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
+                                {order.email}
+                              </td>
+                              <td className="py-2 px-1 sm:px-4">
+                                {order.items.length} item{order.items.length>1?'s':''}
+                              </td>
+                              <td className="py-2 px-1 sm:px-4">
+                                {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(order.total)}
+                              </td>
+                              <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
+                                <Badge variant="outline">
+                                  {order.total > 0 ? 'Concluído' : 'Em processamento'}
+                                </Badge>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {completedOrdersList.length > 5 && (
+                      <div className="flex justify-center">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => navigate('/orders')}
+                          className="w-full sm:w-auto"
+                        >
+                          Ver todo o histórico de pedidos
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
