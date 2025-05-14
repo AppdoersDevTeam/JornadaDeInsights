@@ -185,7 +185,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                 {userEbooks.map((ebook) => (
                   <Card key={ebook.id} className="overflow-hidden">
                     <div className="flex flex-col md:flex-row gap-6 p-8">
-                      <div className="w-full md:w-32 h-40 overflow-hidden rounded-md relative bg-muted">
+                      <div className="w-full md:w-32 h-56 md:h-40 overflow-hidden rounded-md relative bg-muted">
                         <img
                           src={ebook.cover_url}
                           alt={ebook.title}
@@ -198,7 +198,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                           loading="lazy"
                         />
                       </div>
-                      <div className="flex-1 flex flex-col gap-4">
+                      <div className="flex-1 flex flex-col gap-6">
                         <CardHeader className="p-0">
                           <CardTitle className="text-xl">{ebook.title}</CardTitle>
                           <CardDescription className="line-clamp-2">{ebook.description}</CardDescription>
@@ -207,8 +207,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                           <div className="flex flex-col sm:flex-row gap-2">
                             <Button 
                               variant="outline" 
-                              size="sm" 
-                              className="flex-1"
+                              className="flex-1 h-14"
                               onClick={() => {
                                 const pdfUrl = supabase.storage
                                   .from('store-assets')
@@ -216,13 +215,12 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                                 window.open(pdfUrl, '_blank');
                               }}
                             >
-                              <Eye className="mr-2 h-4 w-4" />
+                              <Eye className="mr-2 h-5 w-5" />
                               Visualizar
                             </Button>
                             <Button 
                               variant="outline" 
-                              size="sm" 
-                              className="flex-1"
+                              className="flex-1 h-14"
                               onClick={async () => {
                                 try {
                                   const { data, error } = await supabase.storage
