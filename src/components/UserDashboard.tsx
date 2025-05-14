@@ -140,16 +140,16 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
       <div className="mb-12 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">
-            {activeTab === 'ebooks' && 'My eBooks'}
-            {activeTab === 'orders' && 'My Orders'}
+            {activeTab === 'ebooks' && 'Meus eBooks'}
+            {activeTab === 'orders' && 'Meus Pedidos'}
             {activeTab === 'newsletter' && 'Newsletter'}
-            {activeTab === 'settings' && 'Settings'}
+            {activeTab === 'settings' && 'Configurações'}
           </h1>
           <p className="text-muted-foreground mt-2">
-            {activeTab === 'ebooks' && 'Manage your eBooks and downloads'}
-            {activeTab === 'orders' && 'Track your orders and purchases'}
-            {activeTab === 'newsletter' && 'Manage your newsletter preferences'}
-            {activeTab === 'settings' && 'Configure your account settings'}
+            {activeTab === 'ebooks' && 'Gerencie seus eBooks e downloads'}
+            {activeTab === 'orders' && 'Acompanhe seus pedidos e compras'}
+            {activeTab === 'newsletter' && 'Gerencie suas preferências de newsletter'}
+            {activeTab === 'settings' && 'Configure as configurações da sua conta'}
           </p>
         </div>
       </div>
@@ -160,9 +160,9 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
           <div className="space-y-8">
             {userEbooks.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-lg text-muted-foreground">You haven't purchased any eBooks yet.</p>
+                <p className="text-lg text-muted-foreground">Você ainda não comprou nenhum eBook.</p>
                 <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
-                  Browse eBooks
+                  Procurar eBooks
                 </Button>
               </div>
             ) : (
@@ -202,7 +202,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                               }}
                             >
                               <Eye className="mr-2 h-4 w-4" />
-                              View
+                              Visualizar
                             </Button>
                             <Button 
                               variant="outline" 
@@ -236,7 +236,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                               }}
                             >
                               <Download className="mr-2 h-4 w-4" />
-                              Download
+                              Baixar
                             </Button>
                           </div>
                         </CardContent>
@@ -253,15 +253,15 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
           <div className="space-y-8">
             <Card className="p-6">
               <CardHeader>
-                <CardTitle>Order History</CardTitle>
-                <CardDescription>View all your orders and purchases</CardDescription>
+                <CardTitle>Histórico de Pedidos</CardTitle>
+                <CardDescription>Visualize todos os seus pedidos e compras</CardDescription>
               </CardHeader>
               <CardContent>
                 {completedOrdersList.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-lg text-muted-foreground">You haven't made any purchases yet.</p>
+                    <p className="text-lg text-muted-foreground">Você ainda não fez nenhuma compra.</p>
                     <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
-                      Browse eBooks
+                      Procurar eBooks
                     </Button>
                   </div>
                 ) : (
@@ -269,11 +269,11 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                     <table className="w-full text-left whitespace-nowrap">
                       <thead>
                         <tr>
-                          <th className="py-3 px-4 border-b">Date</th>
-                          <th className="py-3 px-4 border-b">Name</th>
+                          <th className="py-3 px-4 border-b">Data</th>
+                          <th className="py-3 px-4 border-b">Nome</th>
                           <th className="py-3 px-4 border-b">Email</th>
                           <th className="py-3 px-4 border-b">Total</th>
-                          <th className="py-3 px-4 border-b">Items</th>
+                          <th className="py-3 px-4 border-b">Itens</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -344,24 +344,24 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
               <CardHeader>
                 <CardTitle>Newsletter</CardTitle>
                 <CardDescription>
-                  Receive updates and exclusive content
+                  Receba atualizações e conteúdo exclusivo
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="max-w-md">
                   <p className="text-muted-foreground mb-6">
-                    Subscribe to receive the latest news, eBooks, and exclusive content.
+                    Inscreva-se para receber as últimas notícias, eBooks e conteúdo exclusivo.
                   </p>
                   <div className="flex items-center gap-4">
                     <Button
                       onClick={handleNewsletterToggle}
                       variant={isSubscribed ? 'outline' : 'default'}
                     >
-                      {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                      {isSubscribed ? 'Cancelar Inscrição' : 'Inscrever-se'}
                     </Button>
                     {isSubscribed && (
                       <p className="text-sm text-muted-foreground">
-                        You are subscribed to the newsletter
+                        Você está inscrito na newsletter
                       </p>
                     )}
                   </div>
@@ -375,15 +375,15 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
           <div className="space-y-8">
             <Card>
               <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
+                <CardTitle>Configurações da Conta</CardTitle>
                 <CardDescription>
-                  Manage your account preferences and information
+                  Gerencie suas preferências e informações da conta
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-8">
                   <div>
-                    <h3 className="text-lg font-medium mb-6">Account Information</h3>
+                    <h3 className="text-lg font-medium mb-6">Informações da Conta</h3>
                     <div className="space-y-6">
                       <div>
                         <label className="block text-sm font-medium text-muted-foreground mb-2">
@@ -393,7 +393,7 @@ const UserDashboard = ({ activeTab }: UserDashboardProps) => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-muted-foreground mb-2">
-                          Account created on
+                          Conta criada em
                         </label>
                         <p className="text-sm">
                           {user.metadata.creationTime
