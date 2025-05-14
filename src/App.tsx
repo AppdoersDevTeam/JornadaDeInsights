@@ -49,12 +49,11 @@ function App() {
             <Route path="terms" element={<TermsPage />} />
             <Route path="privacy" element={<PrivacyPage />} />
             <Route path="ebook/:id" element={<EbookDetailsPage />} />
+            <Route path="signin" element={<SignIn />} />
+            <Route path="signup" element={<SignUp />} />
+            <Route path="check-email" element={<CheckEmailPage />} />
+            <Route path="confirm-email" element={<ConfirmEmailPage />} />
           </Route>
-
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/check-email" element={<CheckEmailPage />} />
-          <Route path="/confirm-email" element={<ConfirmEmailPage />} />
 
           <Route path="/dashboard" element={
             <AdminLayout 
