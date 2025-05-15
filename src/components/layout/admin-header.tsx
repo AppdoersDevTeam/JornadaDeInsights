@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Headphones, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart } from 'lucide-react';
+import { Menu, X, Headphones, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'firebase/auth';
@@ -197,6 +197,14 @@ export function AdminHeader() {
             Início
           </Link>
           <Link
+            to="/about"
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+            onClick={closeMenu}
+          >
+            <Info className="h-5 w-5" />
+            Sobre
+          </Link>
+          <Link
             to="/podcast"
             className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
             onClick={closeMenu}
@@ -211,6 +219,14 @@ export function AdminHeader() {
           >
             <ShoppingBag className="h-5 w-5" />
             Loja
+          </Link>
+          <Link
+            to="/contact"
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+            onClick={closeMenu}
+          >
+            <Mail className="h-5 w-5" />
+            Contato
           </Link>
 
           {/* Logout Button */}
