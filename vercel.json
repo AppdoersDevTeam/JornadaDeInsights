@@ -16,6 +16,78 @@
   ],
   "routes": [
     {
+      "src": "/api/create-checkout-session",
+      "dest": "/api/create-checkout-session.js",
+      "methods": ["POST", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+        "Access-Control-Allow-Credentials": "true",
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "src": "/api/send-purchase-email",
+      "dest": "/api/send-purchase-email.js",
+      "methods": ["POST", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+        "Access-Control-Allow-Credentials": "true",
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "src": "/api/completed-orders",
+      "dest": "/api/completed-orders.js",
+      "methods": ["GET", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+        "Access-Control-Allow-Credentials": "true",
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "src": "/api/stats",
+      "dest": "/api/stats.js",
+      "methods": ["GET", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+        "Access-Control-Allow-Credentials": "true",
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "src": "/api/top-products",
+      "dest": "/api/top-products.js",
+      "methods": ["GET", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+        "Access-Control-Allow-Credentials": "true",
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "src": "/api/users",
+      "dest": "/api/users.js",
+      "methods": ["GET", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+        "Access-Control-Allow-Credentials": "true",
+        "Content-Type": "application/json"
+      }
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1.js",
       "methods": ["GET", "POST", "OPTIONS"],

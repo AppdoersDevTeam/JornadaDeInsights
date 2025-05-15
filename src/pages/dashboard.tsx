@@ -208,9 +208,19 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         try {
           setLoading(true);
           const [ordersRes, topProducts, statsRes] = await Promise.all([
-            fetch(`${SERVER_URL}/api/completed-orders`),
+            fetch(`${SERVER_URL}/api/completed-orders`, {
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }),
             calculateTopProducts(),
-            fetch(`${SERVER_URL}/stats`)
+            fetch(`${SERVER_URL}/api/stats`, {
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
           ]);
 
           if (!ordersRes.ok) throw new Error('Failed to load orders');
@@ -248,7 +258,12 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   // Fetch all users when switching to users tab
   const fetchUsers = async () => {
     try {
-      const res = await fetch(`${SERVER_URL}/users`);
+      const res = await fetch(`${SERVER_URL}/api/users`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       if (!res.ok) throw new Error('Failed to load users');
       const { users } = await res.json();
       setUsersList(users);
