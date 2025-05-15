@@ -123,11 +123,17 @@ export default async function handler(req, res) {
       // Calculate sales from both charges and balance transactions
       const salesFromCharges = dayCharges.data
         .filter(ch => ch.status === 'succeeded')
-        .reduce((sum, ch) => sum + ch.amount, 0) / 100;
+        .reduce((sum, ch) => {
+          // Convert from cents to dollars
+          return sum + (ch.amount / 100);
+        }, 0);
 
       const salesFromTransactions = dayTransactions.data
         .filter(txn => txn.type === 'charge' && txn.status === 'available')
-        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+        .reduce((sum, txn) => {
+          // Convert from cents to dollars
+          return sum + (txn.amount / 100);
+        }, 0);
 
       // Use the larger of the two values to ensure we don't miss any sales
       const sales = Math.max(salesFromCharges, salesFromTransactions);
@@ -141,7 +147,12 @@ export default async function handler(req, res) {
         salesFromTransactions,
         finalSales: sales,
         chargesCount: dayCharges.data.length,
-        transactionsCount: dayTransactions.data.length
+        transactionsCount: dayTransactions.data.length,
+        charges: dayCharges.data.map(ch => ({
+          amount: ch.amount / 100,
+          currency: ch.currency,
+          status: ch.status
+        }))
       });
 
       salesTrends.daily.push({
@@ -176,11 +187,15 @@ export default async function handler(req, res) {
 
       const salesFromCharges = weekCharges.data
         .filter(ch => ch.status === 'succeeded')
-        .reduce((sum, ch) => sum + ch.amount, 0) / 100;
+        .reduce((sum, ch) => {
+          return sum + (ch.amount / 100);
+        }, 0);
 
       const salesFromTransactions = weekTransactions.data
         .filter(txn => txn.type === 'charge' && txn.status === 'available')
-        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+        .reduce((sum, txn) => {
+          return sum + (txn.amount / 100);
+        }, 0);
 
       const sales = Math.max(salesFromCharges, salesFromTransactions);
 
@@ -216,11 +231,15 @@ export default async function handler(req, res) {
 
       const salesFromCharges = monthCharges.data
         .filter(ch => ch.status === 'succeeded')
-        .reduce((sum, ch) => sum + ch.amount, 0) / 100;
+        .reduce((sum, ch) => {
+          return sum + (ch.amount / 100);
+        }, 0);
 
       const salesFromTransactions = monthTransactions.data
         .filter(txn => txn.type === 'charge' && txn.status === 'available')
-        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+        .reduce((sum, txn) => {
+          return sum + (txn.amount / 100);
+        }, 0);
 
       const sales = Math.max(salesFromCharges, salesFromTransactions);
 

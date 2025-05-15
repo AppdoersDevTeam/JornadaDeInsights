@@ -17,6 +17,15 @@ interface SalesTrendsChartProps {
 export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTrendsChartProps) {
   const [activeTab, setActiveTab] = useState('daily');
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-NZ', {
+      style: 'currency',
+      currency: 'NZD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  };
+
   const renderChart = (data: SalesData[]) => {
     if (!data || data.length === 0) {
       return (
@@ -38,7 +47,7 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
           <YAxis 
             tick={{ fill: '#666' }}
             tickLine={{ stroke: '#666' }}
-            tickFormatter={(value) => `$${value}`}
+            tickFormatter={(value) => formatCurrency(value)}
           />
           <Tooltip
             contentStyle={{
@@ -47,7 +56,7 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
               borderRadius: '4px',
               padding: '8px'
             }}
-            formatter={(value: number) => [`$${value.toFixed(2)}`, 'Sales']}
+            formatter={(value: number) => [formatCurrency(value), 'Sales']}
           />
           <Line
             type="monotone"
@@ -65,7 +74,7 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Sales Trends</CardTitle>
+        <CardTitle>Sales Trends (NZD)</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
