@@ -30,9 +30,9 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
     if (value >= 1000) {
       return `$ ${(value / 1000).toFixed(1)}k`;
     }
-    return new Intl.NumberFormat('en-NZ', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'NZD',
+      currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
@@ -44,9 +44,9 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
         <div className="bg-white p-4 border rounded-lg shadow-lg">
           <p className="font-medium">{label}</p>
           <p className="text-primary">
-            {new Intl.NumberFormat('en-NZ', {
+            {new Intl.NumberFormat('en-US', {
               style: 'currency',
-              currency: 'NZD'
+              currency: 'USD'
             }).format(payload[0].value)}
           </p>
         </div>

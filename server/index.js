@@ -200,17 +200,20 @@ app.get('/stats', async (req, res) => {
       stripe.charges.list({ 
         created: { gte: dayStart }, 
         limit: 100,
-        status: 'succeeded'
+        status: 'succeeded',
+        currency: 'usd' // Only get USD charges
       }),
       stripe.charges.list({ 
         created: { gte: weekStart }, 
         limit: 100,
-        status: 'succeeded'
+        status: 'succeeded',
+        currency: 'usd'
       }),
       stripe.charges.list({ 
         created: { gte: monthStart }, 
         limit: 100,
-        status: 'succeeded'
+        status: 'succeeded',
+        currency: 'usd'
       }),
     ]);
 
@@ -222,7 +225,8 @@ app.get('/stats', async (req, res) => {
     // Fetch total completed orders ever
     const allChargesEver = await stripe.charges.list({ 
       limit: 100,
-      status: 'succeeded'
+      status: 'succeeded',
+      currency: 'usd'
     });
     const completedOrdersEver = allChargesEver.data.length;
 
@@ -252,13 +256,10 @@ app.get('/stats', async (req, res) => {
         ch.created < endOfDay
       );
       
-      // Convert amount from cents to dollars and from BRL to NZD
+      // Calculate total amount in USD (already in dollars since we filtered for USD charges)
       const totalAmount = dayCharges.reduce((sum, ch) => {
         // Convert from cents to dollars
-        const amountInBRL = ch.amount / 100;
-        // Convert from BRL to NZD (using a fixed rate for now, should be updated with real exchange rate)
-        const exchangeRate = 0.33; // 1 BRL = 0.33 NZD (approximate)
-        return sum + (amountInBRL * exchangeRate);
+        return sum + (ch.amount / 100);
       }, 0);
       
       dailyData.push({
@@ -280,9 +281,7 @@ app.get('/stats', async (req, res) => {
       );
       
       const totalAmount = weekCharges.reduce((sum, ch) => {
-        const amountInBRL = ch.amount / 100;
-        const exchangeRate = 0.33;
-        return sum + (amountInBRL * exchangeRate);
+        return sum + (ch.amount / 100);
       }, 0);
       
       weeklyData.push({
@@ -304,9 +303,7 @@ app.get('/stats', async (req, res) => {
       );
       
       const totalAmount = monthCharges.reduce((sum, ch) => {
-        const amountInBRL = ch.amount / 100;
-        const exchangeRate = 0.33;
-        return sum + (amountInBRL * exchangeRate);
+        return sum + (ch.amount / 100);
       }, 0);
       
       monthlyData.push({

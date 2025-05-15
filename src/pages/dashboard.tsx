@@ -487,9 +487,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                           </p>
                         </div>
                         <p className="font-medium">
-                          {new Intl.NumberFormat('en-NZ', {
+                          {new Intl.NumberFormat('en-US', {
                             style: 'currency',
-                            currency: 'NZD'
+                            currency: 'USD'
                           }).format(product.revenue)}
                         </p>
                       </div>
@@ -861,7 +861,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                             {o.name}
                           </div>
                         </td>
-                        <td>{new Intl.NumberFormat('en-NZ', {style:'currency',currency:'NZD'}).format(o.total)}</td>
+                        <td>{new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: 'USD'
+                        }).format(o.total)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -905,7 +908,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                               <Copy className="absolute right-1 top-1 cursor-pointer" onClick={() => copyEmail(o.email)} />
                             )}
                           </td>
-                          <td>{new Intl.NumberFormat('en-NZ', {style:'currency',currency:'NZD'}).format(o.total)}</td>
+                          <td>{new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'USD'
+                          }).format(o.total)}</td>
                           <td style={{ color: '#8B4513' }}>
                             <button className="text-[#8B4513] hover:underline" onClick={() => toggleRow(o.id)}>
                               {o.items.length} item{o.items.length>1?'s':''}
@@ -922,7 +928,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                                       {item.name.length > 40 ? item.name.slice(0, 40) + '...' : item.name}
                                     </div>
                                     <div className="text-gray-600">Format: PDF</div>
-                                    <div className="text-gray-600">Price: {new Intl.NumberFormat('en-NZ', {style:'currency',currency:'NZD'}).format(item.price)}</div>
+                                    <div className="text-gray-600">Price: {new Intl.NumberFormat('en-US', {
+                                      style: 'currency',
+                                      currency: 'USD'
+                                    }).format(item.price)}</div>
                                   </div>
                                 ))}
                               </div>
