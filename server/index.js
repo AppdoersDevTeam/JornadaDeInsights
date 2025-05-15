@@ -195,21 +195,36 @@ app.get('/stats', async (req, res) => {
       monthStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000);
     }
 
-    // Fetch charges for each period
+    // Fetch all successful charges for the periods
     const [dailyCharges, weeklyCharges, monthlyCharges] = await Promise.all([
-      stripe.charges.list({ created: { gte: dayStart }, limit: 100 }),
-      stripe.charges.list({ created: { gte: weekStart }, limit: 100 }),
-      stripe.charges.list({ created: { gte: monthStart }, limit: 100 }),
+      stripe.charges.list({ 
+        created: { gte: dayStart }, 
+        limit: 100,
+        status: 'succeeded'
+      }),
+      stripe.charges.list({ 
+        created: { gte: weekStart }, 
+        limit: 100,
+        status: 'succeeded'
+      }),
+      stripe.charges.list({ 
+        created: { gte: monthStart }, 
+        limit: 100,
+        status: 'succeeded'
+      }),
     ]);
 
-    // Count only succeeded charges
-    const todayCount = dailyCharges.data.filter(ch => ch.status === 'succeeded').length;
-    const weekCount = weeklyCharges.data.filter(ch => ch.status === 'succeeded').length;
-    const monthCount = monthlyCharges.data.filter(ch => ch.status === 'succeeded').length;
+    // Count successful charges
+    const todayCount = dailyCharges.data.length;
+    const weekCount = weeklyCharges.data.length;
+    const monthCount = monthlyCharges.data.length;
 
     // Fetch total completed orders ever
-    const allChargesEver = await stripe.charges.list({ limit: 100 });
-    const completedOrdersEver = allChargesEver.data.filter(ch => ch.status === 'succeeded').length;
+    const allChargesEver = await stripe.charges.list({ 
+      limit: 100,
+      status: 'succeeded'
+    });
+    const completedOrdersEver = allChargesEver.data.length;
 
     // Fetch Firebase Auth users for total and new signups in last week
     const allUsers = await admin.auth().listUsers(1000);
@@ -233,15 +248,21 @@ app.get('/stats', async (req, res) => {
       const endOfDay = startOfDay + 24 * 60 * 60;
       
       const dayCharges = dailyCharges.data.filter(ch => 
-        ch.status === 'succeeded' && 
         ch.created >= startOfDay && 
         ch.created < endOfDay
       );
       
-      const totalAmount = dayCharges.reduce((sum, ch) => sum + (ch.amount / 100), 0);
+      // Convert amount from cents to dollars and from BRL to NZD
+      const totalAmount = dayCharges.reduce((sum, ch) => {
+        // Convert from cents to dollars
+        const amountInBRL = ch.amount / 100;
+        // Convert from BRL to NZD (using a fixed rate for now, should be updated with real exchange rate)
+        const exchangeRate = 0.33; // 1 BRL = 0.33 NZD (approximate)
+        return sum + (amountInBRL * exchangeRate);
+      }, 0);
       
       dailyData.push({
-        date: date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        date: date.toLocaleDateString('en-NZ', { day: '2-digit', month: '2-digit' }),
         amount: totalAmount
       });
     }
@@ -254,15 +275,18 @@ app.get('/stats', async (req, res) => {
       const endOfWeek = startOfWeek + 7 * 24 * 60 * 60;
       
       const weekCharges = weeklyCharges.data.filter(ch => 
-        ch.status === 'succeeded' && 
         ch.created >= startOfWeek && 
         ch.created < endOfWeek
       );
       
-      const totalAmount = weekCharges.reduce((sum, ch) => sum + (ch.amount / 100), 0);
+      const totalAmount = weekCharges.reduce((sum, ch) => {
+        const amountInBRL = ch.amount / 100;
+        const exchangeRate = 0.33;
+        return sum + (amountInBRL * exchangeRate);
+      }, 0);
       
       weeklyData.push({
-        week: `Semana ${4-i}`,
+        week: `Week ${4-i}`,
         amount: totalAmount
       });
     }
@@ -275,15 +299,18 @@ app.get('/stats', async (req, res) => {
       const endOfMonth = Math.floor(new Date(date.getFullYear(), date.getMonth() + 1, 0).getTime() / 1000);
       
       const monthCharges = monthlyCharges.data.filter(ch => 
-        ch.status === 'succeeded' && 
         ch.created >= startOfMonth && 
         ch.created < endOfMonth
       );
       
-      const totalAmount = monthCharges.reduce((sum, ch) => sum + (ch.amount / 100), 0);
+      const totalAmount = monthCharges.reduce((sum, ch) => {
+        const amountInBRL = ch.amount / 100;
+        const exchangeRate = 0.33;
+        return sum + (amountInBRL * exchangeRate);
+      }, 0);
       
       monthlyData.push({
-        month: date.toLocaleDateString('pt-BR', { month: '2-digit' }),
+        month: date.toLocaleDateString('en-NZ', { month: '2-digit' }),
         amount: totalAmount
       });
     }
