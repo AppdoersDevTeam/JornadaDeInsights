@@ -214,22 +214,6 @@ app.get('/stats', async (req, res) => {
       }),
     ]);
 
-    // Fetch customers for the periods
-    const [dailyCustomers, weeklyCustomers, monthlyCustomers] = await Promise.all([
-      stripe.customers.list({ 
-        created: { gte: dayStart },
-        limit: 100
-      }),
-      stripe.customers.list({ 
-        created: { gte: weekStart },
-        limit: 100
-      }),
-      stripe.customers.list({ 
-        created: { gte: monthStart },
-        limit: 100
-      }),
-    ]);
-
     // Helper function to process transactions
     const processTransactions = (transactions) => {
       return transactions.data.reduce((acc, tx) => {
@@ -294,10 +278,6 @@ app.get('/stats', async (req, res) => {
       );
       
       const dayStats = processTransactions({ data: dayTransactions });
-      const dayCustomers = dailyCustomers.data.filter(c => 
-        c.created >= startOfDay && 
-        c.created < endOfDay
-      ).length;
       
       dailyData.push({
         date: date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' }),
@@ -307,7 +287,7 @@ app.get('/stats', async (req, res) => {
         disputesWon: dayStats.disputesWon,
         otherAdjustments: dayStats.otherAdjustments,
         totalGrossActivity: dayStats.totalGrossActivity,
-        customersCount: dayCustomers,
+        customersCount: dayStats.salesCount,
         salesCount: dayStats.salesCount,
         refundCount: dayStats.refundCount,
         disputeCount: dayStats.disputeCount,
@@ -328,10 +308,6 @@ app.get('/stats', async (req, res) => {
       );
       
       const weekStats = processTransactions({ data: weekTransactions });
-      const weekCustomers = weeklyCustomers.data.filter(c => 
-        c.created >= startOfWeek && 
-        c.created < endOfWeek
-      ).length;
       
       weeklyData.push({
         date: `Week ${4-i}`,
@@ -341,7 +317,7 @@ app.get('/stats', async (req, res) => {
         disputesWon: weekStats.disputesWon,
         otherAdjustments: weekStats.otherAdjustments,
         totalGrossActivity: weekStats.totalGrossActivity,
-        customersCount: weekCustomers,
+        customersCount: weekStats.salesCount,
         salesCount: weekStats.salesCount,
         refundCount: weekStats.refundCount,
         disputeCount: weekStats.disputeCount,
@@ -362,10 +338,6 @@ app.get('/stats', async (req, res) => {
       );
       
       const monthStats = processTransactions({ data: monthTransactions });
-      const monthCustomers = monthlyCustomers.data.filter(c => 
-        c.created >= startOfMonth && 
-        c.created < endOfMonth
-      ).length;
       
       monthlyData.push({
         date: date.toLocaleDateString('en-US', { month: '2-digit' }),
@@ -375,7 +347,7 @@ app.get('/stats', async (req, res) => {
         disputesWon: monthStats.disputesWon,
         otherAdjustments: monthStats.otherAdjustments,
         totalGrossActivity: monthStats.totalGrossActivity,
-        customersCount: monthCustomers,
+        customersCount: monthStats.salesCount,
         salesCount: monthStats.salesCount,
         refundCount: monthStats.refundCount,
         disputeCount: monthStats.disputeCount,
@@ -390,8 +362,8 @@ app.get('/stats', async (req, res) => {
       month: monthlyStats.salesCount,
       completedOrders: dailyStats.salesCount + weeklyStats.salesCount + monthlyStats.salesCount,
       users: { 
-        total: dailyCustomers.data.length + weeklyCustomers.data.length + monthlyCustomers.data.length, 
-        newThisWeek: weeklyCustomers.data.length 
+        total: dailyStats.salesCount + weeklyStats.salesCount + monthlyStats.salesCount, 
+        newThisWeek: weeklyStats.salesCount 
       },
       thresholds: { dayStart, weekStart, monthStart },
       salesTrends: {
@@ -614,6 +586,24 @@ app.post('/send-purchase-email', async (req, res) => {
 
 // Top products endpoint
 app.get('/api/top-products', async (req, res) => {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
+    ? 'https://jornadadeinsights.com'
+    : '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, X-Requested-With'
+  );
+  res.setHeader('Content-Type', 'application/json');
+
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+
   try {
     // Get current month's start date
     const now = new Date();

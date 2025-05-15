@@ -177,9 +177,23 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   // Calculate top selling products
   const calculateTopProducts = async (): Promise<ProductSales[]> => {
     try {
-      const response = await fetch(`${SERVER_URL}/api/top-products`);
-      if (!response.ok) throw new Error('Failed to fetch top products');
+      const response = await fetch(`${SERVER_URL}/api/top-products`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      if (!data.products) {
+        throw new Error('Invalid response format');
+      }
+
       return data.products;
     } catch (error) {
       console.error('Error calculating top products:', error);
