@@ -10,7 +10,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface EbookMetadata {
   title: string;
@@ -35,6 +38,7 @@ export default function EbookList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(null);
+  const [ebookToDelete, setEbookToDelete] = useState<Ebook | null>(null);
 
   const fetchEbooks = async () => {
     try {
@@ -153,17 +157,21 @@ export default function EbookList() {
   };
 
   const handleDelete = async (ebook: Ebook) => {
-    if (!confirm('Are you sure you want to delete this ebook?')) return;
+    setEbookToDelete(ebook);
+  };
+
+  const confirmDelete = async () => {
+    if (!ebookToDelete) return;
 
     try {
       // Remove the item from the UI immediately
-      setEbooks(prevEbooks => prevEbooks.filter(e => e.name !== ebook.name));
+      setEbooks(prevEbooks => prevEbooks.filter(e => e.name !== ebookToDelete.name));
 
       // First check if the metadata exists
       const { data: checkData, error: checkError } = await supabase
         .from('ebooks_metadata')
         .select('*')
-        .eq('filename', ebook.name);
+        .eq('filename', ebookToDelete.name);
 
       if (checkError) {
         console.error('Error checking metadata:', checkError);
@@ -175,13 +183,13 @@ export default function EbookList() {
       const { data: deleteData, error: metadataError } = await supabase
         .from('ebooks_metadata')
         .delete()
-        .eq('filename', ebook.name)
+        .eq('filename', ebookToDelete.name)
         .select();
 
       if (metadataError) {
         console.error('Error deleting metadata:', metadataError);
         // If metadata deletion fails, restore the item in the UI
-        setEbooks(prevEbooks => [...prevEbooks, ebook]);
+        setEbooks(prevEbooks => [...prevEbooks, ebookToDelete]);
         throw metadataError;
       }
 
@@ -190,25 +198,25 @@ export default function EbookList() {
       // Then delete the PDF file from storage
       const { error: pdfError } = await supabase.storage
         .from('store-assets')
-        .remove([`pdfs/${ebook.name}`]);
+        .remove([`pdfs/${ebookToDelete.name}`]);
 
       if (pdfError) {
         console.error('Error deleting PDF:', pdfError);
         // If PDF deletion fails, restore the item in the UI
-        setEbooks(prevEbooks => [...prevEbooks, ebook]);
+        setEbooks(prevEbooks => [...prevEbooks, ebookToDelete]);
         throw pdfError;
       }
 
       // Finally delete the cover image if it exists
-      if (ebook.coverUrl) {
+      if (ebookToDelete.coverUrl) {
         const { error: coverError } = await supabase.storage
           .from('store-assets')
-          .remove([`covers/${ebook.name}`]);
+          .remove([`covers/${ebookToDelete.name}`]);
 
         if (coverError) {
           console.error('Error deleting cover:', coverError);
           // If cover deletion fails, restore the item in the UI
-          setEbooks(prevEbooks => [...prevEbooks, ebook]);
+          setEbooks(prevEbooks => [...prevEbooks, ebookToDelete]);
           throw coverError;
         }
       }
@@ -217,7 +225,7 @@ export default function EbookList() {
       const { data: verifyData, error: verifyError } = await supabase
         .from('ebooks_metadata')
         .select('*')
-        .eq('filename', ebook.name);
+        .eq('filename', ebookToDelete.name);
 
       if (verifyError) {
         console.error('Error verifying deletion:', verifyError);
@@ -228,12 +236,13 @@ export default function EbookList() {
         }
       }
 
-      toast.success('Ebook deleted successfully');
+      toast.success('eBook excluído com sucesso');
+      setEbookToDelete(null);
       // Force a refresh of the list
       await fetchEbooks();
     } catch (error) {
       console.error('Error deleting ebook:', error);
-      toast.error('Failed to delete ebook');
+      toast.error('Falha ao excluir o eBook');
       // If there was an error, refresh the list to ensure consistency
       await fetchEbooks();
     }
@@ -317,6 +326,25 @@ export default function EbookList() {
               onCancel={() => setSelectedEbook(null)}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!ebookToDelete} onOpenChange={() => setEbookToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir este eBook? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEbookToDelete(null)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Excluir
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

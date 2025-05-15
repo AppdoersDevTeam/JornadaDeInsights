@@ -55,6 +55,12 @@ interface CompletedOrder {
   }>;
 }
 
+interface ProductSales {
+  name: string;
+  sales: number;
+  revenue: number;
+}
+
 interface UserData {
   uid: string;
   displayName: string | null;
@@ -76,11 +82,21 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [hoverEmail, setHoverEmail] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [stats, setStats] = useState({ today: 0, week: 0, month: 0, completedOrders: 0, users: { total: 0, newThisWeek: 0 } });
+  const [stats, setStats] = useState({
+    today: 0,
+    week: 0,
+    month: 0,
+    users: {
+      total: 0,
+      newThisWeek: 0
+    },
+    completedOrders: 0
+  });
   const [statsLoading, setStatsLoading] = useState(true);
   const [completedOrdersList, setCompletedOrdersList] = useState<CompletedOrder[]>([]);
   const [usersList, setUsersList] = useState<UserData[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   // Constants
   const itemsPerPage = 20;
@@ -146,22 +162,77 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     navigator.clipboard.writeText(email);
     toast.success('Email copied');
   };
+
+  // Calculate top selling products
+  const calculateTopProducts = (orders: CompletedOrder[]): ProductSales[] => {
+    const productMap = new Map<string, { sales: number; revenue: number }>();
+
+    // Get current month's start date
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Filter orders from this month
+    const thisMonthOrders = orders.filter(order => new Date(order.date) >= startOfMonth);
+
+    // Calculate sales and revenue for each product
+    thisMonthOrders.forEach(order => {
+      order.items.forEach(item => {
+        const current = productMap.get(item.name) || { sales: 0, revenue: 0 };
+        productMap.set(item.name, {
+          sales: current.sales + 1,
+          revenue: current.revenue + item.price
+        });
+      });
+    });
+
+    // Convert to array and sort by sales
+    return Array.from(productMap.entries())
+      .map(([name, data]) => ({
+        name,
+        sales: data.sales,
+        revenue: data.revenue
+      }))
+      .sort((a, b) => b.sales - a.sales)
+      .slice(0, 3); // Get top 3 products
+  };
+
   const fetchCompletedOrders = async () => {
     try {
+      setLoading(true);
       const res = await fetch(`${SERVER_URL}/api/completed-orders`);
       if (!res.ok) throw new Error('Failed to load orders');
       const { orders } = await res.json();
       setCompletedOrdersList(orders);
+
+      // Calculate stats
+      const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const todayOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfDay);
+      const weekOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfWeek);
+      const monthOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfMonth);
+
+      setStats({
+        today: todayOrders.length,
+        week: weekOrders.length,
+        month: monthOrders.length,
+        users: {
+          total: new Set(orders.map((o: CompletedOrder) => o.email)).size,
+          newThisWeek: new Set(weekOrders.map((o: CompletedOrder) => o.email)).size
+        },
+        completedOrders: orders.length
+      });
+      setStatsLoading(false);
     } catch (err) {
       console.error('Error loading completed orders:', err);
+      toast.error('Failed to load orders');
+    } finally {
+      setLoading(false);
     }
   };
-  // Fetch all orders when switching to orders tab
-  useEffect(() => {
-    if (activeTab === 'orders') {
-      fetchCompletedOrders();
-    }
-  }, [activeTab]);
+
   // Fetch all users when switching to users tab
   const fetchUsers = async () => {
     try {
@@ -178,37 +249,6 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       fetchUsers();
     }
   }, [activeTab]);
-
-  useEffect(() => {
-    setStatsLoading(true);
-    // Compute local midnight thresholds
-    const now = new Date();
-    // Start of today local midnight
-    const dayStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000);
-    // Start of week as sliding last 7 days (from local midnight today)
-    const weekStart = dayStart - 7 * 24 * 60 * 60;
-    // Start of month local midnight
-    const monthStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000);
-    // Fetch stats with timezone-aware thresholds
-    fetch(`${SERVER_URL}/api/stats?dayStart=${dayStart}&weekStart=${weekStart}&monthStart=${monthStart}`, {
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then(data => setStats(data))
-      .catch(err => {
-        console.error('Error fetching stats:', err);
-        setStats({ today: 0, week: 0, month: 0, completedOrders: 0, users: { total: 0, newThisWeek: 0 } });
-      })
-      .finally(() => setStatsLoading(false));
-  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -402,6 +442,53 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             </Card>
           </div>
 
+          {/* Top Products Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Produtos Mais Vendidos</CardTitle>
+              <CardDescription>Produtos mais vendidos este mês</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {loading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <div className="space-y-2">
+                          <div className="h-4 w-32 bg-gray-200 animate-pulse rounded" />
+                          <div className="h-3 w-24 bg-gray-200 animate-pulse rounded" />
+                        </div>
+                        <div className="h-4 w-20 bg-gray-200 animate-pulse rounded" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  calculateTopProducts(completedOrdersList).map((product, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{product.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {product.sales} vendas
+                        </p>
+                      </div>
+                      <p className="font-medium">
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(product.revenue)}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" className="w-full" onClick={() => onTabChange('ebooks')}>
+                Ver Todos os Produtos
+              </Button>
+            </CardFooter>
+          </Card>
+
           {/* Insights Section */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 w-full">
             <Card className="p-6">
@@ -420,32 +507,6 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               <Button variant="outline" className="w-full mt-4" onClick={() => onTabChange('orders')}>
                 Ver Pedidos Concluídos
               </Button>
-            </Card>
-            <Card className="p-6">
-              <CardHeader>
-                <CardTitle>Produtos Mais Vendidos</CardTitle>
-                <CardDescription>Produtos mais vendidos este mês</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {salesData.topProducts.map((product, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {product.sales} vendas
-                        </p>
-                      </div>
-                      <p className="font-medium">${product.revenue}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">
-                  Ver Todos os Produtos
-                </Button>
-              </CardFooter>
             </Card>
             <Card className="p-6">
               <CardHeader>
