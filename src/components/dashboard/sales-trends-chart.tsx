@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   LineChart,
   Line,
@@ -12,15 +12,25 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-interface SalesData {
+export interface SalesData {
   date: string;
-  amount: number;
+  sales: number;
+  refunds: number;
+  disputes: number;
+  disputesWon: number;
+  otherAdjustments: number;
+  totalGrossActivity: number;
+  customersCount: number;
+  salesCount: number;
+  refundCount: number;
+  disputeCount: number;
+  disputesWonCount: number;
 }
 
 interface SalesTrendsChartProps {
   dailyData: SalesData[];
-  weeklyData: { week: string; amount: number }[];
-  monthlyData: { month: string; amount: number }[];
+  weeklyData: SalesData[];
+  monthlyData: SalesData[];
 }
 
 export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTrendsChartProps) {
@@ -43,12 +53,16 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
       return (
         <div className="bg-white p-4 border rounded-lg shadow-lg">
           <p className="font-medium">{label}</p>
-          <p className="text-primary">
-            {new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'USD'
-            }).format(payload[0].value)}
-          </p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} style={{ color: entry.color }}>
+              {entry.name}: {formatCurrency(entry.value)}
+            </p>
+          ))}
+          {payload[0]?.payload?.customersCount !== undefined && (
+            <p className="text-gray-500 mt-2">
+              Customers: {payload[0].payload.customersCount}
+            </p>
+          )}
         </div>
       );
     }
@@ -58,15 +72,15 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tendências de Vendas</CardTitle>
-        <CardDescription>Dados de vendas diários, semanais e mensais</CardDescription>
+        <CardTitle>Business Report</CardTitle>
+        <CardDescription>Sales, refunds, disputes, and customer data</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="daily">Diário</TabsTrigger>
-            <TabsTrigger value="weekly">Semanal</TabsTrigger>
-            <TabsTrigger value="monthly">Mensal</TabsTrigger>
+            <TabsTrigger value="daily">Daily</TabsTrigger>
+            <TabsTrigger value="weekly">Weekly</TabsTrigger>
+            <TabsTrigger value="monthly">Monthly</TabsTrigger>
           </TabsList>
           <TabsContent value="daily" className="mt-4">
             <div className="h-[300px] w-full">
@@ -82,11 +96,35 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
                   <Legend />
                   <Line
                     type="monotone"
-                    dataKey="amount"
-                    name="Vendas"
-                    stroke="#808000"
+                    dataKey="sales"
+                    name="Sales"
+                    stroke="#22c55e"
                     strokeWidth={2}
-                    dot={{ fill: '#808000' }}
+                    dot={{ fill: '#22c55e' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="refunds"
+                    name="Refunds"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    dot={{ fill: '#ef4444' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="disputes"
+                    name="Disputes"
+                    stroke="#f59e0b"
+                    strokeWidth={2}
+                    dot={{ fill: '#f59e0b' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="disputesWon"
+                    name="Disputes Won"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    dot={{ fill: '#3b82f6' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -106,11 +144,35 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
                   <Legend />
                   <Line
                     type="monotone"
-                    dataKey="amount"
-                    name="Vendas"
-                    stroke="#808000"
+                    dataKey="sales"
+                    name="Sales"
+                    stroke="#22c55e"
                     strokeWidth={2}
-                    dot={{ fill: '#808000' }}
+                    dot={{ fill: '#22c55e' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="refunds"
+                    name="Refunds"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    dot={{ fill: '#ef4444' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="disputes"
+                    name="Disputes"
+                    stroke="#f59e0b"
+                    strokeWidth={2}
+                    dot={{ fill: '#f59e0b' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="disputesWon"
+                    name="Disputes Won"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    dot={{ fill: '#3b82f6' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -130,11 +192,35 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
                   <Legend />
                   <Line
                     type="monotone"
-                    dataKey="amount"
-                    name="Vendas"
-                    stroke="#808000"
+                    dataKey="sales"
+                    name="Sales"
+                    stroke="#22c55e"
                     strokeWidth={2}
-                    dot={{ fill: '#808000' }}
+                    dot={{ fill: '#22c55e' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="refunds"
+                    name="Refunds"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    dot={{ fill: '#ef4444' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="disputes"
+                    name="Disputes"
+                    stroke="#f59e0b"
+                    strokeWidth={2}
+                    dot={{ fill: '#f59e0b' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="disputesWon"
+                    name="Disputes Won"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    dot={{ fill: '#3b82f6' }}
                   />
                 </LineChart>
               </ResponsiveContainer>

@@ -37,7 +37,8 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'react-hot-toast';
 import UploadEbookForm from '@/components/dashboard/upload-ebook-form';
 import EbookList from '@/components/dashboard/ebook-list';
-import { SalesTrendsChart } from '@/components/dashboard/sales-trends-chart';
+import { SalesTrendsChart, SalesData } from '@/components/dashboard/sales-trends-chart';
+import Stripe from 'stripe';
 
 interface DashboardPageProps {
   activeTab: string;
@@ -74,6 +75,11 @@ const ALLOWED_ADMIN_EMAILS = [
   'admin@jornadadeinsights.com'
 ];
 
+// Initialize Stripe client
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2025-04-30.basil'
+});
+
 export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -98,6 +104,16 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const [usersList, setUsersList] = useState<UserData[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [topProducts, setTopProducts] = useState<ProductSales[]>([]);
+  const [salesTrends, setSalesTrends] = useState<{
+    daily: SalesData[];
+    weekly: SalesData[];
+    monthly: SalesData[];
+  }>({
+    daily: [],
+    weekly: [],
+    monthly: []
+  });
 
   // Constants
   const itemsPerPage = 20; // Show 20 orders per page in completed orders tab
@@ -165,74 +181,111 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   };
 
   // Calculate top selling products
-  const calculateTopProducts = (orders: CompletedOrder[]): ProductSales[] => {
-    const productMap = new Map<string, { sales: number; revenue: number }>();
+  const calculateTopProducts = async (): Promise<ProductSales[]> => {
+    try {
+      // Fetch all successful charges from Stripe
+      const charges = await stripe.charges.list({
+        limit: 100
+      });
 
-    // Get current month's start date
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      // Get current month's start date
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfMonthUnix = Math.floor(startOfMonth.getTime() / 1000);
 
-    // Filter orders from this month
-    const thisMonthOrders = orders.filter(order => new Date(order.date) >= startOfMonth);
+      // Filter charges from this month and only include successful ones in USD
+      const thisMonthCharges = charges.data.filter(charge => 
+        charge.created >= startOfMonthUnix && 
+        charge.status === 'succeeded' &&
+        charge.currency === 'usd'
+      );
 
-    // Calculate sales and revenue for each product
-    thisMonthOrders.forEach(order => {
-      order.items.forEach(item => {
-        const current = productMap.get(item.name) || { sales: 0, revenue: 0 };
-        productMap.set(item.name, {
+      // Group charges by product name and calculate totals
+      const productMap = new Map<string, { sales: number; revenue: number }>();
+
+      thisMonthCharges.forEach((charge: Stripe.Charge) => {
+        const productName = charge.description || 'Unknown Product';
+        const current = productMap.get(productName) || { sales: 0, revenue: 0 };
+        
+        // Convert amount from cents to dollars
+        const amount = charge.amount / 100;
+        
+        productMap.set(productName, {
           sales: current.sales + 1,
-          revenue: current.revenue + item.price
+          revenue: current.revenue + amount
         });
       });
-    });
 
-    // Convert to array and sort by sales
-    return Array.from(productMap.entries())
-      .map(([name, data]) => ({
-        name,
-        sales: data.sales,
-        revenue: data.revenue
-      }))
-      .sort((a, b) => b.sales - a.sales)
-      .slice(0, 3); // Get top 3 products
-  };
-
-  const fetchCompletedOrders = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${SERVER_URL}/api/completed-orders`);
-      if (!res.ok) throw new Error('Failed to load orders');
-      const { orders } = await res.json();
-      setCompletedOrdersList(orders);
-
-      // Calculate stats
-      const now = new Date();
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-      const todayOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfDay);
-      const weekOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfWeek);
-      const monthOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfMonth);
-
-      setStats({
-        today: todayOrders.length,
-        week: weekOrders.length,
-        month: monthOrders.length,
-        users: {
-          total: new Set(orders.map((o: CompletedOrder) => o.email)).size,
-          newThisWeek: new Set(weekOrders.map((o: CompletedOrder) => o.email)).size
-        },
-        completedOrders: orders.length
-      });
-      setStatsLoading(false);
-    } catch (err) {
-      console.error('Error loading completed orders:', err);
-      toast.error('Failed to load orders');
-    } finally {
-      setLoading(false);
+      // Convert to array and sort by sales
+      return Array.from(productMap.entries())
+        .map(([name, data]) => ({
+          name,
+          sales: data.sales,
+          revenue: data.revenue
+        }))
+        .sort((a, b) => b.sales - a.sales)
+        .slice(0, 3); // Get top 3 products
+    } catch (error) {
+      console.error('Error calculating top products:', error);
+      return [];
     }
   };
+
+  // Update the useEffect to fetch sales trends data
+  useEffect(() => {
+    if (activeTab === 'overview') {
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          const [ordersRes, topProducts, statsRes] = await Promise.all([
+            fetch(`${SERVER_URL}/api/completed-orders`),
+            calculateTopProducts(),
+            fetch(`${SERVER_URL}/api/stats`)
+          ]);
+
+          if (!ordersRes.ok) throw new Error('Failed to load orders');
+          if (!statsRes.ok) throw new Error('Failed to load stats');
+          
+          const { orders } = await ordersRes.json();
+          const { salesTrends: trendsData } = await statsRes.json();
+          
+          setCompletedOrdersList(orders);
+          setTopProducts(topProducts);
+          setSalesTrends(trendsData);
+
+          // Calculate stats
+          const now = new Date();
+          const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+          const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+          const todayOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfDay);
+          const weekOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfWeek);
+          const monthOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfMonth);
+
+          setStats({
+            today: todayOrders.length,
+            week: weekOrders.length,
+            month: monthOrders.length,
+            users: {
+              total: new Set(orders.map((o: CompletedOrder) => o.email)).size,
+              newThisWeek: new Set(weekOrders.map((o: CompletedOrder) => o.email)).size
+            },
+            completedOrders: orders.length
+          });
+
+          setStatsLoading(false);
+        } catch (err) {
+          console.error('Error loading data:', err);
+          toast.error('Failed to load data');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchData();
+    }
+  }, [activeTab]);
 
   // Fetch all users when switching to users tab
   const fetchUsers = async () => {
@@ -267,12 +320,6 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
     return () => unsubscribe();
   }, [navigate]);
-
-  useEffect(() => {
-    if (activeTab === 'overview') {
-      fetchCompletedOrders();
-    }
-  }, [activeTab]);
 
   if (!isAuthenticated) {
     return null; // Don't render anything while checking auth
@@ -478,12 +525,12 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       ))}
                     </div>
                   ) : (
-                    calculateTopProducts(completedOrdersList).map((product, index) => (
+                    topProducts.map((product, index) => (
                       <div key={index} className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">{product.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {product.sales} vendas
+                            {product.sales} sales
                           </p>
                         </div>
                         <p className="font-medium">
