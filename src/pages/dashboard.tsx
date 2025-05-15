@@ -38,7 +38,6 @@ import { toast } from 'react-hot-toast';
 import UploadEbookForm from '@/components/dashboard/upload-ebook-form';
 import EbookList from '@/components/dashboard/ebook-list';
 import { SalesTrendsChart, SalesData } from '@/components/dashboard/sales-trends-chart';
-import Stripe from 'stripe';
 
 interface DashboardPageProps {
   activeTab: string;
@@ -74,11 +73,6 @@ const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
   'admin@jornadadeinsights.com'
 ];
-
-// Initialize Stripe client
-const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-04-30.basil'
-});
 
 export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const navigate = useNavigate();
@@ -183,48 +177,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   // Calculate top selling products
   const calculateTopProducts = async (): Promise<ProductSales[]> => {
     try {
-      // Fetch all successful charges from Stripe
-      const charges = await stripe.charges.list({
-        limit: 100
-      });
-
-      // Get current month's start date
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const startOfMonthUnix = Math.floor(startOfMonth.getTime() / 1000);
-
-      // Filter charges from this month and only include successful ones in USD
-      const thisMonthCharges = charges.data.filter(charge => 
-        charge.created >= startOfMonthUnix && 
-        charge.status === 'succeeded' &&
-        charge.currency === 'usd'
-      );
-
-      // Group charges by product name and calculate totals
-      const productMap = new Map<string, { sales: number; revenue: number }>();
-
-      thisMonthCharges.forEach((charge: Stripe.Charge) => {
-        const productName = charge.description || 'Unknown Product';
-        const current = productMap.get(productName) || { sales: 0, revenue: 0 };
-        
-        // Convert amount from cents to dollars
-        const amount = charge.amount / 100;
-        
-        productMap.set(productName, {
-          sales: current.sales + 1,
-          revenue: current.revenue + amount
-        });
-      });
-
-      // Convert to array and sort by sales
-      return Array.from(productMap.entries())
-        .map(([name, data]) => ({
-          name,
-          sales: data.sales,
-          revenue: data.revenue
-        }))
-        .sort((a, b) => b.sales - a.sales)
-        .slice(0, 3); // Get top 3 products
+      const response = await fetch(`${SERVER_URL}/api/top-products`);
+      if (!response.ok) throw new Error('Failed to fetch top products');
+      const data = await response.json();
+      return data.products;
     } catch (error) {
       console.error('Error calculating top products:', error);
       return [];

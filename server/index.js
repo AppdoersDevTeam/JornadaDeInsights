@@ -612,6 +612,55 @@ app.post('/send-purchase-email', async (req, res) => {
   }
 });
 
+// Top products endpoint
+app.get('/api/top-products', async (req, res) => {
+  try {
+    // Get current month's start date
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfMonthUnix = Math.floor(startOfMonth.getTime() / 1000);
+
+    // Fetch successful charges from this month
+    const charges = await stripe.charges.list({
+      created: { gte: startOfMonthUnix },
+      limit: 100,
+      status: 'succeeded',
+      currency: 'usd'
+    });
+
+    // Group charges by product name and calculate totals
+    const productMap = new Map();
+
+    charges.data.forEach(charge => {
+      const productName = charge.description || 'Unknown Product';
+      const current = productMap.get(productName) || { sales: 0, revenue: 0 };
+      
+      // Convert amount from cents to dollars
+      const amount = charge.amount / 100;
+      
+      productMap.set(productName, {
+        sales: current.sales + 1,
+        revenue: current.revenue + amount
+      });
+    });
+
+    // Convert to array and sort by sales
+    const products = Array.from(productMap.entries())
+      .map(([name, data]) => ({
+        name,
+        sales: data.sales,
+        revenue: data.revenue
+      }))
+      .sort((a, b) => b.sales - a.sales)
+      .slice(0, 3); // Get top 3 products
+
+    res.json({ products });
+  } catch (error) {
+    console.error('Error fetching top products:', error);
+    res.status(500).json({ error: 'Failed to fetch top products' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 }); 
