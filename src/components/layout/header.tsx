@@ -28,8 +28,10 @@ export function Header() {
   const navLinks = user ? [
     { to: '/dashboard', label: 'Dashboard' },
     { to: '/', label: 'Home' },
+    { to: '/about', label: 'Sobre' },
     { to: '/podcast', label: 'Podcast' },
-    { to: '/shop', label: 'Store' }
+    { to: '/shop', label: 'Store' },
+    { to: '/contact', label: 'Contato' }
   ] : [
     { to: '/', label: 'Início' },
     { to: '/about', label: 'Sobre' },

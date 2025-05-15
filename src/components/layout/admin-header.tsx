@@ -57,8 +57,10 @@ export function AdminHeader() {
 
   const mainLinks = [
     { to: '/', label: 'Início' },
+    { to: '/about', label: 'Sobre' },
     { to: '/podcast', label: 'Podcast' },
-    { to: '/shop', label: 'Loja' }
+    { to: '/shop', label: 'Loja' },
+    { to: '/contact', label: 'Contato' }
   ];
 
   return (
