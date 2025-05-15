@@ -100,39 +100,73 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
 
   const fetchUserOrders = async () => {
     try {
-      const res = await fetch(`${SERVER_URL}/api/completed-orders`);
-      if (!res.ok) throw new Error('Failed to fetch orders');
-      const { orders } = await res.json();
-      if (user?.email) {
-        const userOrders = orders.filter((o: CompletedOrder) => o.email === user.email);
-        setCompletedOrdersList(userOrders);
-        
-        // Get unique ebook titles from orders
-        const orderedEbookTitles = new Set(userOrders.flatMap((order: CompletedOrder) => 
-          order.items.map((item: { name: string; price: number }) => item.name)
-        ));
-
-        // Fetch ebooks from Supabase
-        const { data: ebooks, error } = await supabase
-          .from('ebooks_metadata')
-          .select('*')
-          .in('title', Array.from(orderedEbookTitles));
-
-        if (error) throw error;
-
-        if (ebooks) {
-          const ebooksWithCoverUrls = ebooks.map(ebook => ({
-            ...ebook,
-            cover_url: ebook.filename 
-              ? supabase.storage.from('store-assets').getPublicUrl(`covers/${ebook.filename}`).data.publicUrl 
-              : DEFAULT_COVER_DATA_URL
-          }));
-          setUserEbooks(ebooksWithCoverUrls);
-        }
+      if (!user?.email) {
+        console.error('No user email available');
+        return;
       }
+
+      const res = await fetch(`${SERVER_URL}/api/completed-orders`);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch orders: ${res.status} ${res.statusText}`);
+      }
+      
+      const { orders } = await res.json();
+      if (!orders) {
+        console.warn('No orders found in response');
+        setCompletedOrdersList([]);
+        setUserEbooks([]);
+        return;
+      }
+
+      const userOrders = orders.filter((o: CompletedOrder) => o.email === user.email);
+      setCompletedOrdersList(userOrders);
+      
+      if (userOrders.length === 0) {
+        console.log('No orders found for user');
+        setUserEbooks([]);
+        return;
+      }
+
+      // Get unique ebook titles from orders
+      const orderedEbookTitles = new Set(userOrders.flatMap((order: CompletedOrder) => 
+        order.items.map((item: { name: string; price: number }) => item.name)
+      ));
+
+      if (orderedEbookTitles.size === 0) {
+        console.log('No ebook titles found in orders');
+        setUserEbooks([]);
+        return;
+      }
+
+      // Fetch ebooks from Supabase
+      const { data: ebooks, error } = await supabase
+        .from('ebooks_metadata')
+        .select('*')
+        .in('title', Array.from(orderedEbookTitles));
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(`Failed to fetch ebooks from database: ${error.message}`);
+      }
+
+      if (!ebooks || ebooks.length === 0) {
+        console.log('No ebooks found in database');
+        setUserEbooks([]);
+        return;
+      }
+
+      const ebooksWithCoverUrls = ebooks.map(ebook => ({
+        ...ebook,
+        cover_url: ebook.filename 
+          ? supabase.storage.from('store-assets').getPublicUrl(`covers/${ebook.filename}`).data.publicUrl 
+          : DEFAULT_COVER_DATA_URL
+      }));
+      
+      setUserEbooks(ebooksWithCoverUrls);
     } catch (err) {
       console.error('Error fetching orders and ebooks:', err);
-      toast.error('Failed to load your ebooks');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load your ebooks';
+      toast.error(errorMessage);
     }
   };
 

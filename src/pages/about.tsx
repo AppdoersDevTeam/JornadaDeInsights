@@ -19,7 +19,7 @@ export function AboutPage() {
     <>
       {/* Hero Section */}
       <motion.section
-        className="relative min-h-[60vh] py-20 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        className="relative min-h-[60vh] pt-28 md:py-20 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
         initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
         viewport={{ amount: 0.3 }}
