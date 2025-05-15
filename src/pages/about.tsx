@@ -406,7 +406,6 @@ export function AboutPage() {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <div className="flex flex-col items-center gap-6">
-                <div className="text-primary text-4xl">❤️</div>
                 <p className="text-lg text-muted-foreground">
                   Sua generosidade permite que eu continue compartilhando a Palavra de Deus e criando conteúdo que transforma vidas.
                 </p>

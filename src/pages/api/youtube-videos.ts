@@ -1,12 +1,52 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import NodeCache from 'node-cache';
 
-// Cache for 1 hour
-const cache = new NodeCache({ stdTTL: 3600 });
+// Cache for 24 hours with a check period of 1 hour
+const cache = new NodeCache({ 
+  stdTTL: 86400, // 24 hours
+  checkperiod: 3600, // 1 hour
+  useClones: false // Better performance
+});
 
 // Get API key from environment variable
 const API_KEY = process.env.VITE_YOUTUBE_API_KEY;
 const CHANNEL_ID = process.env.VITE_YOUTUBE_CHANNEL_ID;
+
+// Track quota usage
+let quotaUsed = 0;
+const QUOTA_LIMIT = 10000; // Daily quota limit
+const QUOTA_RESET_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+let lastQuotaReset = Date.now();
+
+// Reset quota counter if 24 hours have passed
+function checkAndResetQuota() {
+  const now = Date.now();
+  if (now - lastQuotaReset >= QUOTA_RESET_TIME) {
+    quotaUsed = 0;
+    lastQuotaReset = now;
+  }
+}
+
+// Calculate quota cost for API calls
+function calculateQuotaCost(endpoint: string, parts: string[]): number {
+  // Base costs for different endpoints
+  const costs: { [key: string]: number } = {
+    'search': 100,
+    'videos': 1
+  };
+  
+  // Additional cost for each part
+  const partCosts: { [key: string]: number } = {
+    'snippet': 1,
+    'contentDetails': 1,
+    'id': 0
+  };
+
+  const baseCost = costs[endpoint] || 0;
+  const partsCost = parts.reduce((sum, part) => sum + (partCosts[part] || 0), 0);
+  
+  return baseCost + partsCost;
+}
 
 // Log all environment variables (for debugging)
 console.log('All environment variables:', {
@@ -22,6 +62,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Check and reset quota if needed
+  checkAndResetQuota();
 
   // Debug logging
   console.log('Environment variables in handler:', {
@@ -39,6 +82,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    // Calculate quota cost for search request
+    const searchQuotaCost = calculateQuotaCost('search', ['snippet', 'id']);
+    
+    // Check if we have enough quota
+    if (quotaUsed + searchQuotaCost > QUOTA_LIMIT) {
+      console.error('YouTube API quota limit reached');
+      return res.status(429).json({ error: 'YouTube API quota limit reached' });
+    }
+
     // Check cache first
     const cachedData = cache.get('youtube-videos');
     if (cachedData) {
@@ -82,6 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const searchData = await searchResponse.json();
+    quotaUsed += searchQuotaCost;
     
     if (!searchData.items?.length) {
       console.log('No videos found in search response');
@@ -93,6 +146,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .filter((item: any) => item.id?.videoId)
       .map((item: any) => item.id.videoId)
       .join(',');
+
+    // Calculate quota cost for videos request
+    const videosQuotaCost = calculateQuotaCost('videos', ['snippet', 'contentDetails']);
+    
+    // Check if we have enough quota for the second request
+    if (quotaUsed + videosQuotaCost > QUOTA_LIMIT) {
+      console.error('YouTube API quota limit reached');
+      return res.status(429).json({ error: 'YouTube API quota limit reached' });
+    }
 
     const detailsUrl = `https://youtube.googleapis.com/youtube/v3/videos?key=${API_KEY}&id=${videoIds}&part=snippet,contentDetails`;
     console.log('Details URL:', detailsUrl);
@@ -120,6 +182,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const detailsData = await detailsResponse.json();
+    quotaUsed += videosQuotaCost;
 
     // Process and format the data
     const parseISO8601 = (iso: string): number => {
@@ -151,7 +214,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         spotifyUrl: 'https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW?si=ZkJHnMx6SGmz0WIrMczEjw&nd=1&dlsi=1bf146313df84baa',
       }));
 
-    console.log(`Successfully processed ${videos.length} videos`);
+    console.log(`Successfully processed ${videos.length} videos. Quota used: ${quotaUsed}`);
 
     // Cache the processed data
     cache.set('youtube-videos', { items: videos });

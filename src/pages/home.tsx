@@ -62,19 +62,34 @@ export function HomePage() {
   useEffect(() => {
     setIsLoading(true);
     setHasError(false);
-    // bump cache key to v3 to clear any old cached items without the duration filter
-    const CACHE_KEY = 'youtube-videos-v3';
-    const CACHE_TIME_KEY = 'youtube-videos-v3-timestamp';
-    const oneDay = 24 * 60 * 60 * 1000;
+    // bump cache key to v4 to clear any old cached items and implement better caching
+    const CACHE_KEY = 'youtube-videos-v4';
+    const CACHE_TIME_KEY = 'youtube-videos-v4-timestamp';
+    const CACHE_ERROR_KEY = 'youtube-videos-v4-error';
+    const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
     const now = Date.now();
 
     const cachedData = localStorage.getItem(CACHE_KEY);
     const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+    const lastError = localStorage.getItem(CACHE_ERROR_KEY);
 
-    if (cachedData && cachedTime && now - parseInt(cachedTime, 10) < oneDay) {
-      const vids = JSON.parse(cachedData) as YouTubeVideo[];
-      setVideos(vids);
-      setHeroVideo(vids[Math.floor(Math.random() * vids.length)]);
+    // If we have cached data and it's not expired, use it
+    if (cachedData && cachedTime && now - parseInt(cachedTime, 10) < CACHE_DURATION) {
+      try {
+        const vids = JSON.parse(cachedData) as YouTubeVideo[];
+        setVideos(vids);
+        setHeroVideo(vids[Math.floor(Math.random() * vids.length)]);
+        setIsLoading(false);
+        return;
+      } catch (e) {
+        console.error('Error parsing cached data:', e);
+        // If there's an error parsing the cache, we'll fetch fresh data
+      }
+    }
+
+    // If we had an error in the last 1 hour, don't try to fetch again
+    if (lastError && now - parseInt(lastError, 10) < 60 * 60 * 1000) {
+      setHasError(true);
       setIsLoading(false);
       return;
     }
@@ -89,54 +104,84 @@ export function HomePage() {
       return;
     }
 
-    fetch(`https://youtube.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&type=video&order=date&maxResults=10`)
-      .then((response) => {
+    // First, try to get videos from our own API endpoint which has better caching
+    fetch('/api/youtube-videos')
+      .then(response => {
         if (!response.ok) {
-          // Treat HTTP errors (e.g. quota exceeded) as exceptions
-          return response.json().then(err => {
-            console.error('YouTube API error:', err);
-            throw new Error(err.error?.message || `HTTP ${response.status}`);
-          });
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return response.json() as Promise<{ items: YouTubeVideo[] }>;
+        return response.json();
       })
-      .then((data) => {
-        if (!data.items) {
-          setVideos([]);
-          setHeroVideo(null);
-          return;
+      .then(data => {
+        if (data.items && data.items.length > 0) {
+          setVideos(data.items);
+          setHeroVideo(data.items[Math.floor(Math.random() * data.items.length)]);
+          // Cache the successful response
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data.items));
+          localStorage.setItem(CACHE_TIME_KEY, now.toString());
+          localStorage.removeItem(CACHE_ERROR_KEY);
+        } else {
+          throw new Error('No videos found in API response');
         }
-        const searchItems = (data.items as YouTubeVideo[]).filter(item => item.id.videoId);
-        if (searchItems.length === 0) {
-          setVideos([]);
-          setHeroVideo(null);
-          return;
-        }
-        const idList = searchItems.map(item => item.id.videoId).join(',');
-        fetch(`https://youtube.googleapis.com/youtube/v3/videos?key=${API_KEY}&id=${idList}&part=contentDetails`)
-          .then(res2 => res2.json())
-          .then((detailData: { items: { id: string; contentDetails: { duration: string } }[] }) => {
-            const parseISO8601 = (iso: string): number => {
-              const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-              const hours = parseInt(match?.[1] ?? '0', 10);
-              const minutes = parseInt(match?.[2] ?? '0', 10);
-              const seconds = parseInt(match?.[3] ?? '0', 10);
-              return hours * 3600 + minutes * 60 + seconds;
-            };
-            const allowedIds = detailData.items
-              .filter(d => parseISO8601(d.contentDetails.duration) > 120)
-              .map(d => d.id);
-            const filtered = searchItems.filter(item => allowedIds.includes(item.id.videoId));
-            setVideos(filtered);
-            setHeroVideo(filtered[Math.floor(Math.random() * filtered.length)] || null);
-            localStorage.setItem(CACHE_KEY, JSON.stringify(filtered));
-            localStorage.setItem(CACHE_TIME_KEY, now.toString());
+      })
+      .catch(error => {
+        console.error('Error fetching from API endpoint:', error);
+        // If our API endpoint fails, fall back to direct YouTube API call
+        return fetch(`https://youtube.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&type=video&order=date&maxResults=10`)
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then(err => {
+                console.error('YouTube API error:', err);
+                // If we hit quota limits, cache the error
+                if (err.error?.code === 403 || err.error?.message?.includes('quota')) {
+                  localStorage.setItem(CACHE_ERROR_KEY, now.toString());
+                }
+                throw new Error(err.error?.message || `HTTP ${response.status}`);
+              });
+            }
+            return response.json() as Promise<{ items: YouTubeVideo[] }>;
           })
-          .catch(err => console.error('Error fetching video details:', err));
+          .then((data) => {
+            if (!data.items) {
+              setVideos([]);
+              setHeroVideo(null);
+              return;
+            }
+            const searchItems = (data.items as YouTubeVideo[]).filter(item => item.id.videoId);
+            if (searchItems.length === 0) {
+              setVideos([]);
+              setHeroVideo(null);
+              return;
+            }
+            const idList = searchItems.map(item => item.id.videoId).join(',');
+            return fetch(`https://youtube.googleapis.com/youtube/v3/videos?key=${API_KEY}&id=${idList}&part=contentDetails`)
+              .then(res2 => res2.json())
+              .then((detailData: { items: { id: string; contentDetails: { duration: string } }[] }) => {
+                const parseISO8601 = (iso: string): number => {
+                  const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+                  const hours = parseInt(match?.[1] ?? '0', 10);
+                  const minutes = parseInt(match?.[2] ?? '0', 10);
+                  const seconds = parseInt(match?.[3] ?? '0', 10);
+                  return hours * 3600 + minutes * 60 + seconds;
+                };
+                const allowedIds = detailData.items
+                  .filter(d => parseISO8601(d.contentDetails.duration) > 120)
+                  .map(d => d.id);
+                const filtered = searchItems.filter(item => allowedIds.includes(item.id.videoId));
+                setVideos(filtered);
+                setHeroVideo(filtered[Math.floor(Math.random() * filtered.length)] || null);
+                // Cache the successful response
+                localStorage.setItem(CACHE_KEY, JSON.stringify(filtered));
+                localStorage.setItem(CACHE_TIME_KEY, now.toString());
+                localStorage.removeItem(CACHE_ERROR_KEY);
+              });
+          });
       })
       .catch((error: unknown) => {
         console.error('Error fetching YouTube videos:', error);
         setHasError(true);
+        // Cache the error timestamp
+        localStorage.setItem(CACHE_ERROR_KEY, now.toString());
       })
       .finally(() => setIsLoading(false));
   }, []);
