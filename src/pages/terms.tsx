@@ -30,7 +30,7 @@ export function TermsPage() {
           className="mb-12"
         >
           <h1 className="text-4xl font-heading font-bold mb-4">Termos de Serviço</h1>
-          <p className="text-muted-foreground">Data de Efetivação: 15 de Maio de 2025</p>
+          <p className="text-muted-foreground">Data de Efetivação: 16 de Maio de 2025</p>
         </motion.div>
 
         {/* Content Sections */}
