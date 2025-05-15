@@ -94,10 +94,10 @@ export function Header() {
 
       {/* Mobile Navigation */}
       <div className={cn(
-        "fixed inset-0 top-[72px] bg-white z-40 transform transition-transform duration-300 ease-in-out md:hidden",
+        "fixed inset-0 top-[72px] bg-white z-40 transform transition-transform duration-300 ease-in-out md:hidden overflow-y-auto",
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
-        <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-2 items-start">
+        <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-4 items-start">
           {navLinks.map((link) => {
             let Icon;
             switch (link.to) {
