@@ -56,9 +56,9 @@ export function AdminHeader() {
   ];
 
   const mainLinks = [
-    { to: '/', label: 'Home' },
+    { to: '/', label: 'Início' },
     { to: '/podcast', label: 'Podcast' },
-    { to: '/shop', label: 'Store' }
+    { to: '/shop', label: 'Loja' }
   ];
 
   return (
