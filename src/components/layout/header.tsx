@@ -98,49 +98,78 @@ export function Header() {
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-4 items-start">
-          {navLinks.map((link) => {
-            let Icon;
-            switch (link.to) {
-              case '/':
-                Icon = Home;
-                break;
-              case '/about':
-                Icon = Info;
-                break;
-              case '/podcast':
-                Icon = Mic;
-                break;
-              case '/shop':
-                Icon = ShoppingBag;
-                break;
-              case '/contact':
-                Icon = Mail;
-                break;
-              case '/dashboard':
-                Icon = LayoutDashboard;
-                break;
-              default:
-                Icon = null;
+          {/* Main Navigation Links */}
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
+                isActive
+                  ? 'bg-[#606C38] text-white'
+                  : 'hover:bg-[#606C38] hover:text-white'
+              }`
             }
-            return (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.to === '/'}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
-                    isActive
-                      ? 'bg-[#606C38] text-white'
-                      : 'hover:bg-[#606C38] hover:text-white'
-                  }`
-                }
-                onClick={closeMenu}
-              >
-                {Icon && <Icon className="h-5 w-5" />}
-                {link.label}
-              </NavLink>
-            );
-          })}
+            onClick={closeMenu}
+          >
+            <Home className="h-5 w-5" />
+            Início
+          </NavLink>
+          <NavLink
+            to="/about"
+            className={({ isActive }) =>
+              `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
+                isActive
+                  ? 'bg-[#606C38] text-white'
+                  : 'hover:bg-[#606C38] hover:text-white'
+              }`
+            }
+            onClick={closeMenu}
+          >
+            <Info className="h-5 w-5" />
+            Sobre
+          </NavLink>
+          <NavLink
+            to="/podcast"
+            className={({ isActive }) =>
+              `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
+                isActive
+                  ? 'bg-[#606C38] text-white'
+                  : 'hover:bg-[#606C38] hover:text-white'
+              }`
+            }
+            onClick={closeMenu}
+          >
+            <Mic className="h-5 w-5" />
+            Podcast
+          </NavLink>
+          <NavLink
+            to="/shop"
+            className={({ isActive }) =>
+              `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
+                isActive
+                  ? 'bg-[#606C38] text-white'
+                  : 'hover:bg-[#606C38] hover:text-white'
+              }`
+            }
+            onClick={closeMenu}
+          >
+            <ShoppingBag className="h-5 w-5" />
+            Loja
+          </NavLink>
+          <NavLink
+            to="/contact"
+            className={({ isActive }) =>
+              `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
+                isActive
+                  ? 'bg-[#606C38] text-white'
+                  : 'hover:bg-[#606C38] hover:text-white'
+              }`
+            }
+            onClick={closeMenu}
+          >
+            <Mail className="h-5 w-5" />
+            Contato
+          </NavLink>
           {!user && (
             <NavLink
               to="/signin"

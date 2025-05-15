@@ -58,14 +58,14 @@ export function AboutPage() {
           >
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button size="lg" asChild className="w-full sm:w-auto">
-                <Link to="/#bio-section">
+                <Link to="/about#bio-section">
                   Explorar Minha História <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </motion.div>
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                <Link to="/#timeline-section">
+                <Link to="/about#timeline-section">
                   Explorar Minha Jornada <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
