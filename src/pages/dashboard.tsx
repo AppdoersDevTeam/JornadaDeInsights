@@ -227,14 +227,15 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           if (!statsRes.ok) throw new Error('Failed to load stats');
           
           const { orders } = await ordersRes.json();
-          const { salesTrends: trendsData, today, week, month, completedOrders, users } = await statsRes.json();
+          const statsData = await statsRes.json();
+          console.log('Received stats data:', statsData);
           
           setCompletedOrdersList(orders);
           setTopProducts(topProducts);
           
           // Ensure salesTrends has the correct structure and format
           const formattedTrends = {
-            daily: Array.isArray(trendsData?.daily) ? trendsData.daily.map((item: SalesData) => ({
+            daily: Array.isArray(statsData?.salesTrends?.daily) ? statsData.salesTrends.daily.map((item: SalesData) => ({
               ...item,
               date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
               sales: Number(item.sales) || 0,
@@ -242,7 +243,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               disputes: Number(item.disputes) || 0,
               disputesWon: Number(item.disputesWon) || 0
             })) : [],
-            weekly: Array.isArray(trendsData?.weekly) ? trendsData.weekly.map((item: SalesData) => ({
+            weekly: Array.isArray(statsData?.salesTrends?.weekly) ? statsData.salesTrends.weekly.map((item: SalesData) => ({
               ...item,
               date: item.date,
               sales: Number(item.sales) || 0,
@@ -250,7 +251,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               disputes: Number(item.disputes) || 0,
               disputesWon: Number(item.disputesWon) || 0
             })) : [],
-            monthly: Array.isArray(trendsData?.monthly) ? trendsData.monthly.map((item: SalesData) => ({
+            monthly: Array.isArray(statsData?.salesTrends?.monthly) ? statsData.salesTrends.monthly.map((item: SalesData) => ({
               ...item,
               date: new Date(2024, Number(item.date) - 1).toLocaleDateString('en-US', { month: 'short' }),
               sales: Number(item.sales) || 0,
@@ -260,22 +261,23 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             })) : []
           };
 
+          console.log('Formatted trends data:', formattedTrends);
           setSalesTrends(formattedTrends);
 
           // Use real stats from the server
           setStats({
-            today: Number(today) || 0,
-            week: Number(week) || 0,
-            month: Number(month) || 0,
-            users: users || { total: 0, newThisWeek: 0 },
-            completedOrders: Number(completedOrders) || 0
+            today: Number(statsData.today) || 0,
+            week: Number(statsData.week) || 0,
+            month: Number(statsData.month) || 0,
+            users: statsData.users || { total: 0, newThisWeek: 0 },
+            completedOrders: Number(statsData.completedOrders) || 0
           });
 
           setStatsLoading(false);
-        } catch (err) {
-          console.error('Error loading data:', err);
-          toast.error('Failed to load data');
-          // Set default values on error
+        } catch (error) {
+          console.error('Error fetching dashboard data:', error);
+          setStatsLoading(false);
+          // Set default values in case of error
           setSalesTrends({
             daily: [],
             weekly: [],

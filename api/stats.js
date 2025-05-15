@@ -88,14 +88,163 @@ export default async function handler(req, res) {
       return createdSec >= weekStart;
     }).length;
 
-    // Return analytics including user stats
+    // Generate sales trends data
+    const salesTrends = {
+      daily: [],
+      weekly: [],
+      monthly: []
+    };
+
+    // Daily data for the last 7 days
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const endOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+
+      const dayTransactions = await stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startOfDate.getTime() / 1000),
+          lt: Math.floor(endOfDate.getTime() / 1000)
+        },
+        limit: 100
+      });
+
+      const sales = dayTransactions.data
+        .filter(txn => txn.type === 'charge' && txn.status === 'available')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const refunds = dayTransactions.data
+        .filter(txn => txn.type === 'refund')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputes = dayTransactions.data
+        .filter(txn => txn.type === 'dispute')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputesWon = dayTransactions.data
+        .filter(txn => txn.type === 'dispute' && txn.status === 'won')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      salesTrends.daily.push({
+        date: date.toISOString().split('T')[0],
+        sales: Number(sales.toFixed(2)),
+        refunds: Number(refunds.toFixed(2)),
+        disputes: Number(disputes.toFixed(2)),
+        disputesWon: Number(disputesWon.toFixed(2)),
+        otherAdjustments: 0,
+        totalGrossActivity: Number((sales - refunds - disputes + disputesWon).toFixed(2)),
+        customersCount: new Set(dayTransactions.data.map(txn => txn.source?.customer)).size,
+        salesCount: dayTransactions.data.filter(txn => txn.type === 'charge').length,
+        refundCount: dayTransactions.data.filter(txn => txn.type === 'refund').length,
+        disputeCount: dayTransactions.data.filter(txn => txn.type === 'dispute').length,
+        disputesWonCount: dayTransactions.data.filter(txn => txn.type === 'dispute' && txn.status === 'won').length
+      });
+    }
+
+    // Weekly data for the last 4 weeks
+    for (let i = 3; i >= 0; i--) {
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() - (i * 7));
+      const startDate = new Date(endDate);
+      startDate.setDate(endDate.getDate() - 7);
+
+      const weekTransactions = await stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startDate.getTime() / 1000),
+          lt: Math.floor(endDate.getTime() / 1000)
+        },
+        limit: 100
+      });
+
+      const sales = weekTransactions.data
+        .filter(txn => txn.type === 'charge' && txn.status === 'available')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const refunds = weekTransactions.data
+        .filter(txn => txn.type === 'refund')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputes = weekTransactions.data
+        .filter(txn => txn.type === 'dispute')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputesWon = weekTransactions.data
+        .filter(txn => txn.type === 'dispute' && txn.status === 'won')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      salesTrends.weekly.push({
+        date: `Week ${4-i}`,
+        sales: Number(sales.toFixed(2)),
+        refunds: Number(refunds.toFixed(2)),
+        disputes: Number(disputes.toFixed(2)),
+        disputesWon: Number(disputesWon.toFixed(2)),
+        otherAdjustments: 0,
+        totalGrossActivity: Number((sales - refunds - disputes + disputesWon).toFixed(2)),
+        customersCount: new Set(weekTransactions.data.map(txn => txn.source?.customer)).size,
+        salesCount: weekTransactions.data.filter(txn => txn.type === 'charge').length,
+        refundCount: weekTransactions.data.filter(txn => txn.type === 'refund').length,
+        disputeCount: weekTransactions.data.filter(txn => txn.type === 'dispute').length,
+        disputesWonCount: weekTransactions.data.filter(txn => txn.type === 'dispute' && txn.status === 'won').length
+      });
+    }
+
+    // Monthly data for the last 3 months
+    for (let i = 2; i >= 0; i--) {
+      const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() - i);
+      const startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+      const nextMonth = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 1);
+
+      const monthTransactions = await stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startDate.getTime() / 1000),
+          lt: Math.floor(nextMonth.getTime() / 1000)
+        },
+        limit: 100
+      });
+
+      const sales = monthTransactions.data
+        .filter(txn => txn.type === 'charge' && txn.status === 'available')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const refunds = monthTransactions.data
+        .filter(txn => txn.type === 'refund')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputes = monthTransactions.data
+        .filter(txn => txn.type === 'dispute')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputesWon = monthTransactions.data
+        .filter(txn => txn.type === 'dispute' && txn.status === 'won')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      salesTrends.monthly.push({
+        date: `${endDate.getMonth() + 1}`.padStart(2, '0'),
+        sales: Number(sales.toFixed(2)),
+        refunds: Number(refunds.toFixed(2)),
+        disputes: Number(disputes.toFixed(2)),
+        disputesWon: Number(disputesWon.toFixed(2)),
+        otherAdjustments: 0,
+        totalGrossActivity: Number((sales - refunds - disputes + disputesWon).toFixed(2)),
+        customersCount: new Set(monthTransactions.data.map(txn => txn.source?.customer)).size,
+        salesCount: monthTransactions.data.filter(txn => txn.type === 'charge').length,
+        refundCount: monthTransactions.data.filter(txn => txn.type === 'refund').length,
+        disputeCount: monthTransactions.data.filter(txn => txn.type === 'dispute').length,
+        disputesWonCount: monthTransactions.data.filter(txn => txn.type === 'dispute' && txn.status === 'won').length
+      });
+    }
+
+    // Return analytics including user stats and sales trends
     res.json({
       today: todayCount,
       week: weekCount,
       month: monthCount,
       completedOrders: completedOrdersEver,
       users: { total: totalUsers, newThisWeek },
-      thresholds: { dayStart, weekStart, monthStart }
+      salesTrends,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('Error fetching stats:', error);
