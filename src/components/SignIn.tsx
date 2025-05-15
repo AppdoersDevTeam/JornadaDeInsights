@@ -25,7 +25,7 @@ const SignIn = () => {
     setError('');
 
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setError('Preencha todos os campos');
       return;
     }
 
