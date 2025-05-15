@@ -176,205 +176,228 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Stats endpoint to fetch purchase counts for today, this week, and this month
+// Get analytics data
 app.get('/stats', async (req, res) => {
   try {
-    // Accept client-calculated thresholds for admin timezone via query, fall back to server local time
-    let dayStart, weekStart, monthStart;
-    if (req.query.dayStart && req.query.weekStart && req.query.monthStart) {
-      dayStart = parseInt(req.query.dayStart, 10);
-      weekStart = parseInt(req.query.weekStart, 10);
-      monthStart = parseInt(req.query.monthStart, 10);
-    } else {
-      const now = new Date();
-      // Start of today local midnight
-      dayStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000);
-      // Start of week threshold as last 7 days from today
-      weekStart = dayStart - 7 * 24 * 60 * 60;
-      // Start of month at local midnight
-      monthStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000);
-    }
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // Fetch balance transactions for the periods
-    const [dailyTransactions, weeklyTransactions, monthlyTransactions] = await Promise.all([
-      stripe.balanceTransactions.list({ 
-        created: { gte: dayStart },
-        limit: 100,
-        type: { in: ['charge', 'payment', 'payment_refund', 'refund', 'adjustment'] }
+    // Get balance transactions for different time periods
+    const [todayTransactions, weekTransactions, monthTransactions] = await Promise.all([
+      stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startOfDay.getTime() / 1000)
+        },
+        limit: 100
       }),
-      stripe.balanceTransactions.list({ 
-        created: { gte: weekStart },
-        limit: 100,
-        type: { in: ['charge', 'payment', 'payment_refund', 'refund', 'adjustment'] }
+      stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startOfWeek.getTime() / 1000)
+        },
+        limit: 100
       }),
-      stripe.balanceTransactions.list({ 
-        created: { gte: monthStart },
-        limit: 100,
-        type: { in: ['charge', 'payment', 'payment_refund', 'refund', 'adjustment'] }
-      }),
+      stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startOfMonth.getTime() / 1000)
+        },
+        limit: 100
+      })
     ]);
 
-    // Helper function to process transactions
-    const processTransactions = (transactions) => {
-      return transactions.data.reduce((acc, tx) => {
-        const amount = tx.amount / 100; // Convert from cents to dollars
-        const type = tx.type;
-        const description = tx.description?.toLowerCase() || '';
-
-        if (type === 'charge' || type === 'payment') {
-          acc.sales += amount;
-          acc.salesCount += 1;
-        } else if (type === 'payment_refund' || type === 'refund') {
-          acc.refunds += amount;
-          acc.refundCount += 1;
-        } else if (type === 'adjustment') {
-          if (description.includes('chargeback withdrawal')) {
-            acc.disputes += amount;
-            acc.disputeCount += 1;
-          } else if (description.includes('chargeback reversal')) {
-            acc.disputesWon += amount;
-            acc.disputesWonCount += 1;
-          } else {
-            acc.otherAdjustments += amount;
-          }
+    // Calculate totals for each period
+    const calculateTotal = (transactions) => {
+      return transactions.data.reduce((total, txn) => {
+        if (txn.type === 'charge' && txn.status === 'available') {
+          return total + txn.amount;
         }
-        acc.totalGrossActivity += amount;
-        return acc;
-      }, {
-        sales: 0,
-        refunds: 0,
-        disputes: 0,
-        disputesWon: 0,
-        otherAdjustments: 0,
-        totalGrossActivity: 0,
-        salesCount: 0,
-        refundCount: 0,
-        disputeCount: 0,
-        disputesWonCount: 0
-      });
+        return total;
+      }, 0) / 100; // Convert from cents to dollars
     };
 
-    // Process transactions for each period
-    const dailyStats = processTransactions(dailyTransactions);
-    const weeklyStats = processTransactions(weeklyTransactions);
-    const monthlyStats = processTransactions(monthlyTransactions);
+    const today = calculateTotal(todayTransactions.data);
+    const week = calculateTotal(weekTransactions.data);
+    const month = calculateTotal(monthTransactions.data);
+
+    // Get unique customers
+    const charges = await stripe.charges.list({
+      limit: 100,
+      created: {
+        gte: Math.floor(startOfMonth.getTime() / 1000)
+      }
+    });
+
+    const uniqueCustomers = new Set(charges.data.map(charge => charge.customer));
+    const newCustomersThisWeek = new Set(
+      charges.data
+        .filter(charge => new Date(charge.created * 1000) >= startOfWeek)
+        .map(charge => charge.customer)
+    );
 
     // Generate sales trends data
-    const now = new Date();
-    const dailyData = [];
-    const weeklyData = [];
-    const monthlyData = [];
+    const salesTrends = {
+      daily: [],
+      weekly: [],
+      monthly: []
+    };
 
-    // Generate daily data for the last 7 days
+    // Daily data for the last 7 days
     for (let i = 6; i >= 0; i--) {
-      const date = new Date(now);
+      const date = new Date();
       date.setDate(date.getDate() - i);
-      const startOfDay = Math.floor(new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000);
-      const endOfDay = startOfDay + 24 * 60 * 60;
-      
-      const dayTransactions = dailyTransactions.data.filter(tx => 
-        tx.created >= startOfDay && 
-        tx.created < endOfDay
-      );
-      
-      const dayStats = processTransactions({ data: dayTransactions });
-      
-      dailyData.push({
-        date: date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' }),
-        sales: dayStats.sales,
-        refunds: dayStats.refunds,
-        disputes: dayStats.disputes,
-        disputesWon: dayStats.disputesWon,
-        otherAdjustments: dayStats.otherAdjustments,
-        totalGrossActivity: dayStats.totalGrossActivity,
-        customersCount: dayStats.salesCount,
-        salesCount: dayStats.salesCount,
-        refundCount: dayStats.refundCount,
-        disputeCount: dayStats.disputeCount,
-        disputesWonCount: dayStats.disputesWonCount
+      const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const endOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+
+      const dayTransactions = await stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startOfDate.getTime() / 1000),
+          lt: Math.floor(endOfDate.getTime() / 1000)
+        },
+        limit: 100
+      });
+
+      const sales = dayTransactions.data
+        .filter(txn => txn.type === 'charge' && txn.status === 'available')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const refunds = dayTransactions.data
+        .filter(txn => txn.type === 'refund')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputes = dayTransactions.data
+        .filter(txn => txn.type === 'dispute')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputesWon = dayTransactions.data
+        .filter(txn => txn.type === 'dispute' && txn.status === 'won')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      salesTrends.daily.push({
+        date: date.toISOString().split('T')[0],
+        sales,
+        refunds,
+        disputes,
+        disputesWon,
+        otherAdjustments: 0,
+        totalGrossActivity: sales - refunds - disputes + disputesWon,
+        customersCount: new Set(dayTransactions.data.map(txn => txn.source?.customer)).size,
+        salesCount: dayTransactions.data.filter(txn => txn.type === 'charge').length,
+        refundCount: dayTransactions.data.filter(txn => txn.type === 'refund').length,
+        disputeCount: dayTransactions.data.filter(txn => txn.type === 'dispute').length,
+        disputesWonCount: dayTransactions.data.filter(txn => txn.type === 'dispute' && txn.status === 'won').length
       });
     }
 
-    // Generate weekly data for the last 4 weeks
+    // Weekly data for the last 4 weeks
     for (let i = 3; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - (i * 7));
-      const startOfWeek = Math.floor(new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000);
-      const endOfWeek = startOfWeek + 7 * 24 * 60 * 60;
-      
-      const weekTransactions = weeklyTransactions.data.filter(tx => 
-        tx.created >= startOfWeek && 
-        tx.created < endOfWeek
-      );
-      
-      const weekStats = processTransactions({ data: weekTransactions });
-      
-      weeklyData.push({
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() - (i * 7));
+      const startDate = new Date(endDate);
+      startDate.setDate(endDate.getDate() - 7);
+
+      const weekTransactions = await stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startDate.getTime() / 1000),
+          lt: Math.floor(endDate.getTime() / 1000)
+        },
+        limit: 100
+      });
+
+      const sales = weekTransactions.data
+        .filter(txn => txn.type === 'charge' && txn.status === 'available')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const refunds = weekTransactions.data
+        .filter(txn => txn.type === 'refund')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputes = weekTransactions.data
+        .filter(txn => txn.type === 'dispute')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputesWon = weekTransactions.data
+        .filter(txn => txn.type === 'dispute' && txn.status === 'won')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      salesTrends.weekly.push({
         date: `Week ${4-i}`,
-        sales: weekStats.sales,
-        refunds: weekStats.refunds,
-        disputes: weekStats.disputes,
-        disputesWon: weekStats.disputesWon,
-        otherAdjustments: weekStats.otherAdjustments,
-        totalGrossActivity: weekStats.totalGrossActivity,
-        customersCount: weekStats.salesCount,
-        salesCount: weekStats.salesCount,
-        refundCount: weekStats.refundCount,
-        disputeCount: weekStats.disputeCount,
-        disputesWonCount: weekStats.disputesWonCount
+        sales,
+        refunds,
+        disputes,
+        disputesWon,
+        otherAdjustments: 0,
+        totalGrossActivity: sales - refunds - disputes + disputesWon,
+        customersCount: new Set(weekTransactions.data.map(txn => txn.source?.customer)).size,
+        salesCount: weekTransactions.data.filter(txn => txn.type === 'charge').length,
+        refundCount: weekTransactions.data.filter(txn => txn.type === 'refund').length,
+        disputeCount: weekTransactions.data.filter(txn => txn.type === 'dispute').length,
+        disputesWonCount: weekTransactions.data.filter(txn => txn.type === 'dispute' && txn.status === 'won').length
       });
     }
 
-    // Generate monthly data for the last 3 months
+    // Monthly data for the last 3 months
     for (let i = 2; i >= 0; i--) {
-      const date = new Date(now);
-      date.setMonth(date.getMonth() - i);
-      const startOfMonth = Math.floor(new Date(date.getFullYear(), date.getMonth(), 1).getTime() / 1000);
-      const endOfMonth = Math.floor(new Date(date.getFullYear(), date.getMonth() + 1, 0).getTime() / 1000);
-      
-      const monthTransactions = monthlyTransactions.data.filter(tx => 
-        tx.created >= startOfMonth && 
-        tx.created < endOfMonth
-      );
-      
-      const monthStats = processTransactions({ data: monthTransactions });
-      
-      monthlyData.push({
-        date: date.toLocaleDateString('en-US', { month: '2-digit' }),
-        sales: monthStats.sales,
-        refunds: monthStats.refunds,
-        disputes: monthStats.disputes,
-        disputesWon: monthStats.disputesWon,
-        otherAdjustments: monthStats.otherAdjustments,
-        totalGrossActivity: monthStats.totalGrossActivity,
-        customersCount: monthStats.salesCount,
-        salesCount: monthStats.salesCount,
-        refundCount: monthStats.refundCount,
-        disputeCount: monthStats.disputeCount,
-        disputesWonCount: monthStats.disputesWonCount
+      const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() - i);
+      const startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+      const nextMonth = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 1);
+
+      const monthTransactions = await stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startDate.getTime() / 1000),
+          lt: Math.floor(nextMonth.getTime() / 1000)
+        },
+        limit: 100
+      });
+
+      const sales = monthTransactions.data
+        .filter(txn => txn.type === 'charge' && txn.status === 'available')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const refunds = monthTransactions.data
+        .filter(txn => txn.type === 'refund')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputes = monthTransactions.data
+        .filter(txn => txn.type === 'dispute')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      const disputesWon = monthTransactions.data
+        .filter(txn => txn.type === 'dispute' && txn.status === 'won')
+        .reduce((sum, txn) => sum + txn.amount, 0) / 100;
+
+      salesTrends.monthly.push({
+        date: `${endDate.getMonth() + 1}`.padStart(2, '0'),
+        sales,
+        refunds,
+        disputes,
+        disputesWon,
+        otherAdjustments: 0,
+        totalGrossActivity: sales - refunds - disputes + disputesWon,
+        customersCount: new Set(monthTransactions.data.map(txn => txn.source?.customer)).size,
+        salesCount: monthTransactions.data.filter(txn => txn.type === 'charge').length,
+        refundCount: monthTransactions.data.filter(txn => txn.type === 'refund').length,
+        disputeCount: monthTransactions.data.filter(txn => txn.type === 'dispute').length,
+        disputesWonCount: monthTransactions.data.filter(txn => txn.type === 'dispute' && txn.status === 'won').length
       });
     }
 
-    // Return analytics including user stats and sales trends
     res.json({
-      today: dailyStats.salesCount,
-      week: weeklyStats.salesCount,
-      month: monthlyStats.salesCount,
-      completedOrders: dailyStats.salesCount + weeklyStats.salesCount + monthlyStats.salesCount,
-      users: { 
-        total: dailyStats.salesCount + weeklyStats.salesCount + monthlyStats.salesCount, 
-        newThisWeek: weeklyStats.salesCount 
+      today,
+      week,
+      month,
+      completedOrders: charges.data.length,
+      users: {
+        total: uniqueCustomers.size,
+        newThisWeek: newCustomersThisWeek.size
       },
-      thresholds: { dayStart, weekStart, monthStart },
-      salesTrends: {
-        daily: dailyData,
-        weekly: weeklyData,
-        monthly: monthlyData
-      }
+      salesTrends
     });
   } catch (error) {
     console.error('Error fetching stats:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Failed to fetch stats' });
   }
 });
 

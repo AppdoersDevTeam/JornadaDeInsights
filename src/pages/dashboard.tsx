@@ -210,38 +210,26 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           const [ordersRes, topProducts, statsRes] = await Promise.all([
             fetch(`${SERVER_URL}/api/completed-orders`),
             calculateTopProducts(),
-            fetch(`${SERVER_URL}/api/stats`)
+            fetch(`${SERVER_URL}/stats`)
           ]);
 
           if (!ordersRes.ok) throw new Error('Failed to load orders');
           if (!statsRes.ok) throw new Error('Failed to load stats');
           
           const { orders } = await ordersRes.json();
-          const { salesTrends: trendsData } = await statsRes.json();
+          const { salesTrends: trendsData, today, week, month, completedOrders, users } = await statsRes.json();
           
           setCompletedOrdersList(orders);
           setTopProducts(topProducts);
           setSalesTrends(trendsData);
 
-          // Calculate stats
-          const now = new Date();
-          const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-          const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-          const todayOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfDay);
-          const weekOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfWeek);
-          const monthOrders = orders.filter((o: CompletedOrder) => new Date(o.date) >= startOfMonth);
-
+          // Use real stats from the server
           setStats({
-            today: todayOrders.length,
-            week: weekOrders.length,
-            month: monthOrders.length,
-            users: {
-              total: new Set(orders.map((o: CompletedOrder) => o.email)).size,
-              newThisWeek: new Set(weekOrders.map((o: CompletedOrder) => o.email)).size
-            },
-            completedOrders: orders.length
+            today,
+            week,
+            month,
+            users,
+            completedOrders
           });
 
           setStatsLoading(false);
@@ -294,236 +282,6 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   if (!isAuthenticated) {
     return null; // Don't render anything while checking auth
   }
-
-  // Mock data for demonstration
-  const salesData = {
-    today: 1250,
-    todayChange: 5.2,
-    week: 8750,
-    weekChange: -2.1,
-    month: 32500,
-    monthChange: 8.5,
-    topProducts: [
-      { name: 'Mindfulness Guide', sales: 450, revenue: 2250, stock: 25, image: 'https://i.pravatar.cc/150?u=1' },
-      { name: 'Productivity Masterclass', sales: 380, revenue: 1900, stock: 15, image: 'https://i.pravatar.cc/150?u=2' },
-      { name: 'Stress Management', sales: 290, revenue: 1450, stock: 10, image: 'https://i.pravatar.cc/150?u=3' },
-    ],
-    recentSales: [
-      { id: 1, product: 'Mindfulness Guide', customer: 'John Doe', amount: 49.99, date: '2024-03-15', status: 'completed' },
-      { id: 2, product: 'Productivity Masterclass', customer: 'Jane Smith', amount: 99.99, date: '2024-03-15', status: 'completed' },
-      { id: 3, product: 'Stress Management', customer: 'Mike Johnson', amount: 29.99, date: '2024-03-14', status: 'completed' },
-    ],
-    salesTrends: {
-      daily: [
-        { 
-          date: '2024-03-09',
-          sales: 1200,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 1200,
-          customersCount: 12,
-          salesCount: 12,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        },
-        { 
-          date: '2024-03-10',
-          sales: 1350,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 1350,
-          customersCount: 13,
-          salesCount: 13,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        },
-        { 
-          date: '2024-03-11',
-          sales: 1100,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 1100,
-          customersCount: 11,
-          salesCount: 11,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        },
-        { 
-          date: '2024-03-12',
-          sales: 1450,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 1450,
-          customersCount: 14,
-          salesCount: 14,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        },
-        { 
-          date: '2024-03-13',
-          sales: 1300,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 1300,
-          customersCount: 13,
-          salesCount: 13,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        },
-        { 
-          date: '2024-03-14',
-          sales: 1500,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 1500,
-          customersCount: 15,
-          salesCount: 15,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        },
-        { 
-          date: '2024-03-15',
-          sales: 1250,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 1250,
-          customersCount: 12,
-          salesCount: 12,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        }
-      ],
-      weekly: [
-        { 
-          date: 'Week 1',
-          sales: 8500,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 8500,
-          customersCount: 85,
-          salesCount: 85,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        },
-        { 
-          date: 'Week 2',
-          sales: 9200,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 9200,
-          customersCount: 92,
-          salesCount: 92,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        },
-        { 
-          date: 'Week 3',
-          sales: 7800,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 7800,
-          customersCount: 78,
-          salesCount: 78,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        },
-        { 
-          date: 'Week 4',
-          sales: 8750,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 8750,
-          customersCount: 87,
-          salesCount: 87,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        }
-      ],
-      monthly: [
-        { 
-          date: '01',
-          sales: 28000,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 28000,
-          customersCount: 280,
-          salesCount: 280,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        },
-        { 
-          date: '02',
-          sales: 32000,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 32000,
-          customersCount: 320,
-          salesCount: 320,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        },
-        { 
-          date: '03',
-          sales: 32500,
-          refunds: 0,
-          disputes: 0,
-          disputesWon: 0,
-          otherAdjustments: 0,
-          totalGrossActivity: 32500,
-          customersCount: 325,
-          salesCount: 325,
-          refundCount: 0,
-          disputeCount: 0,
-          disputesWonCount: 0
-        }
-      ]
-    },
-    revenueBreakdown: [
-      { product: 'Mindfulness Guide', revenue: 2250, percentage: 35 },
-      { product: 'Productivity Masterclass', revenue: 1900, percentage: 30 },
-      { product: 'Stress Management', revenue: 1450, percentage: 22 },
-      { product: 'Others', revenue: 900, percentage: 13 },
-    ]
-  };
 
   const contentData = {
     recentUpdates: [
@@ -597,7 +355,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
-                      : stats.today
+                      : new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: 'USD'
+                        }).format(stats.today)
                     }
                   </h3>
                 </div>
@@ -612,7 +373,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
-                      : stats.week
+                      : new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: 'USD'
+                        }).format(stats.week)
                     }
                   </h3>
                 </div>
@@ -627,7 +391,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
-                      : stats.month
+                      : new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: 'USD'
+                        }).format(stats.month)
                     }
                   </h3>
                 </div>
@@ -785,9 +552,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         <div className="space-y-6 w-full">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
             <SalesTrendsChart
-              dailyData={salesData.salesTrends.daily}
-              weeklyData={salesData.salesTrends.weekly}
-              monthlyData={salesData.salesTrends.monthly}
+              dailyData={salesTrends.daily}
+              weeklyData={salesTrends.weekly}
+              monthlyData={salesTrends.monthly}
             />
             <Card className="p-6 w-full">
               <CardHeader>
