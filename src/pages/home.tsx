@@ -79,8 +79,16 @@ export function HomePage() {
       return;
     }
 
-    const API_KEY = 'AIzaSyDFVf55ZCzoknpER5JA-AeUK_cVLoTsrlo';
-    const CHANNEL_ID = 'UCCJzity3rNbZd_pkBZsZOkw';
+    const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+    const CHANNEL_ID = import.meta.env.VITE_YOUTUBE_CHANNEL_ID;
+    
+    if (!API_KEY || !CHANNEL_ID) {
+      console.error('YouTube API key or Channel ID not found in environment variables');
+      setHasError(true);
+      setIsLoading(false);
+      return;
+    }
+
     fetch(`https://youtube.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&type=video&order=date&maxResults=10`)
       .then((response) => {
         if (!response.ok) {
