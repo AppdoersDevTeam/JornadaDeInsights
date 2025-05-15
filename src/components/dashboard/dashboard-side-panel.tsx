@@ -17,7 +17,7 @@ interface DashboardSidePanelProps {
 
 export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePanelProps) {
   return (
-    <div className="h-full">
+    <div className="h-full mt-[72px]">
       <div className="flex h-16 items-center border-b px-6">
         <h2 className="text-lg font-semibold">Admin Dashboard</h2>
       </div>
