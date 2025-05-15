@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
 import { AnimatedCartIcon } from '@/components/shop/animated-cart-icon';
 import { useAuth } from '@/context/auth-context';
+import jornadaLogo from '@/Jornada logo.png';
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,9 +47,8 @@ export function Header() {
       scrolled ? "shadow-sm" : ""
     )}>
       <div className="container mx-auto px-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-xl md:text-2xl font-heading font-normal text-background">
-          <Headphones className="h-6 w-6 text-current" />
-          <span>Patricia</span>
+        <Link to="/" className="flex items-center">
+          <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
         </Link>
 
         {/* Desktop Navigation */}

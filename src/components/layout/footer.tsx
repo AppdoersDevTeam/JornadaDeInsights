@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import jornadaLogo from '@/Jornada logo.png';
 
 export function Footer() {
   const [quickOpen, setQuickOpen] = useState(false);
@@ -35,9 +36,8 @@ export function Footer() {
           <div className="md:hidden space-y-4">
             {/* Brand Column */}
             <div className="flex flex-col items-center text-center">
-              <Link to="/" className="flex items-center gap-2 mb-4">
-                <Headphones className="h-6 w-6 text-primary" />
-                <span className="text-xl font-heading font-semibold">Patricia</span>
+              <Link to="/" className="mb-4">
+                <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
               </Link>
               <p className="text-muted-foreground mb-6 text-base">
                 Podcaster, autora e criadora de conteúdo, compartilhando insights sobre crescimento pessoal e bem-estar.
@@ -131,9 +131,8 @@ export function Footer() {
           <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-8 justify-items-center md:justify-items-start">
             {/* Brand Column */}
             <div className="md:col-span-1 flex flex-col items-center text-center md:items-start md:text-left">
-              <Link to="/" className="flex items-center gap-2 mb-4">
-                <Headphones className="h-6 w-6 text-primary" />
-                <span className="text-xl font-heading font-semibold">Patricia</span>
+              <Link to="/" className="mb-4">
+                <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
               </Link>
               <p className="text-muted-foreground mb-6 text-base">
                 Podcaster, autora e criadora de conteúdo, compartilhando insights sobre crescimento pessoal e bem-estar.

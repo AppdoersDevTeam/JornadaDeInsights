@@ -151,7 +151,7 @@ export function ShopPage() {
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         />
         
-        <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-10 text-center">
+        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
           <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">
             Descubra Nossa Coleção de eBooks
           </h1>
