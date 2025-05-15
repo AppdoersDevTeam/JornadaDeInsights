@@ -27,18 +27,16 @@ const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { st
 const ctaButtonVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 400, damping: 20 } } };
 
 const scrollToSection = (sectionId: string) => {
-  requestAnimationFrame(() => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const headerOffset = 80;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-    }
+  const element = document.getElementById(sectionId);
+  if (!element) return;
+
+  const headerOffset = 80;
+  const elementPosition = element.getBoundingClientRect().top;
+  const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+  window.scrollTo({
+    top: offsetPosition,
+    behavior: 'smooth'
   });
 };
 
@@ -178,7 +176,7 @@ export function ShopPage() {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    requestAnimationFrame(() => scrollToSection('featured-ebook'));
+                    scrollToSection('featured-ebook');
                   }}
                 >
                   eBook em Destaque <ArrowRight className="ml-2 h-4 w-4" />
@@ -192,7 +190,7 @@ export function ShopPage() {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    requestAnimationFrame(() => scrollToSection('all-ebooks'));
+                    scrollToSection('all-ebooks');
                   }}
                 >
                   Todos os eBooks <ArrowRight className="ml-2 h-4 w-4" />
@@ -227,11 +225,11 @@ export function ShopPage() {
           ) : featuredEbook ? (
             <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 transition-all duration-300 hover:shadow-lg hover:border-primary/20 group">
               <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="md:order-2 aspect-square md:aspect-[3/4] md:h-full max-h-[400px] md:max-h-none overflow-hidden">
+                <div className="md:order-2 aspect-square md:aspect-[3/4] md:h-full max-h-[400px] md:max-h-none overflow-hidden relative">
                   <LazyImage 
                     src={featuredEbook.cover_url || ''} 
                     alt={featuredEbook.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
                 <div className="p-6 md:p-8 flex flex-col justify-between">

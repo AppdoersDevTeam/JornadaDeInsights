@@ -260,30 +260,16 @@ export function HomePage() {
               >
                 <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
                   <Button size="lg" asChild className="w-full sm:w-auto">
-                    <a 
-                      href="#podcast-section" 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        scrollToSection('podcast-section');
-                      }}
-                    >
+                    <Link to="/podcast">
                       Ouvir o Podcast <ArrowRight className="ml-2 h-4 w-4" />
-                    </a>
+                    </Link>
                   </Button>
                 </motion.div>
                 <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
                   <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                    <a 
-                      href="#ebooks-section" 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        scrollToSection('ebooks-section');
-                      }}
-                    >
+                    <Link to="/shop">
                       Explorar eBooks <ArrowRight className="ml-2 h-4 w-4" />
-                    </a>
+                    </Link>
                   </Button>
                 </motion.div>
               </motion.div>
