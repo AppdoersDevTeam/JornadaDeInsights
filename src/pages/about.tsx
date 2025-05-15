@@ -378,6 +378,47 @@ export function AboutPage() {
         </div>
       </motion.section>
 
+      {/* Support My Work Section */}
+      <motion.section
+        className="py-16 bg-background"
+        initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
+        whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
+        viewport={{ amount: 0.3 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+      >
+        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-6">Apoie Meu Trabalho</h2>
+            <motion.p 
+              className="text-muted-foreground mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ amount: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              Se você tem sido abençoado pelo meu conteúdo e gostaria de apoiar este ministério, sua contribuição faz toda a diferença. Cada doação ajuda a manter este trabalho e a criar mais conteúdo inspirador.
+            </motion.p>
+            <motion.div
+              className="bg-card p-8 rounded-lg border border-border/50 shadow-md"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ amount: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <div className="flex flex-col items-center gap-6">
+                <div className="text-primary text-4xl">❤️</div>
+                <p className="text-lg text-muted-foreground">
+                  Sua generosidade permite que eu continue compartilhando a Palavra de Deus e criando conteúdo que transforma vidas.
+                </p>
+                <Button size="lg" className="mt-4">
+                  Fazer uma Doação
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </motion.section>
+
       {/* Testimonials */}
       <motion.section
         className="py-16 bg-background"

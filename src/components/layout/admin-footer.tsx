@@ -9,7 +9,7 @@ export function AdminFooter() {
   const toggle = (section: string) => setOpen(open === section ? null : section);
 
   return (
-    <footer className="bg-muted/30 border-t footer-wave relative">
+    <footer className="bg-muted border-t footer-wave relative">
       {/* Wave SVG at top */}
       <div className="absolute top-0 left-0 w-full overflow-hidden pointer-events-none -mt-10 h-10">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-[200%] h-full" style={{ animation: 'waveScroll 8s linear infinite' }} xmlns="http://www.w3.org/2000/svg">
@@ -60,15 +60,21 @@ export function AdminFooter() {
           {/* Legal Accordion */}
           <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
             <button className="flex justify-between items-center w-full text-base font-medium text-foreground py-3 px-4 focus:outline-none" onClick={() => toggle('legal')}>
-              Legal {open === 'legal' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              Recursos {open === 'legal' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
             {open === 'legal' && (
               <ul className="space-y-3 py-2 px-4">
                 <li>
+                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
+                </li>
+                <li>
                   <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
                 </li>
                 <li>
-                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
+                  <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</Link>
+                </li>
+                <li>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</Link>
                 </li>
               </ul>
             )}
@@ -124,13 +130,19 @@ export function AdminFooter() {
           </div>
           {/* Legal Links */}
           <div>
-            <h3 className="text-base font-medium mb-4 text-foreground">Legal</h3>
+            <h3 className="text-base font-medium mb-4 text-foreground">Recursos</h3>
             <ul className="space-y-3">
+              <li>
+                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
+              </li>
               <li>
                 <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
+                <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</Link>
               </li>
             </ul>
           </div>
