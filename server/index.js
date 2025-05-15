@@ -283,7 +283,7 @@ app.get('/stats', async (req, res) => {
       const totalAmount = monthCharges.reduce((sum, ch) => sum + (ch.amount / 100), 0);
       
       monthlyData.push({
-        month: date.toLocaleDateString('pt-BR', { month: 'short' }),
+        month: date.toLocaleDateString('pt-BR', { month: '2-digit' }),
         amount: totalAmount
       });
     }

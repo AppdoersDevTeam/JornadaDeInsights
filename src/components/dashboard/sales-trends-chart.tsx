@@ -27,9 +27,14 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
   const [activeTab, setActiveTab] = useState('daily');
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
+    if (value >= 1000) {
+      return `$ ${(value / 1000).toFixed(1)}k`;
+    }
+    return new Intl.NumberFormat('en-NZ', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'NZD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(value);
   };
 
@@ -38,7 +43,12 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
       return (
         <div className="bg-white p-4 border rounded-lg shadow-lg">
           <p className="font-medium">{label}</p>
-          <p className="text-primary">{formatCurrency(payload[0].value)}</p>
+          <p className="text-primary">
+            {new Intl.NumberFormat('en-NZ', {
+              style: 'currency',
+              currency: 'NZD'
+            }).format(payload[0].value)}
+          </p>
         </div>
       );
     }
@@ -63,7 +73,10 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={dailyData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
+                  <XAxis 
+                    dataKey="date"
+                    tickFormatter={(value) => value}
+                  />
                   <YAxis tickFormatter={formatCurrency} />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
@@ -84,7 +97,10 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={weeklyData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="week" />
+                  <XAxis 
+                    dataKey="week"
+                    tickFormatter={(value) => value}
+                  />
                   <YAxis tickFormatter={formatCurrency} />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
@@ -105,7 +121,10 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
+                  <XAxis 
+                    dataKey="month"
+                    tickFormatter={(value) => value}
+                  />
                   <YAxis tickFormatter={formatCurrency} />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
