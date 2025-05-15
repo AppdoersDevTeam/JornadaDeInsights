@@ -136,7 +136,7 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
                 <LineChart data={weeklyData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
-                    dataKey="week"
+                    dataKey="date"
                     tickFormatter={(value) => value}
                   />
                   <YAxis tickFormatter={formatCurrency} />
@@ -184,7 +184,7 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
-                    dataKey="month"
+                    dataKey="date"
                     tickFormatter={(value) => value}
                   />
                   <YAxis tickFormatter={formatCurrency} />

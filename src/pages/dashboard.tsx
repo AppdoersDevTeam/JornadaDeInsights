@@ -76,7 +76,7 @@ const ALLOWED_ADMIN_EMAILS = [
 ];
 
 // Initialize Stripe client
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2025-04-30.basil'
 });
 
@@ -345,24 +345,206 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     ],
     salesTrends: {
       daily: [
-        { date: '2024-03-09', amount: 1200 },
-        { date: '2024-03-10', amount: 1350 },
-        { date: '2024-03-11', amount: 1100 },
-        { date: '2024-03-12', amount: 1450 },
-        { date: '2024-03-13', amount: 1300 },
-        { date: '2024-03-14', amount: 1500 },
-        { date: '2024-03-15', amount: 1250 },
+        { 
+          date: '2024-03-09',
+          sales: 1200,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 1200,
+          customersCount: 12,
+          salesCount: 12,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        },
+        { 
+          date: '2024-03-10',
+          sales: 1350,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 1350,
+          customersCount: 13,
+          salesCount: 13,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        },
+        { 
+          date: '2024-03-11',
+          sales: 1100,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 1100,
+          customersCount: 11,
+          salesCount: 11,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        },
+        { 
+          date: '2024-03-12',
+          sales: 1450,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 1450,
+          customersCount: 14,
+          salesCount: 14,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        },
+        { 
+          date: '2024-03-13',
+          sales: 1300,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 1300,
+          customersCount: 13,
+          salesCount: 13,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        },
+        { 
+          date: '2024-03-14',
+          sales: 1500,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 1500,
+          customersCount: 15,
+          salesCount: 15,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        },
+        { 
+          date: '2024-03-15',
+          sales: 1250,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 1250,
+          customersCount: 12,
+          salesCount: 12,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        }
       ],
       weekly: [
-        { week: 'Week 1', amount: 8500 },
-        { week: 'Week 2', amount: 9200 },
-        { week: 'Week 3', amount: 7800 },
-        { week: 'Week 4', amount: 8750 },
+        { 
+          date: 'Week 1',
+          sales: 8500,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 8500,
+          customersCount: 85,
+          salesCount: 85,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        },
+        { 
+          date: 'Week 2',
+          sales: 9200,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 9200,
+          customersCount: 92,
+          salesCount: 92,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        },
+        { 
+          date: 'Week 3',
+          sales: 7800,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 7800,
+          customersCount: 78,
+          salesCount: 78,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        },
+        { 
+          date: 'Week 4',
+          sales: 8750,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 8750,
+          customersCount: 87,
+          salesCount: 87,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        }
       ],
       monthly: [
-        { month: 'Jan', amount: 28000 },
-        { month: 'Feb', amount: 32000 },
-        { month: 'Mar', amount: 32500 },
+        { 
+          date: '01',
+          sales: 28000,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 28000,
+          customersCount: 280,
+          salesCount: 280,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        },
+        { 
+          date: '02',
+          sales: 32000,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 32000,
+          customersCount: 320,
+          salesCount: 320,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        },
+        { 
+          date: '03',
+          sales: 32500,
+          refunds: 0,
+          disputes: 0,
+          disputesWon: 0,
+          otherAdjustments: 0,
+          totalGrossActivity: 32500,
+          customersCount: 325,
+          salesCount: 325,
+          refundCount: 0,
+          disputeCount: 0,
+          disputesWonCount: 0
+        }
       ]
     },
     revenueBreakdown: [
