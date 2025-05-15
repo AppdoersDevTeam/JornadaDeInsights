@@ -267,6 +267,12 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     return () => unsubscribe();
   }, [navigate]);
 
+  useEffect(() => {
+    if (activeTab === 'overview') {
+      fetchCompletedOrders();
+    }
+  }, [activeTab]);
+
   if (!isAuthenticated) {
     return null; // Don't render anything while checking auth
   }
