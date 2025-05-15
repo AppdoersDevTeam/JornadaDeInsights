@@ -99,7 +99,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const [loading, setLoading] = useState(true);
 
   // Constants
-  const itemsPerPage = 20;
+  const itemsPerPage = 20; // Show 20 orders per page in completed orders tab
   const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
   console.log('Dashboard using SERVER_URL:', SERVER_URL);
 
@@ -448,56 +448,56 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             </Card>
           </div>
 
-          {/* Top Products Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Produtos Mais Vendidos</CardTitle>
-              <CardDescription>Produtos mais vendidos este mês</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {loading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-center justify-between">
-                        <div className="space-y-2">
-                          <div className="h-4 w-32 bg-gray-200 animate-pulse rounded" />
-                          <div className="h-3 w-24 bg-gray-200 animate-pulse rounded" />
+          {/* Top Products and Pedidos Concluídos Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+            {/* Produtos Mais Vendidos (2/3 width on lg) */}
+            <Card className="col-span-1 lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Produtos Mais Vendidos</CardTitle>
+                <CardDescription>Produtos mais vendidos este mês</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {loading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center justify-between">
+                          <div className="space-y-2">
+                            <div className="h-4 w-32 bg-gray-200 animate-pulse rounded" />
+                            <div className="h-3 w-24 bg-gray-200 animate-pulse rounded" />
+                          </div>
+                          <div className="h-4 w-20 bg-gray-200 animate-pulse rounded" />
                         </div>
-                        <div className="h-4 w-20 bg-gray-200 animate-pulse rounded" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  calculateTopProducts(completedOrdersList).map((product, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {product.sales} vendas
+                      ))}
+                    </div>
+                  ) : (
+                    calculateTopProducts(completedOrdersList).map((product, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{product.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {product.sales} vendas
+                          </p>
+                        </div>
+                        <p className="font-medium">
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                          }).format(product.revenue)}
                         </p>
                       </div>
-                      <p className="font-medium">
-                        {new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL'
-                        }).format(product.revenue)}
-                      </p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full" onClick={() => onTabChange('ebooks')}>
-                Ver Todos os Produtos
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Insights Section */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 w-full">
-            <Card className="p-6">
+                    ))
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" className="w-full" onClick={() => onTabChange('analytics')}>
+                  Ver Todos os Produtos
+                </Button>
+              </CardFooter>
+            </Card>
+            {/* Pedidos Concluídos (1/3 width on lg) */}
+            <Card className="col-span-1 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Pedidos Concluídos</p>
@@ -514,6 +514,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 Ver Pedidos Concluídos
               </Button>
             </Card>
+          </div>
+
+          {/* Insights Section */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 w-full">
             <Card className="p-6">
               <CardHeader>
                 <CardTitle>Atualizações Recentes de Conteúdo</CardTitle>
