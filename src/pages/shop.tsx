@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ShoppingCart, BookOpen } from 'lucide-react';
+import { Search, ShoppingCart, BookOpen, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EbookCard, type Ebook } from '@/components/shop/ebook-card';
 import { NewsletterForm } from '@/components/newsletter-form';
@@ -7,7 +7,7 @@ import { useCart } from '@/context/cart-context';
 import { LazyImage } from '@/components/shop/lazy-image';
 import { AnimatedGridItem } from '@/components/shop/animated-grid-item';
 import { AnimatedCartIcon } from '@/components/shop/animated-cart-icon';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, Variants } from 'framer-motion';
 import { getEbooks } from '@/lib/supabase';
 
 // Remove mock data
@@ -21,6 +21,10 @@ const categories = [
   "Saúde",
   "Carreira",
 ];
+
+// Add CTA animations
+const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.5 } } };
+const ctaButtonVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 400, damping: 20 } } };
 
 export function ShopPage() {
   const { addItem } = useCart();
@@ -159,12 +163,33 @@ export function ShopPage() {
             >
               Explore nossa seleção curada de eBooks projetados para inspirar e transformar sua vida.
             </motion.p>
+            <motion.div
+              variants={ctaContainerVariants}
+              initial="hidden"
+              animate="visible"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full"
+            >
+              <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+                <Button size="lg" asChild className="w-full sm:w-auto">
+                  <a href="#featured-ebook">
+                    eBook em Destaque <ArrowRight className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+              </motion.div>
+              <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
+                  <a href="#all-ebooks">
+                    Todos os eBooks <ArrowRight className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </motion.section>
 
       {/* Featured eBook */}
-      <section className="py-16 bg-background">
+      <section id="featured-ebook" className="py-16 bg-background">
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">eBook em Destaque</h2>
           
@@ -250,7 +275,7 @@ export function ShopPage() {
       </section>
 
       {/* All eBooks with Search and Filter */}
-      <section className="py-16 bg-muted/30">
+      <section id="all-ebooks" className="py-16 bg-muted/30">
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl md:text-3xl font-heading font-semibold">Todos os eBooks</h2>

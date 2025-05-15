@@ -1,6 +1,11 @@
 import { useState } from 'react';
-import { Mail, MapPin, Send, Clock, CheckCircle, ChevronDown, Loader2 } from 'lucide-react';
+import { Mail, MapPin, Send, Clock, CheckCircle, ChevronDown, Loader2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { motion, Variants } from 'framer-motion';
+
+// Add CTA animations
+const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.5 } } };
+const ctaButtonVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 400, damping: 20 } } };
 
 export function ContactPage() {
   const [formState, setFormState] = useState({
@@ -61,12 +66,33 @@ export function ContactPage() {
             <p className="text-lg text-muted-foreground mb-6 animate-in fade-in duration-1000 slide-in-from-bottom-4 delay-500">
               Tem perguntas sobre meu podcast, eBooks ou palestras? Vamos nos conectar!
             </p>
+            <motion.div
+              variants={ctaContainerVariants}
+              initial="hidden"
+              animate="visible"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full"
+            >
+              <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+                <Button size="lg" asChild className="w-full sm:w-auto">
+                  <a href="#contact-form">
+                    Enviar Mensagem <ArrowRight className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+              </motion.div>
+              <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
+                  <a href="#faq-section">
+                    Perguntas Frequentes <ArrowRight className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Contact Form and Info */}
-      <section className="py-16 bg-background">
+      <section id="contact-form" className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             
