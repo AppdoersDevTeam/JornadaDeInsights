@@ -157,20 +157,6 @@ export function Header() {
             Loja
           </NavLink>
           <NavLink
-            to="/about"
-            className={({ isActive }) =>
-              `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
-                isActive
-                  ? 'bg-[#606C38] text-white'
-                  : 'hover:bg-[#606C38] hover:text-white'
-              }`
-            }
-            onClick={closeMenu}
-          >
-            <Info className="h-5 w-5" />
-            Sobre
-          </NavLink>
-          <NavLink
             to="/contact"
             className={({ isActive }) =>
               `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
