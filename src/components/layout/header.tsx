@@ -94,7 +94,7 @@ export function Header() {
 
       {/* Mobile Navigation */}
       <div className={cn(
-        "fixed inset-0 top-[72px] bg-white z-40 transform transition-transform duration-300 ease-in-out md:hidden overflow-y-auto",
+        "fixed inset-0 top-[72px] bg-white z-50 transform transition-transform duration-300 ease-in-out md:hidden overflow-y-auto h-[calc(100vh-72px)]",
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-4 items-start">
@@ -141,7 +141,6 @@ export function Header() {
               </NavLink>
             );
           })}
-          {/* Entrar link for sign in (only if not signed in) */}
           {!user && (
             <NavLink
               to="/signin"
