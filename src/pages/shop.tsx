@@ -131,19 +131,6 @@ export function ShopPage() {
         />
         <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <motion.div
-              animate={{
-                y: [0, -10, 0],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="mb-6"
-            >
-              <BookOpen className="h-16 w-16 mx-auto text-primary" />
-            </motion.div>
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ 

@@ -3,9 +3,14 @@ import plogo from '@/plogo.png';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { NewsletterForm } from '@/components/newsletter-form';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { useTypewriter, Cursor } from 'react-simple-typewriter';
 import CountUp from 'react-countup';
+import { ArrowRight } from 'lucide-react';
+
+// Add CTA animations
+const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.5 } } };
+const ctaButtonVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 400, damping: 20 } } };
 
 export function AboutPage() {
   const [text] = useTypewriter({ words: ['Sobre a Patricia'], loop: 1, typeSpeed: 100 });
@@ -45,11 +50,33 @@ export function AboutPage() {
           >
             Podcaster, autora e criadora de conteúdo, compartilhando insights sobre crescimento pessoal e bem-estar.
           </motion.p>
+          <motion.div
+            variants={ctaContainerVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full"
+          >
+            <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+              <Button size="lg" asChild className="w-full sm:w-auto">
+                <a href="#bio-section">
+                  Explorar Minha História <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </motion.div>
+            <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
+                <a href="#timeline-section">
+                  Explorar Minha Jornada <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
       </motion.section>
 
       {/* Bio Section */}
       <motion.section
+        id="bio-section"
         className="py-16"
         initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
@@ -245,6 +272,7 @@ export function AboutPage() {
 
       {/* Timeline */}
       <motion.section
+        id="timeline-section"
         className="py-16 bg-muted/30"
         initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
