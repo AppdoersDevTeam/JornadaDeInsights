@@ -7,35 +7,7 @@
       "config": { "distDir": "dist" }
     },
     {
-      "src": "api/create-checkout-session.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["api/**/*.js"]
-      }
-    },
-    {
-      "src": "api/send-purchase-email.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["api/**/*.js"]
-      }
-    },
-    {
-      "src": "api/completed-orders.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["api/**/*.js"]
-      }
-    },
-    {
-      "src": "api/stats.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["api/**/*.js"]
-      }
-    },
-    {
-      "src": "api/users.js",
+      "src": "api/**/*.js",
       "use": "@vercel/node",
       "config": {
         "includeFiles": ["api/**/*.js"]
@@ -44,66 +16,26 @@
   ],
   "routes": [
     {
-      "src": "/api/create-checkout-session",
-      "dest": "/api/create-checkout-session.js",
-      "methods": ["POST", "OPTIONS"],
+      "src": "/api/(.*)",
+      "dest": "/api/$1.js",
+      "methods": ["GET", "POST", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
         "Access-Control-Allow-Credentials": "true",
         "Content-Type": "application/json"
       }
     },
     {
-      "src": "/api/send-purchase-email",
-      "dest": "/api/send-purchase-email.js",
-      "methods": ["POST", "OPTIONS"],
-      "headers": {
-        "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
-        "Access-Control-Allow-Credentials": "true",
-        "Content-Type": "application/json"
-      }
+      "handle": "filesystem"
     },
     {
-      "src": "/api/completed-orders",
-      "dest": "/api/completed-orders.js",
-      "methods": ["GET", "OPTIONS"],
+      "src": "/(.*)",
+      "dest": "/index.html",
       "headers": {
-        "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
-        "Access-Control-Allow-Credentials": "true",
-        "Content-Type": "application/json"
+        "Cache-Control": "public, max-age=0, must-revalidate"
       }
-    },
-    {
-      "src": "/api/stats",
-      "dest": "/api/stats.js",
-      "methods": ["GET", "OPTIONS"],
-      "headers": {
-        "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
-        "Access-Control-Allow-Credentials": "true",
-        "Content-Type": "application/json"
-      }
-    },
-    {
-      "src": "/users",
-      "dest": "/api/users.js",
-      "methods": ["GET", "OPTIONS"],
-      "headers": {
-        "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
-        "Access-Control-Allow-Credentials": "true",
-        "Content-Type": "application/json"
-      }
-    },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    }
   ]
 } 
