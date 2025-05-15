@@ -46,7 +46,7 @@ export function Header() {
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 bg-primary",
       scrolled ? "shadow-sm" : ""
     )}>
-      <div className="container mx-auto px-4 flex items-center">
+      <div className="container mx-auto px-4 flex items-center justify-between">
         <Link to="/" className="flex items-center">
           <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
         </Link>
@@ -85,7 +85,7 @@ export function Header() {
         {/* Mobile Menu Toggle */}
         <button 
           onClick={toggleMenu}
-          className="md:hidden text-foreground p-2 bg-background rounded-full shadow"
+          className="md:hidden text-foreground p-2 bg-background rounded-full shadow ml-auto"
           aria-label="Toggle menu"
         >
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
