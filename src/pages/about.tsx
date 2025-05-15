@@ -58,16 +58,46 @@ export function AboutPage() {
           >
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button size="lg" asChild className="w-full sm:w-auto">
-                <Link to="/about#bio-section">
+                <a href="#bio-section" onClick={(e) => {
+                  e.preventDefault();
+                  setTimeout(() => {
+                    const element = document.getElementById('bio-section');
+                    if (element) {
+                      const headerOffset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }, 100);
+                }}>
                   Explorar Minha História <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+                </a>
               </Button>
             </motion.div>
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                <Link to="/about#timeline-section">
+                <a href="#timeline-section" onClick={(e) => {
+                  e.preventDefault();
+                  setTimeout(() => {
+                    const element = document.getElementById('timeline-section');
+                    if (element) {
+                      const headerOffset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }, 100);
+                }}>
                   Explorar Minha Jornada <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+                </a>
               </Button>
             </motion.div>
           </motion.div>

@@ -157,14 +157,44 @@ export function ShopPage() {
           >
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button size="lg" asChild className="w-full sm:w-auto">
-                <a href="#featured-ebook">
+                <a href="#featured-ebook" onClick={(e) => {
+                  e.preventDefault();
+                  setTimeout(() => {
+                    const element = document.getElementById('featured-ebook');
+                    if (element) {
+                      const headerOffset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }, 100);
+                }}>
                   eBook em Destaque <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </motion.div>
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                <a href="#all-ebooks">
+                <a href="#all-ebooks" onClick={(e) => {
+                  e.preventDefault();
+                  setTimeout(() => {
+                    const element = document.getElementById('all-ebooks');
+                    if (element) {
+                      const headerOffset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }, 100);
+                }}>
                   Todos os eBooks <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>

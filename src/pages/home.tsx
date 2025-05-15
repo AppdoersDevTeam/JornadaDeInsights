@@ -35,6 +35,20 @@ const testimonials = [
   }
 ];
 
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const ctaButtonVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const staggerContainer = {
+  // ... existing code ...
+};
+
 export function HomePage() {
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [heroVideo, setHeroVideo] = useState<YouTubeVideo | null>(null);
@@ -224,28 +238,48 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="flex flex-col sm:flex-row gap-4"
               >
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="inline-block"
-                >
-                  <Button asChild size="lg">
-                    <Link to="/podcast">
-                      Ouvir o Podcast <Play className="ml-2 h-4 w-4" />
-                    </Link>
+                <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+                  <Button size="lg" asChild className="w-full sm:w-auto">
+                    <a href="#podcast-section" onClick={(e) => {
+                      e.preventDefault();
+                      setTimeout(() => {
+                        const element = document.getElementById('podcast-section');
+                        if (element) {
+                          const headerOffset = 80;
+                          const elementPosition = element.getBoundingClientRect().top;
+                          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                          
+                          window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                          });
+                        }
+                      }, 100);
+                    }}>
+                      Ouvir o Podcast <ArrowRight className="ml-2 h-4 w-4" />
+                    </a>
                   </Button>
                 </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="inline-block"
-                >
-                  <Button variant="outline" size="lg" asChild>
-                    <Link to="/shop">
-                      Explorar eBooks <Bookmark className="ml-2 h-4 w-4" />
-                    </Link>
+                <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+                  <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
+                    <a href="#ebooks-section" onClick={(e) => {
+                      e.preventDefault();
+                      setTimeout(() => {
+                        const element = document.getElementById('ebooks-section');
+                        if (element) {
+                          const headerOffset = 80;
+                          const elementPosition = element.getBoundingClientRect().top;
+                          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                          
+                          window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                          });
+                        }
+                      }, 100);
+                    }}>
+                      Explorar eBooks <ArrowRight className="ml-2 h-4 w-4" />
+                    </a>
                   </Button>
                 </motion.div>
               </motion.div>
