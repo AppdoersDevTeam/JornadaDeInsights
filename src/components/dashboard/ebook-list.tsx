@@ -4,6 +4,13 @@ import { FileObject } from '@supabase/storage-js';
 import { Eye, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { auth } from '@/lib/firebase';
+import EditEbookForm from './edit-ebook-form';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface EbookMetadata {
   title: string;
@@ -27,6 +34,7 @@ export default function EbookList() {
   const [ebooks, setEbooks] = useState<Ebook[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(null);
 
   const fetchEbooks = async () => {
     try {
@@ -231,6 +239,11 @@ export default function EbookList() {
     }
   };
 
+  const handleEditSuccess = () => {
+    setSelectedEbook(null);
+    fetchEbooks();
+  };
+
   useEffect(() => {
     fetchEbooks();
   }, []);
@@ -244,24 +257,24 @@ export default function EbookList() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {ebooks.map((ebook) => (
-        <div key={ebook.id} className="bg-white rounded-lg shadow-md h-[480px] flex flex-col">
-          <div className="relative h-[300px] w-full">
-            <img
-              src={ebook.coverUrl || ''}
-              alt={ebook.metadata.title}
-              className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
-            />
-          </div>
-          <div className="p-4 flex flex-col flex-1">
-            <h3 className="text-lg font-semibold truncate mb-1" title={ebook.metadata.title}>
-              {ebook.metadata.title}
-            </h3>
-            <p className="text-gray-600 text-sm truncate mb-2" title={ebook.metadata.description}>
-              {ebook.metadata.description}
-            </p>
-            <div className="mt-auto">
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {ebooks.map((ebook) => (
+          <div key={ebook.id} className="bg-white rounded-lg shadow-md h-[480px] flex flex-col">
+            <div className="relative h-[300px] w-full">
+              <img
+                src={ebook.coverUrl || ''}
+                alt={ebook.metadata.title}
+                className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
+              />
+            </div>
+            <div className="p-4 flex flex-col flex-1">
+              <h3 className="text-lg font-semibold truncate mb-1" title={ebook.metadata.title}>
+                {ebook.metadata.title}
+              </h3>
+              <p className="text-gray-600 text-sm truncate mb-2" title={ebook.metadata.description}>
+                {ebook.metadata.description}
+              </p>
               <p className="text-primary font-semibold mb-2">${ebook.metadata.price.toFixed(2)}</p>
               <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
                 <span>{ebook.size.toFixed(2)} MB</span>
@@ -275,7 +288,7 @@ export default function EbookList() {
                   <Eye size={20} />
                 </button>
                 <button
-                  onClick={() => {/* TODO: Implement edit functionality */}}
+                  onClick={() => setSelectedEbook(ebook)}
                   className="p-2 text-gray-600 hover:text-primary transition-colors"
                 >
                   <Edit size={20} />
@@ -289,8 +302,23 @@ export default function EbookList() {
               </div>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+
+      <Dialog open={!!selectedEbook} onOpenChange={() => setSelectedEbook(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit eBook</DialogTitle>
+          </DialogHeader>
+          {selectedEbook && (
+            <EditEbookForm
+              ebook={selectedEbook}
+              onEditSuccess={handleEditSuccess}
+              onCancel={() => setSelectedEbook(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 } 

@@ -44,7 +44,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
 
   return (
     <>
-      <div className="h-full mt-[62px]">
+      <div className="h-full mt-[52px]">
         <div className="flex h-16 items-center border-b px-6">
           <h2 className="text-lg font-semibold">Meu Dashboard</h2>
         </div>
