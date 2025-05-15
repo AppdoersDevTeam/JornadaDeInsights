@@ -102,56 +102,31 @@ export default async function handler(req, res) {
       const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const endOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
 
-      // Fetch both charges and balance transactions for complete data
-      const [dayCharges, dayTransactions] = await Promise.all([
-        stripe.charges.list({
-          created: {
-            gte: Math.floor(startOfDate.getTime() / 1000),
-            lt: Math.floor(endOfDate.getTime() / 1000)
-          },
-          limit: 100
-        }),
-        stripe.balanceTransactions.list({
-          created: {
-            gte: Math.floor(startOfDate.getTime() / 1000),
-            lt: Math.floor(endOfDate.getTime() / 1000)
-          },
-          limit: 100
-        })
-      ]);
+      // Get all balance transactions for the day
+      const dayTransactions = await stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startOfDate.getTime() / 1000),
+          lt: Math.floor(endOfDate.getTime() / 1000)
+        },
+        limit: 100
+      });
 
-      // Calculate sales from both charges and balance transactions
-      const salesFromCharges = dayCharges.data
-        .filter(ch => ch.status === 'succeeded')
-        .reduce((sum, ch) => {
-          // Convert from cents to dollars
-          return sum + (ch.amount / 100);
-        }, 0);
-
-      const salesFromTransactions = dayTransactions.data
-        .filter(txn => txn.type === 'charge' && txn.status === 'available')
-        .reduce((sum, txn) => {
-          // Convert from cents to dollars
-          return sum + (txn.amount / 100);
-        }, 0);
-
-      // Use the larger of the two values to ensure we don't miss any sales
-      const sales = Math.max(salesFromCharges, salesFromTransactions);
+      // Calculate sales from balance transactions
+      const sales = dayTransactions.data
+        .filter(txn => ['payment', 'charge'].includes(txn.type))
+        .reduce((sum, txn) => sum + (txn.amount / 100), 0);
 
       // Format date as dd/mm
       const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
 
       // Log the data for debugging
       console.log(`Data for ${formattedDate}:`, {
-        salesFromCharges,
-        salesFromTransactions,
-        finalSales: sales,
-        chargesCount: dayCharges.data.length,
-        transactionsCount: dayTransactions.data.length,
-        charges: dayCharges.data.map(ch => ({
-          amount: ch.amount / 100,
-          currency: ch.currency,
-          status: ch.status
+        sales,
+        transactions: dayTransactions.data.map(txn => ({
+          type: txn.type,
+          amount: txn.amount / 100,
+          currency: txn.currency,
+          description: txn.description
         }))
       });
 
@@ -168,36 +143,17 @@ export default async function handler(req, res) {
       const startDate = new Date(endDate);
       startDate.setDate(endDate.getDate() - 7);
 
-      const [weekCharges, weekTransactions] = await Promise.all([
-        stripe.charges.list({
-          created: {
-            gte: Math.floor(startDate.getTime() / 1000),
-            lt: Math.floor(endDate.getTime() / 1000)
-          },
-          limit: 100
-        }),
-        stripe.balanceTransactions.list({
-          created: {
-            gte: Math.floor(startDate.getTime() / 1000),
-            lt: Math.floor(endDate.getTime() / 1000)
-          },
-          limit: 100
-        })
-      ]);
+      const weekTransactions = await stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startDate.getTime() / 1000),
+          lt: Math.floor(endDate.getTime() / 1000)
+        },
+        limit: 100
+      });
 
-      const salesFromCharges = weekCharges.data
-        .filter(ch => ch.status === 'succeeded')
-        .reduce((sum, ch) => {
-          return sum + (ch.amount / 100);
-        }, 0);
-
-      const salesFromTransactions = weekTransactions.data
-        .filter(txn => txn.type === 'charge' && txn.status === 'available')
-        .reduce((sum, txn) => {
-          return sum + (txn.amount / 100);
-        }, 0);
-
-      const sales = Math.max(salesFromCharges, salesFromTransactions);
+      const sales = weekTransactions.data
+        .filter(txn => ['payment', 'charge'].includes(txn.type))
+        .reduce((sum, txn) => sum + (txn.amount / 100), 0);
 
       salesTrends.weekly.push({
         date: `Week ${4-i}`,
@@ -212,36 +168,17 @@ export default async function handler(req, res) {
       const startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
       const nextMonth = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 1);
 
-      const [monthCharges, monthTransactions] = await Promise.all([
-        stripe.charges.list({
-          created: {
-            gte: Math.floor(startDate.getTime() / 1000),
-            lt: Math.floor(nextMonth.getTime() / 1000)
-          },
-          limit: 100
-        }),
-        stripe.balanceTransactions.list({
-          created: {
-            gte: Math.floor(startDate.getTime() / 1000),
-            lt: Math.floor(nextMonth.getTime() / 1000)
-          },
-          limit: 100
-        })
-      ]);
+      const monthTransactions = await stripe.balanceTransactions.list({
+        created: {
+          gte: Math.floor(startDate.getTime() / 1000),
+          lt: Math.floor(nextMonth.getTime() / 1000)
+        },
+        limit: 100
+      });
 
-      const salesFromCharges = monthCharges.data
-        .filter(ch => ch.status === 'succeeded')
-        .reduce((sum, ch) => {
-          return sum + (ch.amount / 100);
-        }, 0);
-
-      const salesFromTransactions = monthTransactions.data
-        .filter(txn => txn.type === 'charge' && txn.status === 'available')
-        .reduce((sum, txn) => {
-          return sum + (txn.amount / 100);
-        }, 0);
-
-      const sales = Math.max(salesFromCharges, salesFromTransactions);
+      const sales = monthTransactions.data
+        .filter(txn => ['payment', 'charge'].includes(txn.type))
+        .reduce((sum, txn) => sum + (txn.amount / 100), 0);
 
       salesTrends.monthly.push({
         date: `${endDate.getMonth() + 1}`.padStart(2, '0'),
