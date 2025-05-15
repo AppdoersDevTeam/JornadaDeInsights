@@ -232,20 +232,43 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           setCompletedOrdersList(orders);
           setTopProducts(topProducts);
           
-          // Ensure salesTrends has the correct structure
-          setSalesTrends({
-            daily: Array.isArray(trendsData?.daily) ? trendsData.daily : [],
-            weekly: Array.isArray(trendsData?.weekly) ? trendsData.weekly : [],
-            monthly: Array.isArray(trendsData?.monthly) ? trendsData.monthly : []
-          });
+          // Ensure salesTrends has the correct structure and format
+          const formattedTrends = {
+            daily: Array.isArray(trendsData?.daily) ? trendsData.daily.map((item: SalesData) => ({
+              ...item,
+              date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              sales: Number(item.sales) || 0,
+              refunds: Number(item.refunds) || 0,
+              disputes: Number(item.disputes) || 0,
+              disputesWon: Number(item.disputesWon) || 0
+            })) : [],
+            weekly: Array.isArray(trendsData?.weekly) ? trendsData.weekly.map((item: SalesData) => ({
+              ...item,
+              date: item.date,
+              sales: Number(item.sales) || 0,
+              refunds: Number(item.refunds) || 0,
+              disputes: Number(item.disputes) || 0,
+              disputesWon: Number(item.disputesWon) || 0
+            })) : [],
+            monthly: Array.isArray(trendsData?.monthly) ? trendsData.monthly.map((item: SalesData) => ({
+              ...item,
+              date: new Date(2024, Number(item.date) - 1).toLocaleDateString('en-US', { month: 'short' }),
+              sales: Number(item.sales) || 0,
+              refunds: Number(item.refunds) || 0,
+              disputes: Number(item.disputes) || 0,
+              disputesWon: Number(item.disputesWon) || 0
+            })) : []
+          };
+
+          setSalesTrends(formattedTrends);
 
           // Use real stats from the server
           setStats({
-            today: today || 0,
-            week: week || 0,
-            month: month || 0,
+            today: Number(today) || 0,
+            week: Number(week) || 0,
+            month: Number(month) || 0,
             users: users || { total: 0, newThisWeek: 0 },
-            completedOrders: completedOrders || 0
+            completedOrders: Number(completedOrders) || 0
           });
 
           setStatsLoading(false);
