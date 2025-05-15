@@ -49,6 +49,20 @@ const staggerContainer = {
   // ... existing code ...
 };
 
+const scrollToSection = (sectionId: string) => {
+  const element = document.getElementById(sectionId);
+  if (element) {
+    const headerOffset = 80;
+    const elementPosition = element.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+  }
+};
+
 export function HomePage() {
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [heroVideo, setHeroVideo] = useState<YouTubeVideo | null>(null);
@@ -240,44 +254,28 @@ export function HomePage() {
               >
                 <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
                   <Button size="lg" asChild className="w-full sm:w-auto">
-                    <a href="#podcast-section" onClick={(e) => {
-                      e.preventDefault();
-                      setTimeout(() => {
-                        const element = document.getElementById('podcast-section');
-                        if (element) {
-                          const headerOffset = 80;
-                          const elementPosition = element.getBoundingClientRect().top;
-                          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                          
-                          window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                          });
-                        }
-                      }, 100);
-                    }}>
+                    <a 
+                      href="#podcast-section" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        scrollToSection('podcast-section');
+                      }}
+                    >
                       Ouvir o Podcast <ArrowRight className="ml-2 h-4 w-4" />
                     </a>
                   </Button>
                 </motion.div>
                 <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
                   <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                    <a href="#ebooks-section" onClick={(e) => {
-                      e.preventDefault();
-                      setTimeout(() => {
-                        const element = document.getElementById('ebooks-section');
-                        if (element) {
-                          const headerOffset = 80;
-                          const elementPosition = element.getBoundingClientRect().top;
-                          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                          
-                          window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                          });
-                        }
-                      }, 100);
-                    }}>
+                    <a 
+                      href="#ebooks-section" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        scrollToSection('ebooks-section');
+                      }}
+                    >
                       Explorar eBooks <ArrowRight className="ml-2 h-4 w-4" />
                     </a>
                   </Button>

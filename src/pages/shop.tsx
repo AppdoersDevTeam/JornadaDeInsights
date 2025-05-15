@@ -26,6 +26,20 @@ const categories = [
 const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.5 } } };
 const ctaButtonVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 400, damping: 20 } } };
 
+const scrollToSection = (sectionId: string) => {
+  const element = document.getElementById(sectionId);
+  if (element) {
+    const headerOffset = 80;
+    const elementPosition = element.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+  }
+};
+
 export function ShopPage() {
   const { addItem } = useCart();
   const [ebooks, setEbooks] = useState<Ebook[]>([]);
@@ -157,44 +171,28 @@ export function ShopPage() {
           >
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button size="lg" asChild className="w-full sm:w-auto">
-                <a href="#featured-ebook" onClick={(e) => {
-                  e.preventDefault();
-                  setTimeout(() => {
-                    const element = document.getElementById('featured-ebook');
-                    if (element) {
-                      const headerOffset = 80;
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                      
-                      window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                      });
-                    }
-                  }, 100);
-                }}>
+                <a 
+                  href="#featured-ebook" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    scrollToSection('featured-ebook');
+                  }}
+                >
                   eBook em Destaque <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </motion.div>
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                <a href="#all-ebooks" onClick={(e) => {
-                  e.preventDefault();
-                  setTimeout(() => {
-                    const element = document.getElementById('all-ebooks');
-                    if (element) {
-                      const headerOffset = 80;
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                      
-                      window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                      });
-                    }
-                  }, 100);
-                }}>
+                <a 
+                  href="#all-ebooks" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    scrollToSection('all-ebooks');
+                  }}
+                >
                   Todos os eBooks <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
