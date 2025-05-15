@@ -285,7 +285,7 @@ export function PodcastPage() {
       <motion.section
         initial="hidden"
         animate="visible"
-        className="relative min-h-[60vh] pt-28 pb-20 md:py-20 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        className="relative min-h-[60vh] pt-32 md:pt-36 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
       >
         {/* Background blurred blobs */}
         <motion.div
