@@ -27,17 +27,19 @@ const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { st
 const ctaButtonVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 400, damping: 20 } } };
 
 const scrollToSection = (sectionId: string) => {
-  const element = document.getElementById(sectionId);
-  if (element) {
-    const headerOffset = 80;
-    const elementPosition = element.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-    
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: 'smooth'
-    });
-  }
+  requestAnimationFrame(() => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  });
 };
 
 export function ShopPage() {
@@ -176,7 +178,7 @@ export function ShopPage() {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    scrollToSection('featured-ebook');
+                    requestAnimationFrame(() => scrollToSection('featured-ebook'));
                   }}
                 >
                   eBook em Destaque <ArrowRight className="ml-2 h-4 w-4" />
@@ -190,7 +192,7 @@ export function ShopPage() {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    scrollToSection('all-ebooks');
+                    requestAnimationFrame(() => scrollToSection('all-ebooks'));
                   }}
                 >
                   Todos os eBooks <ArrowRight className="ml-2 h-4 w-4" />

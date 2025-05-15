@@ -51,15 +51,21 @@ const staggerContainer = {
 
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId);
-  if (element) {
-    const headerOffset = 80;
-    const elementPosition = element.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-    
+  if (!element) return;
+
+  const headerOffset = 80;
+  const elementPosition = element.getBoundingClientRect().top;
+  const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+  // Use smooth scrolling with a fallback
+  try {
     window.scrollTo({
       top: offsetPosition,
       behavior: 'smooth'
     });
+  } catch (e) {
+    // Fallback for browsers that don't support smooth scrolling
+    window.scrollTo(0, offsetPosition);
   }
 };
 
