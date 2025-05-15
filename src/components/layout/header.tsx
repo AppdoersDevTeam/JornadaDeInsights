@@ -46,13 +46,13 @@ export function Header() {
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 bg-primary",
       scrolled ? "shadow-sm" : ""
     )}>
-      <div className="container mx-auto px-4 flex items-center justify-between">
+      <div className="container mx-auto px-4 flex items-center">
         <Link to="/" className="flex items-center">
           <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-8">
+        <nav className="hidden md:flex flex-1 justify-center gap-8">
           {navLinks.map((link) => (
             <NavLink 
               key={link.to}
