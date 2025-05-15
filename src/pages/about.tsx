@@ -19,7 +19,7 @@ export function AboutPage() {
     <>
       {/* Hero Section */}
       <motion.section
-        className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background pt-[60px]"
+        className="relative min-h-[60vh] py-20 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
         initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
         viewport={{ amount: 0.3 }}
@@ -37,7 +37,7 @@ export function AboutPage() {
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         />
         
-        <div className="max-w-3xl mx-auto text-center">
+        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
           <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">
             {text}
             <Cursor cursorStyle="|" />
@@ -54,7 +54,7 @@ export function AboutPage() {
             variants={ctaContainerVariants}
             initial="hidden"
             animate="visible"
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full"
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md mx-auto px-4 sm:px-0"
           >
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button size="lg" asChild className="w-full sm:w-auto">

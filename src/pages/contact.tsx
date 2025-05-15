@@ -59,37 +59,60 @@ export function ContactPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background pt-[60px]">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4 animate-in fade-in duration-1000 slide-in-from-bottom-4">Entre em Contato</h1>
-            <p className="text-lg text-muted-foreground mb-6 animate-in fade-in duration-1000 slide-in-from-bottom-4 delay-500">
-              Tem perguntas sobre meu podcast, eBooks ou palestras? Vamos nos conectar!
-            </p>
-            <motion.div
-              variants={ctaContainerVariants}
-              initial="hidden"
-              animate="visible"
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full"
-            >
-              <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
-                <Button size="lg" asChild className="w-full sm:w-auto">
-                  <a href="#contact-form">
-                    Enviar Mensagem <ArrowRight className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
-              </motion.div>
-              <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                  <a href="#faq-section">
-                    Perguntas Frequentes <ArrowRight className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
-              </motion.div>
+      <motion.section
+        className="relative min-h-[60vh] py-20 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
+        whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
+        viewport={{ amount: 0.3 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+      >
+        {/* Background blurred blobs */}
+        <motion.div
+          className="absolute top-0 -left-8 w-64 h-64 bg-secondary/20 rounded-full blur-2xl"
+          animate={{ x: [0, 20, 0], y: [0, 10, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute bottom-0 -right-8 w-72 h-72 bg-primary/20 rounded-full blur-3xl"
+          animate={{ x: [0, -20, 0], y: [0, -10, 0] }}
+          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        
+        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
+          <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">
+            Entre em Contato
+          </h1>
+          <motion.p className="text-lg text-muted-foreground mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Tem perguntas sobre meu podcast, eBooks ou palestras? Vamos nos conectar!
+          </motion.p>
+          <motion.div
+            variants={ctaContainerVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md mx-auto px-4 sm:px-0"
+          >
+            <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+              <Button size="lg" asChild className="w-full sm:w-auto">
+                <a href="#contact-form">
+                  Enviar Mensagem <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
             </motion.div>
-          </div>
+            <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
+                <a href="#faq-section">
+                  Perguntas Frequentes <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Contact Form and Info */}
       <section id="contact-form" className="py-16 bg-background">

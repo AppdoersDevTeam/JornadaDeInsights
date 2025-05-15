@@ -118,9 +118,12 @@ export function ShopPage() {
   return (
     <div style={{ scrollBehavior: 'smooth' }}>
       {/* Hero Section */}
-      <motion.section 
-        className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background pt-[60px]"
-        style={{ y: heroY, opacity: heroOpacity }}
+      <motion.section
+        className="relative min-h-[60vh] py-20 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
+        whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
+        viewport={{ amount: 0.3 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         {/* Background blurred blobs */}
         <motion.div
@@ -133,58 +136,40 @@ export function ShopPage() {
           animate={{ x: [0, -20, 0], y: [0, -10, 0] }}
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ 
-                opacity: 1, 
-                y: 0,
-                scale: [1, 1.02, 1],
-              }}
-              transition={{ 
-                duration: 0.6, 
-                ease: "easeOut",
-                scale: {
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }
-              }}
-              className="text-3xl md:text-5xl font-heading font-bold mb-4"
-            >
-              Descubra Nossa Coleção de eBooks
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="text-lg text-muted-foreground mb-6"
-            >
-              Explore nossa seleção curada de eBooks projetados para inspirar e transformar sua vida.
-            </motion.p>
-            <motion.div
-              variants={ctaContainerVariants}
-              initial="hidden"
-              animate="visible"
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full"
-            >
-              <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
-                <Button size="lg" asChild className="w-full sm:w-auto">
-                  <a href="#featured-ebook">
-                    eBook em Destaque <ArrowRight className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
-              </motion.div>
-              <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                  <a href="#all-ebooks">
-                    Todos os eBooks <ArrowRight className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
-              </motion.div>
+        
+        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
+          <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">
+            Descubra Nossa Coleção de eBooks
+          </h1>
+          <motion.p className="text-lg text-muted-foreground mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Explore nossa seleção curada de eBooks projetados para inspirar e transformar sua vida.
+          </motion.p>
+          <motion.div
+            variants={ctaContainerVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md mx-auto px-4 sm:px-0"
+          >
+            <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+              <Button size="lg" asChild className="w-full sm:w-auto">
+                <a href="#featured-ebook">
+                  eBook em Destaque <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
             </motion.div>
-          </div>
+            <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
+                <a href="#all-ebooks">
+                  Todos os eBooks <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
       </motion.section>
 

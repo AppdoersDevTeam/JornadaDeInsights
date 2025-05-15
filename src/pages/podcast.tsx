@@ -285,14 +285,14 @@ export function PodcastPage() {
       <motion.section
         initial="hidden"
         animate="visible"
-        className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background pt-[60px]"
+        className="relative min-h-[60vh] py-20 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
       >
         <motion.div
           variants={ringVariants}
           className="absolute inset-0 bg-primary/5 rounded-full"
           style={{ transform: 'translate(-50%, -50%)' }}
         />
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10 pt-12">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10">
           <motion.div
             variants={headlineContainerVariants}
             className="max-w-3xl mx-auto text-center mb-8"
@@ -318,7 +318,7 @@ export function PodcastPage() {
           </motion.p>
           <motion.div
             variants={ctaContainerVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full"
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md mx-auto px-4 sm:px-0"
           >
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button size="lg" asChild className="w-full sm:w-auto">
