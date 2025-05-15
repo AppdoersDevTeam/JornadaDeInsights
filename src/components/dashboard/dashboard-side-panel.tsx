@@ -19,7 +19,7 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
   return (
     <div className="h-full mt-[52px]">
       <div className="flex h-16 items-center border-b px-6">
-        <h2 className="text-lg font-semibold">Admin Dashboard</h2>
+        <h2 className="text-lg font-semibold">Painel de Controle</h2>
       </div>
       <nav className="space-y-1 p-4">
         <Button
@@ -28,7 +28,7 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
           onClick={() => onTabChange('overview')}
         >
           <LayoutDashboard className="mr-2 h-4 w-4" />
-          Overview
+          Visão Geral
         </Button>
         <Button
           variant={activeTab === 'ebooks' ? 'secondary' : 'ghost'}
@@ -44,7 +44,7 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
           onClick={() => onTabChange('analytics')}
         >
           <BarChart3 className="mr-2 h-4 w-4" />
-          Analytics
+          Análises
         </Button>
         <Button
           variant={activeTab === 'content' ? 'secondary' : 'ghost'}
@@ -52,7 +52,7 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
           onClick={() => onTabChange('content')}
         >
           <Edit className="mr-2 h-4 w-4" />
-          Content
+          Conteúdo
         </Button>
         <Button
           variant={activeTab === 'users' ? 'secondary' : 'ghost'}
@@ -60,7 +60,7 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
           onClick={() => onTabChange('users')}
         >
           <Users className="mr-2 h-4 w-4" />
-          Users
+          Usuários
         </Button>
         <Button
           variant={activeTab === 'orders' ? 'secondary' : 'ghost'}
@@ -68,7 +68,7 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
           onClick={() => onTabChange('orders')}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
-          Completed Orders
+          Pedidos Concluídos
         </Button>
         <Button
           variant={activeTab === 'settings' ? 'secondary' : 'ghost'}
@@ -76,7 +76,7 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
           onClick={() => onTabChange('settings')}
         >
           <Settings className="mr-2 h-4 w-4" />
-          Settings
+          Configurações
         </Button>
       </nav>
     </div>

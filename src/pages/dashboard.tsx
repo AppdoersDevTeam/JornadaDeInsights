@@ -37,6 +37,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'react-hot-toast';
 import UploadEbookForm from '@/components/dashboard/upload-ebook-form';
 import EbookList from '@/components/dashboard/ebook-list';
+import { SalesTrendsChart } from '@/components/dashboard/sales-trends-chart';
 
 interface DashboardPageProps {
   activeTab: string;
@@ -584,25 +585,11 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       {activeTab === 'analytics' && (
         <div className="space-y-6 w-full">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
-            <Card className="p-6 w-full">
-              <CardHeader>
-                <CardTitle>Tendências de Vendas</CardTitle>
-                <CardDescription>Dados de vendas diários, semanais e mensais</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center w-full min-h-[120px]">
-                  <div className="text-center w-full">
-                    <LineChart className="h-12 w-12 mx-auto text-primary mb-2" />
-                    <p className="text-sm text-muted-foreground">O gráfico de tendências de vendas será exibido aqui</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">
-                  Ver Tendências Detalhadas
-                </Button>
-              </CardFooter>
-            </Card>
+            <SalesTrendsChart
+              dailyData={salesData.salesTrends.daily}
+              weeklyData={salesData.salesTrends.weekly}
+              monthlyData={salesData.salesTrends.monthly}
+            />
             <Card className="p-6 w-full">
               <CardHeader>
                 <CardTitle>Análise de Receita</CardTitle>

@@ -210,6 +210,7 @@ app.get('/stats', async (req, res) => {
     // Fetch total completed orders ever
     const allChargesEver = await stripe.charges.list({ limit: 100 });
     const completedOrdersEver = allChargesEver.data.filter(ch => ch.status === 'succeeded').length;
+
     // Fetch Firebase Auth users for total and new signups in last week
     const allUsers = await admin.auth().listUsers(1000);
     const totalUsers = allUsers.users.length;
@@ -217,14 +218,89 @@ app.get('/stats', async (req, res) => {
       const createdSec = Math.floor(new Date(user.metadata.creationTime).getTime() / 1000);
       return createdSec >= weekStart;
     }).length;
-    // Return analytics including user stats
+
+    // Generate sales trends data
+    const now = new Date();
+    const dailyData = [];
+    const weeklyData = [];
+    const monthlyData = [];
+
+    // Generate daily data for the last 7 days
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      const startOfDay = Math.floor(new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000);
+      const endOfDay = startOfDay + 24 * 60 * 60;
+      
+      const dayCharges = dailyCharges.data.filter(ch => 
+        ch.status === 'succeeded' && 
+        ch.created >= startOfDay && 
+        ch.created < endOfDay
+      );
+      
+      const totalAmount = dayCharges.reduce((sum, ch) => sum + (ch.amount / 100), 0);
+      
+      dailyData.push({
+        date: date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        amount: totalAmount
+      });
+    }
+
+    // Generate weekly data for the last 4 weeks
+    for (let i = 3; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - (i * 7));
+      const startOfWeek = Math.floor(new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000);
+      const endOfWeek = startOfWeek + 7 * 24 * 60 * 60;
+      
+      const weekCharges = weeklyCharges.data.filter(ch => 
+        ch.status === 'succeeded' && 
+        ch.created >= startOfWeek && 
+        ch.created < endOfWeek
+      );
+      
+      const totalAmount = weekCharges.reduce((sum, ch) => sum + (ch.amount / 100), 0);
+      
+      weeklyData.push({
+        week: `Semana ${4-i}`,
+        amount: totalAmount
+      });
+    }
+
+    // Generate monthly data for the last 3 months
+    for (let i = 2; i >= 0; i--) {
+      const date = new Date(now);
+      date.setMonth(date.getMonth() - i);
+      const startOfMonth = Math.floor(new Date(date.getFullYear(), date.getMonth(), 1).getTime() / 1000);
+      const endOfMonth = Math.floor(new Date(date.getFullYear(), date.getMonth() + 1, 0).getTime() / 1000);
+      
+      const monthCharges = monthlyCharges.data.filter(ch => 
+        ch.status === 'succeeded' && 
+        ch.created >= startOfMonth && 
+        ch.created < endOfMonth
+      );
+      
+      const totalAmount = monthCharges.reduce((sum, ch) => sum + (ch.amount / 100), 0);
+      
+      monthlyData.push({
+        month: date.toLocaleDateString('pt-BR', { month: 'short' }),
+        amount: totalAmount
+      });
+    }
+
+    // Return analytics including user stats and sales trends
     res.json({
       today: todayCount,
       week: weekCount,
       month: monthCount,
       completedOrders: completedOrdersEver,
       users: { total: totalUsers, newThisWeek },
-      thresholds: { dayStart, weekStart, monthStart }
+      thresholds: { dayStart, weekStart, monthStart },
+      salesTrends: {
+        daily: dailyData,
+        weekly: weeklyData,
+        monthly: monthlyData
+      }
     });
   } catch (error) {
     console.error('Error fetching stats:', error);
