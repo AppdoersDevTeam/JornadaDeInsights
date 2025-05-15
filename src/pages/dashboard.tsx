@@ -231,21 +231,40 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           
           setCompletedOrdersList(orders);
           setTopProducts(topProducts);
-          setSalesTrends(trendsData);
+          
+          // Ensure salesTrends has the correct structure
+          setSalesTrends({
+            daily: Array.isArray(trendsData?.daily) ? trendsData.daily : [],
+            weekly: Array.isArray(trendsData?.weekly) ? trendsData.weekly : [],
+            monthly: Array.isArray(trendsData?.monthly) ? trendsData.monthly : []
+          });
 
           // Use real stats from the server
           setStats({
-            today,
-            week,
-            month,
-            users,
-            completedOrders
+            today: today || 0,
+            week: week || 0,
+            month: month || 0,
+            users: users || { total: 0, newThisWeek: 0 },
+            completedOrders: completedOrders || 0
           });
 
           setStatsLoading(false);
         } catch (err) {
           console.error('Error loading data:', err);
           toast.error('Failed to load data');
+          // Set default values on error
+          setSalesTrends({
+            daily: [],
+            weekly: [],
+            monthly: []
+          });
+          setStats({
+            today: 0,
+            week: 0,
+            month: 0,
+            users: { total: 0, newThisWeek: 0 },
+            completedOrders: 0
+          });
         } finally {
           setLoading(false);
         }
