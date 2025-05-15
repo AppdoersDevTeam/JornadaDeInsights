@@ -285,8 +285,19 @@ export function PodcastPage() {
       <motion.section
         initial="hidden"
         animate="visible"
-        className="relative min-h-[60vh] py-20 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        className="relative min-h-[60vh] pt-28 pb-20 md:py-20 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
       >
+        {/* Background blurred blobs */}
+        <motion.div
+          className="absolute top-0 -left-8 w-64 h-64 bg-secondary/20 rounded-full blur-2xl"
+          animate={{ x: [0, 20, 0], y: [0, 10, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute bottom-0 -right-8 w-72 h-72 bg-primary/20 rounded-full blur-3xl"
+          animate={{ x: [0, -20, 0], y: [0, -10, 0] }}
+          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+        />
         <motion.div
           variants={ringVariants}
           className="absolute inset-0 bg-primary/5 rounded-full"
@@ -295,7 +306,7 @@ export function PodcastPage() {
         <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10">
           <motion.div
             variants={headlineContainerVariants}
-            className="max-w-3xl mx-auto text-center mb-8"
+            className="max-w-3xl mx-auto text-center mb-6 md:mb-8"
           >
             {headlineWords.map((word, i) => (
               <motion.span
@@ -312,7 +323,7 @@ export function PodcastPage() {
             initial="hidden"
             animate="visible"
             transition={{ delay: subtextDelay, duration: 0.6 }}
-            className="text-lg text-muted-foreground text-center mb-12 max-w-2xl mx-auto"
+            className="text-lg text-muted-foreground text-center mb-8 md:mb-12 max-w-2xl mx-auto"
           >
             Reflexões profundas sobre fé, vida e espiritualidade. Episódios semanais para inspirar e transformar sua jornada.
           </motion.p>

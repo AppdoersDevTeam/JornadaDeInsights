@@ -301,7 +301,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-full w-full overflow-x-hidden">
+    <div className="p-4 sm:p-6 max-w-full w-full overflow-x-hidden pt-20 sm:pt-6">
       {/* Header */}
       <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>

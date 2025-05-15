@@ -141,7 +141,7 @@ export function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ amount: 0.3 }}
-        className="relative bg-fixed bg-center bg-gradient-to-br from-primary/5 to-background pt-20 pb-16 md:pt-32 md:pb-24"
+        className="relative bg-fixed bg-center bg-gradient-to-br from-primary/5 to-background pt-28 pb-16 md:pt-32 md:pb-24"
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="flex flex-col md:flex-row items-center">
