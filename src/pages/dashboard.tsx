@@ -358,7 +358,13 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             </>
           ) : (
             <h1 className="text-3xl font-bold">
-              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+              {activeTab === 'overview' && 'Visão Geral'}
+              {activeTab === 'ebooks' && 'eBooks'}
+              {activeTab === 'analytics' && 'Análises'}
+              {activeTab === 'content' && 'Conteúdo'}
+              {activeTab === 'users' && 'Usuários'}
+              {activeTab === 'orders' && 'Pedidos Concluídos'}
+              {activeTab === 'settings' && 'Configurações'}
             </h1>
           )}
         </div>
@@ -497,22 +503,26 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               </CardFooter>
             </Card>
             {/* Pedidos Concluídos (1/3 width on lg) */}
-            <Card className="col-span-1 p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Pedidos Concluídos</p>
-                  <h3 className="text-2xl font-bold">
-                    {statsLoading
-                      ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
-                      : stats.completedOrders
-                    }
-                  </h3>
+            <Card className="col-span-1 p-6 h-full flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Pedidos Concluídos</p>
+                    <h3 className="text-2xl font-bold">
+                      {statsLoading
+                        ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
+                        : stats.completedOrders
+                      }
+                    </h3>
+                  </div>
+                  <Check className="h-8 w-8 text-green-500" />
                 </div>
-                <Check className="h-8 w-8 text-green-500" />
               </div>
-              <Button variant="outline" className="w-full mt-4" onClick={() => onTabChange('orders')}>
-                Ver Pedidos Concluídos
-              </Button>
+              <div className="mt-4">
+                <Button variant="outline" className="w-full" onClick={() => onTabChange('orders')}>
+                  Ver Pedidos Concluídos
+                </Button>
+              </div>
             </Card>
           </div>
 
