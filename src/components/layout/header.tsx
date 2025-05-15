@@ -46,13 +46,15 @@ export function Header() {
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 bg-primary",
       scrolled ? "shadow-sm" : ""
     )}>
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center">
-          <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex flex-1 justify-center gap-8">
+      <div className="container mx-auto px-4 flex items-center">
+        {/* Left: Logo */}
+        <div className="flex-1 flex items-center">
+          <Link to="/" className="flex items-center">
+            <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
+          </Link>
+        </div>
+        {/* Center: Nav Links */}
+        <nav className="flex-1 hidden md:flex justify-center gap-8">
           {navLinks.map((link) => (
             <NavLink 
               key={link.to}
@@ -64,9 +66,8 @@ export function Header() {
             </NavLink>
           ))}
         </nav>
-
-        {/* CTA Button and User Icon (Desktop) */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* Right: Actions */}
+        <div className="flex-1 hidden md:flex justify-end items-center gap-4">
           <Button variant="outline" asChild>
             <Link to="/shop">Adquirir Meus eBooks</Link>
           </Button>
@@ -81,7 +82,6 @@ export function Header() {
             </Link>
           )}
         </div>
-
         {/* Mobile Menu Toggle */}
         <button 
           onClick={toggleMenu}

@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import jornadaLogo from '@/Jornada logo.png';
 
 export function AdminHeader() {
   const [isOpen, setIsOpen] = useState(false);
@@ -65,14 +66,15 @@ export function AdminHeader() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-primary py-4">
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-xl md:text-2xl font-heading font-normal text-background">
-          <Headphones className="h-6 w-6 text-current" />
-          <span>Patricia</span>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-8">
+      <div className="container mx-auto px-4 flex items-center">
+        {/* Left: Logo */}
+        <div className="flex-1 flex items-center">
+          <Link to="/" className="flex items-center">
+            <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
+          </Link>
+        </div>
+        {/* Center: Nav Links */}
+        <nav className="flex-1 hidden md:flex justify-center gap-8">
           {isDashboard ? (
             dashboardLinks.map((link) => (
               <Link 
@@ -100,9 +102,8 @@ export function AdminHeader() {
             </>
           )}
         </nav>
-
-        {/* Desktop User Menu */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* Right: Actions */}
+        <div className="flex-1 hidden md:flex justify-end items-center gap-4">
           {user ? (
             <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
               <DialogTrigger asChild>
@@ -137,7 +138,6 @@ export function AdminHeader() {
             </Link>
           )}
         </div>
-
         {/* Mobile Menu Toggle */}
         <button 
           onClick={toggleMenu}
