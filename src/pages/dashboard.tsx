@@ -237,7 +237,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           const formattedTrends = {
             daily: Array.isArray(statsData?.salesTrends?.daily) ? statsData.salesTrends.daily.map((item: SalesData) => ({
               ...item,
-              date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              date: item.date,
               sales: Number(item.sales) || 0,
               refunds: Number(item.refunds) || 0,
               disputes: Number(item.disputes) || 0,
@@ -253,7 +253,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             })) : [],
             monthly: Array.isArray(statsData?.salesTrends?.monthly) ? statsData.salesTrends.monthly.map((item: SalesData) => ({
               ...item,
-              date: new Date(2024, Number(item.date) - 1).toLocaleDateString('en-US', { month: 'short' }),
+              date: item.date,
               sales: Number(item.sales) || 0,
               refunds: Number(item.refunds) || 0,
               disputes: Number(item.disputes) || 0,
