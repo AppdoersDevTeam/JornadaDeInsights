@@ -388,7 +388,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] p-6 pb-24">
+    <div className="min-h-[calc(100vh-4rem)] p-6 pb-24 mt-[72px]">
       {/* Header */}
       <div className="mb-12 flex items-center justify-between">
         <div>

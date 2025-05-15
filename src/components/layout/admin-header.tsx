@@ -81,7 +81,7 @@ export function AdminHeader() {
         {/* Center: Nav Links */}
         <nav className="flex-1 hidden md:flex justify-center gap-8">
           <Link 
-            to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email) ? "/admin-dashboard" : "/user-dashboard"} 
+            to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email) ? "/dashboard" : "/user-dashboard"} 
             className="text-base text-background font-normal hover:text-secondary transition-colors"
           >
             Dashboard
