@@ -16,6 +16,11 @@ import {
 } from "@/components/ui/dialog";
 import jornadaLogo from '@/Jornada logo.png';
 
+const ALLOWED_ADMIN_EMAILS = [
+  'devteam@appdoers.co.nz',
+  'admin@jornadadeinsights.com'
+];
+
 export function AdminHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
@@ -75,32 +80,21 @@ export function AdminHeader() {
         </div>
         {/* Center: Nav Links */}
         <nav className="flex-1 hidden md:flex justify-center gap-8">
-          {isDashboard ? (
-            dashboardLinks.map((link) => (
-              <Link 
-                key={link.to}
-                to={link.to} 
-                className="text-base text-background font-normal hover:text-secondary transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))
-          ) : (
-            <>
-              <Link to="/dashboard" className="text-base text-background font-normal hover:text-secondary transition-colors">
-                Dashboard
-              </Link>
-              {mainLinks.map((link) => (
-                <Link 
-                  key={link.to}
-                  to={link.to} 
-                  className="text-base text-background font-normal hover:text-secondary transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </>
-          )}
+          <Link 
+            to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email) ? "/admin-dashboard" : "/user-dashboard"} 
+            className="text-base text-background font-normal hover:text-secondary transition-colors"
+          >
+            Dashboard
+          </Link>
+          {mainLinks.map((link) => (
+            <Link 
+              key={link.to}
+              to={link.to} 
+              className="text-base text-background font-normal hover:text-secondary transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
         {/* Right: Actions */}
         <div className="flex-1 hidden md:flex justify-end items-center gap-4">
