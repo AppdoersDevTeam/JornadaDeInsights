@@ -285,7 +285,7 @@ export function PodcastPage() {
       <motion.section
         initial="hidden"
         animate="visible"
-        className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background pt-[60px]"
       >
         <motion.div
           variants={ringVariants}
