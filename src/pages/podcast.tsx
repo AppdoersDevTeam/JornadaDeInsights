@@ -289,21 +289,21 @@ export function PodcastPage() {
       >
         {/* Background blurred blobs */}
         <motion.div
-          className="absolute top-0 -left-8 w-64 h-64 bg-secondary/20 rounded-full blur-2xl"
+          className="absolute top-0 -left-8 w-64 h-64 bg-secondary/20 rounded-full blur-2xl pointer-events-none"
           animate={{ x: [0, 20, 0], y: [0, 10, 0] }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute bottom-0 -right-8 w-72 h-72 bg-primary/20 rounded-full blur-3xl"
+          className="absolute bottom-0 -right-8 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none"
           animate={{ x: [0, -20, 0], y: [0, -10, 0] }}
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
           variants={ringVariants}
-          className="absolute inset-0 bg-primary/5 rounded-full"
+          className="absolute inset-0 bg-primary/5 rounded-full pointer-events-none"
           style={{ transform: 'translate(-50%, -50%)' }}
         />
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 relative z-10">
+        <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-10 text-center">
           <motion.div
             variants={headlineContainerVariants}
             className="max-w-3xl mx-auto text-center mb-6 md:mb-8"

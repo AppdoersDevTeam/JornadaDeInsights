@@ -224,13 +224,25 @@ export function HomePage() {
     <>
       {/* Hero Section */}
       <motion.section
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        className="relative min-h-[60vh] pt-28 md:py-20 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
+        whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
         viewport={{ amount: 0.3 }}
-        className="relative bg-fixed bg-center bg-gradient-to-br from-primary/5 to-background pt-28 pb-16 md:pt-32 md:pb-24"
+        transition={{ duration: 0.6, ease: 'easeOut' }}
       >
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
+        {/* Background blurred blobs */}
+        <motion.div
+          className="absolute top-0 -left-8 w-64 h-64 bg-secondary/20 rounded-full blur-2xl pointer-events-none"
+          animate={{ x: [0, 20, 0], y: [0, 10, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute bottom-0 -right-8 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none"
+          animate={{ x: [0, -20, 0], y: [0, -10, 0] }}
+          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        
+        <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-10 text-center">
           <div className="flex flex-col md:flex-row items-center">
             <div className="w-full md:w-1/2 mb-10 md:mb-0">
               <motion.h1

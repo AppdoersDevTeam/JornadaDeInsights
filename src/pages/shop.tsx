@@ -141,17 +141,17 @@ export function ShopPage() {
       >
         {/* Background blurred blobs */}
         <motion.div
-          className="absolute top-0 -left-8 w-64 h-64 bg-secondary/20 rounded-full blur-2xl"
+          className="absolute top-0 -left-8 w-64 h-64 bg-secondary/20 rounded-full blur-2xl pointer-events-none"
           animate={{ x: [0, 20, 0], y: [0, 10, 0] }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute bottom-0 -right-8 w-72 h-72 bg-primary/20 rounded-full blur-3xl"
+          className="absolute bottom-0 -right-8 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none"
           animate={{ x: [0, -20, 0], y: [0, -10, 0] }}
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         />
         
-        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
+        <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-10 text-center">
           <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">
             Descubra Nossa Coleção de eBooks
           </h1>
