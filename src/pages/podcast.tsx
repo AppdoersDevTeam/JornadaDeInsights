@@ -285,7 +285,7 @@ export function PodcastPage() {
       <motion.section
         initial="hidden"
         animate="visible"
-        className="relative min-h-[60vh] pt-32 md:pt-36 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        className="relative min-h-[60vh] pt-32 md:pt-36 pb-24 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
       >
         {/* Background blurred blobs */}
         <motion.div
@@ -303,10 +303,10 @@ export function PodcastPage() {
           className="absolute inset-0 bg-primary/5 rounded-full pointer-events-none"
           style={{ transform: 'translate(-50%, -50%)' }}
         />
-        <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-10 text-center">
+        <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-10 py-8">
           <motion.div
             variants={headlineContainerVariants}
-            className="max-w-3xl mx-auto text-center mb-6 md:mb-8"
+            className="max-w-3xl mx-auto text-center mb-10"
           >
             {headlineWords.map((word, i) => (
               <motion.span
@@ -323,13 +323,13 @@ export function PodcastPage() {
             initial="hidden"
             animate="visible"
             transition={{ delay: subtextDelay, duration: 0.6 }}
-            className="text-lg text-muted-foreground text-center mb-8 md:mb-12 max-w-2xl mx-auto"
+            className="text-lg text-muted-foreground text-center mb-14 max-w-2xl mx-auto"
           >
             Reflexões profundas sobre fé, vida e espiritualidade. Episódios semanais para inspirar e transformar sua jornada.
           </motion.p>
           <motion.div
             variants={ctaContainerVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md mx-auto px-4 sm:px-0"
+            className="flex flex-col sm:flex-row gap-6 justify-center items-center w-full max-w-md mx-auto"
           >
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button size="lg" asChild className="w-full sm:w-auto">

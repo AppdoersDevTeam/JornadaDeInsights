@@ -224,7 +224,7 @@ export function HomePage() {
     <>
       {/* Hero Section */}
       <motion.section
-        className="relative min-h-[60vh] pt-32 md:pt-36 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        className="relative min-h-[60vh] pt-32 md:pt-36 pb-16 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
         initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
         viewport={{ amount: 0.3 }}
@@ -242,15 +242,15 @@ export function HomePage() {
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         />
         
-        <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-10 text-center">
-          <div className="flex flex-col md:flex-row items-center">
-            <div className="w-full md:w-1/2 mb-10 md:mb-0">
+        <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-10">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="w-full md:w-1/2 text-left">
               <motion.h1
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
                 viewport={{ amount: 0.3 }}
-                className="text-3xl md:text-5xl font-heading font-bold mb-4 leading-tight"
+                className="text-3xl md:text-5xl font-heading font-bold mb-6 leading-tight"
               >
                 Uma Jornada de <span className="text-primary">Insights</span>
               </motion.h1>
@@ -259,7 +259,7 @@ export function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ amount: 0.3 }}
-                className="text-lg text-muted-foreground mb-6 md:max-w-md"
+                className="text-lg text-muted-foreground mb-8"
               >
                 A verdade da biblia e eterna, mas sempre ha novos insights a serem descobertos.
               </motion.p>
