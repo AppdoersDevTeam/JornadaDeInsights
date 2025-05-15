@@ -283,9 +283,9 @@ export function PodcastPage() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <motion.section
+        className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
         initial="hidden"
         animate="visible"
-        className="relative min-h-[60vh] pt-32 md:pt-36 pb-24 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
       >
         {/* Background blurred blobs */}
         <motion.div
@@ -303,7 +303,8 @@ export function PodcastPage() {
           className="absolute inset-0 bg-primary/5 rounded-full pointer-events-none"
           style={{ transform: 'translate(-50%, -50%)' }}
         />
-        <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-10 py-8">
+        
+        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6 py-20">
           <motion.div
             variants={headlineContainerVariants}
             className="max-w-3xl mx-auto text-center mb-10"

@@ -224,7 +224,7 @@ export function HomePage() {
     <>
       {/* Hero Section */}
       <motion.section
-        className="relative min-h-[60vh] pt-32 md:pt-36 pb-16 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
         initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
         viewport={{ amount: 0.3 }}
@@ -242,7 +242,7 @@ export function HomePage() {
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         />
         
-        <div className="relative z-10 container mx-auto px-6 sm:px-8 lg:px-10">
+        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6 py-20">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="w-full md:w-1/2 text-left">
               <motion.h1

@@ -19,7 +19,7 @@ export function AboutPage() {
     <>
       {/* Hero Section */}
       <motion.section
-        className="relative min-h-[60vh] pt-28 md:py-20 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
+        className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
         initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
         viewport={{ amount: 0.3 }}
@@ -37,7 +37,7 @@ export function AboutPage() {
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         />
         
-        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6 py-20">
           <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">
             {text}
             <Cursor cursorStyle="|" />
