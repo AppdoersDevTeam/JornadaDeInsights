@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import plogo from '@/plogo.png';
 import { getEbooks } from '@/lib/supabase';
+import { decode } from 'html-entities';
 
 // Define type for YouTube API items
 type YouTubeVideo = {
@@ -329,7 +330,7 @@ export function HomePage() {
               </div>
               {heroVideo && (
                 <div className="bg-white rounded-b-lg px-6 pt-4 pb-6 border-t border-border/50">
-                  <h3 className="font-heading text-lg font-medium mb-0 line-clamp-2 text-[#65623c]">{heroVideo.snippet.title}</h3>
+                  <h3 className="font-heading text-lg font-medium mb-0 line-clamp-2 text-[#65623c]">{decode(heroVideo.snippet.title)}</h3>
                 </div>
               )}
             </div>
@@ -572,7 +573,7 @@ function PodcastCard({ video }: { video: YouTubeVideo }) {
       </div>
       <div className="p-6">
         <h3 className="font-heading text-lg font-medium mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-          {video.snippet.title}
+          {decode(video.snippet.title)}
         </h3>
       </div>
     </motion.div>
