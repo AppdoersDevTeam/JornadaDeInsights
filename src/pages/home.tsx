@@ -76,6 +76,7 @@ export function HomePage() {
   const [hasError, setHasError] = useState(false);
   const [featuredEbooks, setFeaturedEbooks] = useState<Ebook[]>([]);
   const [isLoadingEbooks, setIsLoadingEbooks] = useState(true);
+  const [isHeroPlaying, setIsHeroPlaying] = useState(false);
 
   useEffect(() => {
     // Fetch featured ebooks
@@ -291,22 +292,34 @@ export function HomePage() {
                 {(isLoading || hasError) ? (
                   <div className="w-full aspect-video bg-black" />
                 ) : heroVideo ? (
-                  <iframe
-                    src={`https://www.youtube.com/embed/${heroVideo.id.videoId}?hl=pt-BR&controls=0&modestbranding=1&rel=0`}
-                    title={heroVideo.snippet.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full aspect-video"
-                    onLoad={(e) => {
-                      try {
-                        const iframe = e.target as HTMLIFrameElement;
-                        if (iframe.contentWindow) {
+                  !isHeroPlaying ? (
+                    <div
+                      className="w-full aspect-video bg-cover bg-center cursor-pointer relative"
+                      style={{ backgroundImage: `url(https://img.youtube.com/vi/${heroVideo.id.videoId}/hqdefault.jpg)` }}
+                      onClick={() => setIsHeroPlaying(true)}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Play className="h-16 w-16 text-white bg-primary p-4 rounded-full shadow-lg" />
+                      </div>
+                    </div>
+                  ) : (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${heroVideo.id.videoId}?hl=pt-BR&controls=1&modestbranding=1&rel=0&autoplay=1`}
+                      title={heroVideo.snippet.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full aspect-video"
+                      onLoad={(e) => {
+                        try {
+                          const iframe = e.target as HTMLIFrameElement;
+                          if (iframe.contentWindow) {
+                          }
+                        } catch (err) {
+                          console.debug('Erro relacionado à extensão:', err);
                         }
-                      } catch (err) {
-                        console.debug('Erro relacionado à extensão:', err);
-                      }
-                    }}
-                  />
+                      }}
+                    />
+                  )
                 ) : null}
                 <div className="hidden md:block absolute bottom-0 left-0 bg-gradient-to-t from-black/80 to-transparent p-4 rounded-tr-lg z-10">
                   <div className="flex items-center gap-2 text-white">
