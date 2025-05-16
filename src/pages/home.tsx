@@ -291,7 +291,7 @@ export function HomePage() {
               <div className="relative rounded-lg overflow-hidden shadow-xl">
                 {/* Title overlay (top left) */}
                 {heroVideo && (
-                  <div className="absolute top-0 left-0 m-4 bg-black/70 text-white px-4 py-2 rounded-lg z-20 max-w-[80%]">
+                  <div className="absolute top-0 left-0 m-4 bg-primary/80 text-white px-4 py-2 rounded-lg z-20 max-w-[80%]">
                     <span className="font-semibold text-base line-clamp-2">{heroVideo.snippet.title}</span>
                   </div>
                 )}
