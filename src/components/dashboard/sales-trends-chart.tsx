@@ -6,6 +6,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export interface SalesData {
   date: string;
   sales: number;
+  refunds?: number;
+  disputes?: number;
+  disputesWon?: number;
 }
 
 interface SalesTrendsChartProps {

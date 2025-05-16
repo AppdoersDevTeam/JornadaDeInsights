@@ -38,6 +38,7 @@ import { toast } from 'react-hot-toast';
 import UploadEbookForm from '@/components/dashboard/upload-ebook-form';
 import EbookList from '@/components/dashboard/ebook-list';
 import { SalesTrendsChart, SalesData } from '@/components/dashboard/sales-trends-chart';
+import { StripeBalanceChart, BalanceData } from '@/components/dashboard/stripe-balance-chart';
 
 interface DashboardPageProps {
   activeTab: string;
@@ -108,6 +109,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     weekly: [],
     monthly: []
   });
+  const [balanceData, setBalanceData] = useState<BalanceData[]>([]);
 
   // Constants
   const itemsPerPage = 20; // Show 20 orders per page in completed orders tab
@@ -264,6 +266,23 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           console.log('Formatted trends data:', formattedTrends);
           setSalesTrends(formattedTrends);
 
+          // Set balance data
+          if (Array.isArray(statsData?.balanceData)) {
+            setBalanceData(statsData.balanceData.map((item: BalanceData) => ({
+              ...item,
+              current_balance: Number(item.current_balance) || 0,
+              payouts: Number(item.payouts) || 0,
+              net_transactions: Number(item.net_transactions) || 0,
+              payments: Number(item.payments) || 0,
+              refunds: Number(item.refunds) || 0,
+              transfers: Number(item.transfers) || 0,
+              chargeback_withdrawals: Number(item.chargeback_withdrawals) || 0,
+              chargeback_reversals: Number(item.chargeback_reversals) || 0,
+              other_adjustments: Number(item.other_adjustments) || 0,
+              other_transactions: Number(item.other_transactions) || 0
+            })));
+          }
+
           // Use real stats from the server
           setStats({
             today: Number(statsData.today) || 0,
@@ -283,6 +302,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             weekly: [],
             monthly: []
           });
+          setBalanceData([]);
           setStats({
             today: 0,
             week: 0,
@@ -615,49 +635,26 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               weeklyData={salesTrends.weekly}
               monthlyData={salesTrends.monthly}
             />
-            <Card className="p-6 w-full">
-              <CardHeader>
-                <CardTitle>Análise de Receita</CardTitle>
-                <CardDescription>Distribuição de receita por produto</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center w-full min-h-[120px]">
-                  <div className="text-center w-full">
-                    <PieChart className="h-12 w-12 mx-auto text-primary mb-2" />
-                    <p className="text-sm text-muted-foreground">O gráfico de análise de receita será exibido aqui</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">
-                  Ver Detalhes da Receita
-                </Button>
-              </CardFooter>
-            </Card>
+            <StripeBalanceChart data={balanceData} />
           </div>
-
-          {/* Export Options */}
           <Card className="p-6 w-full">
             <CardHeader>
-              <CardTitle>Exportar Relatórios</CardTitle>
-              <CardDescription>Baixar relatórios de vendas em vários formatos</CardDescription>
+              <CardTitle>Análise de Receita</CardTitle>
+              <CardDescription>Distribuição de receita por produto</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 w-full">
-                <Button variant="outline" className="flex-1 w-full">
-                  <Download className="mr-2 h-4 w-4" />
-                  Exportar como CSV
-                </Button>
-                <Button variant="outline" className="flex-1 w-full">
-                  <Download className="mr-2 h-4 w-4" />
-                  Exportar como PDF
-                </Button>
-                <Button variant="outline" className="flex-1 w-full">
-                  <Download className="mr-2 h-4 w-4" />
-                  Exportar como Excel
-                </Button>
+              <div className="flex items-center justify-center w-full min-h-[120px]">
+                <div className="text-center w-full">
+                  <PieChart className="h-12 w-12 mx-auto text-primary mb-2" />
+                  <p className="text-sm text-muted-foreground">O gráfico de análise de receita será exibido aqui</p>
+                </div>
               </div>
             </CardContent>
+            <CardFooter>
+              <Button variant="outline" className="w-full">
+                Ver Detalhes da Receita
+              </Button>
+            </CardFooter>
           </Card>
         </div>
       )}

@@ -95,6 +95,82 @@ export default async function handler(req, res) {
       monthly: []
     };
 
+    // Generate balance data
+    const balanceData = [];
+
+    // Get balance transactions for the last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const balanceTransactions = await stripe.balanceTransactions.list({
+      created: {
+        gte: Math.floor(thirtyDaysAgo.getTime() / 1000)
+      },
+      limit: 100
+    });
+
+    // Group transactions by day
+    const transactionsByDay = {};
+    balanceTransactions.data.forEach(txn => {
+      const date = new Date(txn.created * 1000);
+      const day = date.toISOString().split('T')[0];
+      
+      if (!transactionsByDay[day]) {
+        transactionsByDay[day] = {
+          day,
+          current_balance: 0,
+          payouts: 0,
+          net_transactions: 0,
+          payments: 0,
+          refunds: 0,
+          transfers: 0,
+          chargeback_withdrawals: 0,
+          chargeback_reversals: 0,
+          other_adjustments: 0,
+          other_transactions: 0
+        };
+      }
+
+      const amount = txn.amount / 100;
+      const net = txn.net / 100;
+
+      // Categorize transaction types
+      if (txn.type === 'payout') {
+        transactionsByDay[day].payouts += net;
+      } else if (txn.type === 'transfer') {
+        transactionsByDay[day].transfers += net;
+      } else if (['charge', 'payment'].includes(txn.type)) {
+        transactionsByDay[day].payments += net;
+      } else if (['payment_refund', 'refund', 'payment_failure_refund'].includes(txn.type)) {
+        transactionsByDay[day].refunds += net;
+      } else if (txn.type === 'adjustment') {
+        if (txn.description?.toLowerCase().includes('chargeback withdrawal')) {
+          transactionsByDay[day].chargeback_withdrawals += net;
+        } else if (txn.description?.toLowerCase().includes('chargeback reversal')) {
+          transactionsByDay[day].chargeback_reversals += net;
+        } else {
+          transactionsByDay[day].other_adjustments += net;
+        }
+      } else {
+        transactionsByDay[day].other_transactions += net;
+      }
+
+      // Calculate net transactions (excluding payouts)
+      if (txn.type !== 'payout') {
+        transactionsByDay[day].net_transactions += net;
+      }
+    });
+
+    // Calculate running balance and sort by date
+    let runningBalance = 0;
+    Object.values(transactionsByDay)
+      .sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime())
+      .forEach(dayData => {
+        runningBalance += dayData.net_transactions;
+        dayData.current_balance = runningBalance;
+        balanceData.push(dayData);
+      });
+
     // Daily data for the last 7 days
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
@@ -118,17 +194,6 @@ export default async function handler(req, res) {
 
       // Format date as dd/mm
       const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-      // Log the data for debugging
-      console.log(`Data for ${formattedDate}:`, {
-        sales,
-        transactions: dayTransactions.data.map(txn => ({
-          type: txn.type,
-          amount: txn.amount / 100,
-          currency: txn.currency,
-          description: txn.description
-        }))
-      });
 
       salesTrends.daily.push({
         date: formattedDate,
@@ -186,7 +251,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Return analytics including user stats and sales trends
+    // Return analytics including user stats, sales trends, and balance data
     res.json({
       today: todayCount,
       week: weekCount,
@@ -194,6 +259,7 @@ export default async function handler(req, res) {
       completedOrders: completedOrdersEver,
       users: { total: totalUsers, newThisWeek },
       salesTrends,
+      balanceData,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
