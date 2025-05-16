@@ -288,15 +288,13 @@ export function HomePage() {
               </motion.div>
             </div>
             <div className="w-full md:w-1/2">
+              {/* Title block above video */}
+              {heroVideo && (
+                <div className="mb-3 bg-white rounded-lg shadow p-4 text-center">
+                  <span className="font-heading text-lg font-semibold text-gray-900">{heroVideo.snippet.title}</span>
+                </div>
+              )}
               <div className="relative rounded-lg overflow-hidden shadow-xl">
-                {/* Title overlay (top left) */}
-                {heroVideo && (
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
-                    <span className="bg-primary text-white px-4 py-1 rounded-full shadow font-medium text-sm whitespace-nowrap">
-                      {heroVideo.snippet.title}
-                    </span>
-                  </div>
-                )}
                 {(isLoading || hasError) ? (
                   <div className="w-full aspect-video bg-black" />
                 ) : heroVideo ? (
