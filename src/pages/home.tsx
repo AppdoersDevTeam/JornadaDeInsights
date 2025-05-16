@@ -288,12 +288,12 @@ export function HomePage() {
               </motion.div>
             </div>
             <div className="w-full md:w-1/2">
-              <div className="bg-white rounded-t-lg px-6 pt-6 pb-4 border-b border-border/50">
-                {heroVideo && (
-                  <h3 className="font-heading text-lg font-medium mb-0 line-clamp-2 text-[#65623c]">{heroVideo.snippet.title}</h3>
-                )}
-              </div>
-              <div className="relative rounded-b-lg overflow-hidden shadow-xl">
+              <div className="relative rounded-t-lg rounded-b-none overflow-hidden shadow-xl">
+                {/* 'Vídeo em Destaque' overlay at top left */}
+                <div className="absolute top-4 left-4 bg-gradient-to-tr from-black/80 to-black/30 p-2 rounded-lg z-10 flex items-center gap-2 text-white">
+                  <Award className="h-5 w-5" />
+                  <span className="text-sm font-medium">Vídeo em Destaque</span>
+                </div>
                 {(isLoading || hasError) ? (
                   <div className="w-full aspect-video bg-black" />
                 ) : heroVideo ? (
@@ -326,13 +326,12 @@ export function HomePage() {
                     />
                   )
                 ) : null}
-                <div className="hidden md:block absolute bottom-0 left-0 bg-gradient-to-t from-black/80 to-transparent p-4 rounded-tr-lg z-10">
-                  <div className="flex items-center gap-2 text-white">
-                    <Award className="h-5 w-5" />
-                    <span className="text-sm font-medium">Vídeo em Destaque</span>
-                  </div>
-                </div>
               </div>
+              {heroVideo && (
+                <div className="bg-white rounded-b-lg px-6 pt-4 pb-6 border-t border-border/50">
+                  <h3 className="font-heading text-lg font-medium mb-0 line-clamp-2 text-[#65623c]">{heroVideo.snippet.title}</h3>
+                </div>
+              )}
             </div>
           </div>
         </div>
