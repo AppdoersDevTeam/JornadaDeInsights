@@ -422,7 +422,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                 <CardDescription>
                   {userEbooks.length > 0 
                     ? `Você tem ${userEbooks.length} eBook${userEbooks.length !== 1 ? 's' : ''}`
-                    : 'Você ainda não comprou nenhum eBook'}
+                    : 'Você ainda não comprou nenhum eBook.'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
