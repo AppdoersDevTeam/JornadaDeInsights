@@ -291,8 +291,10 @@ export function HomePage() {
               <div className="relative rounded-lg overflow-hidden shadow-xl">
                 {/* Title overlay (top left) */}
                 {heroVideo && (
-                  <div className="absolute top-0 left-0 m-4 bg-primary/80 text-white px-4 py-2 rounded-lg z-20 max-w-[80%]">
-                    <span className="font-semibold text-base line-clamp-2">{heroVideo.snippet.title}</span>
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+                    <span className="bg-primary text-white px-4 py-1 rounded-full shadow font-medium text-sm whitespace-nowrap">
+                      {heroVideo.snippet.title}
+                    </span>
                   </div>
                 )}
                 {(isLoading || hasError) ? (
