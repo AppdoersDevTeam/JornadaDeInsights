@@ -203,7 +203,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
   // Update the useEffect to fetch sales trends data
   useEffect(() => {
-    if (activeTab === 'overview') {
+    if (activeTab === 'overview' || activeTab === 'analytics') {
       const fetchData = async () => {
         try {
           setLoading(true);
