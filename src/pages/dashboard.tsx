@@ -637,25 +637,6 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             />
             <StripeBalanceChart data={balanceData} />
           </div>
-          <Card className="p-6 w-full">
-            <CardHeader>
-              <CardTitle>Análise de Receita</CardTitle>
-              <CardDescription>Distribuição de receita por produto</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center w-full min-h-[120px]">
-                <div className="text-center w-full">
-                  <PieChart className="h-12 w-12 mx-auto text-primary mb-2" />
-                  <p className="text-sm text-muted-foreground">O gráfico de análise de receita será exibido aqui</p>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">
-                Ver Detalhes da Receita
-              </Button>
-            </CardFooter>
-          </Card>
         </div>
       )}
 

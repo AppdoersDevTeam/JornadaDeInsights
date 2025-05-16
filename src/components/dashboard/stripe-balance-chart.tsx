@@ -46,7 +46,7 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
       current_balance: '#4CAF50',
       payouts: '#FF9800',
       net_transactions: '#2196F3',
-      payments: '#4CAF50',
+      payments: '#2196F3',
       refunds: '#F44336',
       transfers: '#9C27B0',
       chargeback_withdrawals: '#FF5722',
@@ -173,13 +173,13 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Stripe Balance Overview (NZD)</CardTitle>
+        <CardTitle>Visão Geral do Saldo Stripe (NZD)</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="all">Todos</TabsTrigger>
+            <TabsTrigger value="transactions">Transações</TabsTrigger>
             <TabsTrigger value="chargebacks">Chargebacks</TabsTrigger>
           </TabsList>
           <TabsContent value="all" className="mt-4">

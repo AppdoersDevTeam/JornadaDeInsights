@@ -77,14 +77,14 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Sales Trends (NZD)</CardTitle>
+        <CardTitle>Tendências de Vendas (NZD)</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="daily">Daily</TabsTrigger>
-            <TabsTrigger value="weekly">Weekly</TabsTrigger>
-            <TabsTrigger value="monthly">Monthly</TabsTrigger>
+            <TabsTrigger value="daily">Diário</TabsTrigger>
+            <TabsTrigger value="weekly">Semanal</TabsTrigger>
+            <TabsTrigger value="monthly">Mensal</TabsTrigger>
           </TabsList>
           <TabsContent value="daily" className="mt-4">
             {renderChart(dailyData)}
