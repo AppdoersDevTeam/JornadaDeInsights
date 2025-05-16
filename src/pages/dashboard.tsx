@@ -39,6 +39,15 @@ import UploadEbookForm from '@/components/dashboard/upload-ebook-form';
 import EbookList from '@/components/dashboard/ebook-list';
 import { SalesTrendsChart, SalesData } from '@/components/dashboard/sales-trends-chart';
 import { StripeBalanceChart, BalanceData } from '@/components/dashboard/stripe-balance-chart';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface DashboardPageProps {
   activeTab: string;
@@ -110,6 +119,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     monthly: []
   });
   const [balanceData, setBalanceData] = useState<BalanceData[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
 
   // Constants
   const itemsPerPage = 20; // Show 20 orders per page in completed orders tab
@@ -381,6 +391,30 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
   const handleUploadSuccess = () => {
     setRefreshKey(prev => prev + 1);
+  };
+
+  const handleDeleteUser = async (uid: string) => {
+    try {
+      const response = await fetch(`${SERVER_URL}/api/users/${uid}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+
+      // Remove user from the list
+      setUsersList(prev => prev.filter(user => user.uid !== uid));
+      toast.success('Usuário deletado com sucesso');
+      setDeleteDialogOpen(null);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Erro ao deletar usuário');
+    }
   };
 
   return (
@@ -746,15 +780,41 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                     </div>
                   </div>
                   <div className="flex gap-2 w-full sm:w-auto">
-                    <Button variant="ghost" size="icon">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => {
+                        if (user.email) {
+                          navigator.clipboard.writeText(user.email);
+                          toast.success('Email copiado para a área de transferência');
+                        }
+                      }}
+                    >
                       <Mail className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon">
-                      <Lock className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <Dialog open={deleteDialogOpen === user.uid} onOpenChange={(open) => setDeleteDialogOpen(open ? user.uid : null)}>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Confirmar Exclusão</DialogTitle>
+                          <DialogDescription>
+                            Tem certeza que deseja excluir a conta de {user.email || user.displayName || user.uid}? Esta ação não pode ser desfeita.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setDeleteDialogOpen(null)}>
+                            Cancelar
+                          </Button>
+                          <Button variant="destructive" onClick={() => handleDeleteUser(user.uid)}>
+                            Deletar Conta
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               ))}
