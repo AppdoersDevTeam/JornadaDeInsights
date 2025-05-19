@@ -78,6 +78,9 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   const [showComingSoonDialog, setShowComingSoonDialog] = useState(false);
   const [showSettingsComingSoonDialog, setShowSettingsComingSoonDialog] = useState(false);
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
+  const [sessionStartTime, setSessionStartTime] = useState<number>(Date.now());
+  const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
+  const [timeoutCountdown, setTimeoutCountdown] = useState(30);
 
   // Add effect to scroll to top when tab changes
   useEffect(() => {
@@ -90,6 +93,46 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       setShowSettingsComingSoonDialog(true);
     }
   }, [activeTab]);
+
+  // Add session timeout effect
+  useEffect(() => {
+    if (!user) return;
+
+    // Set session start time when user logs in
+    setSessionStartTime(Date.now());
+
+    // Check session time every minute
+    const sessionCheckInterval = setInterval(() => {
+      const currentTime = Date.now();
+      const sessionDuration = currentTime - sessionStartTime;
+      const twoHoursInMs = 2 * 60 * 60 * 1000;
+
+      if (sessionDuration >= twoHoursInMs) {
+        setShowTimeoutDialog(true);
+        setTimeoutCountdown(30);
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(sessionCheckInterval);
+  }, [user, sessionStartTime]);
+
+  // Add countdown effect for timeout dialog
+  useEffect(() => {
+    if (!showTimeoutDialog) return;
+
+    const countdownInterval = setInterval(() => {
+      setTimeoutCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownInterval);
+          handleSessionTimeout();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdownInterval);
+  }, [showTimeoutDialog]);
 
   const capitalizeName = (name: string) => {
     return name
@@ -377,6 +420,20 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
     // You might want to call a sign out function from your auth provider
     // and then navigate to signin page
     navigate('/signin');
+  };
+
+  // Add session timeout handler
+  const handleSessionTimeout = () => {
+    setShowTimeoutDialog(false);
+    auth.signOut();
+    navigate('/');
+  };
+
+  // Add session extension handler
+  const handleExtendSession = () => {
+    setSessionStartTime(Date.now());
+    setShowTimeoutDialog(false);
+    setTimeoutCountdown(30);
   };
 
   if (!user) {
@@ -1031,6 +1088,27 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
             </Button>
             <Button variant="destructive" onClick={handleSignOut}>
               Sair
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Session Timeout Dialog */}
+      <Dialog open={showTimeoutDialog} onOpenChange={setShowTimeoutDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sessão Expirando</DialogTitle>
+            <DialogDescription>
+              Sua sessão está prestes a expirar. Você será desconectado em {timeoutCountdown} segundos.
+              Deseja estender sua sessão?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={handleSessionTimeout}>
+              Sair
+            </Button>
+            <Button onClick={handleExtendSession}>
+              Estender Sessão
             </Button>
           </DialogFooter>
         </DialogContent>
