@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import jornadaLogo from 'C:/Users/Sara/Files/Desktop/Patricia Vercel Deployement/JornadaDeInsights/src/Jornada logo.png';
+import jornadaLogo from '@/Jornada logo.png';
 
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
