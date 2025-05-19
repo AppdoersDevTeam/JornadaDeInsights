@@ -155,7 +155,7 @@ export function AdminFooter() {
         </div>
         <div className="border-t border-border/50 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">© {currentYear} Patricia. Todos os direitos reservados.</p>
-          <p className="text-sm text-muted-foreground mt-2 md:mt-0">Website desenvolvido por <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">buildwithsds.com</a></p>
+          <p className="text-sm text-muted-foreground mt-2 md:mt-0">Website desenvolvido por <a href="https://appdoers.co.nz" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">appdoers.co.nz</a> em parceria com <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">buildwithsds.com</a></p>
         </div>
       </div>
     </footer>
