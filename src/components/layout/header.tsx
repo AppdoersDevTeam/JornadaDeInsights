@@ -73,17 +73,19 @@ export function Header() {
               <Button variant="outline" asChild>
                 <Link to="/shop">Adquirir Meus eBooks</Link>
               </Button>
-              <Link to="/dashboard?tab=cart" className="relative p-2 rounded-full hover:bg-background/10 transition-colors">
-                <ShoppingCart className="h-6 w-6 text-background" />
-                {totalCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
-                    {totalCount}
-                  </span>
-                )}
-              </Link>
-              <Link to="/dashboard" className="p-2 rounded-full hover:bg-background/10 transition-colors">
-                <User className="h-6 w-6 text-background" />
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link to="/dashboard?tab=cart" className="relative p-2 rounded-full hover:bg-background/10 transition-colors">
+                  <ShoppingCart className="h-6 w-6 text-background" />
+                  {totalCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+                      {totalCount}
+                    </span>
+                  )}
+                </Link>
+                <Link to="/dashboard" className="p-2 rounded-full hover:bg-background/10 transition-colors">
+                  <User className="h-6 w-6 text-background" />
+                </Link>
+              </div>
             </>
           ) : (
             <>
@@ -163,16 +165,33 @@ export function Header() {
 
           {/* Sign In/Out Link */}
           {user ? (
-            <button
-              onClick={() => {
-                closeMenu();
-                // Add your sign out logic here
-              }}
-              className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
-            >
-              <LogOut className="h-5 w-5" />
-              Sair
-            </button>
+            <div className="flex items-center gap-2 w-full">
+              <NavLink
+                to="/dashboard?tab=cart"
+                className={({ isActive }) =>
+                  `flex items-center gap-3 text-lg px-4 py-3 flex-1 rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white`
+                }
+                onClick={closeMenu}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                Carrinho
+                {totalCount > 0 && (
+                  <span className="ml-2 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+                    {totalCount}
+                  </span>
+                )}
+              </NavLink>
+              <button
+                onClick={() => {
+                  closeMenu();
+                  // Add your sign out logic here
+                }}
+                className="flex items-center gap-3 text-lg px-4 py-3 rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
+              >
+                <LogOut className="h-5 w-5" />
+                Sair
+              </button>
+            </div>
           ) : (
             <NavLink
               to="/signin"
