@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, Headphones, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Headphones, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
@@ -68,18 +68,35 @@ export function Header() {
         </nav>
         {/* Right: Actions */}
         <div className="flex-1 hidden md:flex justify-end items-center gap-4">
-          <Button variant="outline" asChild>
-            <Link to="/shop">Adquirir Meus eBooks</Link>
-          </Button>
-          <AnimatedCartIcon count={totalCount} className="text-background hover:text-secondary transition-colors" />
           {user ? (
-            <Link to="/dashboard" className="p-2 rounded-full hover:bg-background/10 transition-colors">
-              <User className="h-6 w-6 text-background" />
-            </Link>
+            <>
+              <Button variant="outline" asChild>
+                <Link to="/shop">Adquirir Meus eBooks</Link>
+              </Button>
+              <Link to="/dashboard?tab=cart" className="relative p-2 rounded-full hover:bg-background/10 transition-colors">
+                <ShoppingCart className="h-6 w-6 text-background" />
+                {totalCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+                    {totalCount}
+                  </span>
+                )}
+              </Link>
+              <Link to="/dashboard" className="p-2 rounded-full hover:bg-background/10 transition-colors">
+                <User className="h-6 w-6 text-background" />
+              </Link>
+            </>
           ) : (
-            <Link to="/signin" className="p-2 rounded-full hover:bg-background/10 transition-colors">
-              <User className="h-6 w-6 text-background" />
-            </Link>
+            <>
+              <Button variant="outline" asChild>
+                <Link to="/shop">Adquirir Meus eBooks</Link>
+              </Button>
+              <Link to="/shop" className="p-2 rounded-full hover:bg-background/10 transition-colors">
+                <ShoppingCart className="h-6 w-6 text-background" />
+              </Link>
+              <Link to="/signin" className="p-2 rounded-full hover:bg-background/10 transition-colors">
+                <User className="h-6 w-6 text-background" />
+              </Link>
+            </>
           )}
         </div>
         {/* Mobile Menu Toggle */}
@@ -99,9 +116,33 @@ export function Header() {
       )}>
         <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-4 items-start">
           {/* Main Navigation Links */}
+          {navLinks.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.to === '/'}
+              className={({ isActive }) =>
+                `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
+                  isActive
+                    ? 'bg-[#606C38] text-white'
+                    : 'hover:bg-[#606C38] hover:text-white'
+                }`
+              }
+              onClick={closeMenu}
+            >
+              {link.to === '/' && <Home className="h-5 w-5" />}
+              {link.to === '/about' && <Info className="h-5 w-5" />}
+              {link.to === '/podcast' && <Mic className="h-5 w-5" />}
+              {link.to === '/shop' && <ShoppingBag className="h-5 w-5" />}
+              {link.to === '/contact' && <Mail className="h-5 w-5" />}
+              {link.to === '/dashboard' && <LayoutDashboard className="h-5 w-5" />}
+              {link.label}
+            </NavLink>
+          ))}
+
+          {/* Cart Link */}
           <NavLink
-            to="/"
-            end
+            to="/dashboard?tab=cart"
             className={({ isActive }) =>
               `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
                 isActive
@@ -111,66 +152,28 @@ export function Header() {
             }
             onClick={closeMenu}
           >
-            <Home className="h-5 w-5" />
-            Início
+            <ShoppingCart className="h-5 w-5" />
+            Carrinho
+            {totalCount > 0 && (
+              <span className="ml-2 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+                {totalCount}
+              </span>
+            )}
           </NavLink>
-          <NavLink
-            to="/about"
-            className={({ isActive }) =>
-              `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
-                isActive
-                  ? 'bg-[#606C38] text-white'
-                  : 'hover:bg-[#606C38] hover:text-white'
-              }`
-            }
-            onClick={closeMenu}
-          >
-            <Info className="h-5 w-5" />
-            Sobre
-          </NavLink>
-          <NavLink
-            to="/podcast"
-            className={({ isActive }) =>
-              `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
-                isActive
-                  ? 'bg-[#606C38] text-white'
-                  : 'hover:bg-[#606C38] hover:text-white'
-              }`
-            }
-            onClick={closeMenu}
-          >
-            <Mic className="h-5 w-5" />
-            Podcast
-          </NavLink>
-          <NavLink
-            to="/shop"
-            className={({ isActive }) =>
-              `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
-                isActive
-                  ? 'bg-[#606C38] text-white'
-                  : 'hover:bg-[#606C38] hover:text-white'
-              }`
-            }
-            onClick={closeMenu}
-          >
-            <ShoppingBag className="h-5 w-5" />
-            Loja
-          </NavLink>
-          <NavLink
-            to="/contact"
-            className={({ isActive }) =>
-              `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
-                isActive
-                  ? 'bg-[#606C38] text-white'
-                  : 'hover:bg-[#606C38] hover:text-white'
-              }`
-            }
-            onClick={closeMenu}
-          >
-            <Mail className="h-5 w-5" />
-            Contato
-          </NavLink>
-          {!user && (
+
+          {/* Sign In/Out Link */}
+          {user ? (
+            <button
+              onClick={() => {
+                closeMenu();
+                // Add your sign out logic here
+              }}
+              className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
+            >
+              <LogOut className="h-5 w-5" />
+              Sair
+            </button>
+          ) : (
             <NavLink
               to="/signin"
               className={({ isActive }) =>

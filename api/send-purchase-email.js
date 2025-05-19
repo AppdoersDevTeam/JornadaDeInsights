@@ -10,9 +10,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
+  console.log('Request method:', req.method);
+  console.log('Request headers:', req.headers);
+  console.log('Request body:', req.body);
+
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', 'https://jornadadeinsights.com');
+  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
+    ? 'https://jornadadeinsights.com'
+    : '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
   res.setHeader(
     'Access-Control-Allow-Headers',
@@ -22,14 +28,15 @@ export default async function handler(req, res) {
 
   // Handle preflight request
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
     res.status(204).end();
     return;
   }
 
   // Only allow POST requests
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
+    console.error('Invalid method:', req.method);
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
@@ -42,7 +49,24 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Validate environment variables
+    if (!process.env.RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not configured');
+      return res.status(500).json({ error: 'Email service not configured' });
+    }
+
+    if (!process.env.FRONTEND_URL) {
+      console.error('FRONTEND_URL is not configured');
+      return res.status(500).json({ error: 'Frontend URL not configured' });
+    }
+
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('STRIPE_SECRET_KEY is not configured');
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
     // Get the session details from Stripe
+    console.log('Retrieving Stripe session:', sessionId);
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     console.log('Stripe session:', session);
     
@@ -52,6 +76,7 @@ export default async function handler(req, res) {
     }
 
     // Get line items for the session
+    console.log('Retrieving line items for session:', sessionId);
     const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
     console.log('Line items:', lineItems.data);
     
@@ -60,18 +85,6 @@ export default async function handler(req, res) {
       title: item.description || item.price_data?.product_data?.name,
       id: item.price_data?.product_data?.metadata?.ebookId
     }));
-
-    // Validate Resend configuration
-    if (!process.env.RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not configured');
-      return res.status(500).json({ error: 'Email service not configured' });
-    }
-
-    // Validate frontend URL
-    if (!process.env.FRONTEND_URL) {
-      console.error('FRONTEND_URL is not configured');
-      return res.status(500).json({ error: 'Frontend URL not configured' });
-    }
 
     // Send email using Resend
     console.log('Sending email to:', customerEmail);
@@ -123,10 +136,10 @@ export default async function handler(req, res) {
     }
 
     console.log('Email sent successfully:', data);
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     console.error('Error in send-purchase-email:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'Internal server error',
       details: error.message,
       stack: error.stack

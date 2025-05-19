@@ -58,8 +58,11 @@ export function SuccessPage() {
           return;
         }
 
+        const apiUrl = `${SERVER_URL}/api/send-purchase-email`;
+        console.log('Sending request to:', apiUrl);
+
         // Send purchase confirmation email
-        const response = await fetch(`${SERVER_URL}/send-purchase-email`, {
+        const response = await fetch(apiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -71,12 +74,17 @@ export function SuccessPage() {
           }),
         });
 
-        const data = await response.json();
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
         if (!response.ok) {
-          console.error('Email sending failed:', data);
-          throw new Error(data.error || 'Failed to send confirmation email');
+          const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
+          console.error('Email sending failed:', errorData);
+          throw new Error(errorData.error || 'Failed to send confirmation email');
         }
+
+        const data = await response.json();
+        console.log('Response data:', data);
 
         // Mark this session as having sent the email with timestamp
         sessionStorage.setItem(emailSentKey, JSON.stringify({
@@ -136,17 +144,17 @@ export function SuccessPage() {
               'Seu pagamento foi realizado com sucesso. Você pode acessar seus eBooks no seu painel. Um e-mail de confirmação foi enviado com mais detalhes.'
             )}
           </p>
-          <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg">
               <Link to="/user-dashboard?tab=ebooks">Ir para meus eBooks</Link>
             </Button>
             <Button variant="outline" asChild size="lg">
               <Link to="/shop">Continuar comprando</Link>
             </Button>
-            <p className="text-sm text-muted-foreground">
-              Precisa de ajuda? <Link to="/contact" className="text-primary hover:underline">Contate-nos</Link>
-            </p>
           </div>
+          <p className="text-sm text-muted-foreground mt-6">
+            Precisa de ajuda? <Link to="/contact" className="text-primary hover:underline">Contate-nos</Link>
+          </p>
         </div>
       </div>
     </section>
