@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import jornadaLogo from '@/Jornada logo.png';
+import jornadaLogo from '@/Jornada logo footer.png';
 
 export function Footer() {
   const [quickOpen, setQuickOpen] = useState(false);
@@ -37,7 +37,7 @@ export function Footer() {
             {/* Brand Column */}
             <div className="flex flex-col items-center text-center">
               <Link to="/" className="mb-4">
-                <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
+                <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
               </Link>
               <p className="text-muted-foreground mb-6 text-base">
                 Podcaster, autora e criadora de conteúdo, compartilhando insights sobre crescimento pessoal e bem-estar.
@@ -132,7 +132,7 @@ export function Footer() {
             {/* Brand Column */}
             <div className="md:col-span-1 flex flex-col items-center text-center md:items-start md:text-left">
               <Link to="/" className="mb-4">
-                <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
+                <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
               </Link>
               <p className="text-muted-foreground mb-6 text-base">
                 Podcaster, autora e criadora de conteúdo, compartilhando insights sobre crescimento pessoal e bem-estar.
