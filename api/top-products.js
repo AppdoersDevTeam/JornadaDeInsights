@@ -59,8 +59,7 @@ export default async function handler(req, res) {
       charges = await stripe.charges.list({
         created: { gte: startOfMonthUnix },
         limit: 100,
-        status: 'succeeded',
-        currency: 'nzd'
+        status: 'succeeded'
       });
       console.log('Received charges:', charges?.data?.length || 0, 'charges');
     } catch (stripeError) {
@@ -77,21 +76,15 @@ export default async function handler(req, res) {
       return;
     }
 
-    // Group charges by product name and calculate totals
+    // Group charges by product name and count sales
     const productMap = new Map();
 
     charges.data.forEach(charge => {
       if (!charge) return; // Skip invalid charges
-      
       const productName = charge.description || 'Unknown Product';
-      const current = productMap.get(productName) || { sales: 0, revenue: 0 };
-      
-      // Safely convert amount from cents to dollars
-      const amount = typeof charge.amount === 'number' ? charge.amount / 100 : 0;
-      
+      const current = productMap.get(productName) || { sales: 0 };
       productMap.set(productName, {
-        sales: current.sales + 1,
-        revenue: current.revenue + amount
+        sales: current.sales + 1
       });
     });
 
@@ -101,8 +94,7 @@ export default async function handler(req, res) {
     const products = Array.from(productMap.entries())
       .map(([name, data]) => ({
         name: name || 'Unknown Product',
-        sales: data.sales || 0,
-        revenue: data.revenue || 0
+        sales: data.sales || 0
       }))
       .sort((a, b) => (b.sales || 0) - (a.sales || 0))
       .slice(0, 3); // Get top 3 products

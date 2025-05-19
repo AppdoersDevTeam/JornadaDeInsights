@@ -562,15 +562,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                         <div>
                           <p className="font-medium">{product.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {product.sales} sales
+                            {product.sales} vendas
                           </p>
                         </div>
-                        <p className="font-medium">
-                          {new Intl.NumberFormat('en-NZ', {
-                            style: 'currency',
-                            currency: 'NZD'
-                          }).format(product.revenue)}
-                        </p>
                       </div>
                     ))
                   )}
