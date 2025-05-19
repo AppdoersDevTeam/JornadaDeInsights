@@ -56,7 +56,7 @@ export default async function handler(req, res) {
         created: { gte: startOfMonthUnix },
         limit: 100,
         status: 'succeeded',
-        currency: 'usd'
+        currency: 'nzd'
       });
     } catch (stripeError) {
       console.error('Stripe API error:', stripeError);
