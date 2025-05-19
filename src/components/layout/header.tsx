@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
 import { AnimatedCartIcon } from '@/components/shop/animated-cart-icon';
 import { useAuth } from '@/context/auth-context';
-import jornadaLogo from 'C:/Users/Sara/Files/Desktop/Patricia Vercel Deployement/JornadaDeInsights/src/Jornada logo.png';
+import jornadaLogo from '@/Jornada logo.png';
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);

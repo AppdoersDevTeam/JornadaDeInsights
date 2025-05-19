@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import jornadaLogo from 'C:/Users/Sara/Files/Desktop/Patricia Vercel Deployement/JornadaDeInsights/src/Jornada logo footer.png';
+import jornadaLogo from '@/Jornada logo footer.png';
 
 export function Footer() {
   const [quickOpen, setQuickOpen] = useState(false);
