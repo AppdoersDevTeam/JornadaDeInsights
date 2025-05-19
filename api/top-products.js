@@ -81,10 +81,14 @@ export default async function handler(req, res) {
 
     charges.data.forEach(charge => {
       if (!charge) return; // Skip invalid charges
-      const productName = charge.description || 'Unknown Product';
-      const current = productMap.get(productName) || { sales: 0 };
-      productMap.set(productName, {
-        sales: current.sales + 1
+      const productNames = charge.metadata?.product_names || charge.description || 'Unknown Product';
+      productNames.split(',').forEach(name => {
+        const trimmed = name.trim();
+        if (!trimmed) return;
+        const current = productMap.get(trimmed) || { sales: 0 };
+        productMap.set(trimmed, {
+          sales: current.sales + 1
+        });
       });
     });
 

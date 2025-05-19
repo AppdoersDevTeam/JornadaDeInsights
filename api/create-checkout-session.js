@@ -81,6 +81,8 @@ export default async function handler(req, res) {
       return;
     }
 
+    const productNames = items.map(item => item.name).join(', ');
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -127,6 +129,11 @@ export default async function handler(req, res) {
           }
         };
       }),
+      payment_intent_data: {
+        metadata: {
+          product_names: productNames
+        }
+      },
       success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       allow_promotion_codes: true,
