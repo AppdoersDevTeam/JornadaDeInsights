@@ -13,7 +13,9 @@ try {
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', 'https://jornadadeinsights.com');
+  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
+    ? 'https://jornadadeinsights.com'
+    : 'http://localhost:5173');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader(
     'Access-Control-Allow-Headers',
@@ -48,6 +50,8 @@ export default async function handler(req, res) {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfMonthUnix = Math.floor(startOfMonth.getTime() / 1000);
+    
+    console.log('Fetching charges from:', new Date(startOfMonthUnix * 1000).toISOString());
 
     // Fetch successful charges from this month with error handling
     let charges;
@@ -58,6 +62,7 @@ export default async function handler(req, res) {
         status: 'succeeded',
         currency: 'nzd'
       });
+      console.log('Received charges:', charges?.data?.length || 0, 'charges');
     } catch (stripeError) {
       console.error('Stripe API error:', stripeError);
       // Return empty array instead of error
@@ -90,6 +95,8 @@ export default async function handler(req, res) {
       });
     });
 
+    console.log('Product map entries:', productMap.size);
+
     // Convert to array and sort by sales
     const products = Array.from(productMap.entries())
       .map(([name, data]) => ({
@@ -99,6 +106,8 @@ export default async function handler(req, res) {
       }))
       .sort((a, b) => (b.sales || 0) - (a.sales || 0))
       .slice(0, 3); // Get top 3 products
+
+    console.log('Final products array:', products);
 
     // Always return a valid response
     res.json({ 

@@ -566,9 +566,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                           </p>
                         </div>
                         <p className="font-medium">
-                          {new Intl.NumberFormat('en-US', {
+                          {new Intl.NumberFormat('en-NZ', {
                             style: 'currency',
-                            currency: 'USD'
+                            currency: 'NZD'
                           }).format(product.revenue)}
                         </p>
                       </div>
