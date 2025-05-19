@@ -468,10 +468,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
-                      : new Intl.NumberFormat('en-US', {
-                          style: 'currency',
-                          currency: 'USD'
-                        }).format(stats.today)
+                      : stats.today
                     }
                   </h3>
                 </div>
@@ -486,10 +483,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
-                      : new Intl.NumberFormat('en-US', {
-                          style: 'currency',
-                          currency: 'USD'
-                        }).format(stats.week)
+                      : stats.week
                     }
                   </h3>
                 </div>
@@ -504,10 +498,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
-                      : new Intl.NumberFormat('en-US', {
-                          style: 'currency',
-                          currency: 'USD'
-                        }).format(stats.month)
+                      : stats.month
                     }
                   </h3>
                 </div>
