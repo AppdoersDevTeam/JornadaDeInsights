@@ -7,6 +7,7 @@ import { Footer } from './footer';
 import { StickyHeader } from '@/components/ui/sticky-header';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from '@/context/auth-context';
+import ScrollIcon from '@/components/ScrollIcon';
 
 interface LayoutProps {
   children: ReactNode;
@@ -40,6 +41,7 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </motion.main>
       <Footer />
+      <ScrollIcon />
     </div>
   );
 }

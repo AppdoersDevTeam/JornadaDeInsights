@@ -16,8 +16,8 @@ export function StickyHeader({ children }: StickyHeaderProps) {
   );
 
   useEffect(() => {
-    const unsubscribe = scrollY.onChange(latest => {
-      setIsScrolled(latest > 50);
+    const unsubscribe = scrollY.on("change", (latest) => {
+      setIsScrolled(latest > 0);
     });
     return () => unsubscribe();
   }, [scrollY]);

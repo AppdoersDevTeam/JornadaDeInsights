@@ -9,6 +9,7 @@ import { AnimatedGridItem } from '@/components/shop/animated-grid-item';
 import { AnimatedCartIcon } from '@/components/shop/animated-cart-icon';
 import { motion, useScroll, useTransform, Variants } from 'framer-motion';
 import { getEbooks } from '@/lib/supabase';
+import { Link } from 'react-router-dom';
 
 // Remove mock data
 // const allEbooks: Ebook[] = [ ... ];
@@ -223,66 +224,73 @@ export function ShopPage() {
               </div>
             </div>
           ) : featuredEbook ? (
-            <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 transition-all duration-300 hover:shadow-lg hover:border-primary/20 group">
-              <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="md:order-2 aspect-square md:aspect-[3/4] md:h-full max-h-[400px] md:max-h-none overflow-hidden relative">
-                  <LazyImage 
-                    src={featuredEbook.cover_url || ''} 
-                    alt={featuredEbook.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-6 md:p-8 flex flex-col justify-between">
-                  <div>
-                    <p className="text-sm text-purple-600 uppercase tracking-wider mb-2">Mais Vendido</p>
-                    <h3 className="font-heading text-xl md:text-2xl font-semibold mb-3 group-hover:text-primary transition-colors">{featuredEbook.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">por Patricia</p>
-                    <p className="text-muted-foreground mb-4">
-                      {featuredEbook.description}
-                    </p>
-                    <div className="flex items-center gap-2 mb-6">
-                      <div className="text-yellow-400 flex">
-                        {Array(5).fill(0).map((_, i) => (
-                          <motion.span 
-                            key={i}
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            animate={{
-                              y: [0, -5, 0],
-                            }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                              delay: i * 0.2,
-                              ease: "easeInOut",
-                              opacity: { duration: 0.3, delay: 0.5 + i * 0.1 },
-                              scale: { duration: 0.3, delay: 0.5 + i * 0.1 }
-                            }}
-                            className="text-yellow-400 inline-block mx-0.5"
-                          >
-                            ★
-                          </motion.span>
-                        ))}
-                      </div>
-                      <span className="text-sm text-muted-foreground">(128 avaliações)</span>
-                    </div>
-                    <p className="text-2xl font-medium mb-6 group-hover:text-primary transition-colors">R${featuredEbook.price.toFixed(2)}</p>
+            <Link to={`/shop/ebook/${featuredEbook.id}`} className="block">
+              <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 transition-all duration-300 hover:shadow-lg hover:border-primary/20 group">
+                <div className="grid grid-cols-1 md:grid-cols-2 min-h-[350px] md:min-h-[450px]">
+                  <div className="md:order-2 aspect-[3/4] h-full w-full max-h-[450px] overflow-hidden flex items-center justify-center">
+                    <LazyImage 
+                      src={featuredEbook.cover_url || ''} 
+                      alt={featuredEbook.title}
+                      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                    />
                   </div>
-                  <div>
-                    <Button 
-                      className="w-full mb-2 transition-all duration-300 hover:scale-105 hover:shadow-md" 
-                      onClick={() => addItem(featuredEbook)}
-                    >
-                      <ShoppingCart className="mr-2 h-4 w-4" /> Adicionar ao Carrinho
-                    </Button>
-                    <p className="text-xs text-muted-foreground text-center">
-                      Entrega digital • Download instantâneo após a compra
-                    </p>
+                  <div className="p-4 md:p-6 flex flex-col justify-between">
+                    <div>
+                      <p className="text-xs text-purple-600 uppercase tracking-wider mb-1">Mais Vendido</p>
+                      <h3 className="font-heading text-lg md:text-xl font-semibold mb-2 group-hover:text-primary transition-colors">{featuredEbook.title}</h3>
+                      <p className="text-xs text-muted-foreground mb-2">por Patricia</p>
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
+                        {featuredEbook.description}
+                      </p>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="text-yellow-400 flex">
+                          {Array(5).fill(0).map((_, i) => (
+                            <motion.span 
+                              key={i}
+                              initial={{ opacity: 0, scale: 0.5 }}
+                              whileInView={{ opacity: 1, scale: 1 }}
+                              viewport={{ once: true }}
+                              animate={{
+                                y: [0, -5, 0],
+                              }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                delay: i * 0.2,
+                                ease: "easeInOut",
+                                opacity: { duration: 0.3, delay: 0.5 + i * 0.1 },
+                                scale: { duration: 0.3, delay: 0.5 + i * 0.1 }
+                              }}
+                              className="text-yellow-400 inline-block mx-0.5"
+                            >
+                              ★
+                            </motion.span>
+                          ))}
+                        </div>
+                        <span className="text-xs text-muted-foreground">(128 avaliações)</span>
+                      </div>
+                      <p className="text-xl font-medium mb-3 group-hover:text-primary transition-colors">R${featuredEbook.price.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <Button 
+                        size="sm"
+                        className="w-full mb-1 transition-all duration-300 hover:scale-105 hover:shadow-md" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          addItem(featuredEbook);
+                        }}
+                      >
+                        <ShoppingCart className="mr-2 h-4 w-4" /> Adicionar ao Carrinho
+                      </Button>
+                      <p className="text-[10px] text-muted-foreground text-center">
+                        Entrega digital • Download instantâneo após a compra
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ) : null}
         </div>
       </section>

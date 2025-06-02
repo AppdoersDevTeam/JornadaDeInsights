@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useRef } from 'react';
 import type { Ebook } from '@/components/shop/ebook-card';
 import { toast } from 'react-hot-toast';
 
@@ -74,10 +74,17 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [] });
+  const toastRef = useRef<string | null>(null);
+
   const addItem = (item: Ebook) => {
     dispatch({ type: 'ADD_ITEM', payload: item });
-    toast.success(`${item.title} adicionado ao carrinho!`);
+    toast.success(`${item.title} adicionado ao carrinho!`, {
+      id: `add-to-cart-${item.id}`,
+      duration: 2000,
+      position: 'top-right',
+    });
   };
+
   const removeItem = (id: string) => dispatch({ type: 'REMOVE_ITEM', payload: id });
   const decrementItem = (id: string) => dispatch({ type: 'DECREMENT_ITEM', payload: id });
   const clearCart = () => dispatch({ type: 'CLEAR_CART' });

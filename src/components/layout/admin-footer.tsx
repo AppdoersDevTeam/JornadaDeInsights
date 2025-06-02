@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Headphones, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
+import jornadaLogo from '@/Jornada logo footer.png';
 
 export function AdminFooter() {
   const currentYear = new Date().getFullYear();
@@ -21,13 +22,9 @@ export function AdminFooter() {
         <div className="md:hidden space-y-4">
           {/* Brand Section */}
           <div className="flex flex-col items-center text-center">
-            <Link to="/dashboard" className="flex items-center gap-2 mb-4">
-              <Headphones className="h-6 w-6 text-primary" />
-              <span className="text-xl font-heading font-semibold">Patricia Dashboard</span>
+            <Link to="/" className="mb-4">
+              <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
             </Link>
-            <p className="text-muted-foreground text-base mb-2">
-              Painel de Controle - Seu centro de controle
-            </p>
           </div>
           {/* Quick Links Accordion */}
           <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
@@ -93,16 +90,12 @@ export function AdminFooter() {
           </div>
         </div>
         {/* Desktop: Grid */}
-        <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="hidden md:grid grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="flex flex-col">
-            <Link to="/dashboard" className="flex items-center gap-2 mb-4">
-              <Headphones className="h-6 w-6 text-primary" />
-              <span className="text-xl font-heading font-semibold">Patricia Dashboard</span>
+            <Link to="/" className="mb-4">
+              <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
             </Link>
-            <p className="text-muted-foreground text-base mb-2">
-              Painel de Controle - Seu centro de controle
-            </p>
           </div>
           {/* Quick Links */}
           <div>

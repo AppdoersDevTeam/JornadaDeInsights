@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
     ? 'https://jornadadeinsights.com'
-    : '*');
+    : 'http://localhost:5173');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
   res.setHeader(
     'Access-Control-Allow-Headers',

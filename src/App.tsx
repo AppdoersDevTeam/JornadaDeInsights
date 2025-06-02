@@ -63,7 +63,7 @@ function App() {
             <Route path="cancel" element={<CancelPage />} />
             <Route path="terms" element={<TermsPage />} />
             <Route path="privacy" element={<PrivacyPage />} />
-            <Route path="ebook/:id" element={<EbookDetailsPage />} />
+            <Route path="shop/ebook/:id" element={<EbookDetailsPage />} />
             <Route path="signin" element={<SignIn />} />
             <Route path="signup" element={<SignUp />} />
             <Route path="check-email" element={<CheckEmailPage />} />
