@@ -252,18 +252,45 @@ export function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
                 viewport={{ amount: 0.3 }}
-                className="text-3xl md:text-5xl font-heading font-bold mb-6 leading-tight"
+                className="text-3xl md:text-5xl font-heading font-bold mb-2 leading-tight"
               >
                 Uma Jornada de <span className="text-primary">Insights</span>
               </motion.h1>
+              <motion.h2
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                viewport={{ amount: 0.3 }}
+                className="text-2xl md:text-3xl font-heading font-medium mb-6 text-muted-foreground"
+              >
+                Com Patricia da Silva
+              </motion.h2>
               <motion.p
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ amount: 0.3 }}
+                className="text-lg text-muted-foreground mb-2"
+              >
+                A verdade da Bíblia é eterna, mas há sempre novos insights a serem descobertos.
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                viewport={{ amount: 0.3 }}
+                className="text-lg text-muted-foreground mb-2"
+              >
+                Ouça agora os nossos episódios no YouTube, Spotify e iHeartRadio.
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                viewport={{ amount: 0.3 }}
                 className="text-lg text-muted-foreground mb-8"
               >
-                A verdade da biblia e eterna, mas sempre ha novos insights a serem descobertos.
+                Explore nossos e-books e recursos para crianças, jovens e adultos.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
@@ -411,13 +438,21 @@ export function HomePage() {
               viewport={{ amount: 0.3 }}
               className="w-full md:w-7/12"
             >
-              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">Oi, eu sou a Patricia.</h2>
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">Sobre Mim – Patricia da Silva</h2>
+              <p className="text-muted-foreground mb-4 font-medium">
+                Podcaster, educadora e contadora de histórias bíblicas.
+              </p>
               <p className="text-muted-foreground mb-4">
-                Sou apaixonada por explorar a Bíblia com um olhar criativo e reflexivo.
-                Criei este espaço para compartilhar meus estudos, pensamentos e descobertas através de podcasts, vídeos e eBooks.
-                </p>
+                Minha missão é compartilhar insights profundos e acessíveis das Escrituras, trazendo o contexto histórico, cultural e espiritual que dá vida aos textos bíblicos — de forma clara, envolvente e transformadora.
+              </p>
+              <p className="text-muted-foreground mb-4">
+                Com meu projeto "Uma Jornada de Insights", alcanço pessoas de todas as idades, com materiais que vão desde estudos bíblicos para adultos, até e-books e recursos criativos para crianças, ajudando famílias a crescerem juntas na fé.
+              </p>
+              <p className="text-muted-foreground mb-4">
+                Falo da Bíblia é minha paixão, e procuro falar com simplicidade e reverência — combinando pesquisa, ensino e aplicação prática com uma linguagem que conecta mente e coração.
+              </p>
               <p className="text-muted-foreground mb-6">
-                Se você busca aprofundar sua fé e enxergar as Escrituras de uma forma nova, seja muito bem-vindo.
+                Amo ensinar com propósito, educar com criatividade e inspirar com amor pela Palavra de Deus.
               </p>
               <Button asChild>
                 <Link to="/about">Saiba mais sobre mim</Link>

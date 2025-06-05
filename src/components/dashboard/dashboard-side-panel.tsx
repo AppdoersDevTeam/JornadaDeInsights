@@ -47,14 +47,6 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
           Análises
         </Button>
         <Button
-          variant={activeTab === 'content' ? 'secondary' : 'ghost'}
-          className="w-full justify-start"
-          onClick={() => onTabChange('content')}
-        >
-          <Edit className="mr-2 h-4 w-4" />
-          Conteúdo
-        </Button>
-        <Button
           variant={activeTab === 'users' ? 'secondary' : 'ghost'}
           className="w-full justify-start"
           onClick={() => onTabChange('users')}
@@ -69,14 +61,6 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
           Pedidos Concluídos
-        </Button>
-        <Button
-          variant={activeTab === 'settings' ? 'secondary' : 'ghost'}
-          className="w-full justify-start"
-          onClick={() => onTabChange('settings')}
-        >
-          <Settings className="mr-2 h-4 w-4" />
-          Configurações
         </Button>
       </nav>
     </div>

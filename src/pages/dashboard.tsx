@@ -432,28 +432,11 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               {activeTab === 'overview' && 'Visão Geral'}
               {activeTab === 'ebooks' && 'eBooks'}
               {activeTab === 'analytics' && 'Análises'}
-              {activeTab === 'content' && 'Conteúdo'}
               {activeTab === 'users' && 'Usuários'}
               {activeTab === 'orders' && 'Pedidos Concluídos'}
-              {activeTab === 'settings' && 'Configurações'}
             </h1>
           )}
         </div>
-        {activeTab === 'overview' && (
-          <div className="flex w-full sm:w-auto items-center gap-2">
-            <Input
-              type="search"
-              placeholder="Pesquisar..."
-              className="w-full max-w-xs md:w-64"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Button variant="outline" className="shrink-0">
-              <Bell className="mr-2 h-4 w-4" />
-              Notificações
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Content */}
@@ -590,38 +573,6 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               </div>
             </Card>
           </div>
-
-          {/* Insights Section */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 w-full">
-            <Card className="p-6">
-              <CardHeader>
-                <CardTitle>Atualizações Recentes de Conteúdo</CardTitle>
-                <CardDescription>Alterações recentes no conteúdo do seu site</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {contentData.recentUpdates.map((update, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{update.page}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {update.action} • {update.date}
-                        </p>
-                      </div>
-                      <Button variant="ghost" size="icon">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">
-                  Ver Todas as Atualizações
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
         </div>
       )}
 
@@ -655,89 +606,6 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               monthlyData={salesTrends.monthly}
             />
             <StripeBalanceChart data={balanceData} />
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'content' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full">
-            {/* Content Navigation Panel */}
-            <div className="col-span-1 md:col-span-3">
-              <Card className="p-4">
-                <nav className="space-y-1">
-                  <Button variant="ghost" className="w-full justify-start">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Editar Páginas
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start">
-                    <FileText className="mr-2 h-4 w-4" />
-                    Posts do Blog
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start">
-                    <IconImage className="mr-2 h-4 w-4" />
-                    Biblioteca de Mídia
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start">
-                    <IconLink className="mr-2 h-4 w-4" />
-                    Links
-                  </Button>
-                </nav>
-              </Card>
-            </div>
-
-            {/* Content Editor */}
-            <div className="col-span-1 md:col-span-9">
-              <Card className="p-6">
-                <div className="space-y-6">
-                  <div>
-                    <Label htmlFor="page-title" className="text-sm font-medium">Título da Página</Label>
-                    <Input
-                      id="page-title"
-                      placeholder="Digite o título da página"
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="page-content" className="text-sm font-medium">Conteúdo</Label>
-                    <div className="mt-2 border rounded-lg">
-                      <div className="border-b p-2 flex items-center gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Bold className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <Italic className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <Underline className="h-4 w-4" />
-                        </Button>
-                        <Separator orientation="vertical" className="h-6" />
-                        <Button variant="ghost" size="icon">
-                          <IconLink className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <IconImage className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <Textarea
-                        id="page-content"
-                        placeholder="Digite o conteúdo da página..."
-                        rows={10}
-                        className="border-0 focus-visible:ring-0"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Save Changes Button */}
-                  <div className="flex justify-end">
-                    <Button className="w-full sm:w-auto">
-                      Salvar Alterações
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            </div>
           </div>
         </div>
       )}
@@ -808,67 +676,6 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         </div>
       )}
 
-      {activeTab === 'settings' && (
-        <div className="space-y-6">
-          {/* Settings Header */}
-          <div className="mb-8">
-            <p className="text-muted-foreground">
-              Personalize as configurações básicas do site e ative recursos como modo escuro ou modo de manutenção.
-            </p>
-          </div>
-
-          <Card className="p-6">
-            <div className="space-y-8">
-              {/* Site Title */}
-              <div>
-                <Label htmlFor="site-title" className="text-sm font-medium">Título do Site</Label>
-                <Input
-                  id="site-title"
-                  placeholder="Digite o título do seu site aqui"
-                  defaultValue="Minha Plataforma"
-                  className="mt-2"
-                />
-              </div>
-
-              {/* Site Description */}
-              <div>
-                <Label htmlFor="site-description" className="text-sm font-medium">Descrição do Site</Label>
-                <Textarea
-                  id="site-description"
-                  placeholder="Digite uma breve descrição da sua plataforma"
-                  defaultValue="Bem-vindo à nossa plataforma..."
-                  rows={4}
-                  className="mt-2"
-                />
-              </div>
-
-              {/* Maintenance Mode */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="maintenance-mode" className="text-sm font-medium">Modo de Manutenção</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Ative o modo de manutenção para desativar temporariamente o site
-                  </p>
-                </div>
-                <Switch id="maintenance-mode" />
-              </div>
-
-              {/* Dark Mode */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="dark-mode" className="text-sm font-medium">Modo Escuro</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Ative o modo escuro para a interface administrativa
-                  </p>
-                </div>
-                <Switch id="dark-mode" />
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Completed Orders Tab */}
       {activeTab === 'orders' && (
         <div className="space-y-6 w-full">
           <Card className="p-6 w-full">

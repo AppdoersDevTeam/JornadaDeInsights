@@ -40,7 +40,7 @@ export function Footer() {
                 <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
               </Link>
               <p className="text-muted-foreground mb-6 text-base">
-                Podcaster, autora e criadora de conteúdo, compartilhando insights sobre crescimento pessoal e bem-estar.
+                Um podcast para entender a Bíblia com profundidade e simplicidade.
               </p>
               <div className="flex space-x-4">
                 <a href="https://www.youtube.com/channel/UCCJzity3rNbZd_pkBZsZOkw" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
@@ -135,7 +135,7 @@ export function Footer() {
                 <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
               </Link>
               <p className="text-muted-foreground mb-6 text-base">
-                Podcaster, autora e criadora de conteúdo, compartilhando insights sobre crescimento pessoal e bem-estar.
+                Um podcast para entender a Bíblia com profundidade e simplicidade.
               </p>
               <div className="flex space-x-4">
                 <a href="https://www.youtube.com/channel/UCCJzity3rNbZd_pkBZsZOkw" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
