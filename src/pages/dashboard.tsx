@@ -81,7 +81,8 @@ interface UserData {
 
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
-  'admin@jornadadeinsights.com'
+  'admin@jornadadeinsights.com',
+  'ptasbr2020@gmail.com'
 ];
 
 export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
