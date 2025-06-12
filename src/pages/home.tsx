@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import plogo from '@/plogo.png';
 import { getEbooks } from '@/lib/supabase';
 import { decode } from 'html-entities';
+import { needsIOSVideoFix, getYouTubeEmbedUrl, handleIframeLoad, reloadIframeForIOS } from '@/lib/device-utils';
 
 // Define type for YouTube API items
 type YouTubeVideo = {
@@ -78,6 +79,12 @@ export function HomePage() {
   const [featuredEbooks, setFeaturedEbooks] = useState<Ebook[]>([]);
   const [isLoadingEbooks, setIsLoadingEbooks] = useState(true);
   const [isHeroPlaying, setIsHeroPlaying] = useState(false);
+
+  // Enhanced play handler for iOS compatibility
+  const handleVideoPlay = (setPlaying: (playing: boolean) => void) => {
+    setPlaying(true);
+    reloadIframeForIOS();
+  };
 
   useEffect(() => {
     // Fetch featured ebooks
@@ -327,31 +334,37 @@ export function HomePage() {
                 ) : heroVideo ? (
                   !isHeroPlaying ? (
                     <div
-                      className="w-full aspect-video bg-cover bg-center cursor-pointer relative"
+                      className="w-full aspect-video bg-cover bg-center cursor-pointer relative video-thumbnail"
                       style={{ backgroundImage: `url(https://img.youtube.com/vi/${heroVideo.id.videoId}/hqdefault.jpg)` }}
-                      onClick={() => setIsHeroPlaying(true)}
+                      onClick={() => handleVideoPlay(setIsHeroPlaying)}
+                      onTouchStart={() => {}} // Enable touch events on iOS
                     >
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Play className="h-16 w-16 text-white bg-primary p-4 rounded-full shadow-lg" />
+                        <Play className="h-16 w-16 text-white bg-primary p-4 rounded-full shadow-lg play-button video-play-button" />
                       </div>
                     </div>
                   ) : (
-                    <iframe
-                      src={`https://www.youtube.com/embed/${heroVideo.id.videoId}?hl=pt-BR&controls=1&modestbranding=1&rel=0&autoplay=1`}
-                      title={heroVideo.snippet.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="w-full aspect-video"
-                      onLoad={(e) => {
-                        try {
+                    <div className="iframe-container">
+                      <iframe
+                        src={getYouTubeEmbedUrl(heroVideo.id.videoId, {
+                          language: 'pt-BR',
+                          autoplay: true
+                        })}
+                        title={heroVideo.snippet.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="w-full aspect-video"
+                        style={{ 
+                          border: 'none',
+                          WebkitTransform: 'translate3d(0, 0, 0)',
+                          transform: 'translate3d(0, 0, 0)'
+                        }}
+                        onLoad={(e) => {
                           const iframe = e.target as HTMLIFrameElement;
-                          if (iframe.contentWindow) {
-                          }
-                        } catch (err) {
-                          console.debug('Erro relacionado à extensão:', err);
-                        }
-                      }}
-                    />
+                          handleIframeLoad(iframe);
+                        }}
+                      />
+                    </div>
                   )
                 ) : null}
               </div>
@@ -551,6 +564,12 @@ export function HomePage() {
 function PodcastCard({ video }: { video: YouTubeVideo }) {
   const [flipped, setFlipped] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  
+  // Enhanced play handler for iOS compatibility
+  const handleVideoPlay = () => {
+    setIsPlaying(true);
+    reloadIframeForIOS();
+  };
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -571,22 +590,37 @@ function PodcastCard({ video }: { video: YouTubeVideo }) {
           <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden' }}>
             {!isPlaying ? (
               <div
-                className="w-full h-full bg-cover bg-center cursor-pointer"
+                className="w-full h-full bg-cover bg-center cursor-pointer video-thumbnail"
                 style={{ backgroundImage: `url(https://img.youtube.com/vi/${video.id.videoId}/hqdefault.jpg)` }}
-                onClick={() => setIsPlaying(true)}
+                onClick={handleVideoPlay}
+                onTouchStart={() => {}} // Enable touch events on iOS
               >
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Play className="h-12 w-12 text-white bg-primary p-2 rounded-full" />
+                  <Play className="h-12 w-12 text-white bg-primary p-2 rounded-full play-button video-play-button" />
                 </div>
               </div>
             ) : (
-              <iframe
-                src={`https://www.youtube.com/embed/${video.id.videoId}?hl=pt-BR&controls=1&modestbranding=1&rel=0&autoplay=1`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full object-cover transition-transform duration-500"
-                title={video.snippet.title}
-              />
+              <div className="iframe-container">
+                <iframe
+                  src={getYouTubeEmbedUrl(video.id.videoId, {
+                    language: 'pt-BR',
+                    autoplay: true
+                  })}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="w-full h-full object-cover transition-transform duration-500"
+                  title={video.snippet.title}
+                  style={{ 
+                    border: 'none',
+                    WebkitTransform: 'translate3d(0, 0, 0)',
+                    transform: 'translate3d(0, 0, 0)'
+                  }}
+                  onLoad={(e) => {
+                    const iframe = e.target as HTMLIFrameElement;
+                    handleIframeLoad(iframe);
+                  }}
+                />
+              </div>
             )}
           </div>
           {/* Back face: description */}

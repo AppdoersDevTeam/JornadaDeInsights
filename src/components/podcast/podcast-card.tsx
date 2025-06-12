@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { ExternalLink, Play, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getYouTubeEmbedUrl, handleIframeLoad, reloadIframeForIOS } from '@/lib/device-utils';
 
 export interface PodcastEpisode {
   id: string;
@@ -21,6 +22,14 @@ interface PodcastCardProps {
 }
 
 export function PodcastCard({ episode, onPlay, isPlaying }: PodcastCardProps) {
+  // Enhanced play handler for iOS compatibility
+  const handleVideoPlay = () => {
+    if (onPlay) {
+      onPlay();
+      reloadIframeForIOS();
+    }
+  };
+
   return (
     <motion.div
       whileHover={{ y: -5 }}
@@ -29,13 +38,24 @@ export function PodcastCard({ episode, onPlay, isPlaying }: PodcastCardProps) {
     >
       <div className="aspect-video relative overflow-hidden">
         {isPlaying ? (
-          <iframe
-            src={`https://www.youtube.com/embed/${episode.id}?autoplay=1`}
-            title={episode.title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full"
-          />
+          <div className="iframe-container">
+            <iframe
+              src={getYouTubeEmbedUrl(episode.id, { autoplay: true })}
+              title={episode.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="w-full h-full"
+              style={{ 
+                border: 'none',
+                WebkitTransform: 'translate3d(0, 0, 0)',
+                transform: 'translate3d(0, 0, 0)'
+              }}
+              onLoad={(e) => {
+                const iframe = e.target as HTMLIFrameElement;
+                handleIframeLoad(iframe);
+              }}
+            />
+          </div>
         ) : (
           <>
             <img 
@@ -47,11 +67,13 @@ export function PodcastCard({ episode, onPlay, isPlaying }: PodcastCardProps) {
               <div className="absolute inset-0 flex items-center justify-center">
                 <motion.button
                   type="button"
-                  onClick={onPlay}
+                  onClick={handleVideoPlay}
+                  onTouchStart={() => {}} // Enable touch events on iOS
                   initial={{ scale: 0.8, opacity: 0 }}
                   whileHover={{ scale: 1 }}
                   whileInView={{ scale: 0.9, opacity: 1 }}
-                  className="bg-primary rounded-full p-4 focus:outline-none"
+                  className="bg-primary rounded-full p-4 focus:outline-none play-button video-play-button"
+                  style={{ minWidth: '44px', minHeight: '44px' }}
                 >
                   <Play className="h-8 w-8 text-white" />
                 </motion.button>

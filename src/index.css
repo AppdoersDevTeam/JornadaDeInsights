@@ -245,6 +245,59 @@ img, iframe, video {
   height: auto;
 }
 
+/* iOS-specific iframe fixes */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  iframe {
+    /* Enable hardware acceleration on iOS */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    /* Ensure proper touch interaction */
+    -webkit-overflow-scrolling: touch;
+    /* Fix potential z-index issues */
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Improve touch targets on iOS */
+  .video-play-button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  
+  /* Fix iframe loading on iOS */
+  .iframe-container {
+    /* Ensure proper stacking context */
+    isolation: isolate;
+    /* Enable GPU acceleration */
+    will-change: transform;
+  }
+}
+
+/* Enhanced touch interaction for all mobile devices */
+@media (hover: none) and (pointer: coarse) {
+  .video-thumbnail {
+    /* Improve touch responsiveness */
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    tap-highlight-color: rgba(0, 0, 0, 0.1);
+    /* Prevent text selection on touch */
+    -webkit-user-select: none;
+    user-select: none;
+    /* Optimize for touch interaction */
+    touch-action: manipulation;
+  }
+  
+  .play-button {
+    /* Ensure play buttons are easily tappable */
+    min-width: 44px;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
 /* Prevent horizontal scrolling */
 html, body {
   overflow-x: hidden;
