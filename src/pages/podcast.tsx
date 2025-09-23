@@ -15,7 +15,7 @@ const allEpisodes: PodcastEpisode[] = [
     duration: "42:18",
     image: "https://images.pexels.com/photos/4144179/pexels-photo-4144179.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     youtubeUrl: "https://youtube.com",
-    spotifyUrl: "https://spotify.com",
+    spotifyUrl: "https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW",
   },
   {
     id: "2",
@@ -25,7 +25,7 @@ const allEpisodes: PodcastEpisode[] = [
     duration: "38:45",
     image: "https://images.pexels.com/photos/7176026/pexels-photo-7176026.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     youtubeUrl: "https://youtube.com",
-    spotifyUrl: "https://spotify.com",
+    spotifyUrl: "https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW",
   },
   {
     id: "3",
@@ -35,7 +35,7 @@ const allEpisodes: PodcastEpisode[] = [
     duration: "45:30",
     image: "https://images.pexels.com/photos/3759659/pexels-photo-3759659.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     youtubeUrl: "https://youtube.com",
-    spotifyUrl: "https://spotify.com",
+    spotifyUrl: "https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW",
   },
   {
     id: "4",
@@ -45,7 +45,7 @@ const allEpisodes: PodcastEpisode[] = [
     duration: "51:22",
     image: "https://images.pexels.com/photos/5717451/pexels-photo-5717451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     youtubeUrl: "https://youtube.com",
-    spotifyUrl: "https://spotify.com",
+    spotifyUrl: "https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW",
   },
   {
     id: "5",
@@ -55,7 +55,7 @@ const allEpisodes: PodcastEpisode[] = [
     duration: "47:05",
     image: "https://images.pexels.com/photos/8844888/pexels-photo-8844888.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     youtubeUrl: "https://youtube.com",
-    spotifyUrl: "https://spotify.com",
+    spotifyUrl: "https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW",
   },
   {
     id: "6",
@@ -65,7 +65,7 @@ const allEpisodes: PodcastEpisode[] = [
     duration: "49:18",
     image: "https://images.pexels.com/photos/7433822/pexels-photo-7433822.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     youtubeUrl: "https://youtube.com",
-    spotifyUrl: "https://spotify.com",
+    spotifyUrl: "https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW",
   },
   {
     id: "7",
@@ -75,7 +75,7 @@ const allEpisodes: PodcastEpisode[] = [
     duration: "53:40",
     image: "https://images.pexels.com/photos/6787202/pexels-photo-6787202.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     youtubeUrl: "https://youtube.com",
-    spotifyUrl: "https://spotify.com",
+    spotifyUrl: "https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW",
   },
   {
     id: "8",
@@ -85,7 +85,7 @@ const allEpisodes: PodcastEpisode[] = [
     duration: "46:15",
     image: "https://images.pexels.com/photos/897817/pexels-photo-897817.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     youtubeUrl: "https://youtube.com",
-    spotifyUrl: "https://spotify.com",
+    spotifyUrl: "https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW",
   },
   {
     id: "9",
@@ -95,7 +95,7 @@ const allEpisodes: PodcastEpisode[] = [
     duration: "44:32",
     image: "https://images.pexels.com/photos/4386431/pexels-photo-4386431.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     youtubeUrl: "https://youtube.com",
-    spotifyUrl: "https://spotify.com",
+    spotifyUrl: "https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW",
   }
 ];
 
@@ -252,7 +252,7 @@ export function PodcastPage() {
             duration: "",
             image: item.snippet.thumbnails.high.url || item.snippet.thumbnails.medium.url,
             youtubeUrl: `https://www.youtube.com/watch?v=${item.id}`,
-            spotifyUrl: item.snippet.description.match(/https:\/\/open\.spotify\.com\/\S+/)?.[0] || 'https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW?si=ZkJHnMx6SGmz0WIrMczEjw&nd=1&dlsi=1bf146313df84baa',
+            spotifyUrl: item.snippet.description.match(/https:\/\/open\.spotify\.com\/\S+/)?.[0] || 'https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW',
           }));
           setEpisodes(mapped);
           localStorage.setItem(CACHE_KEY, JSON.stringify(mapped));
@@ -334,7 +334,7 @@ export function PodcastPage() {
           >
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button size="lg" asChild className="w-full sm:w-auto">
-                <a href="https://www.youtube.com/@Umajornadadeinsights" target="_blank" rel="noopener noreferrer">
+                <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer">
                   <Play className="mr-2 h-4 w-4" /> Assista no YouTube
                 </a>
               </Button>

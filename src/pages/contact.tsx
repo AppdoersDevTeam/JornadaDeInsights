@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, MapPin, Send, Clock, CheckCircle, ChevronDown, Loader2, ArrowRight } from 'lucide-react';
+import { Mail, MapPin, Send, Clock, CheckCircle, ChevronDown, Loader2, ArrowRight, Facebook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, Variants } from 'framer-motion';
 
@@ -157,14 +157,17 @@ export function ContactPage() {
               
               <h3 className="font-medium mb-4">Conecte-se Comigo</h3>
               <div className="flex space-x-4">
-                <a href="https://www.youtube.com/@umajornadadeinsights" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="bg-primary/10 p-3 rounded-full transition-all duration-300 hover:bg-primary/20 hover:-translate-y-1 hover:shadow-lg">
+                <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="bg-primary/10 p-3 rounded-full transition-all duration-300 hover:bg-primary/20 hover:-translate-y-1 hover:shadow-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
                 </a>
-                <a href="https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW?si=ZkJHnMx6SGmz0WIrMczEjw&nd=1&dlsi=1bf146313df84baa" target="_blank" rel="noopener noreferrer" aria-label="Spotify" className="bg-primary/10 p-3 rounded-full transition-all duration-300 hover:bg-primary/20 hover:-translate-y-1 hover:shadow-lg">
+                <a href="https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW" target="_blank" rel="noopener noreferrer" aria-label="Spotify" className="bg-primary/10 p-3 rounded-full transition-all duration-300 hover:bg-primary/20 hover:-translate-y-1 hover:shadow-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><circle cx="12" cy="12" r="10"/><path d="M8 11.8A5.5 5.5 0 0 1 14.5 8"/><path d="M6 14.5a8 8 0 0 1 8-4"/><path d="M16 6.5a12 12 0 0 0-14 5"/></svg>
                 </a>
-                <a href="https://www.instagram.com/uma_jornada_de_insights?igsh=dmQ0OWozOTBvdWh3" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="bg-primary/10 p-3 rounded-full transition-all duration-300 hover:bg-primary/20 hover:-translate-y-1 hover:shadow-lg">
+                <a href="https://www.instagram.com/jornada_de_insights/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="bg-primary/10 p-3 rounded-full transition-all duration-300 hover:bg-primary/20 hover:-translate-y-1 hover:shadow-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                </a>
+                <a href="https://www.facebook.com/people/Uma-Jornada-de-Insights/61569588175573/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="bg-primary/10 p-3 rounded-full transition-all duration-300 hover:bg-primary/20 hover:-translate-y-1 hover:shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
                 </a>
               </div>
             </div>

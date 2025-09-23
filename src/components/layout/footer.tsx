@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { Youtube, Instagram, Headphones, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { Youtube, Instagram, Headphones, ChevronDown, ChevronUp, AlertCircle, Facebook } from 'lucide-react';
 import { FaSpotify } from 'react-icons/fa';
 import {
   Dialog,
@@ -43,14 +43,17 @@ export function Footer() {
                 Um podcast para entender a Bíblia com profundidade e simplicidade.
               </p>
               <div className="flex space-x-4">
-                <a href="https://www.youtube.com/channel/UCCJzity3rNbZd_pkBZsZOkw" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
+                <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <Youtube className="h-5 w-5" />
                 </a>
-                <a href="https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW?si=ZkJHnMx6SGmz0WIrMczEjw&nd=1&dlsi=1bf146313df84baa" target="_blank" rel="noopener noreferrer" aria-label="Spotify" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
+                <a href="https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW" target="_blank" rel="noopener noreferrer" aria-label="Spotify" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <FaSpotify className="h-5 w-5" />
                 </a>
-                <a href="https://www.instagram.com/uma_jornada_de_insights?igsh=dmQ0OWozOTBvdWh3" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
+                <a href="https://www.instagram.com/jornada_de_insights/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <Instagram className="h-5 w-5" />
+                </a>
+                <a href="https://www.facebook.com/people/Uma-Jornada-de-Insights/61569588175573/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
+                  <Facebook className="h-5 w-5" />
                 </a>
               </div>
             </div>
@@ -138,14 +141,17 @@ export function Footer() {
                 Um podcast para entender a Bíblia com profundidade e simplicidade.
               </p>
               <div className="flex space-x-4">
-                <a href="https://www.youtube.com/channel/UCCJzity3rNbZd_pkBZsZOkw" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
+                <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <Youtube className="h-5 w-5" />
                 </a>
-                <a href="https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW?si=ZkJHnMx6SGmz0WIrMczEjw&nd=1&dlsi=1bf146313df84baa" target="_blank" rel="noopener noreferrer" aria-label="Spotify" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
+                <a href="https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW" target="_blank" rel="noopener noreferrer" aria-label="Spotify" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <FaSpotify className="h-5 w-5" />
                 </a>
-                <a href="https://www.instagram.com/uma_jornada_de_insights?igsh=dmQ0OWozOTBvdWh3" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
+                <a href="https://www.instagram.com/jornada_de_insights/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <Instagram className="h-5 w-5" />
+                </a>
+                <a href="https://www.facebook.com/people/Uma-Jornada-de-Insights/61569588175573/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
+                  <Facebook className="h-5 w-5" />
                 </a>
               </div>
             </div>

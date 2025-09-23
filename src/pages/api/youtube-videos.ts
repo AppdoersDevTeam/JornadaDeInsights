@@ -211,7 +211,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         duration: '',
         image: `https://img.youtube.com/vi/${item.id.videoId}/hqdefault.jpg`,
         youtubeUrl: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-        spotifyUrl: 'https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW?si=ZkJHnMx6SGmz0WIrMczEjw&nd=1&dlsi=1bf146313df84baa',
+        spotifyUrl: 'https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW',
       }));
 
     console.log(`Successfully processed ${videos.length} videos. Quota used: ${quotaUsed}`);
