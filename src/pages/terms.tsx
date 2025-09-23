@@ -29,7 +29,7 @@ export function TermsPage() {
           transition={{ duration: 0.5 }}
           className="mb-12"
         >
-          <h1 className="text-4xl font-heading font-bold mb-4">Termos de Serviço</h1>
+          <h1 className="text-4xl font-heading font-bold mb-4 text-foreground">Termos de Serviço</h1>
           <p className="text-muted-foreground">Data de Efetivação: 16 de Maio de 2025</p>
         </motion.div>
 
@@ -41,21 +41,21 @@ export function TermsPage() {
           className="prose prose-lg dark:prose-invert max-w-none"
         >
           <section className="mb-8">
-            <h2 className="text-2xl font-heading font-semibold mb-4">1. Aceitação dos Termos</h2>
+            <h2 className="text-2xl font-heading font-semibold mb-4 text-foreground">1. Aceitação dos Termos</h2>
             <p className="text-muted-foreground mb-4">
               Ao acessar e usar este site, você concorda em cumprir estes Termos de Serviço e todas as leis aplicáveis. Se você não concordar, por favor, abstenha-se de usar o site.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-heading font-semibold mb-4">2. Propriedade Intelectual</h2>
+            <h2 className="text-2xl font-heading font-semibold mb-4 text-foreground">2. Propriedade Intelectual</h2>
             <p className="text-muted-foreground mb-4">
               Todo o conteúdo deste site, incluindo textos, gráficos, logos e imagens, é propriedade da Jornada de Insights ou de seus fornecedores de conteúdo e é protegido pelas leis de direitos autorais da Nova Zelândia e internacionais. O uso não autorizado é proibido.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-heading font-semibold mb-4">3. Conduta do Usuário</h2>
+            <h2 className="text-2xl font-heading font-semibold mb-4 text-foreground">3. Conduta do Usuário</h2>
             <p className="text-muted-foreground mb-4">Os usuários concordam em não:</p>
             <ul className="list-disc pl-6 text-muted-foreground mb-4">
               <li>Usar o site para qualquer finalidade ilegal.</li>
@@ -65,35 +65,35 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-heading font-semibold mb-4">4. Compras e Pagamentos</h2>
+            <h2 className="text-2xl font-heading font-semibold mb-4 text-foreground">4. Compras e Pagamentos</h2>
             <p className="text-muted-foreground mb-4">
               Todas as transações são processadas em Dólares Neozelandeses (NZD). Preços e disponibilidade de produtos estão sujeitos a alterações sem aviso prévio. Reservamo-nos o direito de recusar ou cancelar pedidos a nosso critério.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-heading font-semibold mb-4">5. Limitação de Responsabilidade</h2>
+            <h2 className="text-2xl font-heading font-semibold mb-4 text-foreground">5. Limitação de Responsabilidade</h2>
             <p className="text-muted-foreground mb-4">
               A Jornada de Insights não será responsável por quaisquer danos indiretos, incidentais ou consequentes decorrentes do uso ou da impossibilidade de usar o site ou seu conteúdo.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-heading font-semibold mb-4">6. Links Externos</h2>
+            <h2 className="text-2xl font-heading font-semibold mb-4 text-foreground">6. Links Externos</h2>
             <p className="text-muted-foreground mb-4">
               Este site pode conter links para sites de terceiros. Não somos responsáveis pelo conteúdo ou práticas desses sites externos.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-heading font-semibold mb-4">7. Alterações nos Termos</h2>
+            <h2 className="text-2xl font-heading font-semibold mb-4 text-foreground">7. Alterações nos Termos</h2>
             <p className="text-muted-foreground mb-4">
               Reservamo-nos o direito de modificar estes Termos de Serviço a qualquer momento. As alterações entrarão em vigor imediatamente após a publicação. O uso contínuo do site significa aceitação dos termos atualizados.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-heading font-semibold mb-4">8. Lei Aplicável</h2>
+            <h2 className="text-2xl font-heading font-semibold mb-4 text-foreground">8. Lei Aplicável</h2>
             <p className="text-muted-foreground mb-4">
               Estes termos são regidos pelas leis da Nova Zelândia. Quaisquer disputas serão resolvidas nos tribunais da Nova Zelândia.
             </p>

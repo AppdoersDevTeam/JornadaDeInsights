@@ -184,7 +184,7 @@ const featuredVariants: Variants = {
 };
 
 export function PodcastPage() {
-  const headlineText = "Uma Jornada de Insights Podcast";
+  const headlineText = "Jornada de Insights Podcast";
   const headlineWords = headlineText.split(" ");
   const subtextDelay = headlineWords.length * 0.08 + 0.3;
   const [searchTerm, setSearchTerm] = useState("");

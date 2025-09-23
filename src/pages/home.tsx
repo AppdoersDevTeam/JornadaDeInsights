@@ -261,7 +261,7 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="text-3xl md:text-5xl font-heading font-bold mb-2 leading-tight"
               >
-                Uma Jornada de <span className="text-primary">Insights</span>
+                Jornada de <span className="text-primary">Insights</span>
               </motion.h1>
               <motion.h2
                 initial={{ opacity: 0, y: 50 }}
@@ -459,10 +459,10 @@ export function HomePage() {
                 Minha missão é compartilhar insights profundos e acessíveis das Escrituras, trazendo o contexto histórico, cultural e espiritual que dá vida aos textos bíblicos — de forma clara, envolvente e transformadora.
               </p>
               <p className="text-muted-foreground mb-4">
-                Com meu projeto "Uma Jornada de Insights", alcanço pessoas de todas as idades, com materiais que vão desde estudos bíblicos para adultos, até e-books e recursos criativos para crianças, ajudando famílias a crescerem juntas na fé.
+                Com meu projeto "Jornada de Insights", alcanço pessoas de todas as idades, com materiais que vão desde estudos bíblicos para adultos, até e-books e recursos criativos para crianças, ajudando famílias a crescerem juntas na fé.
               </p>
               <p className="text-muted-foreground mb-4">
-                Falo da Bíblia é minha paixão, e procuro falar com simplicidade e reverência — combinando pesquisa, ensino e aplicação prática com uma linguagem que conecta mente e coração.
+                Falar da Bíblia é minha paixão, e procuro falar com simplicidade e reverência — combinando pesquisa, ensino e aplicação prática com uma linguagem que conecta mente e coração.
               </p>
               <p className="text-muted-foreground mb-6">
                 Amo ensinar com propósito, educar com criatividade e inspirar com amor pela Palavra de Deus.
