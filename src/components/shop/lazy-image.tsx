@@ -37,12 +37,12 @@ export function LazyImage({ src, alt, className = '' }: LazyImageProps) {
   }, []);
 
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div className="relative overflow-hidden">
       <img
         ref={imgRef}
         src={isInView ? src : ''}
         alt={alt}
-        className={`w-full h-full object-cover transition-opacity duration-500 ${
+        className={`${className} transition-opacity duration-500 ${
           isLoaded ? 'opacity-100' : 'opacity-0'
         }`}
         onLoad={() => setIsLoaded(true)}

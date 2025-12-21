@@ -30,11 +30,11 @@ export function EbookCard({ book }: EbookCardProps) {
   return (
     <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:border-primary/20 group">
       <Link to={`/shop/ebook/${book.id}`} className="block">
-        <div className="aspect-[3/4] relative w-full overflow-hidden">
+        <div className="relative w-full overflow-hidden flex items-center justify-center bg-muted/30">
           <LazyImage
             src={book.cover_url || ''}
             alt={book.title}
-            className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-auto transition-transform duration-500 group-hover:scale-105"
           />
         </div>
         <div className="p-4 flex flex-col flex-grow">

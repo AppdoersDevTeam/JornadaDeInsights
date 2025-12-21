@@ -207,91 +207,49 @@ export function ShopPage() {
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">eBook em Destaque</h2>
           
-          {isLoading ? (
-            <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 animate-pulse">
-              <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="md:order-2 aspect-[3/4] md:aspect-auto md:h-full max-h-[400px] md:max-h-none bg-muted" />
-                <div className="p-6 md:p-8">
-                  <div className="h-4 w-24 bg-muted rounded mb-2" />
-                  <div className="h-6 w-3/4 bg-muted rounded mb-3" />
-                  <div className="h-4 w-32 bg-muted rounded mb-4" />
-                  <div className="space-y-2">
-                    <div className="h-4 w-full bg-muted rounded" />
-                    <div className="h-4 w-5/6 bg-muted rounded" />
-                    <div className="h-4 w-4/6 bg-muted rounded" />
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-1 max-w-4xl mx-auto items-stretch">
+            {isLoading ? (
+              <>
+                <div className="aspect-[3/4] bg-muted animate-pulse rounded-lg max-w-xs mx-auto md:mx-0" />
+                <div className="p-4 flex flex-col justify-center bg-card rounded-lg shadow-md border border-border/50 animate-pulse max-w-md mx-auto md:mx-0">
+                  <div className="h-5 w-3/4 bg-muted rounded mb-3" />
+                  <div className="h-3 w-full bg-muted rounded mb-2" />
+                  <div className="h-3 w-5/6 bg-muted rounded mb-4" />
+                  <div className="h-5 w-20 bg-muted rounded mb-3" />
+                  <div className="h-9 w-28 bg-muted rounded" />
                 </div>
-              </div>
-            </div>
-          ) : featuredEbook ? (
-            <Link to={`/shop/ebook/${featuredEbook.id}`} className="block">
-              <div className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 transition-all duration-300 hover:shadow-lg hover:border-primary/20 group">
-                <div className="grid grid-cols-1 md:grid-cols-2 min-h-[350px] md:min-h-[450px]">
-                  <div className="md:order-2 aspect-[3/4] h-full w-full max-h-[450px] overflow-hidden flex items-center justify-center">
-                    <LazyImage 
-                      src={featuredEbook.cover_url || ''} 
-                      alt={featuredEbook.title}
-                      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="p-4 md:p-6 flex flex-col justify-between">
-                    <div>
-                      <p className="text-xs text-purple-600 uppercase tracking-wider mb-1">Mais Vendido</p>
-                      <h3 className="font-heading text-lg md:text-xl font-semibold mb-2 group-hover:text-primary transition-colors">{featuredEbook.title}</h3>
-                      <p className="text-xs text-muted-foreground mb-2">por Patricia</p>
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
-                        {featuredEbook.description}
-                      </p>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="text-yellow-400 flex">
-                          {Array(5).fill(0).map((_, i) => (
-                            <motion.span 
-                              key={i}
-                              initial={{ opacity: 0, scale: 0.5 }}
-                              whileInView={{ opacity: 1, scale: 1 }}
-                              viewport={{ once: true }}
-                              animate={{
-                                y: [0, -5, 0],
-                              }}
-                              transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                delay: i * 0.2,
-                                ease: "easeInOut",
-                                opacity: { duration: 0.3, delay: 0.5 + i * 0.1 },
-                                scale: { duration: 0.3, delay: 0.5 + i * 0.1 }
-                              }}
-                              className="text-yellow-400 inline-block mx-0.5"
-                            >
-                              ★
-                            </motion.span>
-                          ))}
-                        </div>
-                        <span className="text-xs text-muted-foreground">(128 avaliações)</span>
-                      </div>
-                      <p className="text-xl font-medium mb-3 group-hover:text-primary transition-colors">R${featuredEbook.price.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <Button 
-                        size="sm"
-                        className="w-full mb-1 transition-all duration-300 hover:scale-105 hover:shadow-md" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          addItem(featuredEbook);
-                        }}
-                      >
-                        <ShoppingCart className="mr-2 h-4 w-4" /> Adicionar ao Carrinho
-                      </Button>
-                      <p className="text-[10px] text-muted-foreground text-center">
-                        Entrega digital • Download instantâneo após a compra
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ) : null}
+              </>
+            ) : featuredEbook ? (
+              <>
+                {/* Image Section - Left - Separate Element */}
+                <Link to={`/shop/ebook/${featuredEbook.id}`} className="relative w-full overflow-hidden rounded-lg max-w-xs mx-auto md:mx-0 cursor-pointer hover:opacity-90 transition-opacity h-full flex items-stretch">
+                  <LazyImage
+                    src={featuredEbook.cover_url || ''}
+                    alt={featuredEbook.title}
+                    className="w-full h-full object-contain"
+                  />
+                </Link>
+                
+                {/* Content Section - Right - Separate Element */}
+                <Link to={`/shop/ebook/${featuredEbook.id}`} className="p-4 flex flex-col justify-center bg-card rounded-lg shadow-md border border-border/50 max-w-md mx-auto md:mx-0 cursor-pointer hover:border-primary/50 transition-colors group h-full">
+                  <h3 className="font-heading font-medium text-xl mb-2 group-hover:text-primary transition-colors">{featuredEbook.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-4">{featuredEbook.description}</p>
+                  <p className="font-medium text-lg mb-4 group-hover:text-primary transition-colors">${featuredEbook.price.toFixed(2)}</p>
+                  <Button 
+                    size="sm" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      addItem(featuredEbook);
+                    }}
+                    className="transition-all duration-300 hover:scale-105 hover:shadow-md w-full sm:w-auto"
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" /> Adicionar ao carrinho
+                  </Button>
+                </Link>
+              </>
+            ) : null}
+          </div>
         </div>
       </section>
 
