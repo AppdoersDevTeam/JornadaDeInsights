@@ -43,7 +43,9 @@ export function EbookCard({ book }: EbookCardProps) {
         </div>
       </Link>
       <div className="p-4 pt-0 flex items-center justify-between mt-auto">
-        <p className="font-medium group-hover:text-primary transition-colors">${book.price.toFixed(2)}</p>
+        <p className="font-medium group-hover:text-primary transition-colors">
+          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(book.price)}
+        </p>
         <Button 
           size="sm" 
           onClick={handleAddToCart}

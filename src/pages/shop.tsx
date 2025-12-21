@@ -234,7 +234,9 @@ export function ShopPage() {
                 <Link to={`/shop/ebook/${featuredEbook.id}`} className="p-4 flex flex-col justify-center bg-card rounded-lg shadow-md border border-border/50 max-w-md mx-auto md:mx-0 cursor-pointer hover:border-primary/50 transition-colors group h-full">
                   <h3 className="font-heading font-medium text-xl mb-2 group-hover:text-primary transition-colors">{featuredEbook.title}</h3>
                   <p className="text-sm text-muted-foreground mb-4">{featuredEbook.description}</p>
-                  <p className="font-medium text-lg mb-4 group-hover:text-primary transition-colors">${featuredEbook.price.toFixed(2)}</p>
+                  <p className="font-medium text-lg mb-4 group-hover:text-primary transition-colors">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(featuredEbook.price)}
+                  </p>
                   <Button 
                     size="sm" 
                     onClick={(e) => {

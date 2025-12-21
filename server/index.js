@@ -131,24 +131,20 @@ app.post('/create-checkout-session', async (req, res) => {
           }
         }
 
-        // Convert USD price to BRL (assuming 1 USD = 5 BRL for example)
-        // In production, you should use a real-time exchange rate API
-        const exchangeRate = 5; // This should be fetched from a real exchange rate API
-        const priceInBRL = Math.round(item.price * exchangeRate);
-
+        // Price is already in BRL cents
         return {
           price_data: {
             currency: 'brl',
             product_data: {
               name: item.name,
-              description: `${item.description || 'Digital eBook'} ($${(item.price/100).toFixed(2)} USD / R$${(priceInBRL/100).toFixed(2)} BRL)`,
+              description: item.description || 'Digital eBook',
               images: imageUrl ? [imageUrl] : [],
               metadata: { 
                 ebookId: item.id,
                 type: 'ebook'
               }
             },
-            unit_amount: priceInBRL,
+            unit_amount: item.price, // Price is already in BRL cents
           },
           quantity: item.quantity,
           adjustable_quantity: {

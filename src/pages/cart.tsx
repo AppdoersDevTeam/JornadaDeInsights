@@ -83,7 +83,7 @@ export function CartPage() {
   }, [clearCart, addItem]);
 
   const formatPrice = (value: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
   const handleCheckout = async () => {
     // If not authenticated, show auth modal and redirect to sign in

@@ -97,7 +97,9 @@ export function EbookDetailsPage() {
             className="flex flex-col justify-center"
           >
             <h1 className="text-3xl md:text-4xl font-heading font-bold mb-4">{ebook.title}</h1>
-            <p className="text-xl text-primary font-medium mb-6">R$ {ebook.price.toFixed(2)}</p>
+            <p className="text-xl text-primary font-medium mb-6">
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ebook.price)}
+            </p>
             <p className="text-lg text-muted-foreground mb-8 whitespace-pre-line">{ebook.description}</p>
             
             <div className="flex flex-col sm:flex-row gap-4">

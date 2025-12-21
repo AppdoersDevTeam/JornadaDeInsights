@@ -284,7 +284,9 @@ export default function EbookList() {
               <p className="text-gray-600 text-sm truncate mb-2" title={ebook.metadata.description}>
                 {ebook.metadata.description}
               </p>
-              <p className="text-primary font-semibold mb-2">${ebook.metadata.price.toFixed(2)}</p>
+              <p className="text-primary font-semibold mb-2">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ebook.metadata.price)}
+              </p>
               <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
                 <span>{ebook.size.toFixed(2)} MB</span>
                 <span>{ebook.lastModified}</span>

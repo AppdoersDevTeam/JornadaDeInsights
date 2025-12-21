@@ -717,9 +717,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                             {o.name}
                           </div>
                         </td>
-                        <td>{new Intl.NumberFormat('en-US', {
+                        <td>{new Intl.NumberFormat('pt-BR', {
                           style: 'currency',
-                          currency: 'USD'
+                          currency: 'BRL'
                         }).format(o.total)}</td>
                       </tr>
                     ))}
@@ -764,9 +764,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                               <Copy className="absolute right-1 top-1 cursor-pointer" onClick={() => copyEmail(o.email)} />
                             )}
                           </td>
-                          <td>{new Intl.NumberFormat('en-US', {
+                          <td>{new Intl.NumberFormat('pt-BR', {
                             style: 'currency',
-                            currency: 'USD'
+                            currency: 'BRL'
                           }).format(o.total)}</td>
                           <td style={{ color: '#8B4513' }}>
                             <button className="text-[#8B4513] hover:underline" onClick={() => toggleRow(o.id)}>
@@ -784,9 +784,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                                       {item.name.length > 40 ? item.name.slice(0, 40) + '...' : item.name}
                                     </div>
                                     <div className="text-gray-600">Format: PDF</div>
-                                    <div className="text-gray-600">Price: {new Intl.NumberFormat('en-US', {
+                                    <div className="text-gray-600">Price: {new Intl.NumberFormat('pt-BR', {
                                       style: 'currency',
-                                      currency: 'USD'
+                                      currency: 'BRL'
                                     }).format(item.price)}</div>
                                   </div>
                                 ))}
