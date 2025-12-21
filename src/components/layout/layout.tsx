@@ -8,6 +8,7 @@ import { StickyHeader } from '@/components/ui/sticky-header';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from '@/context/auth-context';
 import ScrollIcon from '@/components/ScrollIcon';
+import { DonationPopup } from '@/components/donation-popup';
 
 interface LayoutProps {
   children: ReactNode;
@@ -42,6 +43,7 @@ export function Layout({ children }: LayoutProps) {
       </motion.main>
       <Footer />
       <ScrollIcon />
+      <DonationPopup />
     </div>
   );
 }
