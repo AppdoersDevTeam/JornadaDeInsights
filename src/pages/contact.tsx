@@ -271,20 +271,24 @@ export function ContactPage() {
           <div className="max-w-3xl mx-auto space-y-4">
             {[
               {
-                question: "Como posso ser um convidado no seu podcast?",
-                answer: "Estou sempre em busca de convidados interessantes com perspectivas únicas. Por favor, use o formulário de contato acima e selecione 'Consulta sobre Podcast' como assunto. Inclua detalhes sobre sua experiência e os tópicos que gostaria de discutir."
+                question: "Como faço para baixar os eBooks e guias?",
+                answer: "Após a confirmação da compra (ou acesso gratuito, se for o caso), você receberá um link para download imediato do material em formato PDF. Você pode ler no celular, tablet, computador ou imprimir."
               },
               {
-                question: "Você oferece palestras?",
-                answer: "Sim, estou disponível para palestras principais, workshops e discussões em painéis sobre temas relacionados à atenção plena, produtividade e vida equilibrada. Entre em contato com os detalhes do evento para verificar disponibilidade e tarifas."
+                question: "Os materiais são indicados para iniciantes na fé?",
+                answer: "Sim! Todos os conteúdos são escritos com linguagem clara, bíblica e acessível — ideais tanto para quem está começando quanto para quem deseja aprofundar o conhecimento."
               },
               {
-                question: "Comprei um eBook, mas não o recebi. O que devo fazer?",
-                answer: "Verifique primeiro sua pasta de spam/lixo eletrônico. Se ainda não conseguir localizar sua compra, entre em contato comigo com os detalhes do pedido e eu reenviarei imediatamente."
+                question: "Posso usar os materiais em grupos de estudo ou na igreja?",
+                answer: "Com certeza! Nossos eBooks, resumos e guias podem ser usados em pequenos grupos, escolas bíblicas e estudos em família. Apenas pedimos que o conteúdo não seja redistribuído comercialmente."
               },
               {
-                question: "Você oferece coaching ou consultorias?",
-                answer: "Tenho disponibilidade limitada para sessões de coaching individuais. Por favor, entre em contato através do formulário de contato para saber sobre disponibilidade e tarifas atuais."
+                question: "Onde posso ouvir o podcast \"Uma Jornada de Insights\"?",
+                answer: "Você pode ouvir nas principais plataformas como YouTube, Spotify e iHeartRadio. Também há links disponíveis aqui no site."
+              },
+              {
+                question: "Os livros infantis vêm com atividades?",
+                answer: "Sim! Os eBooks infantis incluem histórias bíblicas, atividades lúdicas, curiosidades, reflexões e até páginas para colorir — tudo pensado para ensinar de forma divertida."
               }
             ].map((faq, index) => (
               <div key={index} className="bg-card rounded-lg shadow-sm border border-border/50 overflow-hidden">
