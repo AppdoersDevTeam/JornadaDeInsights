@@ -46,7 +46,10 @@ export default async function handler(req, res) {
                   li.price?.product_data?.name ||
                   li.description ||
                   'Unknown Item',
-            price: price
+            price: price,
+            ebookId: li.price_data?.product_data?.metadata?.ebookId ||
+                     li.price?.product_data?.metadata?.ebookId ||
+                     null
           };
         });
         return {

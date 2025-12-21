@@ -34,6 +34,7 @@ interface CompletedOrder {
   items: Array<{
     name: string;
     price: number;
+    ebookId?: string | null;
   }>;
 }
 
@@ -170,22 +171,56 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
         return;
       }
 
-      // Get unique ebook titles from orders
-      const orderedEbookTitles = new Set(userOrders.flatMap((order: CompletedOrder) => 
-        order.items.map((item: { name: string; price: number }) => item.name)
-      ));
+      // Get unique ebook IDs from orders (preferred) or fallback to titles
+      const orderedEbookIds = new Set<string>();
+      const orderedEbookTitles = new Set<string>();
+      
+      userOrders.forEach((order: CompletedOrder) => {
+        order.items.forEach((item) => {
+          if (item.ebookId) {
+            orderedEbookIds.add(item.ebookId);
+            console.log('Found ebookId in order:', item.ebookId, 'for item:', item.name);
+          } else if (item.name) {
+            // Fallback to title matching if ebookId is not available
+            orderedEbookTitles.add(item.name);
+            console.log('Using title fallback for item:', item.name, '(ebookId not available)');
+          }
+        });
+      });
 
-      if (orderedEbookTitles.size === 0) {
-        console.log('No ebook titles found in orders');
+      console.log('Ordered ebook IDs:', Array.from(orderedEbookIds));
+      console.log('Ordered ebook titles (fallback):', Array.from(orderedEbookTitles));
+
+      if (orderedEbookIds.size === 0 && orderedEbookTitles.size === 0) {
+        console.log('No ebook IDs or titles found in orders');
         setUserEbooks([]);
         return;
       }
 
-      // Fetch ebooks from Supabase
-      const { data: ebooks, error } = await supabase
-        .from('ebooks_metadata')
-        .select('*')
-        .in('title', Array.from(orderedEbookTitles));
+      // Fetch ebooks from Supabase using IDs (preferred) or titles (fallback)
+      let ebooks;
+      let error;
+      
+      if (orderedEbookIds.size > 0) {
+        console.log('Fetching ebooks by ID from Supabase...');
+        const { data, error: err } = await supabase
+          .from('ebooks_metadata')
+          .select('*')
+          .in('id', Array.from(orderedEbookIds));
+        ebooks = data;
+        error = err;
+        console.log('Fetched ebooks by ID:', ebooks?.length || 0, 'ebooks');
+      } else {
+        // Fallback to title matching
+        console.log('Fetching ebooks by title from Supabase (fallback)...');
+        const { data, error: err } = await supabase
+          .from('ebooks_metadata')
+          .select('*')
+          .in('title', Array.from(orderedEbookTitles));
+        ebooks = data;
+        error = err;
+        console.log('Fetched ebooks by title:', ebooks?.length || 0, 'ebooks');
+      }
 
       if (error) {
         console.error('Supabase error:', error);
