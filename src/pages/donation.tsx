@@ -113,7 +113,7 @@ export function DonationPage() {
   const finalAmount = getFinalAmount();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 to-background py-16">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 to-background pt-24 pb-16">
       <div className="container mx-auto px-6 sm:px-8 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

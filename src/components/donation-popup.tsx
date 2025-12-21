@@ -25,26 +25,28 @@ export function DonationPopup() {
   const location = useLocation();
 
   useEffect(() => {
-    // Check if user has already seen the popup in this session
-    const hasSeenPopup = sessionStorage.getItem(DONATION_POPUP_KEY);
-    
     // Don't show on excluded pages
     if (EXCLUDED_PAGES.some(page => location.pathname.startsWith(page))) {
       return;
     }
 
-    if (hasSeenPopup) {
+    // Check if user has dismissed the popup in this session
+    const hasDismissedPopup = sessionStorage.getItem(DONATION_POPUP_KEY);
+    
+    // If they've dismissed it, don't show again
+    if (hasDismissedPopup === 'dismissed') {
       return;
     }
 
-    // Set timer to show popup after 2 minutes
+    // Reset and start timer on each page load/navigation
     const timer = setTimeout(() => {
-      setIsOpen(true);
-      // Mark as seen in session storage
-      sessionStorage.setItem(DONATION_POPUP_KEY, 'true');
+      // Check again before showing (in case they navigated away)
+      if (!EXCLUDED_PAGES.some(page => location.pathname.startsWith(page))) {
+        setIsOpen(true);
+      }
     }, DONATION_POPUP_DELAY);
 
-    // Cleanup timer on unmount
+    // Cleanup timer on unmount or navigation
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
@@ -55,6 +57,8 @@ export function DonationPopup() {
 
   const handleClose = () => {
     setIsOpen(false);
+    // Mark as dismissed so it doesn't show again in this session
+    sessionStorage.setItem(DONATION_POPUP_KEY, 'dismissed');
   };
 
   return (
