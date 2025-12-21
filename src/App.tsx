@@ -8,6 +8,7 @@ import { PodcastPage } from '@/pages/podcast';
 import { ShopPage } from '@/pages/shop';
 import { ContactPage } from '@/pages/contact';
 import { CartPage } from '@/pages/cart';
+import { DonationPage } from '@/pages/donation';
 import { SuccessPage } from '@/pages/success';
 import { CancelPage } from '@/pages/cancel';
 import { DashboardPage } from '@/pages/dashboard';
@@ -59,6 +60,7 @@ function App() {
             <Route path="shop" element={<ShopPage />} />
             <Route path="contact" element={<ContactPage />} />
             <Route path="cart" element={<CartPage />} />
+            <Route path="donation" element={<DonationPage />} />
             <Route path="success" element={<SuccessPage />} />
             <Route path="cancel" element={<CancelPage />} />
             <Route path="terms" element={<TermsPage />} />

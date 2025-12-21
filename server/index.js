@@ -167,6 +167,94 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
+// Create donation checkout session endpoint
+app.post('/api/create-donation-session', async (req, res) => {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
+    ? 'https://jornadadeinsights.com'
+    : '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, X-Requested-With'
+  );
+  res.setHeader('Content-Type', 'application/json');
+
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+
+  try {
+    const { amount, note, isRecurring } = req.body;
+
+    // Validate required fields
+    if (!amount || typeof amount !== 'number' || amount < 500) {
+      return res.status(400).json({ 
+        error: 'O valor mínimo da doação é R$ 5,00 (500 centavos)' 
+      });
+    }
+
+    // Validate environment variables
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('Missing STRIPE_SECRET_KEY environment variable');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+    if (!process.env.FRONTEND_URL) {
+      console.error('Missing FRONTEND_URL environment variable');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
+    // Create Stripe checkout session for donation
+    const sessionConfig = {
+      payment_method_types: ['card'],
+      locale: 'pt-BR',
+      currency: 'brl',
+      line_items: [{
+        price_data: {
+          currency: 'brl',
+          product_data: {
+            name: isRecurring ? 'Doação Recorrente - Jornada de Insights' : 'Doação Única - Jornada de Insights',
+            description: note || 'Doação para apoiar o ministério Jornada de Insights',
+            metadata: {
+              type: 'donation',
+              note: note || '',
+            }
+          },
+          unit_amount: amount, // Amount in cents
+          ...(isRecurring && {
+            recurring: {
+              interval: 'month'
+            }
+          })
+        },
+        quantity: 1,
+      }],
+      mode: isRecurring ? 'subscription' : 'payment',
+      success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}&type=donation`,
+      cancel_url: `${process.env.FRONTEND_URL}/donation`,
+      allow_promotion_codes: false,
+      billing_address_collection: 'required',
+      metadata: {
+        type: 'donation',
+        isRecurring: isRecurring ? 'true' : 'false',
+        note: note || '',
+      }
+    };
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
+
+    res.status(200).json({ sessionId: session.id });
+  } catch (error) {
+    console.error('Error creating donation checkout session:', error);
+    res.status(500).json({ 
+      error: error.message || 'Falha ao criar sessão de pagamento' 
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });

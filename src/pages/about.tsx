@@ -561,8 +561,10 @@ export function AboutPage() {
                 <p className="text-lg text-muted-foreground">
                   Sua generosidade permite que eu continue compartilhando a Palavra de Deus e criando conteúdo que transforma vidas.
                 </p>
-                <Button size="lg" className="mt-4">
-                  Fazer uma Doação
+                <Button size="lg" className="mt-4" asChild>
+                  <Link to="/donation">
+                    Fazer uma Doação
+                  </Link>
                 </Button>
               </div>
             </motion.div>
