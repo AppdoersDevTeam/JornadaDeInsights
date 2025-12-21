@@ -4,7 +4,6 @@ import { Menu, X, Headphones, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDa
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
-import { AnimatedCartIcon } from '@/components/shop/animated-cart-icon';
 import { useAuth } from '@/context/auth-context';
 import jornadaLogo from '@/Jornada logo.png';
 
@@ -92,8 +91,13 @@ export function Header() {
               <Button variant="outline" asChild>
                 <Link to="/shop">Adquirir Meus eBooks</Link>
               </Button>
-              <Link to="/shop" className="p-2 rounded-full hover:bg-background/10 transition-colors">
+              <Link to="/cart" className="relative p-2 rounded-full hover:bg-background/10 transition-colors">
                 <ShoppingCart className="h-6 w-6 text-background" />
+                {totalCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+                    {totalCount}
+                  </span>
+                )}
               </Link>
               <Link to="/signin" className="p-2 rounded-full hover:bg-background/10 transition-colors">
                 <User className="h-6 w-6 text-background" />
