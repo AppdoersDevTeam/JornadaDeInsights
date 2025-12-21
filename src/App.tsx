@@ -34,7 +34,7 @@ function App() {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tabParam = searchParams.get('tab');
-    const validTabs: TabType[] = ['overview', 'ebooks', 'orders', 'newsletter', 'settings', 'cart'];
+    const validTabs: TabType[] = ['overview', 'ebooks', 'orders', 'settings', 'cart'];
     if (tabParam && validTabs.includes(tabParam as TabType)) {
       setActiveTab(tabParam as TabType);
     }

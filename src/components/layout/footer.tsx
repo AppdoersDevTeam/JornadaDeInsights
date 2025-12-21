@@ -1,26 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { Youtube, Instagram, Headphones, ChevronDown, ChevronUp, AlertCircle, Facebook } from 'lucide-react';
+import { Youtube, Instagram, Headphones, ChevronDown, ChevronUp, Facebook } from 'lucide-react';
 import { FaSpotify } from 'react-icons/fa';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import jornadaLogo from '@/Jornada logo footer.png';
 
 export function Footer() {
   const [quickOpen, setQuickOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
-  const [newsletterOpen, setNewsletterOpen] = useState(false);
-  const [showComingSoon, setShowComingSoon] = useState(false);
   const currentYear = new Date().getFullYear();
-
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setShowComingSoon(true);
-  };
 
   return (
     <>
@@ -105,33 +92,9 @@ export function Footer() {
                 </li>
               </ul>
             </div>
-            {/* Newsletter Accordion */}
-            <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
-              <button onClick={() => setNewsletterOpen(!newsletterOpen)} className="flex justify-between items-center w-full text-base font-medium text-foreground py-3 px-4 focus:outline-none">
-                Newsletter
-                {newsletterOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </button>
-              <div className={`${newsletterOpen ? 'block' : 'hidden'} py-2 px-4`}>
-                <p className="text-muted-foreground mb-4 text-base">Assine para receber os últimos episódios, eBooks e conteúdos exclusivos.</p>
-                <form onSubmit={handleNewsletterSubmit} className="space-y-2">
-                  <input 
-                    type="email" 
-                    placeholder="Seu email" 
-                    className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary text-base"
-                    required
-                  />
-                  <button 
-                    type="submit" 
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-2 px-4 rounded-md transition-colors text-base"
-                  >
-                    Inscreva-se
-                  </button>
-                </form>
-              </div>
-            </div>
           </div>
           {/* Desktop: Grid */}
-          <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-8 justify-items-center md:justify-items-start">
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center md:justify-items-start">
             {/* Brand Column */}
             <div className="md:col-span-1 flex flex-col items-center text-center md:items-start md:text-left">
               <Link to="/" className="mb-4">
@@ -197,25 +160,6 @@ export function Footer() {
                 </li>
               </ul>
             </div>
-            {/* Newsletter */}
-            <div className="flex flex-col items-center text-center md:items-start md:text-left w-full max-w-xs">
-              <h3 className="text-base font-medium mb-4 text-foreground">Newsletter</h3>
-              <p className="text-muted-foreground mb-4 text-base">Assine para receber os últimos episódios, eBooks e conteúdos exclusivos.</p>
-              <form onSubmit={handleNewsletterSubmit} className="space-y-2">
-                <input 
-                  type="email" 
-                  placeholder="Seu email" 
-                  className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary text-base"
-                  required
-                />
-                <button 
-                  type="submit" 
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-2 px-4 rounded-md transition-colors text-base"
-                >
-                  Inscreva-se
-                </button>
-              </form>
-            </div>
           </div>
           <div className="border-t border-border/50 mt-12 pt-6 flex flex-col md:flex-row justify-center md:justify-between items-center">
             <p className="text-sm text-muted-foreground">
@@ -228,21 +172,6 @@ export function Footer() {
         </div>
       </footer>
 
-      <Dialog open={showComingSoon} onOpenChange={setShowComingSoon}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-primary" />
-              Em Breve
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-muted-foreground">
-              A funcionalidade de newsletter estará disponível em breve. Agradecemos seu interesse!
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

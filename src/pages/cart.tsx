@@ -1,7 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, X, Plus, Minus } from 'lucide-react';
-import { NewsletterForm } from '@/components/newsletter-form';
 import { useCart } from '@/context/cart-context';
 import { loadStripe } from '@stripe/stripe-js';
 import { toast } from 'react-hot-toast';
@@ -259,13 +258,6 @@ export function CartPage() {
               </div>
             )}
           </div>
-        </div>
-      </section>
-
-      {/* Newsletter Section */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 max-w-4xl">
-          <NewsletterForm />
         </div>
       </section>
 

@@ -1,7 +1,6 @@
 import { 
   Book, 
   ShoppingBag, 
-  Mail, 
   Settings,
   LogOut,
   LayoutDashboard,
@@ -85,14 +84,6 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
                 {totalCount}
               </span>
             )}
-          </Button>
-          <Button
-            variant={activeTab === 'newsletter' ? 'secondary' : 'ghost'}
-            className="w-full justify-start"
-            onClick={() => onTabChange('newsletter')}
-          >
-            <Mail className="mr-2 h-4 w-4" />
-            Newsletter
           </Button>
           <Button
             variant={activeTab === 'settings' ? 'secondary' : 'ghost'}

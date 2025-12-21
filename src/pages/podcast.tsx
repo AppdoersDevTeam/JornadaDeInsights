@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, Filter, Play, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PodcastCard, type PodcastEpisode } from '@/components/podcast/podcast-card';
-import { NewsletterForm } from '@/components/newsletter-form';
 import { motion, Variants, useInView } from 'framer-motion';
 
 // Mock data
@@ -461,12 +460,6 @@ export function PodcastPage() {
         </div>
       </section>
 
-      {/* Newsletter */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 max-w-4xl">
-          <NewsletterForm />
-        </div>
-      </section>
     </div>
   );
 }

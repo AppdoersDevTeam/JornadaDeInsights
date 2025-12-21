@@ -1,7 +1,6 @@
 import { ArrowRight, Play, Bookmark, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { NewsletterForm } from '@/components/newsletter-form';
 import { EbookCard, type Ebook } from '@/components/shop/ebook-card';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -544,18 +543,6 @@ export function HomePage() {
         </div>
       </motion.section>
 
-      {/* Newsletter */}
-      <motion.section
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        viewport={{ amount: 0.3 }}
-        className="py-16 bg-muted/30"
-      >
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 max-w-4xl">
-          <NewsletterForm />
-        </div>
-      </motion.section>
     </>
   );
 }

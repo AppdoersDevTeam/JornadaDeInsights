@@ -57,7 +57,6 @@ export function AdminHeader() {
     { to: '/user-dashboard?tab=overview', label: 'Visão Geral', icon: LayoutDashboard },
     { to: '/user-dashboard?tab=ebooks', label: 'Meus eBooks', icon: Book },
     { to: '/user-dashboard?tab=orders', label: 'Pedidos', icon: ShoppingBag },
-    { to: '/user-dashboard?tab=newsletter', label: 'Newsletter', icon: Mail },
     { to: '/user-dashboard?tab=settings', label: 'Configurações', icon: Settings },
     { to: '/user-dashboard?tab=cart', label: 'Carrinho', icon: ShoppingCart }
   ];

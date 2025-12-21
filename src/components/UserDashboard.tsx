@@ -64,7 +64,6 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 
 const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isSubscribed, setIsSubscribed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -76,7 +75,6 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   const { state: { items }, totalCount, totalPrice, addItem, removeItem, decrementItem, clearCart } = useCart();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showComingSoonDialog, setShowComingSoonDialog] = useState(false);
   const [showSettingsComingSoonDialog, setShowSettingsComingSoonDialog] = useState(false);
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const [sessionStartTime, setSessionStartTime] = useState<number>(Date.now());
@@ -353,9 +351,6 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
     return () => unsubscribe();
   }, [clearCart, addItem]);
 
-  const handleNewsletterToggle = () => {
-    setIsSubscribed(!isSubscribed);
-  };
 
   const handleCheckout = async () => {
     // If not authenticated, show auth modal and redirect to sign in
@@ -488,7 +483,6 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
             {activeTab === 'overview' && 'Visão Geral'}
             {activeTab === 'ebooks' && 'Meus eBooks'}
             {activeTab === 'orders' && 'Meus Pedidos'}
-            {activeTab === 'newsletter' && 'Newsletter'}
             {activeTab === 'settings' && 'Configurações'}
             {activeTab === 'cart' && 'Meu Carrinho'}
           </h1>
@@ -496,7 +490,6 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
             {activeTab === 'overview' && 'Uma visão geral da sua conta e atividades'}
             {activeTab === 'ebooks' && 'Gerencie seus eBooks e downloads'}
             {activeTab === 'orders' && 'Acompanhe seus pedidos e compras'}
-            {activeTab === 'newsletter' && 'Gerencie suas preferências de newsletter'}
             {activeTab === 'settings' && 'Configure as configurações da sua conta'}
             {activeTab === 'cart' && 'Gerencie os itens do seu carrinho'}
           </p>
@@ -698,36 +691,6 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
               </CardContent>
             </Card>
 
-            {/* Newsletter Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Newsletter</CardTitle>
-                <CardDescription>
-                  Mantenha-se atualizado com nossas novidades
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div>
-                    <p className="font-medium">Status da Inscrição</p>
-                    <p className="text-sm text-muted-foreground">
-                      {isSubscribed ? 'Inscrito' : 'Não inscrito'}
-                    </p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button variant="outline" onClick={() => setShowComingSoonDialog(true)}>
-                      {isSubscribed ? 'Cancelar Inscrição' : 'Inscrever-se'}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => onTabChange('newsletter')}
-                    >
-                      Ver detalhes
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Recommended Ebooks Section */}
             <Card>
@@ -1002,39 +965,6 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           </div>
         )}
 
-        {activeTab === 'newsletter' && (
-          <div className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Newsletter</CardTitle>
-                <CardDescription>
-                  Receba atualizações e conteúdo exclusivo
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="max-w-md">
-                  <p className="text-muted-foreground mb-6">
-                    Inscreva-se para receber as últimas notícias, eBooks e conteúdo exclusivo.
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <Button
-                      onClick={() => setShowComingSoonDialog(true)}
-                      variant={isSubscribed ? 'outline' : 'default'}
-                    >
-                      {isSubscribed ? 'Cancelar Inscrição' : 'Inscrever-se'}
-                    </Button>
-                    {isSubscribed && (
-                      <p className="text-sm text-muted-foreground">
-                        Você está inscrito na newsletter
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
         {activeTab === 'settings' && (
           <div className="space-y-8">
             <Card>
@@ -1074,22 +1004,6 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
         )}
       </div>
 
-      {/* Coming Soon Dialog */}
-      <Dialog open={showComingSoonDialog} onOpenChange={setShowComingSoonDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Em Breve!</DialogTitle>
-            <DialogDescription>
-              A funcionalidade de newsletter está em desenvolvimento. Fique ligado para novidades em breve!
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => setShowComingSoonDialog(false)}>
-              Entendi
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Settings Coming Soon Dialog */}
       <Dialog open={showSettingsComingSoonDialog} onOpenChange={setShowSettingsComingSoonDialog}>

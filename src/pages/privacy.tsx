@@ -65,7 +65,7 @@ export function PrivacyPage() {
             <ul className="list-disc pl-6 text-muted-foreground mb-4">
               <li>Processar transações e entregar serviços</li>
               <li>Comunicar-se com você sobre sua conta ou compras</li>
-              <li>Enviar newsletters ou materiais promocionais (com seu consentimento)</li>
+              <li>Enviar materiais promocionais (com seu consentimento)</li>
               <li>Melhorar nosso site e serviços</li>
             </ul>
           </section>

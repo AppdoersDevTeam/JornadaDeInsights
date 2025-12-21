@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Search, ShoppingCart, BookOpen, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EbookCard, type Ebook } from '@/components/shop/ebook-card';
-import { NewsletterForm } from '@/components/newsletter-form';
 import { useCart } from '@/context/cart-context';
 import { LazyImage } from '@/components/shop/lazy-image';
 import { AnimatedGridItem } from '@/components/shop/animated-grid-item';
@@ -492,12 +491,6 @@ export function ShopPage() {
         </div>
       </motion.section>
 
-      {/* Newsletter */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 max-w-4xl">
-          <NewsletterForm />
-        </div>
-      </section>
     </div>
   );
 }

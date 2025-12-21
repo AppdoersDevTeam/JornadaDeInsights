@@ -2,7 +2,6 @@ import { Headphones, Book, Users, CalendarDays, Facebook } from 'lucide-react';
 import plogo from '@/plogo.png';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { NewsletterForm } from '@/components/newsletter-form';
 import { motion, Variants } from 'framer-motion';
 import { useTypewriter, Cursor } from 'react-simple-typewriter';
 import CountUp from 'react-countup';
@@ -606,18 +605,6 @@ export function AboutPage() {
         </div>
       </motion.section>
 
-      {/* Newsletter */}
-      <motion.section
-        className="py-16 bg-background"
-        initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
-        whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
-        viewport={{ amount: 0.3 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-      >
-        <div className="container mx-auto px-6 sm:px-8 lg:px-10 max-w-4xl">
-          <NewsletterForm />
-        </div>
-      </motion.section>
     </>
   );
 }
