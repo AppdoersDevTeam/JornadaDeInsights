@@ -171,8 +171,8 @@ export function CartPage() {
         throw new Error(result.error.message);
       }
     } catch (error) {
-      console.error('Erro ao iniciar o processo de checkout:', error);
-      toast.error('Falha ao iniciar o processo de checkout. Por favor, tente novamente.');
+      console.error('Error starting checkout process:', error);
+      toast.error('Failed to start checkout process. Please try again.');
     }
   };
 
@@ -195,13 +195,13 @@ export function CartPage() {
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="max-w-3xl mx-auto">
             <ShoppingCart className="mx-auto mb-4 h-12 w-12 text-primary" />
-            <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4 text-center">Seu Carrinho</h1>
+            <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4 text-center">Your Cart</h1>
 
             {totalCount === 0 ? (
               <div className="text-center">
-                <p className="text-lg text-muted-foreground mb-6">Seu carrinho está vazio no momento.</p>
+                <p className="text-lg text-muted-foreground mb-6">Your cart is empty at the moment.</p>
                 <Button asChild size="lg">
-                  <Link to="/shop">Continuar Comprando</Link>
+                  <Link to="/shop">Continue Shopping</Link>
                 </Button>
               </div>
             ) : (
@@ -252,8 +252,8 @@ export function CartPage() {
                   <p className="text-2xl font-bold">{formatPrice(totalPrice)}</p>
                 </div>
                 <div className="flex justify-center gap-4 mt-6">
-                  <Button variant="outline" onClick={clearCart}>Limpar Carrinho</Button>
-                  <Button onClick={handleCheckout}>Finalizar Compra</Button>
+                  <Button variant="outline" onClick={clearCart}>Clear Cart</Button>
+                  <Button onClick={handleCheckout}>Checkout</Button>
                 </div>
               </div>
             )}
@@ -265,15 +265,15 @@ export function CartPage() {
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Atenção</DialogTitle>
+            <DialogTitle>Attention</DialogTitle>
             <DialogDescription>
-              Para finalizar a compra, você precisa estar logado. Deseja continuar?
+              To complete your purchase, you need to be logged in. Would you like to continue?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAuthModal(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setShowAuthModal(false)}>Cancel</Button>
             <Button onClick={handleAuthRedirect}>
-              Continuar
+              Continue
             </Button>
           </DialogFooter>
           <DialogClose />

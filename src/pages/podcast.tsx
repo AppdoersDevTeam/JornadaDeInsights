@@ -99,10 +99,10 @@ const allEpisodes: PodcastEpisode[] = [
 ];
 
 const categories = [
-  "Todos",
-  "Rute",
-  "Sobrenatural",
-  "Apocalipse"
+  "All",
+  "Ruth",
+  "Supernatural",
+  "Revelation"
 ];
 
 // Define YouTube API snippet type for fetching channel videos
@@ -325,7 +325,7 @@ export function PodcastPage() {
             transition={{ delay: subtextDelay, duration: 0.6 }}
             className="text-lg text-muted-foreground text-center mb-14 max-w-2xl mx-auto"
           >
-            Reflexões profundas sobre fé, vida e espiritualidade. Episódios semanais para inspirar e transformar sua jornada.
+            Deep reflections on faith, life, and spirituality. Weekly episodes to inspire and transform your journey.
           </motion.p>
           <motion.div
             variants={ctaContainerVariants}
@@ -334,14 +334,14 @@ export function PodcastPage() {
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button size="lg" asChild className="w-full sm:w-auto">
                 <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer">
-                  <Play className="mr-2 h-4 w-4" /> Assista no YouTube
+                  <Play className="mr-2 h-4 w-4" /> Watch on YouTube
                 </a>
               </Button>
             </motion.div>
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
                 <a href="https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW" target="_blank" rel="noopener noreferrer">
-                  <Play className="mr-2 h-4 w-4" /> Ouça no Spotify
+                  <Play className="mr-2 h-4 w-4" /> Listen on Spotify
                 </a>
               </Button>
             </motion.div>
@@ -357,7 +357,7 @@ export function PodcastPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Pesquisar episódios..."
+                placeholder="Search episodes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 w-full rounded-md border border-input bg-background"
@@ -405,15 +405,15 @@ export function PodcastPage() {
               ))
             ) : hasError ? (
               <div className="col-span-full text-center py-12">
-                <p className="text-lg text-muted-foreground">Não foi possível carregar os episódios. Por favor, tente novamente mais tarde.</p>
+                <p className="text-lg text-muted-foreground">Unable to load episodes. Please try again later.</p>
               </div>
             ) : (
               episodes
                 .filter((episode) => {
                   const matchesSearch = episode.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     episode.description.toLowerCase().includes(searchTerm.toLowerCase());
-                  const matchesCategory = selectedCategory === "Todos" || 
-                    (selectedCategory === "Rute" ? 
+                  const matchesCategory = selectedCategory === "All" || 
+                    (selectedCategory === "Ruth" ? 
                       (episode.title.toLowerCase().includes("rute") || episode.title.toLowerCase().includes("ruth")) :
                       episode.title.toLowerCase().includes(selectedCategory.toLowerCase()));
                   return matchesSearch && matchesCategory;
@@ -437,7 +437,7 @@ export function PodcastPage() {
                 variant="outline"
                 onClick={() => setVisibleCount((prev) => prev + 6)}
               >
-                Carregar Mais Episódios
+                Load More Episodes
               </Button>
             </div>
           )}
@@ -453,7 +453,7 @@ export function PodcastPage() {
                   }
                 }}
               >
-                Mostrar Menos
+                Show Less
               </Button>
             </div>
           )}

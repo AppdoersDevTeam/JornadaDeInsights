@@ -24,7 +24,7 @@ export function EbookDetailsPage() {
         const data = await getEbookById(id);
         setEbook(data);
       } catch (err) {
-        setError('Falha ao carregar detalhes do ebook. Por favor, tente novamente mais tarde.');
+        setError('Failed to load ebook details. Please try again later.');
         console.error(err);
       } finally {
         setIsLoading(false);
@@ -47,11 +47,11 @@ export function EbookDetailsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-red-500 mb-4">Erro</h2>
-          <p className="text-gray-600">{error || 'Ebook não encontrado'}</p>
+          <p className="text-gray-600">{error || 'Ebook not found'}</p>
           <Button asChild className="mt-4">
             <Link to="/shop">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar para a Loja
+              Back to Shop
             </Link>
           </Button>
         </div>
@@ -70,7 +70,7 @@ export function EbookDetailsPage() {
         <Button asChild variant="ghost" className="mb-8">
           <Link to="/shop">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para a Loja
+            Back to Shop
           </Link>
         </Button>
 
@@ -109,7 +109,7 @@ export function EbookDetailsPage() {
                 className="flex-1"
               >
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                Adicionar ao Carrinho
+                Add to Cart
               </Button>
             </div>
           </motion.div>

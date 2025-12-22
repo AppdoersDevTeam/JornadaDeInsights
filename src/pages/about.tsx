@@ -12,7 +12,7 @@ const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { st
 const ctaButtonVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 400, damping: 20 } } };
 
 export function AboutPage() {
-  const [text] = useTypewriter({ words: ['Sobre a Patricia'], loop: 1, typeSpeed: 100 });
+  const [text] = useTypewriter({ words: ['About Patricia'], loop: 1, typeSpeed: 100 });
 
   return (
     <>
@@ -47,7 +47,7 @@ export function AboutPage() {
             viewport={{ amount: 0.3 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Podcaster, autora e criadora de conteúdo, compartilhando insights sobre crescimento pessoal e bem-estar.
+            Podcaster, author, and content creator, sharing insights on personal growth and well-being.
           </motion.p>
           <motion.div
             variants={ctaContainerVariants}
@@ -73,7 +73,7 @@ export function AboutPage() {
                     }
                   }, 100);
                 }}>
-                  Explorar Minha História <ArrowRight className="ml-2 h-4 w-4" />
+                  Explore My Story <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </motion.div>
@@ -95,7 +95,7 @@ export function AboutPage() {
                     }
                   }, 100);
                 }}>
-                  Explorar Minha Jornada <ArrowRight className="ml-2 h-4 w-4" />
+                  Explore My Journey <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </motion.div>
@@ -138,7 +138,7 @@ export function AboutPage() {
               </div>
             </div>
             <div className="lg:w-3/5">
-              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">Minha História</h2>
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">My Story</h2>
               
               <motion.p className="text-muted-foreground mb-4"
                 initial={{ opacity: 0, y: 20 }}
@@ -146,8 +146,8 @@ export function AboutPage() {
                 viewport={{ amount: 0.3 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
-                Oi, eu sou a Patricia.
-                Sou apaixonada por explorar a Bíblia com um olhar criativo e reflexivo. Sou podcaster, autora e criadora de conteúdo dedicada a compartilhar insights profundos sobre a Bíblia e temas relacionados ao crescimento pessoal e bem-estar. Com a minha experiência, busco levar os ouvintes e leitores a uma jornada de descoberta espiritual, onde a reflexão e a fé se encontram com novas perspectivas.
+                Hi, I'm Patricia.
+                I'm passionate about exploring the Bible with a creative and reflective perspective. I'm a podcaster, author, and content creator dedicated to sharing deep insights about the Bible and topics related to personal growth and well-being. With my experience, I seek to take listeners and readers on a journey of spiritual discovery, where reflection and faith meet new perspectives.
               </motion.p>
               
               <motion.p className="text-muted-foreground mb-4"
@@ -156,7 +156,7 @@ export function AboutPage() {
                 viewport={{ amount: 0.3 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
               >
-                Ao longo dos anos, desenvolvi um espaço onde estudo a Bíblia de uma forma criativa e acessível, trazendo à tona histórias que muitas vezes são vistas de uma maneira diferente. Acredito que, ao entender mais profundamente as Escrituras, podemos melhorar nossa vida cotidiana e fortalecer nossa fé de maneira prática e inspiradora.
+                Over the years, I've developed a space where I study the Bible in a creative and accessible way, bringing to light stories that are often seen differently. I believe that by understanding the Scriptures more deeply, we can improve our daily lives and strengthen our faith in a practical and inspiring way.
               </motion.p>
               
               <motion.p className="text-muted-foreground mb-6"
@@ -165,7 +165,7 @@ export function AboutPage() {
                 viewport={{ amount: 0.3 }}
                 transition={{ duration: 0.6, delay: 0.7 }}
               >
-                Além do meu podcast, também escrevo eBooks com conteúdos exclusivos, onde compartilho reflexões e ensinamentos que ajudem as pessoas a aplicar os ensinamentos bíblicos em sua vida pessoal. Cada trabalho é pensado com carinho e foco em trazer transformações reais para quem busca mais clareza e crescimento espiritual.
+                Beyond my podcast, I also write eBooks with exclusive content, where I share reflections and teachings that help people apply biblical teachings to their personal lives. Each work is thoughtfully crafted with care and focus on bringing real transformations to those seeking more clarity and spiritual growth.
               </motion.p>
               
               <div className="flex flex-wrap gap-4">
@@ -176,7 +176,7 @@ export function AboutPage() {
                   transition={{ duration: 0.5, bounce: 0.4 }}
                 >
                   <Button asChild>
-                    <Link to="/podcast">Explorar Meu Podcast</Link>
+                    <Link to="/podcast">Explore My Podcast</Link>
                   </Button>
                 </motion.div>
                 <motion.div
@@ -186,7 +186,7 @@ export function AboutPage() {
                   transition={{ duration: 0.5, bounce: 0.4, delay: 0.2 }}
                 >
                   <Button variant="outline" asChild>
-                    <Link to="/contact">Entre em Contato</Link>
+                    <Link to="/contact">Get in Touch</Link>
                   </Button>
                 </motion.div>
               </div>
@@ -205,7 +205,7 @@ export function AboutPage() {
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">Como Começou Jornada de Insights</h2>
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">How Journey of Insights Began</h2>
             
             <div className="space-y-6">
               <motion.div
@@ -214,12 +214,12 @@ export function AboutPage() {
                 viewport={{ amount: 0.1, once: true }}
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
-                <h3 className="text-xl font-heading font-medium mb-4">De onde tudo começou e o que inspirou minha Jornada</h3>
+                <h3 className="text-xl font-heading font-medium mb-4">Where it all began and what inspired my Journey</h3>
                 <p className="text-muted-foreground mb-4">
-                  Desde criança, trago comigo a lembrança marcante da minha mãe nos levando para a igreja. Mas foi aos 8 anos que meu coração realmente despertou: desejei me batizar e assumir, com consciência, um compromisso pessoal com Deus. Desde então, fui movida por um amor crescente pelo estudo, tanto da Bíblia quanto de livros que aprofundassem meu entendimento das Escrituras.
+                  Since childhood, I carry with me the vivid memory of my mother taking us to church. But it was at age 8 that my heart truly awakened: I desired to be baptized and consciously make a personal commitment to God. Since then, I've been moved by a growing love for study, both of the Bible and books that deepened my understanding of the Scriptures.
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  Minha família saiu de Santo André-SP rumo a Marília-SP, e ali, na adolescência, fui profundamente marcada pelo cuidado e investimento do Pr. Venilson e da Pra. Márcia, que me treinaram e inspiraram a ser uma líder na comunidade cristã.
+                  My family moved from Santo André-SP to Marília-SP, and there, in my adolescence, I was deeply marked by the care and investment of Pastor Venilson and Pastor Márcia, who trained and inspired me to be a leader in the Christian community.
                 </p>
               </motion.div>
 
@@ -229,15 +229,15 @@ export function AboutPage() {
                 viewport={{ amount: 0.1, once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <h3 className="text-xl font-heading font-medium mb-4">Momentos-chave e viradas na minha Jornada</h3>
+                <h3 className="text-xl font-heading font-medium mb-4">Key moments and turning points in my Journey</h3>
                 <p className="text-muted-foreground mb-4">
-                  Aos 18 anos conheci o Fabiano, um novo convertido, mas cheio de disposição para crescer. Algum tempo depois, ele recebeu o chamado missionário, algo que, juntos, discernimos e abraçamos.
+                  At age 18, I met Fabiano, a new convert, but full of willingness to grow. Some time later, he received the missionary call, something that together we discerned and embraced.
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  Em 2004, demos um dos passos mais ousados das nossas vidas: nos mudamos para a África do Sul e, em seguida, para Botswana, onde vivemos numa vila chamada Palapye. Passado esse período missionário, voltamos ao Brasil, onde nasceram nossos filhos. Foram anos de preparo, aprendizado e novas experiências — sempre com Deus conduzindo cada detalhe.
+                  In 2004, we took one of the boldest steps of our lives: we moved to South Africa and then to Botswana, where we lived in a village called Palapye. After that missionary period, we returned to Brazil, where our children were born. Those were years of preparation, learning, and new experiences — always with God guiding every detail.
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  Em 2012 retornamos para Botswana, agora com nossos filhos, e ali permanecemos até 2017. No ano seguinte, começamos uma nova etapa em Nova Zelândia. Cada mudança trouxe novos desafios: culturas diferentes, lares diferentes, igrejas novas, amigos e expressões linguísticas que se renovavam, malas sempre abertas — e, em meio a tudo, a mão de Deus sendo evidente em cada passo.
+                  In 2012, we returned to Botswana, now with our children, and remained there until 2017. The following year, we began a new chapter in New Zealand. Each change brought new challenges: different cultures, different homes, new churches, friends and linguistic expressions that renewed themselves, suitcases always open — and, in the midst of everything, God's hand being evident in every step.
                 </p>
               </motion.div>
 
@@ -247,12 +247,12 @@ export function AboutPage() {
                 viewport={{ amount: 0.1, once: true }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <h3 className="text-xl font-heading font-medium mb-4">O que me levou a criar espaço para compartilhar</h3>
+                <h3 className="text-xl font-heading font-medium mb-4">What led me to create a space to share</h3>
                 <p className="text-muted-foreground mb-4">
-                  Sempre estive envolvida com ensino bíblico e música nas igrejas por onde passei. Nos últimos anos, tenho percebido como a tecnologia abriu portas para compartilhar minhas experiências, aprendizados e até desafios com pessoas ao redor do mundo — família, amigos, irmãos na fé.
+                  I've always been involved with biblical teaching and music in the churches I've been part of. In recent years, I've noticed how technology has opened doors to share my experiences, learnings, and even challenges with people around the world — family, friends, brothers and sisters in faith.
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  Vejo que minha missão é, com honestidade e esperança, repartir a jornada que Deus tem desenhado para mim: mostrar que, mesmo no meio das mudanças e incertezas, é possível viver com propósito, fé, conhecimento e comunhão. Meu desejo é encorajar outros a também se aprofundarem no relacionamento com Deus e a perceberem que a fé é viva, prática, e transforma cada etapa da vida.
+                  I see that my mission is, with honesty and hope, to share the journey that God has designed for me: to show that, even in the midst of changes and uncertainties, it's possible to live with purpose, faith, knowledge, and fellowship. My desire is to encourage others to also deepen their relationship with God and to realize that faith is alive, practical, and transforms every stage of life.
                 </p>
               </motion.div>
 
@@ -263,36 +263,36 @@ export function AboutPage() {
                 transition={{ duration: 0.5, delay: 0.4 }}
                 className="bg-card p-6 rounded-lg border border-border/50 shadow-sm"
               >
-                <h3 className="text-xl font-heading font-medium mb-4">Como nasceu "Uma Jornada pelo Livro de Apocalipse"</h3>
+                <h3 className="text-xl font-heading font-medium mb-4">How "A Journey Through the Book of Revelation" was born</h3>
                 <p className="text-muted-foreground mb-4">
-                  Em 2022, começamos algo muito especial. Toda semana, um grupo de irmãos se reunia para orar e estudar a Bíblia. Decidimos começar pelo livro do Apocalipse.
+                  In 2022, we started something very special. Every week, a group of brothers and sisters would gather to pray and study the Bible. We decided to start with the book of Revelation.
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  No meio do caminho, já nas cartas às sete igrejas, uma das irmãs — com 80 anos, muito ocupada cuidando do marido acamado após vários derrames — compartilhou algo que nos deixou em silêncio. Ela disse que não viria mais. Que já não acreditava em Deus, não entendia a Bíblia, e que estava desanimada e sem esperança.
+                  Midway through, already in the letters to the seven churches, one of the sisters — 80 years old, very busy caring for her bedridden husband after several strokes — shared something that left us in silence. She said she wouldn't come anymore. That she no longer believed in God, didn't understand the Bible, and that she was discouraged and without hope.
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  Naquele noite, eu e outra irmã a chamamos para conversar. Oramos juntas, encorajamos, e no fim ela decidiu continuar vindo.
+                  That night, another sister and I called her to talk. We prayed together, encouraged her, and in the end she decided to keep coming.
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  E foi aí que começamos a ver uma transformação. No início, ela não entendia muito, mas se esforçava. Eu comecei a gravar os áudios dos estudos e enviar para ela. Ela não só ouvia, mas lia todas as passagens antes do estudo de quarta-feira. E quando chegava em casa, revisava tudo de novo com as anotações que eu dava. Ela ainda continuava com muitas duvidas, mas continuou com o proposito de ler e estudar a Biblia. Ela compartilhou que ela já estava na igreja há mais de 15 anos, ela tinha uma bíblia de estudo que a irma dela havia dado a ela há mais de 30 anos, mas ela nunca a tinha lido. Mas nesta epoca, ela decidiu que ia se esforçar, ler, estudar, fazer anotações e aprender o que pudesse.
+                  And that's when we began to see a transformation. At first, she didn't understand much, but she made an effort. I started recording the study audios and sending them to her. She not only listened, but read all the passages before Wednesday's study. And when she got home, she reviewed everything again with the notes I gave her. She still had many doubts, but she continued with the purpose of reading and studying the Bible. She shared that she had been in the church for more than 15 years, she had a study Bible that her sister had given her more than 30 years ago, but she had never read it. But at this time, she decided that she would make an effort, read, study, take notes, and learn what she could.
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  O marido dela não melhorou. A situação em casa não mudou. Mas ela mudou. O semblante dela mudou. A fé dela se renovou. E mais: ela começou a compartilhar com as enfermeiras que vinham ajudar em casa tudo o que estava aprendendo. Até o desejo de cozinhar e preparar deliciosas receitas para compartilhar com o grupo aumentou.
+                  Her husband didn't improve. The situation at home didn't change. But she changed. Her countenance changed. Her faith was renewed. And more: she began to share with the nurses who came to help at home everything she was learning. Even the desire to cook and prepare delicious recipes to share with the group increased.
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  Durante um ano e meio, estudamos o livro do Apocalipse em nossa célula com o material de um ministério chamado versículo por versículo. Estavam ali pessoas idosas, crianças, adolescentes, pessoas de várias culturas e nacionalidades. E cada semana víamos algo diferente: os rostos brilhando, os testemunhos nascendo, a Palavra criando vida.
+                  For a year and a half, we studied the book of Revelation in our cell group with material from a ministry called verse by verse. There were elderly people, children, teenagers, people from various cultures and nationalities. And each week we saw something different: faces shining, testimonies being born, the Word creating life.
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  Eu pude ver com meus olhos a promessa de Apocalipse 1:3 se cumprir:
+                  I was able to see with my own eyes the promise of Revelation 1:3 being fulfilled:
                 </p>
                 <p className="text-muted-foreground mb-4 italic text-center bg-muted/50 p-4 rounded-lg">
-                  "Bem-aventurados os que leem, os que ouvem e guardam as palavras desta profecia."
+                  "Blessed is the one who reads aloud the words of this prophecy, and blessed are those who hear it and take to heart what is written in it."
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  O Apocalipse pode parecer um livro confuso, cheio de profecias difíceis de entender. Mas nós experimentamos a promessa: a verdadeira bem-aventurança. Não é sobre circunstâncias mudarem, mas sobre nós sermos transformados. Eu vi isso acontecer na vida dessa irmã. E vi também acontecer na minha vida e de minha família, em um tempo em que as minhas próprias circunstâncias não eram fáceis.
+                  Revelation may seem like a confusing book, full of prophecies difficult to understand. But we experienced the promise: true blessedness. It's not about circumstances changing, but about us being transformed. I saw this happen in that sister's life. And I also saw it happen in my life and my family's, at a time when my own circumstances were not easy.
                 </p>
                 <p className="text-muted-foreground">
-                  E foi assim que nasceu "Uma Jornada pelo Livro de Apocalipse": não como um estudo teórico, mas como uma caminhada real, de lágrimas, esperança e transformação.
+                  And that's how "A Journey Through the Book of Revelation" was born: not as a theoretical study, but as a real walk, of tears, hope, and transformation.
                 </p>
               </motion.div>
 
@@ -304,10 +304,10 @@ export function AboutPage() {
                 className="bg-primary/5 p-6 rounded-lg border border-primary/20"
               >
                 <p className="text-muted-foreground mb-2">
-                  <strong>Em 2024,</strong> comecei o podcast, e postar no Youtube e Spotify.
+                  <strong>In 2024,</strong> I started the podcast and posting on YouTube and Spotify.
                 </p>
                 <p className="text-muted-foreground">
-                  <strong>Em 2025,</strong> a minha pagina de website ficou pronta.
+                  <strong>In 2025,</strong> my website page was completed.
                 </p>
               </motion.div>
             </div>
@@ -335,7 +335,7 @@ export function AboutPage() {
               <div className="text-primary text-3xl font-bold mb-2">
                 <CountUp end={1} suffix="K+" duration={1.5} enableScrollSpy scrollSpyOnce />
               </div>
-              <div className="text-muted-foreground">Ouvintes do Podcast</div>
+              <div className="text-muted-foreground">Podcast Listeners</div>
             </motion.div>
             <motion.div
               className="p-6"
@@ -347,7 +347,7 @@ export function AboutPage() {
               <div className="text-primary text-3xl font-bold mb-2">
                 <CountUp end={10} suffix="+" duration={1.5} enableScrollSpy scrollSpyOnce />
               </div>
-              <div className="text-muted-foreground">eBooks Publicados</div>
+              <div className="text-muted-foreground">Published eBooks</div>
             </motion.div>
             <motion.div
               className="p-6"
@@ -359,7 +359,7 @@ export function AboutPage() {
               <div className="text-primary text-3xl font-bold mb-2">
                 <CountUp end={50} suffix="+" duration={1.5} enableScrollSpy scrollSpyOnce />
               </div>
-              <div className="text-muted-foreground">Episódios de Podcast</div>
+              <div className="text-muted-foreground">Podcast Episodes</div>
             </motion.div>
             <motion.div
               className="p-6"
@@ -371,7 +371,7 @@ export function AboutPage() {
               <div className="text-primary text-3xl font-bold mb-2">
                 <CountUp end={130} suffix="+" duration={1.5} enableScrollSpy scrollSpyOnce />
               </div>
-              <div className="text-muted-foreground">Seguidores</div>
+              <div className="text-muted-foreground">Followers</div>
             </motion.div>
           </div>
         </div>
@@ -386,7 +386,7 @@ export function AboutPage() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">O Que Eu Faço</h2>
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">What I Do</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-card p-6 rounded-lg border border-border/50 shadow-sm transform transition-transform transition-shadow duration-300 ease-out hover:-translate-y-1 hover:shadow-md">
@@ -395,7 +395,7 @@ export function AboutPage() {
               </div>
               <h3 className="text-xl font-heading font-medium mb-2">Podcasting</h3>
               <p className="text-muted-foreground">
-                Apresento um podcast semanal onde compartilho reflexões e conversas sobre temas bíblicos, crescimento pessoal e bem-estar. A cada episódio, convido os ouvintes a explorar a Palavra de Deus de forma profunda e inspiradora.
+                I host a weekly podcast where I share reflections and conversations about biblical topics, personal growth, and well-being. In each episode, I invite listeners to explore God's Word in a deep and inspiring way.
               </p>
             </div>
             
@@ -403,9 +403,9 @@ export function AboutPage() {
               <div className="mb-4 bg-primary/10 p-3 rounded-full w-12 h-12 flex items-center justify-center">
                 <Book className="text-primary h-6 w-6" />
               </div>
-              <h3 className="text-xl font-heading font-medium mb-2">Escrita</h3>
+              <h3 className="text-xl font-heading font-medium mb-2">Writing</h3>
               <p className="text-muted-foreground">
-                Sou autora de eBooks que oferecem ensinamentos práticos e insights bíblicos para ajudar na aplicação diária da fé e no desenvolvimento pessoal. Meus livros buscam guiar você em uma jornada de transformação espiritual e equilíbrio.
+                I'm the author of eBooks that offer practical teachings and biblical insights to help with daily faith application and personal development. My books seek to guide you on a journey of spiritual transformation and balance.
               </p>
             </div>
             
@@ -413,9 +413,9 @@ export function AboutPage() {
               <div className="mb-4 bg-primary/10 p-3 rounded-full w-12 h-12 flex items-center justify-center">
                 <Users className="text-primary h-6 w-6" />
               </div>
-              <h3 className="text-xl font-heading font-medium mb-2">Palestras</h3>
+              <h3 className="text-xl font-heading font-medium mb-2">Speaking</h3>
               <p className="text-muted-foreground">
-                Realizo palestras e workshops, tanto em eventos presenciais quanto online, focados em bem-estar, crescimento espiritual e como viver de acordo com os princípios bíblicos em nossa vida cotidiana.
+                I conduct talks and workshops, both at in-person events and online, focused on well-being, spiritual growth, and how to live according to biblical principles in our daily lives.
               </p>
             </div>
           </div>
@@ -432,7 +432,7 @@ export function AboutPage() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">Minha Jornada</h2>
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">My Journey</h2>
           
           <div className="relative">
             <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-primary/20" />
@@ -452,9 +452,9 @@ export function AboutPage() {
                       <CalendarDays className="text-primary h-4 w-4" />
                       <span className="text-sm text-muted-foreground">2020</span>
                     </div>
-                    <h3 className="text-xl font-heading font-medium mb-2">Início do Podcast</h3>
+                    <h3 className="text-xl font-heading font-medium mb-2">Podcast Launch</h3>
                     <p className="text-muted-foreground">
-                      Comecei a compartilhar meus estudos bíblicos e reflexões através do podcast, criando um espaço para discussões profundas sobre fé e crescimento pessoal.
+                      I began sharing my Bible studies and reflections through the podcast, creating a space for deep discussions about faith and personal growth.
                     </p>
                   </div>
                 </div>
@@ -474,9 +474,9 @@ export function AboutPage() {
                       <CalendarDays className="text-primary h-4 w-4" />
                       <span className="text-sm text-muted-foreground">2021</span>
                     </div>
-                    <h3 className="text-xl font-heading font-medium mb-2">Primeiro eBook</h3>
+                    <h3 className="text-xl font-heading font-medium mb-2">First eBook</h3>
                     <p className="text-muted-foreground">
-                      Publiquei meu primeiro eBook, expandindo o alcance dos meus ensinamentos e oferecendo conteúdo mais aprofundado para meus leitores.
+                      I published my first eBook, expanding the reach of my teachings and offering more in-depth content for my readers.
                     </p>
                   </div>
                 </div>
@@ -496,9 +496,9 @@ export function AboutPage() {
                       <CalendarDays className="text-primary h-4 w-4" />
                       <span className="text-sm text-muted-foreground">2022</span>
                     </div>
-                    <h3 className="text-xl font-heading font-medium mb-2">Expansão do Conteúdo</h3>
+                    <h3 className="text-xl font-heading font-medium mb-2">Content Expansion</h3>
                     <p className="text-muted-foreground">
-                      Ampliei meu alcance com mais eBooks e episódios de podcast, além de começar a oferecer workshops e palestras online.
+                      I expanded my reach with more eBooks and podcast episodes, in addition to starting to offer online workshops and talks.
                     </p>
                   </div>
                 </div>
@@ -518,9 +518,9 @@ export function AboutPage() {
                       <CalendarDays className="text-primary h-4 w-4" />
                       <span className="text-sm text-muted-foreground">2023</span>
                     </div>
-                    <h3 className="text-xl font-heading font-medium mb-2">Comunidade Crescente</h3>
+                    <h3 className="text-xl font-heading font-medium mb-2">Growing Community</h3>
                     <p className="text-muted-foreground">
-                      Construí uma comunidade engajada de ouvintes e leitores, alcançando milhares de pessoas com mensagens de fé e crescimento pessoal.
+                      I built an engaged community of listeners and readers, reaching thousands of people with messages of faith and personal growth.
                     </p>
                   </div>
                 </div>
@@ -540,7 +540,7 @@ export function AboutPage() {
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-6">Apoie Meu Trabalho</h2>
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-6">Support My Work</h2>
             <motion.p 
               className="text-muted-foreground mb-8"
               initial={{ opacity: 0, y: 20 }}
@@ -548,7 +548,7 @@ export function AboutPage() {
               viewport={{ amount: 0.3 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              Se você tem sido abençoado pelo meu conteúdo e gostaria de apoiar este ministério, sua contribuição faz toda a diferença. Cada doação ajuda a manter este trabalho e a criar mais conteúdo inspirador.
+              If you have been blessed by my content and would like to support this ministry, your contribution makes all the difference. Each donation helps maintain this work and create more inspiring content.
             </motion.p>
             <motion.div
               className="bg-card p-8 rounded-lg border border-border/50 shadow-md"
@@ -559,11 +559,11 @@ export function AboutPage() {
             >
               <div className="flex flex-col items-center gap-6">
                 <p className="text-lg text-muted-foreground">
-                  Sua generosidade permite que eu continue compartilhando a Palavra de Deus e criando conteúdo que transforma vidas.
+                  Your generosity allows me to continue sharing God's Word and creating content that transforms lives.
                 </p>
                 <Button size="lg" className="mt-4" asChild>
                   <Link to="/donation">
-                    Fazer uma Doação
+                    Make a Donation
                   </Link>
                 </Button>
               </div>
@@ -581,14 +581,14 @@ export function AboutPage() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">O Que as Pessoas Estão Dizendo</h2>
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">What People Are Saying</h2>
           
           <div className="max-w-5xl mx-auto">
             <div className="bg-card p-8 rounded-lg border border-border/50 shadow-md relative">
               <div className="text-5xl text-primary/20 absolute top-6 left-6">"</div>
               <div className="relative z-10">
                 <p className="text-lg italic mb-6">
-                  Patricia tem uma habilidade única de transformar conceitos complexos sobre bem-estar em conselhos práticos e acionáveis. Seus episódios de podcast são como conversar com uma amiga sábia, e seus eBooks se tornaram meus recursos essenciais sempre que me sinto sobrecarregada ou fora de equilíbrio.
+                  Patricia has a unique ability to transform complex concepts about well-being into practical and actionable advice. Her podcast episodes are like talking to a wise friend, and her eBooks have become my essential resources whenever I feel overwhelmed or out of balance.
                 </p>
                 <div className="flex items-center">
                   <img 
@@ -598,7 +598,7 @@ export function AboutPage() {
                   />
                   <div>
                     <p className="font-medium">Jennifer Wilson</p>
-                    <p className="text-sm text-muted-foreground">Coach de Bem-Estar & Ouvinte do Podcast</p>
+                    <p className="text-sm text-muted-foreground">Wellness Coach & Podcast Listener</p>
                   </div>
                 </div>
               </div>

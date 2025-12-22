@@ -19,17 +19,17 @@ const SignUp = () => {
     setError('');
 
     if (!email || !password || !confirmPassword) {
-      setError('Por favor, preencha todos os campos');
+      setError('Please fill in all fields');
       return;
     }
 
     if (password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
+      setError('Password must be at least 6 characters');
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('As senhas não coincidem');
+      setError('Passwords do not match');
       return;
     }
 
@@ -39,7 +39,7 @@ const SignUp = () => {
       await sendEmailVerification(user, { url: `${window.location.origin}/confirm-email` });
       navigate('/check-email');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Falha ao criar conta';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create account';
       setError(errorMessage);
     }
   };
@@ -56,7 +56,7 @@ const SignUp = () => {
         navigate('/user-dashboard');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Falha ao entrar com Google';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Google';
       setError(errorMessage);
     }
   };
@@ -81,30 +81,30 @@ const SignUp = () => {
               <div className="flex items-center gap-3 mb-6">
                 <Headphones className="h-8 w-8 text-primary" />
                 <h1 className="text-3xl md:text-4xl font-heading font-bold">
-                  Crie sua conta e comece sua jornada
+                  Create Your Account and Start Your Journey
                 </h1>
               </div>
               <p className="text-lg text-muted-foreground">
-                Junte-se à nossa comunidade e tenha acesso a conteúdo exclusivo, eBooks e muito mais. Comece sua jornada de crescimento hoje mesmo.
+                Join our community and get access to exclusive content, eBooks, and much more. Start your growth journey today.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Book className="h-4 w-4 text-primary" />
                   </div>
-                  <p className="text-muted-foreground">Acesso a todos os eBooks</p>
+                  <p className="text-muted-foreground">Access to all eBooks</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Book className="h-4 w-4 text-primary" />
                   </div>
-                  <p className="text-muted-foreground">Conteúdo exclusivo</p>
+                  <p className="text-muted-foreground">Exclusive content</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Book className="h-4 w-4 text-primary" />
                   </div>
-                  <p className="text-muted-foreground">Atualizações sobre novos lançamentos</p>
+                  <p className="text-muted-foreground">Updates about new releases</p>
                 </div>
               </div>
             </motion.div>
@@ -117,14 +117,14 @@ const SignUp = () => {
             >
               <div className="bg-card p-8 rounded-lg border border-border/50 shadow-md">
                 <h2 className="text-2xl font-heading font-bold mb-6 text-center">
-                  Criar conta
+                  Create Account
                 </h2>
                 
                 <form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-1">
-                        Nome completo
+                        <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-1">
+                        Full Name
                       </label>
                       <input
                         id="name"
@@ -132,7 +132,7 @@ const SignUp = () => {
                         type="text"
                         autoComplete="name"
                         className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Seu nome completo"
+                        placeholder="Your full name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                       />
@@ -148,7 +148,7 @@ const SignUp = () => {
                         autoComplete="email"
                         required
                         className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Seu email"
+                        placeholder="Your email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
@@ -164,7 +164,7 @@ const SignUp = () => {
                         autoComplete="new-password"
                         required
                         className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Sua senha"
+                        placeholder="Your password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                       />
@@ -180,7 +180,7 @@ const SignUp = () => {
                         autoComplete="new-password"
                         required
                         className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Confirme sua senha"
+                        placeholder="Confirm your password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                       />
@@ -193,12 +193,12 @@ const SignUp = () => {
 
                   <div className="flex items-center justify-center">
                     <Button variant="link" asChild className="text-primary hover:text-primary/90">
-                      <a href="/signin">Já tem uma conta? Entre aqui</a>
+                      <a href="/signin">Already have an account? Sign in here</a>
                     </Button>
                   </div>
 
                   <Button type="submit" className="w-full">
-                    Criar conta
+                    Create Account
                   </Button>
 
                   <div className="relative">
@@ -206,7 +206,7 @@ const SignUp = () => {
                       <span className="w-full border-t border-border/50" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">Ou continue com</span>
+                      <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
                     </div>
                   </div>
 
@@ -234,7 +234,7 @@ const SignUp = () => {
                         fill="#EA4335"
                       />
                     </svg>
-                    Criar conta com Google
+                    Create account with Google
                   </Button>
                 </form>
               </div>

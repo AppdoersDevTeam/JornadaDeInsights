@@ -50,12 +50,12 @@ export function DonationPage() {
     const finalAmount = getFinalAmount();
     
     if (finalAmount <= 0) {
-      toast.error('Por favor, selecione ou insira um valor válido');
+      toast.error('Please select or enter a valid amount');
       return;
     }
 
     if (finalAmount < 5) {
-      toast.error('O valor mínimo da doação é R$ 5,00');
+      toast.error('The minimum donation amount is R$ 5.00');
       return;
     }
 
@@ -81,7 +81,7 @@ export function DonationPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Falha ao criar sessão de pagamento');
+        throw new Error(error.error || 'Failed to create payment session');
       }
 
       const { sessionId } = await response.json();
@@ -89,7 +89,7 @@ export function DonationPage() {
       // Redirect to Stripe Checkout
       const stripe = await stripePromise;
       if (!stripe) {
-        throw new Error('Stripe não foi carregado corretamente');
+        throw new Error('Stripe was not loaded correctly');
       }
 
       const result = await stripe.redirectToCheckout({
@@ -104,7 +104,7 @@ export function DonationPage() {
       toast.error(
         error instanceof Error 
           ? error.message 
-          : 'Ocorreu um erro ao processar sua doação. Por favor, tente novamente.'
+          : 'An error occurred while processing your donation. Please try again.'
       );
       setIsProcessing(false);
     }
@@ -131,16 +131,16 @@ export function DonationPage() {
               >
                 <Heart className="h-8 w-8 text-primary" fill="currentColor" />
               </motion.div>
-              <CardTitle className="text-3xl font-heading">Apoie Meu Trabalho</CardTitle>
+              <CardTitle className="text-3xl font-heading">Support My Work</CardTitle>
               <CardDescription className="text-lg mt-2">
-                Sua generosidade permite que eu continue compartilhando a Palavra de Deus e criando conteúdo que transforma vidas.
+                Your generosity allows me to continue sharing God's Word and creating content that transforms lives.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Amount Selection */}
               <div>
                 <Label className="text-base font-medium mb-3 block">
-                  Selecione o valor da doação
+                  Select donation amount
                 </Label>
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
                   {PRESET_AMOUNTS.map((presetAmount) => (
@@ -164,7 +164,7 @@ export function DonationPage() {
                 <div className="relative">
                   <Input
                     type="number"
-                    placeholder="Ou insira um valor personalizado"
+                    placeholder="Or enter a custom amount"
                     value={customAmount}
                     onChange={(e) => handleCustomAmountChange(e.target.value)}
                     min="5"
@@ -183,7 +183,7 @@ export function DonationPage() {
                     animate={{ opacity: 1 }}
                     className="mt-2 text-sm text-muted-foreground"
                   >
-                    Valor selecionado: <span className="font-semibold text-primary">{formatPrice(finalAmount)}</span>
+                    Selected amount: <span className="font-semibold text-primary">{formatPrice(finalAmount)}</span>
                   </motion.p>
                 )}
               </div>
@@ -192,10 +192,10 @@ export function DonationPage() {
               <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                 <div className="flex-1">
                   <Label htmlFor="recurring" className="text-base font-medium cursor-pointer">
-                    Tornar esta doação recorrente
+                    Make this donation recurring
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Sua doação será cobrada mensalmente
+                    Your donation will be charged monthly
                   </p>
                 </div>
                 <Switch
@@ -208,11 +208,11 @@ export function DonationPage() {
               {/* Note Field */}
               <div>
                 <Label htmlFor="note" className="text-base font-medium mb-2 block">
-                  Adicione uma mensagem (opcional)
+                  Add a message (optional)
                 </Label>
                 <Textarea
                   id="note"
-                  placeholder="Deixe uma mensagem de encorajamento ou motivo da sua doação..."
+                  placeholder="Leave a message of encouragement or reason for your donation..."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   rows={4}
@@ -220,7 +220,7 @@ export function DonationPage() {
                   className="resize-none"
                 />
                 <p className="text-xs text-muted-foreground mt-1 text-right">
-                  {note.length}/500 caracteres
+                  {note.length}/500 characters
                 </p>
               </div>
 
@@ -232,18 +232,18 @@ export function DonationPage() {
                   className="p-4 bg-primary/5 rounded-lg border border-primary/20"
                 >
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-muted-foreground">Valor da doação:</span>
+                    <span className="text-muted-foreground">Donation amount:</span>
                     <span className="font-semibold text-lg">{formatPrice(finalAmount)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Frequência:</span>
+                    <span className="text-muted-foreground">Frequency:</span>
                     <span className="font-medium">
-                      {isRecurring ? 'Mensal' : 'Única'}
+                      {isRecurring ? 'Monthly' : 'One-time'}
                     </span>
                   </div>
                   {isRecurring && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      Você será cobrado {formatPrice(finalAmount)} todos os meses até cancelar
+                      You will be charged {formatPrice(finalAmount)} every month until you cancel
                     </p>
                   )}
                 </motion.div>
@@ -262,13 +262,13 @@ export function DonationPage() {
                   </>
                 ) : (
                   <>
-                    Finalizar Doação <ArrowRight className="ml-2 h-4 w-4" />
+                    Complete Donation <ArrowRight className="ml-2 h-4 w-4" />
                   </>
                 )}
               </Button>
 
               <p className="text-xs text-center text-muted-foreground">
-                Seu pagamento é seguro e processado pela Stripe. Você pode cancelar sua doação recorrente a qualquer momento.
+                Your payment is secure and processed by Stripe. You can cancel your recurring donation at any time.
               </p>
             </CardContent>
           </Card>
@@ -281,7 +281,7 @@ export function DonationPage() {
             className="mt-8 text-center"
           >
             <p className="text-sm text-muted-foreground">
-              Obrigado por considerar apoiar este ministério. Cada contribuição faz a diferença!
+              Thank you for considering supporting this ministry. Every contribution makes a difference!
             </p>
           </motion.div>
         </motion.div>

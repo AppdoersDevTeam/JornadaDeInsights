@@ -28,16 +28,16 @@ export function Header() {
   const navLinks = user ? [
     { to: '/dashboard', label: 'Dashboard' },
     { to: '/', label: 'Home' },
-    { to: '/about', label: 'Sobre' },
+    { to: '/about', label: 'About' },
     { to: '/podcast', label: 'Podcast' },
     { to: '/shop', label: 'Store' },
-    { to: '/contact', label: 'Contato' }
+    { to: '/contact', label: 'Contact' }
   ] : [
-    { to: '/', label: 'Início' },
-    { to: '/about', label: 'Sobre' },
+    { to: '/', label: 'Home' },
+    { to: '/about', label: 'About' },
     { to: '/podcast', label: 'Podcast' },
-    { to: '/shop', label: 'Loja' },
-    { to: '/contact', label: 'Contato' }
+    { to: '/shop', label: 'Shop' },
+    { to: '/contact', label: 'Contact' }
   ];
 
   return (
@@ -70,7 +70,7 @@ export function Header() {
           {user ? (
             <>
               <Button variant="outline" asChild>
-                <Link to="/shop">Adquirir Meus eBooks</Link>
+                <Link to="/shop">Get My eBooks</Link>
               </Button>
               <div className="flex items-center gap-2">
                 <Link to="/dashboard?tab=cart" className="relative p-2 rounded-full hover:bg-background/10 transition-colors">
@@ -89,7 +89,7 @@ export function Header() {
           ) : (
             <>
               <Button variant="outline" asChild>
-                <Link to="/shop">Adquirir Meus eBooks</Link>
+                <Link to="/shop">Get My eBooks</Link>
               </Button>
               <Link to="/cart" className="relative p-2 rounded-full hover:bg-background/10 transition-colors">
                 <ShoppingCart className="h-6 w-6 text-background" />
@@ -159,7 +159,7 @@ export function Header() {
             onClick={closeMenu}
           >
             <ShoppingCart className="h-5 w-5" />
-            Carrinho
+            Cart
             {totalCount > 0 && (
               <span className="ml-2 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
                 {totalCount}
@@ -193,7 +193,7 @@ export function Header() {
                 className="flex items-center gap-3 text-lg px-4 py-3 rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
               >
                 <LogOut className="h-5 w-5" />
-                Sair
+                Sign Out
               </button>
             </div>
           ) : (
@@ -209,7 +209,7 @@ export function Header() {
               onClick={closeMenu}
             >
               <User className="h-5 w-5" />
-              Entrar
+              Sign In
             </NavLink>
           )}
         </nav>
