@@ -26,7 +26,7 @@ const SignIn = () => {
     setError('');
 
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setError('Preencha todos os campos');
       return;
     }
 
@@ -120,30 +120,30 @@ const SignIn = () => {
               <div className="flex items-center gap-3 mb-6">
                 <Headphones className="h-8 w-8 text-primary" />
                 <h1 className="text-3xl md:text-4xl font-heading font-bold">
-                  Access Your eBooks and Exclusive Content
+                  Acesse seus eBooks e conteúdo exclusivo
                 </h1>
               </div>
               <p className="text-lg text-muted-foreground">
-                By signing in, you'll have access to all your purchased eBooks, be able to download new content, and receive updates about the latest releases.
+                Ao entrar, você terá acesso a todos os seus eBooks comprados, poderá baixar novos conteúdos e receber atualizações sobre os últimos lançamentos.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Book className="h-4 w-4 text-primary" />
                   </div>
-                  <p className="text-muted-foreground">Track your eBook purchases</p>
+                  <p className="text-muted-foreground">Acompanhe suas compras de eBooks</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Book className="h-4 w-4 text-primary" />
                   </div>
-                  <p className="text-muted-foreground">Access exclusive downloads</p>
+                  <p className="text-muted-foreground">Acesse downloads exclusivos</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Book className="h-4 w-4 text-primary" />
                   </div>
-                  <p className="text-muted-foreground">Receive updates about new releases</p>
+                  <p className="text-muted-foreground">Receba atualizações sobre novos lançamentos</p>
                 </div>
               </div>
             </motion.div>
@@ -156,7 +156,7 @@ const SignIn = () => {
             >
               <div className="bg-card p-8 rounded-lg border border-border/50 shadow-md">
                 <h2 className="text-2xl font-heading font-bold mb-6 text-center">
-                  Welcome back!
+                  Bem-vindo de volta!
                 </h2>
                 
                 <form noValidate className="space-y-6" onSubmit={handleSubmit}>
@@ -172,7 +172,7 @@ const SignIn = () => {
                         autoComplete="email"
                         required
                         className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Your email"
+                        placeholder="Seu email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
@@ -188,7 +188,7 @@ const SignIn = () => {
                         autoComplete="current-password"
                         required
                         className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Your password"
+                        placeholder="Sua senha"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                       />
@@ -201,15 +201,15 @@ const SignIn = () => {
 
                   <div className="flex items-center justify-between">
                     <Button variant="link" asChild className="text-primary hover:text-primary/90">
-                      <a href="/forgot-password">Forgot your password?</a>
+                      <a href="/forgot-password">Esqueceu sua senha?</a>
                     </Button>
                     <Button variant="link" asChild className="text-primary hover:text-primary/90">
-                      <a href="/signup">Create account</a>
+                      <a href="/signup">Criar conta</a>
                     </Button>
                   </div>
 
                   <Button type="submit" className="w-full">
-                    Sign In
+                    Entrar
                   </Button>
 
                   <div className="relative">
@@ -217,7 +217,7 @@ const SignIn = () => {
                       <span className="w-full border-t border-border/50" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                      <span className="bg-card px-2 text-muted-foreground">Ou continue com</span>
                     </div>
                   </div>
 
@@ -245,7 +245,7 @@ const SignIn = () => {
                         fill="#EA4335"
                       />
                     </svg>
-                    Sign in with Google
+                    Entrar com Google
                   </Button>
                 </form>
               </div>

@@ -80,7 +80,7 @@ export function ContactPage() {
         
         <div className="max-w-3xl mx-auto text-center px-4 sm:px-6 py-20">
           <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">
-            Get in Touch
+            Entre em Contato
           </h1>
           <motion.p className="text-lg text-muted-foreground mb-6"
             initial={{ opacity: 0, y: 20 }}
@@ -88,7 +88,7 @@ export function ContactPage() {
             viewport={{ amount: 0.3 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Have questions about my podcast, eBooks, or speaking engagements? Let's connect!
+            Tem perguntas sobre meu podcast, eBooks ou palestras? Vamos nos conectar!
           </motion.p>
           <motion.div
             variants={ctaContainerVariants}
@@ -99,14 +99,14 @@ export function ContactPage() {
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button size="lg" asChild className="w-full sm:w-auto">
                 <a href="#contact-form">
-                  Send Message <ArrowRight className="ml-2 h-4 w-4" />
+                  Enviar Mensagem <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </motion.div>
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
                 <a href="#faq-section">
-                  Frequently Asked Questions <ArrowRight className="ml-2 h-4 w-4" />
+                  Perguntas Frequentes <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </motion.div>
@@ -121,7 +121,7 @@ export function ContactPage() {
             
             {/* Contact Information */}
             <div>
-              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">Contact Information</h2>
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">Informações de Contato</h2>
               
               <div className="space-y-6 mb-10">
                 <div className="flex items-start gap-4">
@@ -139,7 +139,7 @@ export function ContactPage() {
                     <MapPin className="text-primary h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-medium mb-1">Location</h3>
+                    <h3 className="font-medium mb-1">Localização</h3>
                     <p className="text-muted-foreground">San Francisco, California</p>
                   </div>
                 </div>
@@ -149,13 +149,13 @@ export function ContactPage() {
                     <Clock className="text-primary h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-medium mb-1">Response Time</h3>
-                    <p className="text-muted-foreground">Usually within 1-2 business days</p>
+                    <h3 className="font-medium mb-1">Tempo de Resposta</h3>
+                    <p className="text-muted-foreground">Normalmente em 1-2 dias úteis</p>
                   </div>
                 </div>
               </div>
               
-              <h3 className="font-medium mb-4">Connect With Me</h3>
+              <h3 className="font-medium mb-4">Conecte-se Comigo</h3>
               <div className="flex space-x-4">
                 <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="bg-primary/10 p-3 rounded-full transition-all duration-300 hover:bg-primary/20 hover:-translate-y-1 hover:shadow-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
@@ -174,21 +174,21 @@ export function ContactPage() {
             
             {/* Contact Form */}
             <div>
-              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">Send a Message</h2>
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">Enviar uma Mensagem</h2>
               
               {isSubmitted ? (
                 <div id="success-message" className="bg-secondary/10 text-secondary rounded-md p-6 flex items-center gap-3 animate-in fade-in duration-500 slide-in-from-bottom-4">
                   <CheckCircle className="h-6 w-6 flex-shrink-0 animate-in bounce-in duration-1000" />
                   <div>
-                    <h3 className="font-medium mb-1">Thank you for getting in touch!</h3>
-                    <p>Your message has been received. I will get back to you as soon as possible.</p>
+                    <h3 className="font-medium mb-1">Obrigado por entrar em contato!</h3>
+                    <p>Sua mensagem foi recebida. Eu retornarei o mais breve possível.</p>
                   </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium mb-2">Your Name</label>
+                      <label htmlFor="name" className="block text-sm font-medium mb-2">Seu Nome</label>
                       <input
                         type="text"
                         id="name"
@@ -200,7 +200,7 @@ export function ContactPage() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium mb-2">Your Email</label>
+                      <label htmlFor="email" className="block text-sm font-medium mb-2">Seu Email</label>
                       <input
                         type="email"
                         id="email"
@@ -223,16 +223,16 @@ export function ContactPage() {
                       required
                       className="w-full px-4 py-2 rounded-md border border-input bg-background transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:shadow-[0_0_0_4px_rgba(var(--primary),0.1)]"
                     >
-                      <option value="">Select a subject</option>
-                      <option value="Podcast Inquiry">Podcast Inquiry</option>
-                      <option value="eBook Support">eBook Support</option>
-                      <option value="Speaking Engagement">Speaking Engagement</option>
-                      <option value="Other">Other</option>
+                      <option value="">Selecione um assunto</option>
+                      <option value="Podcast Inquiry">Inquérito de Podcast</option>
+                      <option value="eBook Support">Suporte ao eBook</option>
+                      <option value="Speaking Engagement">Palestras</option>
+                      <option value="Other">Outro</option>
                     </select>
                   </div>
                   
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium mb-2">Your Message</label>
+                    <label htmlFor="message" className="block text-sm font-medium mb-2">Sua Mensagem</label>
                     <textarea
                       id="message"
                       name="message"
@@ -248,11 +248,11 @@ export function ContactPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Sending...
+                        Enviando...
                       </>
                     ) : (
                       <>
-                        Send Message <Send className="ml-2 h-4 w-4" />
+                        Enviar Mensagem <Send className="ml-2 h-4 w-4" />
                       </>
                     )}
                   </Button>
@@ -266,29 +266,29 @@ export function ContactPage() {
       {/* FAQ Section */}
       <section id="faq-section" className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">Frequently Asked Questions</h2>
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">Perguntas Frequentes</h2>
           
           <div className="max-w-3xl mx-auto space-y-4">
             {[
               {
-                question: "How do I download the eBooks and guides?",
-                answer: "After purchase confirmation (or free access, if applicable), you will receive a link for immediate download of the material in PDF format. You can read on your phone, tablet, computer, or print it."
+                question: "Como faço para baixar os eBooks e guias?",
+                answer: "Após a confirmação da compra (ou acesso gratuito, se for o caso), você receberá um link para download imediato do material em formato PDF. Você pode ler no celular, tablet, computador ou imprimir."
               },
               {
-                question: "Are the materials suitable for beginners in faith?",
-                answer: "Yes! All content is written with clear, biblical, and accessible language — ideal both for those who are just starting and for those who want to deepen their knowledge."
+                question: "Os materiais são indicados para iniciantes na fé?",
+                answer: "Sim! Todos os conteúdos são escritos com linguagem clara, bíblica e acessível — ideais tanto para quem está começando quanto para quem deseja aprofundar o conhecimento."
               },
               {
-                question: "Can I use the materials in study groups or at church?",
-                answer: "Absolutely! Our eBooks, summaries, and guides can be used in small groups, Bible schools, and family studies. We only ask that the content not be commercially redistributed."
+                question: "Posso usar os materiais em grupos de estudo ou na igreja?",
+                answer: "Com certeza! Nossos eBooks, resumos e guias podem ser usados em pequenos grupos, escolas bíblicas e estudos em família. Apenas pedimos que o conteúdo não seja redistribuído comercialmente."
               },
               {
-                question: "Where can I listen to the \"Journey of Insights\" podcast?",
-                answer: "You can listen on major platforms like YouTube, Spotify, and iHeartRadio. Links are also available here on the website."
+                question: "Onde posso ouvir o podcast \"Uma Jornada de Insights\"?",
+                answer: "Você pode ouvir nas principais plataformas como YouTube, Spotify e iHeartRadio. Também há links disponíveis aqui no site."
               },
               {
-                question: "Do the children's books come with activities?",
-                answer: "Yes! The children's eBooks include Bible stories, fun activities, curiosities, reflections, and even coloring pages — everything designed to teach in a fun way."
+                question: "Os livros infantis vêm com atividades?",
+                answer: "Sim! Os eBooks infantis incluem histórias bíblicas, atividades lúdicas, curiosidades, reflexões e até páginas para colorir — tudo pensado para ensinar de forma divertida."
               }
             ].map((faq, index) => (
               <div key={index} className="bg-card rounded-lg shadow-sm border border-border/50 overflow-hidden">

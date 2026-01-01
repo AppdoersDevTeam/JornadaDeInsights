@@ -18,21 +18,21 @@ type YouTubeVideo = {
 const testimonials = [
   {
     id: "1",
-    quote: "Patricia's podcast transformed my way of understanding the Scriptures. Her deep and accessible reflections helped me apply faith in my daily life.",
+    quote: "O podcast da Patricia transformou minha maneira de entender as Escrituras. Suas reflexões profundas e acessíveis me ajudaram a aplicar a fé no meu dia a dia.",
     author: "Fernanda M.",
-    title: "History Teacher"
+    title: "Professora de História"
   },
   {
     id: "2",
-    quote: "The eBook 'Reflections of Faith' guided me to see the Bible in a new way. Now I feel more connected to my spirituality and have more balance in life.",
+    quote: "O eBook 'Reflexões de Fé' me guiou a enxergar a Bíblia de uma forma nova. Agora, me sinto mais conectada com minha espiritualidade e com mais equilíbrio na vida.",
     author: "Lucas P.",
-    title: "Entrepreneur"
+    title: "Empreendedor"
   },
   {
     id: "3",
-    quote: "I've been following Patricia for years. Her content always brings practical and inspiring wisdom, helping me grow in faith and in my personal journey.",
+    quote: "Acompanho a Patricia há anos. Seus conteúdos sempre trazem sabedoria prática e inspiradora, ajudando-me a crescer na fé e em minha jornada pessoal.",
     author: "Juliana R.",
-    title: "Spiritual Coach"
+    title: "Coach Espiritual"
   }
 ];
 
@@ -260,7 +260,7 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="text-3xl md:text-5xl font-heading font-bold mb-2 leading-tight"
               >
-                Journey of <span className="text-primary">Insights</span>
+                Jornada de <span className="text-primary">Insights</span>
               </motion.h1>
               <motion.h2
                 initial={{ opacity: 0, y: 50 }}
@@ -269,7 +269,7 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="text-2xl md:text-3xl font-heading font-medium mb-6 text-muted-foreground"
               >
-                With Patricia da Silva
+                Com Patricia da Silva
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, y: 50 }}
@@ -278,7 +278,7 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="text-lg text-muted-foreground mb-2"
               >
-                The truth of the Bible is eternal, but there are always new insights to be discovered.
+                A verdade da Bíblia é eterna, mas há sempre novos insights a serem descobertos.
               </motion.p>
               <motion.p
                 initial={{ opacity: 0, y: 50 }}
@@ -287,7 +287,7 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="text-lg text-muted-foreground mb-2"
               >
-                Listen now to our episodes on YouTube, Spotify, and iHeartRadio.
+                Ouça agora os nossos episódios no YouTube, Spotify e iHeartRadio.
               </motion.p>
               <motion.p
                 initial={{ opacity: 0, y: 50 }}
@@ -296,7 +296,7 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="text-lg text-muted-foreground mb-8"
               >
-                Explore our e-books and resources for children, youth, and adults.
+                Explore nossos e-books e recursos para crianças, jovens e adultos.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
@@ -308,14 +308,14 @@ export function HomePage() {
                 <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
                   <Button size="lg" asChild className="w-full sm:w-auto">
                     <Link to="/podcast">
-                      Listen to Podcast <ArrowRight className="ml-2 h-4 w-4" />
+                      Ouvir o Podcast <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 </motion.div>
                 <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
                   <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
                     <Link to="/shop">
-                      Explore eBooks <ArrowRight className="ml-2 h-4 w-4" />
+                      Explorar eBooks <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 </motion.div>
@@ -323,10 +323,10 @@ export function HomePage() {
             </div>
             <div className="w-full md:w-1/2">
               <div className="relative rounded-t-lg rounded-b-none overflow-hidden shadow-xl">
-                {/* 'Featured Video' overlay at top left */}
+                {/* 'Vídeo em Destaque' overlay at top left */}
                 <div className="absolute top-4 left-4 bg-gradient-to-tr from-black/80 to-black/30 p-2 rounded-lg z-10 flex items-center gap-2 text-white">
                   <Award className="h-5 w-5" />
-                  <span className="text-sm font-medium">Featured Video</span>
+                  <span className="text-sm font-medium">Vídeo em Destaque</span>
                 </div>
                 {(isLoading || hasError) ? (
                   <div className="w-full aspect-video bg-black" />
@@ -387,10 +387,10 @@ export function HomePage() {
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold">Recent Episodes</h2>
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold">Episódios Recentes</h2>
             <Button variant="ghost" asChild>
               <Link to="/podcast" className="flex items-center">
-                View All <ArrowRight className="ml-2 h-4 w-4" />
+                Ver Todos <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -407,7 +407,7 @@ export function HomePage() {
               ))
             ) : hasError ? (
               <div className="col-span-full text-center py-12">
-                <p className="text-lg text-muted-foreground">Unable to load episodes. Please try again later.</p>
+                <p className="text-lg text-muted-foreground">Não foi possível carregar os episódios. Por favor, tente novamente mais tarde.</p>
               </div>
             ) : (
               videos.slice(0, 3).map((video) => (
@@ -450,24 +450,24 @@ export function HomePage() {
               viewport={{ amount: 0.3 }}
               className="w-full md:w-7/12"
             >
-              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">About Me – Patricia da Silva</h2>
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">Sobre Mim – Patricia da Silva</h2>
               <p className="text-muted-foreground mb-4 font-medium">
-                Podcaster, educator, and biblical storyteller.
+                Podcaster, educadora e contadora de histórias bíblicas.
               </p>
               <p className="text-muted-foreground mb-4">
-                My mission is to share deep and accessible insights from the Scriptures, bringing the historical, cultural, and spiritual context that brings biblical texts to life — in a clear, engaging, and transformative way.
+                Minha missão é compartilhar insights profundos e acessíveis das Escrituras, trazendo o contexto histórico, cultural e espiritual que dá vida aos textos bíblicos — de forma clara, envolvente e transformadora.
               </p>
               <p className="text-muted-foreground mb-4">
-                Through my "Journey of Insights" project, I reach people of all ages, with materials ranging from Bible studies for adults to e-books and creative resources for children, helping families grow together in faith.
+                Com meu projeto "Jornada de Insights", alcanço pessoas de todas as idades, com materiais que vão desde estudos bíblicos para adultos, até e-books e recursos criativos para crianças, ajudando famílias a crescerem juntas na fé.
               </p>
               <p className="text-muted-foreground mb-4">
-                Speaking about the Bible is my passion, and I seek to speak with simplicity and reverence — combining research, teaching, and practical application with a language that connects mind and heart.
+                Falar da Bíblia é minha paixão, e procuro falar com simplicidade e reverência — combinando pesquisa, ensino e aplicação prática com uma linguagem que conecta mente e coração.
               </p>
               <p className="text-muted-foreground mb-6">
-                I love teaching with purpose, educating with creativity, and inspiring with love for God's Word.
+                Amo ensinar com propósito, educar com criatividade e inspirar com amor pela Palavra de Deus.
               </p>
               <Button asChild>
-                <Link to="/about">Learn more about me</Link>
+                <Link to="/about">Saiba mais sobre mim</Link>
               </Button>
             </motion.div>
           </div>
@@ -484,10 +484,10 @@ export function HomePage() {
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold">Featured eBooks</h2>
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold">eBooks em Destaque</h2>
             <Button variant="ghost" asChild>
               <Link to="/shop" className="flex items-center">
-                View All <ArrowRight className="ml-2 h-4 w-4" />
+                Ver Todos <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -521,7 +521,7 @@ export function HomePage() {
         className="py-16 bg-background"
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-12 text-center">Testimonials</h2>
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-12 text-center">Depoimentos</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial) => (
               <motion.div
@@ -620,11 +620,11 @@ function PodcastCard({ video }: { video: YouTubeVideo }) {
             </p>
           </div>
         </motion.div>
-          <button
+        <button
           onClick={() => setFlipped(!flipped)}
           className="absolute bottom-2 left-2 bg-primary text-white px-2 py-1 text-xs rounded"
         >
-          {flipped ? 'Watch video' : 'View description'}
+          {flipped ? 'Ver vídeo' : 'Ver descrição'}
         </button>
       </div>
       <div className="p-6">

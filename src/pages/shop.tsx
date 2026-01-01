@@ -122,7 +122,7 @@ export function ShopPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-red-500 mb-4">Error</h2>
+          <h2 className="text-2xl font-semibold text-red-500 mb-4">Erro</h2>
           <p className="text-gray-600">{error}</p>
         </div>
       </div>
@@ -153,7 +153,7 @@ export function ShopPage() {
         
         <div className="max-w-3xl mx-auto text-center px-4 sm:px-6 py-20">
           <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">
-            Discover Our eBook Collection
+            Descubra Nossa Coleção de eBooks
           </h1>
           <motion.p className="text-lg text-muted-foreground mb-6"
             initial={{ opacity: 0, y: 20 }}
@@ -161,7 +161,7 @@ export function ShopPage() {
             viewport={{ amount: 0.3 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Explore our curated selection of eBooks designed to inspire and transform your life.
+            Explore nossa seleção curada de eBooks projetados para inspirar e transformar sua vida.
           </motion.p>
           <motion.div
             variants={ctaContainerVariants}
@@ -179,7 +179,7 @@ export function ShopPage() {
                     scrollToSection('featured-ebook');
                   }}
                 >
-                  Featured eBook <ArrowRight className="ml-2 h-4 w-4" />
+                  eBook em Destaque <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </motion.div>
@@ -193,7 +193,7 @@ export function ShopPage() {
                     scrollToSection('all-ebooks');
                   }}
                 >
-                  All eBooks <ArrowRight className="ml-2 h-4 w-4" />
+                  Todos os eBooks <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </motion.div>
@@ -204,7 +204,7 @@ export function ShopPage() {
       {/* Featured eBook */}
       <section id="featured-ebook" className="py-16 bg-background">
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">Featured eBook</h2>
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">eBook em Destaque</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-1 max-w-4xl mx-auto items-stretch">
             {isLoading ? (
@@ -245,7 +245,7 @@ export function ShopPage() {
                     }}
                     className="transition-all duration-300 hover:scale-105 hover:shadow-md w-full sm:w-auto"
                   >
-                    <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
+                    <ShoppingCart className="mr-2 h-4 w-4" /> Adicionar ao carrinho
                   </Button>
                 </Link>
               </>
@@ -258,7 +258,7 @@ export function ShopPage() {
       <section id="all-ebooks" className="py-16 bg-muted/30">
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold">All eBooks</h2>
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold">Todos os eBooks</h2>
             <AnimatedCartIcon count={totalCount} />
           </div>
           
@@ -268,7 +268,7 @@ export function ShopPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search eBooks..."
+                placeholder="Pesquisar eBooks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-2 w-full rounded-md border border-input bg-background cursor-text"
@@ -287,7 +287,7 @@ export function ShopPage() {
 
           {filteredEbooks.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">No eBooks found for your search.</p>
+              <p className="text-lg text-muted-foreground">Nenhum eBook encontrado para sua pesquisa.</p>
             </div>
           )}
         </div>
@@ -303,7 +303,7 @@ export function ShopPage() {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="text-2xl md:text-3xl font-heading font-semibold mb-12 text-center"
           >
-            Why Buy My eBooks?
+            Por que comprar meus eBooks?
           </motion.h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -330,7 +330,7 @@ export function ShopPage() {
                 transition={{ duration: 0.4, delay: 0.4 }}
                 className="font-heading font-medium text-lg mb-2"
               >
-                Practical Wisdom
+                Sabedoria Prática
               </motion.h3>
               <motion.p 
                 initial={{ opacity: 0, y: 10 }}
@@ -339,7 +339,7 @@ export function ShopPage() {
                 transition={{ duration: 0.4, delay: 0.5 }}
                 className="text-muted-foreground"
               >
-                Actionable advice you can implement immediately, not just theoretical concepts.
+                Conselhos acionáveis que você pode implementar imediatamente, não apenas conceitos teóricos.
               </motion.p>
             </motion.div>
             
@@ -366,7 +366,7 @@ export function ShopPage() {
                 transition={{ duration: 0.5, delay: 0.5 }}
                 className="font-heading font-medium text-lg mb-2"
               >
-                Secure Delivery
+                Entrega Segura
               </motion.h3>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -375,7 +375,7 @@ export function ShopPage() {
                 transition={{ duration: 0.5, delay: 0.6 }}
                 className="text-muted-foreground"
               >
-                Instant access to your purchase with secure payment processing.
+                Acesso instantâneo à sua compra com processamento de pagamento seguro.
               </motion.p>
             </motion.div>
             
@@ -418,7 +418,7 @@ export function ShopPage() {
                   transition={{ duration: 0.5, delay: 0.6 }}
                   className="font-heading font-medium text-lg mb-2"
                 >
-                  Quality Content
+                  Conteúdo de Qualidade
                 </motion.h3>
                 <motion.p 
                   initial={{ opacity: 0, y: 20 }}
@@ -427,7 +427,7 @@ export function ShopPage() {
                   transition={{ duration: 0.5, delay: 0.7 }}
                   className="text-muted-foreground"
                 >
-                  Well-researched and professionally edited guides, based on proven methods.
+                  Guias bem pesquisados e profissionalmente editados, baseados em métodos comprovados.
                 </motion.p>
               </div>
             </motion.div>
@@ -444,7 +444,7 @@ export function ShopPage() {
         className="py-16 bg-background"
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-12 text-center">Reader Testimonials</h2>
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-12 text-center">Depoimentos de Leitores</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -453,10 +453,10 @@ export function ShopPage() {
               viewport={{ amount: 0.3 }}
               className="bg-card rounded-lg shadow-md p-6 border border-border/50"
             >
-              <p className="text-muted-foreground mb-4 italic">"The Digital Detox eBook helped me regain control over my smartphone use. Now I'm more productive and present."</p>
+              <p className="text-muted-foreground mb-4 italic">"O eBook Digital Detox me ajudou a recuperar o controle sobre o uso do meu smartphone. Agora estou mais produtivo e presente."</p>
               <div>
                 <p className="font-medium">Michael T.</p>
-                <p className="text-sm text-muted-foreground">Software Engineer</p>
+                <p className="text-sm text-muted-foreground">Engenheiro de Software</p>
               </div>
             </motion.div>
 
@@ -467,10 +467,10 @@ export function ShopPage() {
               viewport={{ amount: 0.3 }}
               className="bg-card rounded-lg shadow-md p-6 border border-border/50"
             >
-              <p className="text-muted-foreground mb-4 italic">"Conscious Life transformed my daily routine. The 30-day plan was easy to follow and I saw real improvements in my stress levels."</p>
+              <p className="text-muted-foreground mb-4 italic">"Vida Consciente transformou minha rotina diária. O plano de 30 dias foi fácil de seguir e vi melhorias reais nos meus níveis de estresse."</p>
               <div>
                 <p className="font-medium">Jennifer L.</p>
-                <p className="text-sm text-muted-foreground">Marketing Director</p>
+                <p className="text-sm text-muted-foreground">Diretora de Marketing</p>
               </div>
             </motion.div>
 
@@ -481,10 +481,10 @@ export function ShopPage() {
               viewport={{ amount: 0.3 }}
               className="bg-card rounded-lg shadow-md p-6 border border-border/50"
             >
-              <p className="text-muted-foreground mb-4 italic">"The Art of Living in Balance is now my reference whenever I feel overwhelmed. Patricia's advice is practical and transformative."</p>
+              <p className="text-muted-foreground mb-4 italic">"A Arte de Viver em Equilíbrio é agora minha referência sempre que me sinto sobrecarregado. Os conselhos da Patricia são práticos e transformadores."</p>
               <div>
                 <p className="font-medium">David R.</p>
-                <p className="text-sm text-muted-foreground">Health Professional</p>
+                <p className="text-sm text-muted-foreground">Profissional de Saúde</p>
               </div>
             </motion.div>
           </div>

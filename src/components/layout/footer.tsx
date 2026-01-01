@@ -27,7 +27,7 @@ export function Footer() {
                 <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
               </Link>
               <p className="text-muted-foreground mb-6 text-base">
-                A podcast to understand the Bible with depth and simplicity.
+                Um podcast para entender a Bíblia com profundidade e simplicidade.
               </p>
               <div className="flex space-x-4">
                 <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
@@ -47,7 +47,7 @@ export function Footer() {
             {/* Quick Links Accordion */}
             <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
               <button onClick={() => setQuickOpen(!quickOpen)} className="flex justify-between items-center w-full text-base font-medium text-foreground py-3 px-4 focus:outline-none">
-                Quick Links
+                Links Rápidos
                 {quickOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
               <ul className={`${quickOpen ? 'block' : 'hidden'} space-y-3 py-2 px-4`}>
@@ -55,40 +55,40 @@ export function Footer() {
                   <Link to="/user-dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">Dashboard</Link>
                 </li>
                 <li>
-                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Home</Link>
+                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Início</Link>
                 </li>
                 <li>
-                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">About</Link>
+                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">Sobre</Link>
                 </li>
                 <li>
                   <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">Podcast</Link>
                 </li>
                 <li>
-                  <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Shop</Link>
+                  <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Loja</Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contact</Link>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contato</Link>
                 </li>
               </ul>
             </div>
             {/* Resources Accordion */}
             <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
               <button onClick={() => setResourcesOpen(!resourcesOpen)} className="flex justify-between items-center w-full text-base font-medium text-foreground py-3 px-4 focus:outline-none">
-                Resources
+                Recursos
                 {resourcesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
               <ul className={`${resourcesOpen ? 'block' : 'hidden'} space-y-3 py-2 px-4`}>
                 <li>
-                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Privacy Policy</Link>
+                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
                 </li>
                 <li>
-                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Terms of Service</Link>
+                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
                 </li>
                 <li>
                   <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Support</Link>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</Link>
                 </li>
               </ul>
             </div>
@@ -101,7 +101,7 @@ export function Footer() {
                 <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
               </Link>
               <p className="text-muted-foreground mb-6 text-base">
-                A podcast to understand the Bible with depth and simplicity.
+                Um podcast para entender a Bíblia com profundidade e simplicidade.
               </p>
               <div className="flex space-x-4">
                 <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
@@ -126,19 +126,19 @@ export function Footer() {
                   <Link to="/user-dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">Dashboard</Link>
                 </li>
                 <li>
-                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Home</Link>
+                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Início</Link>
                 </li>
                 <li>
-                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">About</Link>
+                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">Sobre</Link>
                 </li>
                 <li>
                   <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">Podcast</Link>
                 </li>
                 <li>
-                  <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Shop</Link>
+                  <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Loja</Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contact</Link>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contato</Link>
                 </li>
               </ul>
             </div>
@@ -147,26 +147,26 @@ export function Footer() {
               <h3 className="text-base font-medium mb-4 text-foreground">Recursos</h3>
               <ul className="space-y-3 md:block">
                 <li>
-                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Privacy Policy</Link>
+                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
                 </li>
                 <li>
-                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Terms of Service</Link>
+                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
                 </li>
                 <li>
                   <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Support</Link>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</Link>
                 </li>
               </ul>
             </div>
           </div>
           <div className="border-t border-border/50 mt-12 pt-6 flex flex-col md:flex-row justify-center md:justify-between items-center">
             <p className="text-sm text-muted-foreground">
-              © {currentYear} Patricia. All rights reserved.
+              © {currentYear} Patricia. Todos os direitos reservados.
             </p>
             <p className="text-sm text-muted-foreground mt-2 md:mt-0">
-              Website developed by <a href="https://appdoers.co.nz" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">appdoers.co.nz</a> in partnership with <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">buildwithsds.com</a>
+              Website desenvolvido por <a href="https://appdoers.co.nz" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">appdoers.co.nz</a> em parceria com <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">buildwithsds.com</a>
             </p>
           </div>
         </div>
