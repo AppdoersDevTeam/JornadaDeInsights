@@ -1,15 +1,28 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { supabase } from '@/lib/supabase';
+import { supabase, getCategories, createCategory, type Category } from '@/lib/supabase';
 import { auth } from '@/lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface EbookMetadata {
   title: string;
   description: string;
   price: number;
   filename: string;
+  category_id?: string | null;
 }
 
 interface EditEbookFormProps {
@@ -37,6 +50,12 @@ export default function EditEbookForm({ ebook, onEditSuccess, onCancel }: EditEb
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [error, setError] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(ebook.metadata.category_id || '');
+  const [createCategoryDialogOpen, setCreateCategoryDialogOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -50,6 +69,19 @@ export default function EditEbookForm({ ebook, onEditSuccess, onCancel }: EditEb
 
     return () => unsubscribe();
   }, [navigate]);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +100,8 @@ export default function EditEbookForm({ ebook, onEditSuccess, onCancel }: EditEb
         .update({
           title: title,
           description: description,
-          price: parseFloat(price)
+          price: parseFloat(price),
+          category_id: selectedCategoryId || null
         })
         .eq('filename', ebook.name);
 
@@ -142,6 +175,38 @@ export default function EditEbookForm({ ebook, onEditSuccess, onCancel }: EditEb
       </div>
 
       <div>
+        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+          Category (optional)
+        </label>
+        <select
+          id="category"
+          value={selectedCategoryId}
+          onChange={(e) => {
+            if (e.target.value === '__create_new__') {
+              setCreateCategoryDialogOpen(true);
+              // Reset to current selection to avoid showing "__create_new__" in the select
+              setTimeout(() => {
+                const select = document.getElementById('category') as HTMLSelectElement;
+                if (select) select.value = selectedCategoryId || '';
+              }, 0);
+            } else {
+              setSelectedCategoryId(e.target.value);
+            }
+          }}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+          disabled={!isAuthenticated || isUploading}
+        >
+          <option value="">No category</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+          <option value="__create_new__">+ Create New Category</option>
+        </select>
+      </div>
+
+      <div>
         <label htmlFor="coverImage" className="block text-sm font-medium text-gray-700">
           Cover Image (optional)
         </label>
@@ -178,6 +243,90 @@ export default function EditEbookForm({ ebook, onEditSuccess, onCancel }: EditEb
           {isUploading ? 'Updating...' : 'Update eBook'}
         </button>
       </div>
+
+      {/* Create Category Dialog */}
+      <Dialog open={createCategoryDialogOpen} onOpenChange={setCreateCategoryDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Category</DialogTitle>
+            <DialogDescription>
+              Create a new category for organizing your eBooks
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="newCategoryName">Category Name *</Label>
+              <Input
+                id="newCategoryName"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="Enter category name"
+                disabled={isCreatingCategory}
+              />
+            </div>
+            <div>
+              <Label htmlFor="newCategoryDescription">Description (optional)</Label>
+              <Textarea
+                id="newCategoryDescription"
+                value={newCategoryDescription}
+                onChange={(e) => setNewCategoryDescription(e.target.value)}
+                placeholder="Enter category description"
+                rows={3}
+                disabled={isCreatingCategory}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCreateCategoryDialogOpen(false);
+                setNewCategoryName('');
+                setNewCategoryDescription('');
+              }}
+              disabled={isCreatingCategory}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!newCategoryName.trim()) {
+                  toast.error('Category name is required');
+                  return;
+                }
+
+                try {
+                  setIsCreatingCategory(true);
+                  const newCategory = await createCategory(
+                    newCategoryName.trim(),
+                    newCategoryDescription.trim() || undefined
+                  );
+                  toast.success('Category created successfully');
+                  
+                  // Refresh categories list
+                  await fetchCategories();
+                  
+                  // Select the newly created category
+                  setSelectedCategoryId(newCategory.id);
+                  
+                  // Close dialog and reset form
+                  setCreateCategoryDialogOpen(false);
+                  setNewCategoryName('');
+                  setNewCategoryDescription('');
+                } catch (error: any) {
+                  console.error('Error creating category:', error);
+                  toast.error(error.message || 'Failed to create category');
+                } finally {
+                  setIsCreatingCategory(false);
+                }
+              }}
+              disabled={isCreatingCategory}
+            >
+              {isCreatingCategory ? 'Creating...' : 'Create Category'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 } 

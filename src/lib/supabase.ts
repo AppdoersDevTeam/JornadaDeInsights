@@ -141,16 +141,36 @@ export const getEbooks = async () => {
   try {
     const { data, error } = await supabase
       .from('ebooks_metadata')
-      .select('*')
+      .select(`
+        *,
+        categories (
+          id,
+          name
+        )
+      `)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    // Add cover image URLs
-    const ebooksWithCoverUrls = data.map(ebook => ({
-      ...ebook,
-      cover_url: ebook.filename ? supabase.storage.from('store-assets').getPublicUrl(`covers/${ebook.filename}`).data.publicUrl : null
-    }));
+    // Add cover image URLs and category info
+    const ebooksWithCoverUrls = data.map((ebook: any) => {
+      // Handle category - Supabase returns it as an object for single relations
+      let category = null;
+      if (ebook.categories) {
+        // If it's an array (shouldn't happen for many-to-one, but handle it)
+        if (Array.isArray(ebook.categories) && ebook.categories.length > 0) {
+          category = { id: ebook.categories[0].id, name: ebook.categories[0].name };
+        } else if (typeof ebook.categories === 'object' && ebook.categories.id) {
+          category = { id: ebook.categories.id, name: ebook.categories.name };
+        }
+      }
+      
+      return {
+        ...ebook,
+        cover_url: ebook.filename ? supabase.storage.from('store-assets').getPublicUrl(`covers/${ebook.filename}`).data.publicUrl : null,
+        category: category
+      };
+    });
 
     return ebooksWithCoverUrls;
   } catch (error) {
@@ -163,24 +183,112 @@ export const getEbookById = async (id: string) => {
   try {
     const { data, error } = await supabase
       .from('ebooks_metadata')
-      .select('*')
+      .select(`
+        *,
+        categories (
+          id,
+          name
+        )
+      `)
       .eq('id', id)
       .single();
 
     if (error) throw error;
     if (!data) throw new Error('Ebook not found');
 
-    // Add cover image URL
+    // Add cover image URL and category info
+    let category = null;
+    if (data.categories) {
+      // Handle category - Supabase returns it as an object for single relations
+      if (Array.isArray(data.categories) && data.categories.length > 0) {
+        category = { id: data.categories[0].id, name: data.categories[0].name };
+      } else if (typeof data.categories === 'object' && data.categories.id) {
+        category = { id: data.categories.id, name: data.categories.name };
+      }
+    }
+    
     const ebookWithCoverUrl = {
       ...data,
       cover_url: data.filename 
         ? supabase.storage.from('store-assets').getPublicUrl(`covers/${data.filename}`).data.publicUrl 
-        : null
+        : null,
+      category: category
     };
 
     return ebookWithCoverUrl;
   } catch (error) {
     console.error('Error fetching ebook:', error);
+    throw error;
+  }
+};
+
+// Category management functions
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export const getCategories = async (): Promise<Category[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    throw error;
+  }
+};
+
+export const createCategory = async (name: string, description?: string): Promise<Category> => {
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .insert({ name, description })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating category:', error);
+    throw error;
+  }
+};
+
+export const updateCategory = async (id: string, name: string, description?: string): Promise<Category> => {
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .update({ name, description, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating category:', error);
+    throw error;
+  }
+};
+
+export const deleteCategory = async (id: string): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error deleting category:', error);
     throw error;
   }
 }; 

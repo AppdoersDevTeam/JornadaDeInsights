@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, getCategories, type Category } from '@/lib/supabase';
 import { FileObject } from '@supabase/storage-js';
 import { Eye, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -14,12 +14,18 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface EbookMetadata {
   title: string;
   description: string;
   price: number;
   filename: string;
+  category_id?: string | null;
+  category?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface Ebook {
@@ -35,10 +41,13 @@ interface Ebook {
 
 export default function EbookList() {
   const [ebooks, setEbooks] = useState<Ebook[]>([]);
+  const [allEbooks, setAllEbooks] = useState<Ebook[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(null);
   const [ebookToDelete, setEbookToDelete] = useState<Ebook | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
 
   const fetchEbooks = async () => {
     try {
@@ -48,7 +57,7 @@ export default function EbookList() {
       // Fetch metadata first
       const { data: metadata, error: metadataError } = await supabase
         .from('ebooks_metadata')
-        .select('*');
+        .select('*, categories(id, name)');
 
       if (metadataError) {
         console.error('Error fetching metadata:', metadataError);
@@ -127,6 +136,16 @@ export default function EbookList() {
             return null;
           }
 
+          // Handle category - Supabase returns it as an object for single relations
+          let category = null;
+          if (ebookMetadata.categories) {
+            if (Array.isArray(ebookMetadata.categories) && ebookMetadata.categories.length > 0) {
+              category = { id: ebookMetadata.categories[0].id, name: ebookMetadata.categories[0].name };
+            } else if (typeof ebookMetadata.categories === 'object' && ebookMetadata.categories.id) {
+              category = { id: ebookMetadata.categories.id, name: ebookMetadata.categories.name };
+            }
+          }
+
           return {
             id: pdf.id,
             name: pdf.name,
@@ -139,13 +158,16 @@ export default function EbookList() {
               title: ebookMetadata.title,
               description: ebookMetadata.description,
               price: ebookMetadata.price,
-              filename: ebookMetadata.filename
+              filename: ebookMetadata.filename,
+              category_id: ebookMetadata.category_id || null,
+              category: category
             }
           };
         })
         .filter((ebook): ebook is Ebook => ebook !== null);
 
       console.log('Combined ebooks:', combinedEbooks);
+      setAllEbooks(combinedEbooks);
       setEbooks(combinedEbooks);
     } catch (err) {
       console.error('Error fetching ebooks:', err);
@@ -255,7 +277,28 @@ export default function EbookList() {
 
   useEffect(() => {
     fetchEbooks();
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategoryId === '') {
+      setEbooks(allEbooks);
+    } else {
+      const filtered = allEbooks.filter(ebook => 
+        ebook.metadata.category_id === selectedCategoryId || 
+        ebook.metadata.category?.id === selectedCategoryId
+      );
+      setEbooks(filtered);
+    }
+  }, [selectedCategoryId, allEbooks]);
 
   if (loading) {
     return <div>Loading ebooks...</div>;
@@ -267,6 +310,35 @@ export default function EbookList() {
 
   return (
     <>
+      {/* Category Filter */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-medium text-gray-700">Filtrar por categoria:</span>
+          <Button
+            variant={selectedCategoryId === '' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedCategoryId('')}
+          >
+            Todos
+          </Button>
+          {categories.map((category) => (
+            <Button
+              key={category.id}
+              variant={selectedCategoryId === category.id ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedCategoryId(category.id)}
+            >
+              {category.name}
+            </Button>
+          ))}
+        </div>
+        {selectedCategoryId && (
+          <p className="text-sm text-muted-foreground mt-2">
+            Mostrando {ebooks.length} de {allEbooks.length} eBooks
+          </p>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {ebooks.map((ebook) => (
           <div key={ebook.id} className="bg-white rounded-lg shadow-md h-[480px] flex flex-col">
@@ -278,6 +350,11 @@ export default function EbookList() {
               />
             </div>
             <div className="p-4 flex flex-col flex-1">
+              {ebook.metadata.category && (
+                <Badge variant="secondary" className="w-fit mb-2">
+                  {ebook.metadata.category.name}
+                </Badge>
+              )}
               <h3 className="text-lg font-semibold truncate mb-1" title={ebook.metadata.title}>
                 {ebook.metadata.title}
               </h3>

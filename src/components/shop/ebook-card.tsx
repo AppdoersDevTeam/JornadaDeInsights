@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { LazyImage } from './lazy-image';
@@ -12,6 +13,11 @@ export interface Ebook {
   filename: string;
   cover_url?: string;
   created_at?: string;
+  category_id?: string;
+  category?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface EbookCardProps {
@@ -38,6 +44,11 @@ export function EbookCard({ book }: EbookCardProps) {
           />
         </div>
         <div className="p-4 flex flex-col flex-grow">
+          {book.category && (
+            <Badge variant="secondary" className="w-fit mb-2">
+              {book.category.name}
+            </Badge>
+          )}
           <h3 className="font-heading font-medium text-lg mb-1 line-clamp-2 group-hover:text-primary transition-colors">{book.title}</h3>
           <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-grow">{book.description}</p>
         </div>

@@ -7,20 +7,8 @@ import { LazyImage } from '@/components/shop/lazy-image';
 import { AnimatedGridItem } from '@/components/shop/animated-grid-item';
 import { AnimatedCartIcon } from '@/components/shop/animated-cart-icon';
 import { motion, useScroll, useTransform, Variants } from 'framer-motion';
-import { getEbooks } from '@/lib/supabase';
+import { getEbooks, getCategories, type Category } from '@/lib/supabase';
 import { Link } from 'react-router-dom';
-
-// Remove mock data
-// const allEbooks: Ebook[] = [ ... ];
-
-const categories = [
-  "Todos",
-  "Autoajuda",
-  "Produtividade",
-  "Estilo de Vida",
-  "Saúde",
-  "Carreira",
-];
 
 // Add CTA animations
 const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.5 } } };
@@ -50,6 +38,8 @@ export function ShopPage() {
   const [featuredEbook, setFeaturedEbook] = useState<Ebook | null>(null);
   const { totalCount } = useCart();
   const { scrollYProgress } = useScroll();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
 
   // Parallax effect for hero section
   const heroY = useTransform(scrollYProgress, [0, 1], [0, -100]);
@@ -78,17 +68,21 @@ export function ShopPage() {
   }, []);
 
   useEffect(() => {
-    const fetchEbooks = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
-        const data = await getEbooks();
-        setEbooks(data);
-        setFilteredEbooks(data);
+        const [ebooksData, categoriesData] = await Promise.all([
+          getEbooks(),
+          getCategories()
+        ]);
+        setEbooks(ebooksData);
+        setFilteredEbooks(ebooksData);
+        setCategories(categoriesData);
         
         // Select a random ebook for the featured section
-        if (data.length > 0) {
-          const randomIndex = Math.floor(Math.random() * data.length);
-          setFeaturedEbook(data[randomIndex]);
+        if (ebooksData.length > 0) {
+          const randomIndex = Math.floor(Math.random() * ebooksData.length);
+          setFeaturedEbook(ebooksData[randomIndex]);
         }
       } catch (err) {
         setError('Failed to load ebooks. Please try again later.');
@@ -98,17 +92,19 @@ export function ShopPage() {
       }
     };
 
-    fetchEbooks();
+    fetchData();
   }, []);
 
   useEffect(() => {
     const filtered = ebooks.filter((book: Ebook) => {
-      return book.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
              book.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = !selectedCategoryId || book.category_id === selectedCategoryId || book.category?.id === selectedCategoryId;
+      return matchesSearch && matchesCategory;
     });
     
     setFilteredEbooks(filtered);
-  }, [searchQuery, ebooks]);
+  }, [searchQuery, selectedCategoryId, ebooks]);
 
   if (isLoading) {
     return (
@@ -262,8 +258,8 @@ export function ShopPage() {
             <AnimatedCartIcon count={totalCount} />
           </div>
           
-          {/* Search */}
-          <div className="mb-8">
+          {/* Search and Category Filter */}
+          <div className="mb-8 space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
@@ -273,6 +269,25 @@ export function ShopPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-2 w-full rounded-md border border-input bg-background cursor-text"
               />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={selectedCategoryId === '' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedCategoryId('')}
+              >
+                Todos
+              </Button>
+              {categories.map((category) => (
+                <Button
+                  key={category.id}
+                  variant={selectedCategoryId === category.id ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedCategoryId(category.id)}
+                >
+                  {category.name}
+                </Button>
+              ))}
             </div>
           </div>
 

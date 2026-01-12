@@ -37,6 +37,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'react-hot-toast';
 import UploadEbookForm from '@/components/dashboard/upload-ebook-form';
 import EbookList from '@/components/dashboard/ebook-list';
+import { getCategories, createCategory, updateCategory, deleteCategory, type Category } from '@/lib/supabase';
 import { SalesTrendsChart, SalesData } from '@/components/dashboard/sales-trends-chart';
 import { StripeBalanceChart, BalanceData } from '@/components/dashboard/stripe-balance-chart';
 import {
@@ -121,6 +122,11 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   });
   const [balanceData, setBalanceData] = useState<BalanceData[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryName, setCategoryName] = useState('');
+  const [categoryDescription, setCategoryDescription] = useState('');
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
 
   // Constants
   const itemsPerPage = 20; // Show 20 orders per page in completed orders tab
@@ -346,9 +352,26 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       console.error('Error loading users:', err);
     }
   };
+
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      toast.error('Erro ao carregar categorias');
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'users') {
       fetchUsers();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'categories' || activeTab === 'ebooks') {
+      fetchCategories();
     }
   }, [activeTab]);
 
@@ -418,6 +441,71 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     }
   };
 
+  // Category management functions
+  const handleCreateCategory = async () => {
+    if (!categoryName.trim()) {
+      toast.error('Nome da categoria é obrigatório');
+      return;
+    }
+
+    try {
+      await createCategory(categoryName.trim(), categoryDescription.trim() || undefined);
+      toast.success('Categoria criada com sucesso');
+      setCategoryName('');
+      setCategoryDescription('');
+      setCategoryDialogOpen(false);
+      fetchCategories();
+    } catch (error: any) {
+      console.error('Error creating category:', error);
+      toast.error(error.message || 'Erro ao criar categoria');
+    }
+  };
+
+  const handleUpdateCategory = async () => {
+    if (!editingCategory || !categoryName.trim()) {
+      toast.error('Nome da categoria é obrigatório');
+      return;
+    }
+
+    try {
+      await updateCategory(editingCategory.id, categoryName.trim(), categoryDescription.trim() || undefined);
+      toast.success('Categoria atualizada com sucesso');
+      setEditingCategory(null);
+      setCategoryName('');
+      setCategoryDescription('');
+      setCategoryDialogOpen(false);
+      fetchCategories();
+    } catch (error: any) {
+      console.error('Error updating category:', error);
+      toast.error(error.message || 'Erro ao atualizar categoria');
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    try {
+      await deleteCategory(id);
+      toast.success('Categoria deletada com sucesso');
+      fetchCategories();
+    } catch (error: any) {
+      console.error('Error deleting category:', error);
+      toast.error(error.message || 'Erro ao deletar categoria');
+    }
+  };
+
+  const openEditDialog = (category: Category) => {
+    setEditingCategory(category);
+    setCategoryName(category.name);
+    setCategoryDescription(category.description || '');
+    setCategoryDialogOpen(true);
+  };
+
+  const closeCategoryDialog = () => {
+    setCategoryDialogOpen(false);
+    setEditingCategory(null);
+    setCategoryName('');
+    setCategoryDescription('');
+  };
+
   return (
     <div className="p-4 sm:p-6 max-w-full w-full overflow-x-hidden mt-[52px] pt-20 sm:pt-6">
       {/* Header */}
@@ -435,6 +523,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               {activeTab === 'analytics' && 'Análises'}
               {activeTab === 'users' && 'Usuários'}
               {activeTab === 'orders' && 'Pedidos Concluídos'}
+              {activeTab === 'categories' && 'Categorias'}
             </h1>
           )}
         </div>
@@ -589,6 +678,117 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <UploadEbookForm onUploadSuccess={handleUploadSuccess} />
               </div>
             </CardContent>
+          </Card>
+
+          {/* Categories Management Section */}
+          <Card className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-semibold">Gerenciamento de Categorias</h2>
+                <p className="text-sm text-muted-foreground mt-1">Gerencie categorias para organizar seus eBooks</p>
+              </div>
+              <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => { setEditingCategory(null); setCategoryName(''); setCategoryDescription(''); }}>
+                    Nova Categoria
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{editingCategory ? 'Editar Categoria' : 'Nova Categoria'}</DialogTitle>
+                    <DialogDescription>
+                      {editingCategory ? 'Atualize as informações da categoria' : 'Crie uma nova categoria para organizar seus eBooks'}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="categoryName">Nome da Categoria *</Label>
+                      <Input
+                        id="categoryName"
+                        value={categoryName}
+                        onChange={(e) => setCategoryName(e.target.value)}
+                        placeholder="Ex: Autoajuda, Produtividade..."
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="categoryDescription">Descrição (opcional)</Label>
+                      <Textarea
+                        id="categoryDescription"
+                        value={categoryDescription}
+                        onChange={(e) => setCategoryDescription(e.target.value)}
+                        placeholder="Descrição da categoria..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={closeCategoryDialog}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}>
+                      {editingCategory ? 'Atualizar' : 'Criar'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="space-y-4">
+              {categories.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-lg text-muted-foreground">Nenhuma categoria criada ainda.</p>
+                  <p className="text-sm text-muted-foreground mt-2">Clique em "Nova Categoria" para começar.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {categories.map((category) => (
+                    <Card key={category.id} className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg">{category.name}</h3>
+                          {category.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openEditDialog(category)}
+                          className="flex-1"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="destructive" size="sm" className="flex-1">
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Deletar
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Confirmar Exclusão</DialogTitle>
+                              <DialogDescription>
+                                Tem certeza que deseja excluir a categoria "{category.name}"? Esta ação não pode ser desfeita.
+                                Os eBooks nesta categoria não serão deletados, mas perderão a associação com a categoria.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                              <Button variant="outline">Cancelar</Button>
+                              <Button variant="destructive" onClick={() => handleDeleteCategory(category.id)}>
+                                Deletar
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
           </Card>
 
           <Card className="p-6">
@@ -806,6 +1006,117 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <Button variant="outline" disabled={currentPage===totalPages} onClick={()=>setCurrentPage(p=>p+1)}>Próximo</Button>
               </div>
             </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === 'categories' && (
+        <div className="space-y-6 w-full">
+          <Card className="p-6 w-full">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold">Gerenciamento de Categorias</h2>
+              <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => { setEditingCategory(null); setCategoryName(''); setCategoryDescription(''); }}>
+                    Nova Categoria
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{editingCategory ? 'Editar Categoria' : 'Nova Categoria'}</DialogTitle>
+                    <DialogDescription>
+                      {editingCategory ? 'Atualize as informações da categoria' : 'Crie uma nova categoria para organizar seus eBooks'}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="categoryName">Nome da Categoria *</Label>
+                      <Input
+                        id="categoryName"
+                        value={categoryName}
+                        onChange={(e) => setCategoryName(e.target.value)}
+                        placeholder="Ex: Autoajuda, Produtividade..."
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="categoryDescription">Descrição (opcional)</Label>
+                      <Textarea
+                        id="categoryDescription"
+                        value={categoryDescription}
+                        onChange={(e) => setCategoryDescription(e.target.value)}
+                        placeholder="Descrição da categoria..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={closeCategoryDialog}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}>
+                      {editingCategory ? 'Atualizar' : 'Criar'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="space-y-4">
+              {categories.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-lg text-muted-foreground">Nenhuma categoria criada ainda.</p>
+                  <p className="text-sm text-muted-foreground mt-2">Clique em "Nova Categoria" para começar.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {categories.map((category) => (
+                    <Card key={category.id} className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg">{category.name}</h3>
+                          {category.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openEditDialog(category)}
+                          className="flex-1"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="destructive" size="sm" className="flex-1">
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Deletar
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Confirmar Exclusão</DialogTitle>
+                              <DialogDescription>
+                                Tem certeza que deseja excluir a categoria "{category.name}"? Esta ação não pode ser desfeita.
+                                Os eBooks nesta categoria não serão deletados, mas perderão a associação com a categoria.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                              <Button variant="outline">Cancelar</Button>
+                              <Button variant="destructive" onClick={() => handleDeleteCategory(category.id)}>
+                                Deletar
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
           </Card>
         </div>
       )}
