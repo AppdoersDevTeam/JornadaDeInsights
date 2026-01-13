@@ -19,19 +19,19 @@ type YouTubeVideo = {
 const testimonials = [
   {
     id: "1",
-    quote: "O podcast da Patricia transformou minha maneira de entender as Escrituras. Suas reflexões profundas e acessíveis me ajudaram a aplicar a fé no meu dia a dia.",
+    quote: "O podcast da Patricia transformou minha maneira de entender as Escrituras. Suas reflexões profundas e acessíveis me ajudaram a aplicar a fé no meu dia a dia. Estou muito grata por ter encontrado esse conteúdo.",
     author: "Fernanda M.",
     title: "Professora de História"
   },
   {
     id: "2",
-    quote: "O eBook 'Reflexões de Fé' me guiou a enxergar a Bíblia de uma forma nova. Agora, me sinto mais conectada com minha espiritualidade e com mais equilíbrio na vida.",
+    quote: "O eBook 'Reflexões de Fé' me guiou a enxergar a Bíblia de uma forma nova. Agora, me sinto mais conectado com minha espiritualidade e com mais equilíbrio na vida. Recomendo a todos que buscam crescimento espiritual.",
     author: "Lucas P.",
     title: "Empreendedor"
   },
   {
     id: "3",
-    quote: "Acompanho a Patricia há anos. Seus conteúdos sempre trazem sabedoria prática e inspiradora, ajudando-me a crescer na fé e em minha jornada pessoal.",
+    quote: "Acompanho a Patricia há anos. Seus conteúdos sempre trazem sabedoria prática e inspiradora, ajudando-me a crescer na fé e em minha jornada pessoal. Sou muito grata por todo o aprendizado.",
     author: "Juliana R.",
     title: "Coach Espiritual"
   }

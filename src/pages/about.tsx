@@ -588,7 +588,7 @@ export function AboutPage() {
               <div className="text-5xl text-primary/20 absolute top-6 left-6">"</div>
               <div className="relative z-10">
                 <p className="text-lg italic mb-6">
-                  Patricia tem uma habilidade única de transformar conceitos complexos sobre bem-estar em conselhos práticos e acionáveis. Seus episódios de podcast são como conversar com uma amiga sábia, e seus eBooks se tornaram meus recursos essenciais sempre que me sinto sobrecarregada ou fora de equilíbrio.
+                  Patricia tem uma habilidade única de transformar conceitos complexos sobre bem-estar em conselhos práticos e acionáveis. Seus episódios de podcast são como conversar com uma amiga sábia, e seus eBooks se tornaram meus recursos essenciais sempre que me sinto sobrecarregada ou fora de equilíbrio. Sou muito grata por ter encontrado esse conteúdo transformador.
                 </p>
                 <div className="flex items-center">
                   <img 

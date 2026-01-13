@@ -468,7 +468,7 @@ export function ShopPage() {
               viewport={{ amount: 0.3 }}
               className="bg-card rounded-lg shadow-md p-6 border border-border/50"
             >
-              <p className="text-muted-foreground mb-4 italic">"O eBook Digital Detox me ajudou a recuperar o controle sobre o uso do meu smartphone. Agora estou mais produtivo e presente."</p>
+              <p className="text-muted-foreground mb-4 italic">"O eBook Digital Detox me ajudou a recuperar o controle sobre o uso do meu smartphone. Agora estou mais produtivo e presente no meu dia a dia. Recomendo muito!"</p>
               <div>
                 <p className="font-medium">Michael T.</p>
                 <p className="text-sm text-muted-foreground">Engenheiro de Software</p>
@@ -482,7 +482,7 @@ export function ShopPage() {
               viewport={{ amount: 0.3 }}
               className="bg-card rounded-lg shadow-md p-6 border border-border/50"
             >
-              <p className="text-muted-foreground mb-4 italic">"Vida Consciente transformou minha rotina diária. O plano de 30 dias foi fácil de seguir e vi melhorias reais nos meus níveis de estresse."</p>
+              <p className="text-muted-foreground mb-4 italic">"Vida Consciente transformou minha rotina diária. O plano de 30 dias foi fácil de seguir e vi melhorias reais nos meus níveis de estresse. Estou muito satisfeita com os resultados!"</p>
               <div>
                 <p className="font-medium">Jennifer L.</p>
                 <p className="text-sm text-muted-foreground">Diretora de Marketing</p>
@@ -496,7 +496,7 @@ export function ShopPage() {
               viewport={{ amount: 0.3 }}
               className="bg-card rounded-lg shadow-md p-6 border border-border/50"
             >
-              <p className="text-muted-foreground mb-4 italic">"A Arte de Viver em Equilíbrio é agora minha referência sempre que me sinto sobrecarregado. Os conselhos da Patricia são práticos e transformadores."</p>
+              <p className="text-muted-foreground mb-4 italic">"A Arte de Viver em Equilíbrio é agora minha referência sempre que me sinto sobrecarregado. Os conselhos da Patricia são práticos e transformadores. Sou muito grato por esse conteúdo."</p>
               <div>
                 <p className="font-medium">David R.</p>
                 <p className="text-sm text-muted-foreground">Profissional de Saúde</p>
