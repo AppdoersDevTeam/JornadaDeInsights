@@ -4,6 +4,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Quill Editor Styles */
+.quill {
+  background: white;
+  border-radius: 0.5rem;
+}
+
+.ql-container {
+  min-height: 400px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.ql-editor {
+  min-height: 400px;
+}
+
+.ql-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.ql-toolbar {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.ql-container {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
 @layer base {
   :root {
     /* Brand colors */

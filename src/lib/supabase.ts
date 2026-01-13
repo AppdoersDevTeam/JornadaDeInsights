@@ -291,4 +291,366 @@ export const deleteCategory = async (id: string): Promise<void> => {
     console.error('Error deleting category:', error);
     throw error;
   }
+};
+
+// Curiosidades (Blog Posts) management functions
+export interface CuriosidadeCategory {
+  id: string;
+  name: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Curiosidade {
+  id: string;
+  title: string;
+  author: string;
+  category_id: string | null;
+  category?: CuriosidadeCategory | null;
+  body: string;
+  status: 'draft' | 'published';
+  attachments: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export const getCuriosidades = async (includeDrafts: boolean = false): Promise<Curiosidade[]> => {
+  try {
+    // First try with the join, if it fails, try without
+    let query = supabase
+      .from('curiosidades')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!includeDrafts) {
+      query = query.eq('status', 'published');
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    
+    // If we have data, try to fetch categories separately
+    const curiosidadesWithCategories = await Promise.all((data || []).map(async (item: any) => {
+      let category = null;
+      
+      // Try to fetch category if category_id exists
+      if (item.category_id) {
+        try {
+          const { data: catData, error: catError } = await supabase
+            .from('curiosidades_categories')
+            .select('id, name, description')
+            .eq('id', item.category_id)
+            .single();
+          
+          if (!catError && catData) {
+            category = catData;
+          }
+        } catch (err) {
+          // Category table might not exist yet, ignore
+          console.warn('Could not fetch category:', err);
+        }
+      }
+      
+      return {
+        ...item,
+        category,
+        attachments: Array.isArray(item.attachments) ? item.attachments : []
+      };
+    }));
+    
+    return curiosidadesWithCategories;
+  } catch (error) {
+    console.error('Error fetching curiosidades:', error);
+    throw error;
+  }
+};
+
+export const getCuriosidadeById = async (id: string, includeDrafts: boolean = false): Promise<Curiosidade> => {
+  try {
+    let query = supabase
+      .from('curiosidades')
+      .select('*')
+      .eq('id', id);
+
+    if (!includeDrafts) {
+      query = query.eq('status', 'published');
+    }
+
+    const { data, error } = await query.single();
+
+    if (error) throw error;
+    if (!data) throw new Error('Curiosidade not found');
+    
+    // Try to fetch category separately
+    let category = null;
+    if (data.category_id) {
+      try {
+        const { data: catData, error: catError } = await supabase
+          .from('curiosidades_categories')
+          .select('id, name, description')
+          .eq('id', data.category_id)
+          .single();
+        
+        if (!catError && catData) {
+          category = catData;
+        }
+      } catch (err) {
+        // Category table might not exist yet, ignore
+        console.warn('Could not fetch category:', err);
+      }
+    }
+    
+    return {
+      ...data,
+      category,
+      attachments: Array.isArray(data.attachments) ? data.attachments : []
+    };
+  } catch (error) {
+    console.error('Error fetching curiosidade:', error);
+    throw error;
+  }
+};
+
+export const createCuriosidade = async (
+  title: string,
+  author: string,
+  category_id: string | null,
+  body: string,
+  status: 'draft' | 'published' = 'draft',
+  attachments: string[] = []
+): Promise<Curiosidade> => {
+  try {
+    const { data, error } = await supabase
+      .from('curiosidades')
+      .insert({ 
+        title, 
+        author, 
+        category_id, 
+        body, 
+        status,
+        attachments: attachments.length > 0 ? attachments : []
+      })
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    
+    // Try to fetch category separately
+    let category = null;
+    if (data.category_id) {
+      try {
+        const { data: catData, error: catError } = await supabase
+          .from('curiosidades_categories')
+          .select('id, name, description')
+          .eq('id', data.category_id)
+          .single();
+        
+        if (!catError && catData) {
+          category = catData;
+        }
+      } catch (err) {
+        // Category table might not exist yet, ignore
+        console.warn('Could not fetch category:', err);
+      }
+    }
+    
+    return {
+      ...data,
+      category,
+      attachments: Array.isArray(data.attachments) ? data.attachments : []
+    };
+  } catch (error) {
+    console.error('Error creating curiosidade:', error);
+    throw error;
+  }
+};
+
+export const updateCuriosidade = async (
+  id: string,
+  title: string,
+  author: string,
+  category_id: string | null,
+  body: string,
+  status: 'draft' | 'published' = 'draft',
+  attachments: string[] = []
+): Promise<Curiosidade> => {
+  try {
+    const { data, error } = await supabase
+      .from('curiosidades')
+      .update({ 
+        title, 
+        author, 
+        category_id, 
+        body, 
+        status,
+        attachments: attachments.length > 0 ? attachments : [],
+        updated_at: new Date().toISOString() 
+      })
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    
+    // Try to fetch category separately
+    let category = null;
+    if (data.category_id) {
+      try {
+        const { data: catData, error: catError } = await supabase
+          .from('curiosidades_categories')
+          .select('id, name, description')
+          .eq('id', data.category_id)
+          .single();
+        
+        if (!catError && catData) {
+          category = catData;
+        }
+      } catch (err) {
+        // Category table might not exist yet, ignore
+        console.warn('Could not fetch category:', err);
+      }
+    }
+    
+    return {
+      ...data,
+      category,
+      attachments: Array.isArray(data.attachments) ? data.attachments : []
+    };
+  } catch (error) {
+    console.error('Error updating curiosidade:', error);
+    throw error;
+  }
+};
+
+// Upload attachment file to Supabase storage
+export const uploadAttachment = async (file: File, curiosidadeId: string): Promise<string> => {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${curiosidadeId}/${Date.now()}.${fileExt}`;
+    const filePath = `curiosidades-attachments/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('store-assets')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('store-assets')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  } catch (error) {
+    console.error('Error uploading attachment:', error);
+    throw error;
+  }
+};
+
+export const deleteCuriosidade = async (id: string): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('curiosidades')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error deleting curiosidade:', error);
+    throw error;
+  }
+};
+
+// Curiosidades Categories management functions
+export const getCuriosidadesCategories = async (): Promise<CuriosidadeCategory[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('curiosidades_categories')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) {
+      // If table doesn't exist yet, return empty array
+      if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+        console.warn('curiosidades_categories table does not exist yet');
+        return [];
+      }
+      throw error;
+    }
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching curiosidades categories:', error);
+    // Return empty array if table doesn't exist
+    if (error instanceof Error && (error.message?.includes('does not exist') || error.message?.includes('relation'))) {
+      return [];
+    }
+    throw error;
+  }
+};
+
+export const createCuriosidadesCategory = async (name: string, description?: string): Promise<CuriosidadeCategory> => {
+  try {
+    const { data, error } = await supabase
+      .from('curiosidades_categories')
+      .insert({ name, description })
+      .select()
+      .single();
+
+    if (error) {
+      // Check if table doesn't exist
+      if (error.code === 'PGRST116' || error.message?.includes('does not exist') || error.message?.includes('relation')) {
+        throw new Error('A tabela de categorias ainda não foi criada. Por favor, execute a migração 20241202000002_add_curiosidades_categories.sql no Supabase.');
+      }
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error('Error creating curiosidades category:', error);
+    throw error;
+  }
+};
+
+export const updateCuriosidadesCategory = async (id: string, name: string, description?: string): Promise<CuriosidadeCategory> => {
+  try {
+    const { data, error } = await supabase
+      .from('curiosidades_categories')
+      .update({ name, description, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116' || error.message?.includes('does not exist') || error.message?.includes('relation')) {
+        throw new Error('A tabela de categorias ainda não foi criada. Por favor, execute a migração 20241202000002_add_curiosidades_categories.sql no Supabase.');
+      }
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error('Error updating curiosidades category:', error);
+    throw error;
+  }
+};
+
+export const deleteCuriosidadesCategory = async (id: string): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('curiosidades_categories')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      if (error.code === 'PGRST116' || error.message?.includes('does not exist') || error.message?.includes('relation')) {
+        throw new Error('A tabela de categorias ainda não foi criada. Por favor, execute a migração 20241202000002_add_curiosidades_categories.sql no Supabase.');
+      }
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error deleting curiosidades category:', error);
+    throw error;
+  }
 }; 

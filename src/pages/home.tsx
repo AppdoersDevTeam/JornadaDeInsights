@@ -5,7 +5,8 @@ import { EbookCard, type Ebook } from '@/components/shop/ebook-card';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import plogo from '@/plogo.png';
-import { getEbooks } from '@/lib/supabase';
+import { getEbooks, getCuriosidades, type Curiosidade } from '@/lib/supabase';
+import { CuriosidadeCard } from '@/components/curiosidades/curiosidade-card';
 import { decode } from 'html-entities';
 import { needsIOSVideoFix, getYouTubeEmbedUrl, handleIframeLoad, reloadIframeForIOS } from '@/lib/device-utils';
 
@@ -78,6 +79,8 @@ export function HomePage() {
   const [featuredEbooks, setFeaturedEbooks] = useState<Ebook[]>([]);
   const [isLoadingEbooks, setIsLoadingEbooks] = useState(true);
   const [isHeroPlaying, setIsHeroPlaying] = useState(false);
+  const [curiosidades, setCuriosidades] = useState<Curiosidade[]>([]);
+  const [isLoadingCuriosidades, setIsLoadingCuriosidades] = useState(true);
 
   // Enhanced play handler for iOS compatibility
   const handleVideoPlay = (setPlaying: (playing: boolean) => void) => {
@@ -98,7 +101,20 @@ export function HomePage() {
       }
     };
 
+    // Fetch curiosidades
+    const fetchCuriosidades = async () => {
+      try {
+        const data = await getCuriosidades();
+        setCuriosidades(data.slice(0, 3)); // Show only the 3 most recent
+      } catch (error) {
+        console.error('Error fetching curiosidades:', error);
+      } finally {
+        setIsLoadingCuriosidades(false);
+      }
+    };
+
     fetchEbooks();
+    fetchCuriosidades();
   }, []);
 
   useEffect(() => {
@@ -539,6 +555,49 @@ export function HomePage() {
                 </div>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Curiosidades Section */}
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ amount: 0.3 }}
+        className="py-16 bg-muted/30"
+      >
+        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold">Curiosidades</h2>
+            {curiosidades.length > 0 && (
+              <Button variant="ghost" asChild>
+                <Link to="/curiosidades" className="flex items-center">
+                  Ver Todas <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            )}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {isLoadingCuriosidades ? (
+              Array(3).fill(0).map((_, i) => (
+                <div key={i} className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 animate-pulse">
+                  <div className="p-6">
+                    <div className="h-4 w-3/4 bg-muted rounded mb-2" />
+                    <div className="h-4 w-1/2 bg-muted rounded mb-4" />
+                    <div className="h-20 bg-muted rounded" />
+                  </div>
+                </div>
+              ))
+            ) : curiosidades.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-lg text-muted-foreground">Nenhuma curiosidade disponível ainda.</p>
+              </div>
+            ) : (
+              curiosidades.map((curiosidade) => (
+                <CuriosidadeCard key={curiosidade.id} curiosidade={curiosidade} />
+              ))
+            )}
           </div>
         </div>
       </motion.section>

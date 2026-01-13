@@ -6,7 +6,8 @@ import {
   Users, 
   Settings,
   ShoppingCart,
-  Tag
+  Tag,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TabType } from '@/types/dashboard';
@@ -64,12 +65,12 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
           Pedidos Concluídos
         </Button>
         <Button
-          variant={activeTab === 'categories' ? 'secondary' : 'ghost'}
+          variant={activeTab === 'curiosidades' ? 'secondary' : 'ghost'}
           className="w-full justify-start"
-          onClick={() => onTabChange('categories')}
+          onClick={() => onTabChange('curiosidades')}
         >
-          <Tag className="mr-2 h-4 w-4" />
-          Categorias
+          <BookOpen className="mr-2 h-4 w-4" />
+          Curiosidades
         </Button>
       </nav>
     </div>

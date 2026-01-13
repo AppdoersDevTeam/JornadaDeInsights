@@ -25,6 +25,9 @@ import { AuthProvider } from '@/context/auth-context';
 import { EbookDetailsPage } from '@/pages/ebook-details';
 import { TermsPage } from '@/pages/terms';
 import { PrivacyPage } from '@/pages/privacy';
+import { CuriosidadesPage } from '@/pages/curiosidades';
+import { CuriosidadeDetailsPage } from '@/pages/curiosidade-details';
+import { CuriosidadeEditorPage } from '@/pages/curiosidade-editor';
 import { TabType } from '@/types/dashboard';
 
 function App() {
@@ -66,6 +69,8 @@ function App() {
             <Route path="terms" element={<TermsPage />} />
             <Route path="privacy" element={<PrivacyPage />} />
             <Route path="shop/ebook/:id" element={<EbookDetailsPage />} />
+            <Route path="curiosidades" element={<CuriosidadesPage />} />
+            <Route path="curiosidades/:id" element={<CuriosidadeDetailsPage />} />
             <Route path="signin" element={<SignIn />} />
             <Route path="signup" element={<SignUp />} />
             <Route path="check-email" element={<CheckEmailPage />} />
@@ -82,6 +87,19 @@ function App() {
               }
             >
               <DashboardPage activeTab={activeTab} onTabChange={handleTabChange} />
+            </AdminLayout>
+          } />
+          
+          <Route path="/dashboard/curiosidades/:id?" element={
+            <AdminLayout 
+              sidePanel={
+                <DashboardSidePanel 
+                  activeTab={activeTab} 
+                  onTabChange={handleTabChange} 
+                />
+              }
+            >
+              <CuriosidadeEditorPage />
             </AdminLayout>
           } />
 

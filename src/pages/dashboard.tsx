@@ -37,6 +37,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'react-hot-toast';
 import UploadEbookForm from '@/components/dashboard/upload-ebook-form';
 import EbookList from '@/components/dashboard/ebook-list';
+import CuriosidadesList from '@/components/dashboard/curiosidades-list';
 import { getCategories, createCategory, updateCategory, deleteCategory, type Category } from '@/lib/supabase';
 import { SalesTrendsChart, SalesData } from '@/components/dashboard/sales-trends-chart';
 import { StripeBalanceChart, BalanceData } from '@/components/dashboard/stripe-balance-chart';
@@ -523,7 +524,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               {activeTab === 'analytics' && 'Análises'}
               {activeTab === 'users' && 'Usuários'}
               {activeTab === 'orders' && 'Pedidos Concluídos'}
-              {activeTab === 'categories' && 'Categorias'}
+              {activeTab === 'curiosidades' && 'Curiosidades'}
             </h1>
           )}
         </div>
@@ -1010,114 +1011,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         </div>
       )}
 
-      {activeTab === 'categories' && (
+      {activeTab === 'curiosidades' && (
         <div className="space-y-6 w-full">
-          <Card className="p-6 w-full">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Gerenciamento de Categorias</h2>
-              <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button onClick={() => { setEditingCategory(null); setCategoryName(''); setCategoryDescription(''); }}>
-                    Nova Categoria
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>{editingCategory ? 'Editar Categoria' : 'Nova Categoria'}</DialogTitle>
-                    <DialogDescription>
-                      {editingCategory ? 'Atualize as informações da categoria' : 'Crie uma nova categoria para organizar seus eBooks'}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="categoryName">Nome da Categoria *</Label>
-                      <Input
-                        id="categoryName"
-                        value={categoryName}
-                        onChange={(e) => setCategoryName(e.target.value)}
-                        placeholder="Ex: Autoajuda, Produtividade..."
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="categoryDescription">Descrição (opcional)</Label>
-                      <Textarea
-                        id="categoryDescription"
-                        value={categoryDescription}
-                        onChange={(e) => setCategoryDescription(e.target.value)}
-                        placeholder="Descrição da categoria..."
-                        rows={3}
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={closeCategoryDialog}>
-                      Cancelar
-                    </Button>
-                    <Button onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}>
-                      {editingCategory ? 'Atualizar' : 'Criar'}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <div className="space-y-4">
-              {categories.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">Nenhuma categoria criada ainda.</p>
-                  <p className="text-sm text-muted-foreground mt-2">Clique em "Nova Categoria" para começar.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {categories.map((category) => (
-                    <Card key={category.id} className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{category.name}</h3>
-                          {category.description && (
-                            <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex gap-2 mt-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEditDialog(category)}
-                          className="flex-1"
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Editar
-                        </Button>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="destructive" size="sm" className="flex-1">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Deletar
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Confirmar Exclusão</DialogTitle>
-                              <DialogDescription>
-                                Tem certeza que deseja excluir a categoria "{category.name}"? Esta ação não pode ser desfeita.
-                                Os eBooks nesta categoria não serão deletados, mas perderão a associação com a categoria.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                              <Button variant="outline">Cancelar</Button>
-                              <Button variant="destructive" onClick={() => handleDeleteCategory(category.id)}>
-                                Deletar
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          </Card>
+          <CuriosidadesList />
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Headphones, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart, Info } from 'lucide-react';
+import { Menu, X, Headphones, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart, Info, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'firebase/auth';
@@ -65,6 +65,7 @@ export function AdminHeader() {
     { to: '/', label: 'Início' },
     { to: '/about', label: 'Sobre' },
     { to: '/podcast', label: 'Podcast' },
+    { to: '/curiosidades', label: 'Curiosidades' },
     { to: '/shop', label: 'Loja' },
     { to: '/contact', label: 'Contato' }
   ];
@@ -79,33 +80,34 @@ export function AdminHeader() {
           </Link>
         </div>
         {/* Center: Nav Links */}
-        <nav className="flex-1 hidden md:flex justify-center gap-8">
-          <Link 
-            to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email) ? "/dashboard" : "/user-dashboard"} 
-            className="text-base text-background font-normal hover:text-secondary transition-colors"
-          >
-            Dashboard
-          </Link>
+        <nav className="flex-1 hidden md:flex justify-center items-center gap-3 md:gap-4 lg:gap-5 xl:gap-6">
           {mainLinks.map((link) => (
             <Link 
               key={link.to}
               to={link.to} 
-              className="text-base text-background font-normal hover:text-secondary transition-colors"
+              className="text-sm md:text-base lg:text-lg text-background font-normal hover:text-secondary transition-colors whitespace-nowrap"
             >
               {link.label}
             </Link>
           ))}
         </nav>
         {/* Right: Actions */}
-        <div className="flex-1 hidden md:flex justify-end items-center gap-4">
+        <div className="flex-1 hidden md:flex justify-end items-center gap-2">
           {user ? (
-            <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="text-secondary border-background hover:bg-background/10">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sair
-                </Button>
-              </DialogTrigger>
+            <>
+              <Button variant="outline" asChild size="sm" className="text-secondary border-background hover:bg-background/10">
+                <Link to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email) ? "/dashboard" : "/user-dashboard"}>
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Link>
+              </Button>
+              <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-secondary border-background hover:bg-background/10">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sair
+                  </Button>
+                </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Confirmar saída</DialogTitle>
@@ -122,7 +124,8 @@ export function AdminHeader() {
                   </Button>
                 </div>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+            </>
           ) : (
             <Link to="/signin">
               <Button variant="outline" className="text-secondary border-background hover:bg-background/10">
@@ -148,19 +151,25 @@ export function AdminHeader() {
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-2 items-start">
-          {/* Dashboard Dropdown */}
-          <button
-            onClick={() => setIsDashboardOpen(!isDashboardOpen)}
-            className="flex items-center justify-between w-full text-lg px-4 py-3 rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+          {/* Dashboard Link */}
+          <Link
+            to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email) ? "/dashboard" : "/user-dashboard"}
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+            onClick={closeMenu}
           >
-            <div className="flex items-center gap-3">
-              <LayoutDashboard className="h-5 w-5" />
-              <span>Dashboard</span>
-            </div>
-            {isDashboardOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-          </button>
+            <LayoutDashboard className="h-5 w-5" />
+            Dashboard
+          </Link>
           
           {/* Dashboard Links Dropdown */}
+          <button
+            onClick={() => setIsDashboardOpen(!isDashboardOpen)}
+            className="flex items-center justify-between w-full text-base px-4 py-2 rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+          >
+            <span className="pl-8">Menu do Dashboard</span>
+            {isDashboardOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
+          
           <div className={cn(
             "w-full flex flex-col gap-2 pl-12 overflow-hidden transition-all duration-300",
             isDashboardOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
@@ -205,6 +214,14 @@ export function AdminHeader() {
           >
             <Mic className="h-5 w-5" />
             Podcast
+          </Link>
+          <Link
+            to="/curiosidades"
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+            onClick={closeMenu}
+          >
+            <BookOpen className="h-5 w-5" />
+            Curiosidades
           </Link>
           <Link
             to="/shop"

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, Headphones, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, LogOut } from 'lucide-react';
+import { Menu, X, Headphones, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, LogOut, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
@@ -26,16 +26,17 @@ export function Header() {
   }, []);
 
   const navLinks = user ? [
-    { to: '/dashboard', label: 'Dashboard' },
     { to: '/', label: 'Home' },
     { to: '/about', label: 'Sobre' },
     { to: '/podcast', label: 'Podcast' },
+    { to: '/curiosidades', label: 'Curiosidades' },
     { to: '/shop', label: 'Store' },
     { to: '/contact', label: 'Contato' }
   ] : [
     { to: '/', label: 'Início' },
     { to: '/about', label: 'Sobre' },
     { to: '/podcast', label: 'Podcast' },
+    { to: '/curiosidades', label: 'Curiosidades' },
     { to: '/shop', label: 'Loja' },
     { to: '/contact', label: 'Contato' }
   ];
@@ -53,23 +54,29 @@ export function Header() {
           </Link>
         </div>
         {/* Center: Nav Links */}
-        <nav className="flex-1 hidden md:flex justify-center gap-8">
+        <nav className="flex-1 hidden md:flex justify-center items-center gap-3 md:gap-4 lg:gap-5 xl:gap-6">
           {navLinks.map((link) => (
             <NavLink 
               key={link.to}
               to={link.to} 
               end={link.to === '/'}
-              className="text-base text-background font-normal hover:text-secondary transition-colors"
+              className="text-sm md:text-base lg:text-lg text-background font-normal hover:text-secondary transition-colors whitespace-nowrap"
             >
               {link.label}
             </NavLink>
           ))}
         </nav>
         {/* Right: Actions */}
-        <div className="flex-1 hidden md:flex justify-end items-center gap-4">
+        <div className="flex-1 hidden md:flex justify-end items-center gap-2">
           {user ? (
             <>
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild size="sm">
+                <Link to="/dashboard">
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Link>
+              </Button>
+              <Button variant="outline" asChild size="sm">
                 <Link to="/shop">Adquirir Meus eBooks</Link>
               </Button>
               <div className="flex items-center gap-2">
@@ -121,6 +128,24 @@ export function Header() {
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-4 items-start">
+          {/* Dashboard Link for logged-in users */}
+          {user && (
+            <NavLink
+              to="/dashboard"
+              className={({ isActive }) =>
+                `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
+                  isActive
+                    ? 'bg-[#606C38] text-white'
+                    : 'hover:bg-[#606C38] hover:text-white'
+                }`
+              }
+              onClick={closeMenu}
+            >
+              <LayoutDashboard className="h-5 w-5" />
+              Dashboard
+            </NavLink>
+          )}
+
           {/* Main Navigation Links */}
           {navLinks.map((link) => (
             <NavLink
@@ -139,9 +164,9 @@ export function Header() {
               {link.to === '/' && <Home className="h-5 w-5" />}
               {link.to === '/about' && <Info className="h-5 w-5" />}
               {link.to === '/podcast' && <Mic className="h-5 w-5" />}
+              {link.to === '/curiosidades' && <BookOpen className="h-5 w-5" />}
               {link.to === '/shop' && <ShoppingBag className="h-5 w-5" />}
               {link.to === '/contact' && <Mail className="h-5 w-5" />}
-              {link.to === '/dashboard' && <LayoutDashboard className="h-5 w-5" />}
               {link.label}
             </NavLink>
           ))}
