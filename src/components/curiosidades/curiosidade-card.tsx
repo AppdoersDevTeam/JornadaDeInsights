@@ -31,6 +31,15 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
       viewport={{ amount: 0.3 }}
       className="bg-card rounded-lg shadow-md overflow-hidden border border-border/50 hover:shadow-xl transition-shadow"
     >
+      {curiosidade.cover_image && (
+        <div className="w-full h-48 overflow-hidden">
+          <img 
+            src={curiosidade.cover_image} 
+            alt={curiosidade.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
       <div className="p-6">
         <div className="flex flex-wrap gap-2 mb-3">
           {curiosidade.category && (

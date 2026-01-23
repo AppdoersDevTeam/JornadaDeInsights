@@ -85,25 +85,35 @@ export function CuriosidadeDetailsPage() {
             </Link>
           </Button>
 
-          <article className="bg-card rounded-lg shadow-md border border-border/50 p-8 overflow-hidden">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {curiosidade.category && (
-                <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded">
-                  {curiosidade.category.name}
+          <article className="bg-card rounded-lg shadow-md border border-border/50 overflow-hidden">
+            {curiosidade.cover_image && (
+              <div className="w-full h-64 md:h-96 overflow-hidden">
+                <img 
+                  src={curiosidade.cover_image} 
+                  alt={curiosidade.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <div className="p-8">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {curiosidade.category && (
+                  <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded">
+                    {curiosidade.category.name}
+                  </span>
+                )}
+                <span className="text-sm text-muted-foreground">
+                  {formatDate(curiosidade.created_at)}
                 </span>
-              )}
-              <span className="text-sm text-muted-foreground">
-                {formatDate(curiosidade.created_at)}
-              </span>
-            </div>
+              </div>
 
-            <h1 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-              {curiosidade.title}
-            </h1>
+              <h1 className="font-heading text-3xl md:text-4xl font-bold mb-4">
+                {curiosidade.title}
+              </h1>
 
-            <p className="text-muted-foreground mb-8">
-              Por: <span className="font-medium">{curiosidade.author}</span>
-            </p>
+              <p className="text-muted-foreground mb-8">
+                Por: <span className="font-medium">{curiosidade.author}</span>
+              </p>
 
             <div 
               className="curiosidade-content text-muted-foreground overflow-wrap break-words"
@@ -147,6 +157,7 @@ export function CuriosidadeDetailsPage() {
                 margin-bottom: 0.5rem;
               }
             `}</style>
+            </div>
           </article>
         </motion.div>
       </div>

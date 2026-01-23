@@ -311,6 +311,7 @@ export interface Curiosidade {
   body: string;
   status: 'draft' | 'published';
   attachments: string[];
+  cover_image: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -419,7 +420,8 @@ export const createCuriosidade = async (
   category_id: string | null,
   body: string,
   status: 'draft' | 'published' = 'draft',
-  attachments: string[] = []
+  attachments: string[] = [],
+  cover_image: string | null = null
 ): Promise<Curiosidade> => {
   try {
     const { data, error } = await supabase
@@ -430,7 +432,8 @@ export const createCuriosidade = async (
         category_id, 
         body, 
         status,
-        attachments: attachments.length > 0 ? attachments : []
+        attachments: attachments.length > 0 ? attachments : [],
+        cover_image
       })
       .select('*')
       .single();
@@ -474,7 +477,8 @@ export const updateCuriosidade = async (
   category_id: string | null,
   body: string,
   status: 'draft' | 'published' = 'draft',
-  attachments: string[] = []
+  attachments: string[] = [],
+  cover_image: string | null = null
 ): Promise<Curiosidade> => {
   try {
     const { data, error } = await supabase
@@ -486,6 +490,7 @@ export const updateCuriosidade = async (
         body, 
         status,
         attachments: attachments.length > 0 ? attachments : [],
+        cover_image,
         updated_at: new Date().toISOString() 
       })
       .eq('id', id)
@@ -547,6 +552,33 @@ export const uploadAttachment = async (file: File, curiosidadeId: string): Promi
     return publicUrl;
   } catch (error) {
     console.error('Error uploading attachment:', error);
+    throw error;
+  }
+};
+
+// Upload cover image to Supabase storage
+export const uploadCoverImage = async (file: File, curiosidadeId: string): Promise<string> => {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${curiosidadeId}/cover-${Date.now()}.${fileExt}`;
+    const filePath = `curiosidades-covers/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('store-assets')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('store-assets')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  } catch (error) {
+    console.error('Error uploading cover image:', error);
     throw error;
   }
 };

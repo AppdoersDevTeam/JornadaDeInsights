@@ -8,6 +8,7 @@ import {
   createCuriosidade, 
   updateCuriosidade,
   uploadAttachment,
+  uploadCoverImage,
   getCuriosidadesCategories,
   type Curiosidade,
   type CuriosidadeCategory
@@ -17,13 +18,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Save, Eye, Upload, X, File } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Upload, X, File, Image as ImageIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export function CuriosidadeEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverImageInputRef = useRef<HTMLInputElement>(null);
   
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -31,10 +33,12 @@ export function CuriosidadeEditorPage() {
   const [body, setBody] = useState('');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [attachments, setAttachments] = useState<string[]>([]);
+  const [coverImage, setCoverImage] = useState<string | null>(null);
   const [categories, setCategories] = useState<CuriosidadeCategory[]>([]);
   const [loading, setLoading] = useState(!!id);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -64,6 +68,7 @@ export function CuriosidadeEditorPage() {
       setBody(data.body);
       setStatus(data.status || 'draft');
       setAttachments(data.attachments || []);
+      setCoverImage(data.cover_image || null);
     } catch (error) {
       console.error('Error loading curiosidade:', error);
       toast.error('Erro ao carregar curiosidade');
@@ -104,7 +109,8 @@ export function CuriosidadeEditorPage() {
           finalCategoryId,
           body.trim(),
           newStatus,
-          attachments
+          attachments,
+          coverImage
         );
         toast.success(publish ? 'Curiosidade publicada com sucesso!' : 'Rascunho salvo com sucesso!');
       } else {
@@ -114,7 +120,8 @@ export function CuriosidadeEditorPage() {
           finalCategoryId,
           body.trim(),
           newStatus,
-          attachments
+          attachments,
+          coverImage
         );
         toast.success(publish ? 'Curiosidade publicada com sucesso!' : 'Rascunho salvo com sucesso!');
         navigate(`/dashboard/curiosidades/${newCuriosidade.id}`);
@@ -164,6 +171,52 @@ export function CuriosidadeEditorPage() {
 
   const removeAttachment = (index: number) => {
     setAttachments(attachments.filter((_, i) => i !== index));
+  };
+
+  const handleCoverImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor, selecione um arquivo de imagem');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('A imagem deve ter no máximo 5MB');
+      return;
+    }
+
+    try {
+      setUploadingCover(true);
+      
+      // If we have an ID, upload to that curiosidade, otherwise create a temp one
+      if (id) {
+        const url = await uploadCoverImage(file, id);
+        setCoverImage(url);
+        toast.success('Imagem de capa adicionada com sucesso!');
+      } else {
+        toast.error('Salve o rascunho primeiro antes de adicionar uma imagem de capa');
+      }
+      
+      // Reset file input
+      if (coverImageInputRef.current) {
+        coverImageInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Error uploading cover image:', error);
+      if (!error.message?.includes('Save draft first')) {
+        toast.error('Erro ao fazer upload da imagem de capa');
+      }
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
+  const removeCoverImage = () => {
+    setCoverImage(null);
   };
 
   const quillModules = {
@@ -247,6 +300,67 @@ export function CuriosidadeEditorPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <Label>Imagem de Capa</Label>
+              <div className="mt-2 space-y-4">
+                {coverImage ? (
+                  <div className="relative">
+                    <img 
+                      src={coverImage} 
+                      alt="Cover" 
+                      className="w-full h-64 object-cover rounded-lg border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={removeCoverImage}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Remover
+                    </Button>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      ref={coverImageInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverImageUpload}
+                      className="hidden"
+                      id="cover-image-upload"
+                      disabled={!id || uploadingCover}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (!id) {
+                          toast.error('Salve o rascunho primeiro antes de adicionar uma imagem de capa');
+                          return;
+                        }
+                        coverImageInputRef.current?.click();
+                      }}
+                      disabled={!id || uploadingCover}
+                    >
+                      <ImageIcon className="h-4 w-4 mr-2" />
+                      {uploadingCover ? 'Enviando...' : 'Adicionar Imagem de Capa'}
+                    </Button>
+                    {!id && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Salve o rascunho primeiro para adicionar uma imagem de capa
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
