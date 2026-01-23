@@ -46,68 +46,74 @@ export function Header() {
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 bg-primary",
       scrolled ? "shadow-sm" : ""
     )}>
-      <div className="container mx-auto px-4 flex items-center">
+      <div className="container mx-auto px-2 sm:px-4 flex items-center gap-2 sm:gap-4">
         {/* Left: Logo */}
-        <div className="flex-1 flex items-center">
+        <div className="flex-shrink-0 flex items-center min-w-0">
           <Link to="/" className="flex items-center">
-            <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
+            <img src={jornadaLogo} alt="Jornada de Insights" className="h-8 sm:h-10 lg:h-12 w-auto" />
           </Link>
         </div>
         {/* Center: Nav Links */}
-        <nav className="flex-1 hidden md:flex justify-center items-center gap-3 md:gap-4 lg:gap-5 xl:gap-6">
+        <nav className="hidden lg:flex flex-1 justify-center items-center gap-2 xl:gap-4 min-w-0">
           {navLinks.map((link) => (
             <NavLink 
               key={link.to}
               to={link.to} 
               end={link.to === '/'}
-              className="text-sm md:text-base lg:text-lg text-background font-normal hover:text-secondary transition-colors whitespace-nowrap"
+              className="text-sm xl:text-base text-background font-normal hover:text-secondary transition-colors whitespace-nowrap px-1"
             >
               {link.label}
             </NavLink>
           ))}
         </nav>
         {/* Right: Actions */}
-        <div className="flex-1 hidden md:flex justify-end items-center gap-2">
+        <div className="hidden lg:flex flex-shrink-0 justify-end items-center gap-2 xl:gap-3">
           {user ? (
             <>
-              <Button variant="outline" asChild size="sm">
-                <Link to="/dashboard">
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
-                  Dashboard
+              <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
+                <Link to="/dashboard" className="flex items-center gap-1.5 xl:gap-2">
+                  <LayoutDashboard className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0" />
+                  <span className="text-xs xl:text-sm font-medium">Dashboard</span>
                 </Link>
               </Button>
-              <Button variant="outline" asChild size="sm">
-                <Link to="/shop">Adquirir Meus eBooks</Link>
+              <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 whitespace-nowrap px-2 xl:px-3">
+                <Link to="/shop" className="text-xs xl:text-sm font-medium">
+                  <span className="hidden xl:inline">Adquirir Meus eBooks</span>
+                  <span className="xl:hidden">eBooks</span>
+                </Link>
               </Button>
-              <div className="flex items-center gap-2">
-                <Link to="/dashboard?tab=cart" className="relative p-2 rounded-full hover:bg-background/10 transition-colors">
-                  <ShoppingCart className="h-6 w-6 text-background" />
+              <div className="flex items-center gap-1 xl:gap-2">
+                <Link to="/dashboard?tab=cart" className="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
+                  <ShoppingCart className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
                   {totalCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
                       {totalCount}
                     </span>
                   )}
                 </Link>
-                <Link to="/dashboard" className="p-2 rounded-full hover:bg-background/10 transition-colors">
-                  <User className="h-6 w-6 text-background" />
+                <Link to="/dashboard" className="p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
+                  <User className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
                 </Link>
               </div>
             </>
           ) : (
             <>
-              <Button variant="outline" asChild>
-                <Link to="/shop">Adquirir Meus eBooks</Link>
+              <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 whitespace-nowrap px-2 xl:px-3">
+                <Link to="/shop" className="text-xs xl:text-sm font-medium">
+                  <span className="hidden xl:inline">Adquirir Meus eBooks</span>
+                  <span className="xl:hidden">eBooks</span>
+                </Link>
               </Button>
-              <Link to="/cart" className="relative p-2 rounded-full hover:bg-background/10 transition-colors">
-                <ShoppingCart className="h-6 w-6 text-background" />
+              <Link to="/cart" className="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
+                <ShoppingCart className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
                 {totalCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
                     {totalCount}
                   </span>
                 )}
               </Link>
-              <Link to="/signin" className="p-2 rounded-full hover:bg-background/10 transition-colors">
-                <User className="h-6 w-6 text-background" />
+              <Link to="/signin" className="p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
+                <User className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
               </Link>
             </>
           )}
@@ -115,7 +121,7 @@ export function Header() {
         {/* Mobile Menu Toggle */}
         <button 
           onClick={toggleMenu}
-          className="md:hidden text-foreground p-2 bg-background rounded-full shadow ml-auto"
+          className="lg:hidden text-foreground p-2 bg-background rounded-full shadow flex-shrink-0 ml-auto"
           aria-label="Toggle menu"
         >
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -124,7 +130,7 @@ export function Header() {
 
       {/* Mobile Navigation */}
       <div className={cn(
-        "fixed inset-0 top-[72px] bg-white z-50 transform transition-transform duration-300 ease-in-out md:hidden overflow-y-auto h-[calc(100vh-72px)]",
+        "fixed inset-0 top-[72px] bg-white z-50 transform transition-transform duration-300 ease-in-out lg:hidden overflow-y-auto h-[calc(100vh-72px)]",
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-4 items-start">

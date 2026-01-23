@@ -72,40 +72,40 @@ export function AdminHeader() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-primary py-4">
-      <div className="container mx-auto px-4 flex items-center">
+      <div className="container mx-auto px-2 sm:px-4 flex items-center gap-2 sm:gap-4">
         {/* Left: Logo */}
-        <div className="flex-1 flex items-center">
+        <div className="flex-shrink-0 flex items-center min-w-0">
           <Link to="/" className="flex items-center">
-            <img src={jornadaLogo} alt="Jornada de Insights" className="h-12 w-auto" />
+            <img src={jornadaLogo} alt="Jornada de Insights" className="h-8 sm:h-10 lg:h-12 w-auto" />
           </Link>
         </div>
         {/* Center: Nav Links */}
-        <nav className="flex-1 hidden md:flex justify-center items-center gap-3 md:gap-4 lg:gap-5 xl:gap-6">
+        <nav className="hidden lg:flex flex-1 justify-center items-center gap-2 xl:gap-4 min-w-0">
           {mainLinks.map((link) => (
             <Link 
               key={link.to}
               to={link.to} 
-              className="text-sm md:text-base lg:text-lg text-background font-normal hover:text-secondary transition-colors whitespace-nowrap"
+              className="text-sm xl:text-base text-background font-normal hover:text-secondary transition-colors whitespace-nowrap px-1"
             >
               {link.label}
             </Link>
           ))}
         </nav>
         {/* Right: Actions */}
-        <div className="flex-1 hidden md:flex justify-end items-center gap-2">
+        <div className="hidden lg:flex flex-shrink-0 justify-end items-center gap-2 xl:gap-3">
           {user ? (
             <>
-              <Button variant="outline" asChild size="sm" className="text-secondary border-background hover:bg-background/10">
-                <Link to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email) ? "/dashboard" : "/user-dashboard"}>
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
-                  Dashboard
+              <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
+                <Link to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email) ? "/dashboard" : "/user-dashboard"} className="flex items-center gap-1.5 xl:gap-2">
+                  <LayoutDashboard className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0" />
+                  <span className="text-xs xl:text-sm font-medium">Dashboard</span>
                 </Link>
               </Button>
               <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-secondary border-background hover:bg-background/10">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sair
+                  <Button variant="outline" size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
+                    <LogOut className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0 mr-1.5 xl:mr-2" />
+                    <span className="text-xs xl:text-sm font-medium">Sair</span>
                   </Button>
                 </DialogTrigger>
               <DialogContent>
@@ -128,9 +128,9 @@ export function AdminHeader() {
             </>
           ) : (
             <Link to="/signin">
-              <Button variant="outline" className="text-secondary border-background hover:bg-background/10">
-                <User className="h-4 w-4 mr-2" />
-                Entrar
+              <Button variant="outline" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
+                <User className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0 mr-1.5 xl:mr-2" />
+                <span className="text-xs xl:text-sm font-medium">Entrar</span>
               </Button>
             </Link>
           )}
@@ -138,7 +138,7 @@ export function AdminHeader() {
         {/* Mobile Menu Toggle */}
         <button 
           onClick={toggleMenu}
-          className="md:hidden text-foreground p-2 bg-background rounded-full shadow"
+          className="lg:hidden text-foreground p-2 bg-background rounded-full shadow flex-shrink-0 ml-auto"
           aria-label="Toggle menu"
         >
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -147,7 +147,7 @@ export function AdminHeader() {
 
       {/* Mobile Navigation */}
       <div className={cn(
-        "fixed inset-0 top-[72px] bg-white z-40 transform transition-transform duration-300 ease-in-out md:hidden",
+        "fixed inset-0 top-[72px] bg-white z-40 transform transition-transform duration-300 ease-in-out lg:hidden",
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-2 items-start">
