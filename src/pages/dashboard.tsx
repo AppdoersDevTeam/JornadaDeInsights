@@ -41,6 +41,7 @@ import CuriosidadesList from '@/components/dashboard/curiosidades-list';
 import { getCategories, createCategory, updateCategory, deleteCategory, type Category } from '@/lib/supabase';
 import { SalesTrendsChart, SalesData } from '@/components/dashboard/sales-trends-chart';
 import { StripeBalanceChart, BalanceData } from '@/components/dashboard/stripe-balance-chart';
+import { SiteTrafficDailyChart } from '@/components/dashboard/site-traffic-daily-chart';
 import {
   Dialog,
   DialogContent,
@@ -934,25 +935,8 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                   </div>
 
                   <Card className="p-4">
-                    <h3 className="text-sm font-semibold mb-3">Tendencia diaria de visualizacoes</h3>
-                    <div className="space-y-2">
-                      {siteAnalytics.dailyViews.length === 0 && (
-                        <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
-                      )}
-                      {siteAnalytics.dailyViews.map((point) => (
-                        <div key={point.date} className="grid grid-cols-[110px_1fr_60px] items-center gap-3 text-sm">
-                          <span>{new Date(point.date).toLocaleDateString('pt-BR')}</span>
-                          <Progress
-                            value={
-                              siteAnalytics.dailyViews.length > 0
-                                ? (point.views / Math.max(...siteAnalytics.dailyViews.map((d) => d.views), 1)) * 100
-                                : 0
-                            }
-                          />
-                          <span className="text-right">{point.views}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <h3 className="text-sm font-semibold mb-3">Tendência diária de visualizações</h3>
+                    <SiteTrafficDailyChart data={siteAnalytics.dailyViews} />
                   </Card>
                 </div>
               )}
