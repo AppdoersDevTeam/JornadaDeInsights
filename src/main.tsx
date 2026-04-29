@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
-import { CartProvider } from '@/context/cart-context';
+import { initClientMonitoring } from '@/lib/monitoring';
 
 // Configure future flags for React Router
 const router = {
@@ -13,12 +13,12 @@ const router = {
   }
 };
 
+initClientMonitoring();
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <CartProvider>
-      <BrowserRouter future={router.future}>
-        <App />
-      </BrowserRouter>
-    </CartProvider>
+    <BrowserRouter future={router.future}>
+      <App />
+    </BrowserRouter>
   </StrictMode>
 );

@@ -1,5 +1,8 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from './_lib/admin-auth.js';
+import { applyCors, handleOptionsRequest } from './_lib/cors.js';
+import { logger, getRequestMeta } from './_lib/logger.js';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -16,38 +19,27 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
 });
 
 export default async function handler(req, res) {
-  console.log('Stats API request:', {
-    method: req.method,
-    url: req.url,
-    query: req.query,
-    headers: req.headers
-  });
+  const requestMeta = getRequestMeta(req);
 
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
-    ? 'https://jornadadeinsights.com'
-    : 'http://localhost:5173');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With'
-  );
-  res.setHeader('Content-Type', 'application/json');
+  applyCors(req, res, { methods: 'GET,OPTIONS' });
 
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
+  if (handleOptionsRequest(req, res)) {
     return;
   }
 
   // Only allow GET requests
   if (req.method !== 'GET') {
+    logger.warn('stats_method_not_allowed', requestMeta);
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
   try {
+    const auth = await requireAdmin(req, res);
+    if (!auth) {
+      return;
+    }
+
     // Accept client-calculated thresholds for admin timezone via query, fall back to server local time
     let dayStart, weekStart, monthStart;
     if (req.query.dayStart && req.query.weekStart && req.query.monthStart) {
@@ -70,6 +62,10 @@ export default async function handler(req, res) {
       stripe.charges.list({ created: { gte: weekStart }, limit: 100 }),
       stripe.charges.list({ created: { gte: monthStart }, limit: 100 }),
     ]);
+
+    // Normalize monetary calculations to a single currency to avoid mixed-currency totals.
+    const primaryCurrency =
+      monthlyCharges.data.find((charge) => charge.status === 'succeeded' && charge.currency)?.currency || 'brl';
 
     // Count only succeeded charges
     const todayCount = dailyCharges.data.filter(ch => ch.status === 'succeeded').length;
@@ -122,7 +118,9 @@ export default async function handler(req, res) {
 
     // Group transactions by day
     const transactionsByDay = {};
-    balanceTransactions.data.forEach(txn => {
+    balanceTransactions.data
+      .filter((txn) => txn.currency === primaryCurrency)
+      .forEach(txn => {
       const date = new Date(txn.created * 1000);
       const day = date.toISOString().split('T')[0];
       
@@ -170,7 +168,7 @@ export default async function handler(req, res) {
       if (txn.type !== 'payout') {
         transactionsByDay[day].net_transactions += net;
       }
-    });
+      });
 
     // Calculate running balance and sort by date
     let runningBalance = 0;
@@ -200,6 +198,7 @@ export default async function handler(req, res) {
 
       // Calculate sales from balance transactions
       const sales = dayTransactions.data
+        .filter((txn) => txn.currency === primaryCurrency)
         .filter(txn => ['payment', 'charge'].includes(txn.type))
         .reduce((sum, txn) => sum + (txn.amount / 100), 0);
 
@@ -228,6 +227,7 @@ export default async function handler(req, res) {
       });
 
       const sales = weekTransactions.data
+        .filter((txn) => txn.currency === primaryCurrency)
         .filter(txn => ['payment', 'charge'].includes(txn.type))
         .reduce((sum, txn) => sum + (txn.amount / 100), 0);
 
@@ -253,6 +253,7 @@ export default async function handler(req, res) {
       });
 
       const sales = monthTransactions.data
+        .filter((txn) => txn.currency === primaryCurrency)
         .filter(txn => ['payment', 'charge'].includes(txn.type))
         .reduce((sum, txn) => sum + (txn.amount / 100), 0);
 
@@ -271,16 +272,20 @@ export default async function handler(req, res) {
       users: { total: totalUsers, newThisWeek },
       salesTrends,
       balanceData,
+      currency: primaryCurrency.toUpperCase(),
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error fetching stats:', error);
-    console.error('Environment:', {
-      NODE_ENV: process.env.NODE_ENV,
-      SUPABASE_URL: process.env.SUPABASE_URL ? 'Set' : 'Not set',
-      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Not set',
-      STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ? 'Set' : 'Not set'
+    logger.error('stats_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+      hasSupabaseUrl: Boolean(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL),
+      hasSupabaseServiceRoleKey: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+      hasStripeSecretKey: Boolean(process.env.STRIPE_SECRET_KEY),
     });
-    res.status(500).json({ error: 'Internal server error', details: error.message });
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'unknown_error',
+    });
   }
 } 

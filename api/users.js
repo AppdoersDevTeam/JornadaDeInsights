@@ -1,41 +1,44 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-});
+import { requireAdmin } from './_lib/admin-auth.js';
+import { applyCors, handleOptionsRequest } from './_lib/cors.js';
+import { logger, getRequestMeta } from './_lib/logger.js';
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
-    ? 'https://jornadadeinsights.com'
-    : 'http://localhost:5173');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With'
-  );
-  res.setHeader('Content-Type', 'application/json');
+  const requestMeta = getRequestMeta(req);
+  applyCors(req, res, { methods: 'GET,DELETE,OPTIONS' });
 
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
+  if (handleOptionsRequest(req, res)) {
     return;
   }
 
-  // Only allow GET requests
-  if (req.method !== 'GET') {
+  if (!['GET', 'DELETE'].includes(req.method)) {
+    logger.warn('users_method_not_allowed', requestMeta);
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
   try {
+    const auth = await requireAdmin(req, res);
+    if (!auth) {
+      return;
+    }
+    const { supabaseAdmin } = auth;
+
+    if (req.method === 'DELETE') {
+      const uid = typeof req.query.uid === 'string' ? req.query.uid : '';
+      if (!uid) {
+        res.status(400).json({ error: 'Missing uid query parameter' });
+        return;
+      }
+
+      const { error } = await supabaseAdmin.auth.admin.deleteUser(uid);
+      if (error) {
+        throw error;
+      }
+
+      res.status(200).json({ success: true, uid });
+      return;
+    }
+
     const {
       data: { users: supabaseUsers = [] },
       error,
@@ -58,7 +61,10 @@ export default async function handler(req, res) {
     });
     res.json({ users });
   } catch (error) {
-    console.error('Error listing users:', error);
+    logger.error('users_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
     res.status(500).json({ error: 'Internal server error' });
   }
 } 

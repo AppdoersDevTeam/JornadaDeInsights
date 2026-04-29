@@ -1,38 +1,23 @@
-import { useState, useEffect, Fragment, ChangeEvent } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, getSupabaseAccessToken } from '@/lib/supabase';
 import {
-  FileText,
   BarChart3,
   Edit,
   Users,
-  Upload,
   Trash2,
-  Eye,
-  Download,
   Mail,
-  Lock,
   Check,
-  PieChart,
-  LineChart,
-  Bell,
-  Bold,
-  Italic,
-  Underline,
-  Link as IconLink,
-  Image as IconImage,
   Copy
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { toast } from 'react-hot-toast';
 import UploadEbookForm from '@/components/dashboard/upload-ebook-form';
 import EbookList from '@/components/dashboard/ebook-list';
@@ -95,6 +80,22 @@ interface SiteAnalyticsSummary {
   windowDays: number;
 }
 
+interface LifecycleFunnelSummary {
+  windowDays: number;
+  totals: {
+    visits: number;
+    leads: number;
+    checkoutStarted: number;
+    purchaseCompleted: number;
+  };
+  conversionRates: {
+    visitToLead: number;
+    leadToCheckout: number;
+    checkoutToPurchase: number;
+    visitToPurchase: number;
+  };
+}
+
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
   'ptasbr2020@gmail.com'
@@ -151,10 +152,26 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   });
   const [siteAnalyticsLoading, setSiteAnalyticsLoading] = useState(false);
   const [siteAnalyticsError, setSiteAnalyticsError] = useState<string | null>(null);
+  const [lifecycleFunnel, setLifecycleFunnel] = useState<LifecycleFunnelSummary>({
+    windowDays: 30,
+    totals: {
+      visits: 0,
+      leads: 0,
+      checkoutStarted: 0,
+      purchaseCompleted: 0,
+    },
+    conversionRates: {
+      visitToLead: 0,
+      leadToCheckout: 0,
+      checkoutToPurchase: 0,
+      visitToPurchase: 0,
+    },
+  });
+  const [lifecycleFunnelLoading, setLifecycleFunnelLoading] = useState(false);
 
   // Constants
   const itemsPerPage = 20; // Show 20 orders per page in completed orders tab
-  const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
   console.log('Dashboard using SERVER_URL:', SERVER_URL);
 
   // Helper function to safely parse dates
@@ -250,18 +267,23 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       const fetchData = async () => {
         try {
           setLoading(true);
+          const idToken = await getSupabaseAccessToken();
+          if (!idToken) throw new Error('Admin token unavailable');
+
           const [ordersRes, topProducts, statsRes] = await Promise.all([
             fetch(`${SERVER_URL}/api/completed-orders`, {
               credentials: 'include',
               headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${idToken}`,
               }
             }),
             calculateTopProducts(),
             fetch(`${SERVER_URL}/api/stats`, {
               credentials: 'include',
               headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${idToken}`,
               }
             })
           ]);
@@ -363,10 +385,14 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   // Fetch all users when switching to users tab
   const fetchUsers = async () => {
     try {
+      const idToken = await getSupabaseAccessToken();
+      if (!idToken) throw new Error('Admin token unavailable');
+
       const res = await fetch(`${SERVER_URL}/api/users`, {
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
         }
       });
       if (!res.ok) throw new Error('Failed to load users');
@@ -447,6 +473,54 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   }, [activeTab, SERVER_URL]);
 
   useEffect(() => {
+    if (activeTab !== 'analytics') return;
+
+    const fetchLifecycleFunnel = async () => {
+      try {
+        setLifecycleFunnelLoading(true);
+        const idToken = await getSupabaseAccessToken();
+        if (!idToken) throw new Error('Admin token is not available');
+
+        const response = await fetch(`${SERVER_URL}/api/lifecycle-funnel-summary?days=30`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to load lifecycle funnel (${response.status})`);
+        }
+
+        const data = await response.json();
+        setLifecycleFunnel({
+          windowDays: Number(data.windowDays) || 30,
+          totals: {
+            visits: Number(data?.totals?.visits) || 0,
+            leads: Number(data?.totals?.leads) || 0,
+            checkoutStarted: Number(data?.totals?.checkoutStarted) || 0,
+            purchaseCompleted: Number(data?.totals?.purchaseCompleted) || 0,
+          },
+          conversionRates: {
+            visitToLead: Number(data?.conversionRates?.visitToLead) || 0,
+            leadToCheckout: Number(data?.conversionRates?.leadToCheckout) || 0,
+            checkoutToPurchase: Number(data?.conversionRates?.checkoutToPurchase) || 0,
+            visitToPurchase: Number(data?.conversionRates?.visitToPurchase) || 0,
+          },
+        });
+      } catch (error) {
+        console.error('Error fetching lifecycle funnel:', error);
+      } finally {
+        setLifecycleFunnelLoading(false);
+      }
+    };
+
+    fetchLifecycleFunnel();
+  }, [activeTab, SERVER_URL]);
+
+  useEffect(() => {
     const bootstrap = async () => {
       const { data, error } = await supabase.auth.getUser();
       if (error) {
@@ -480,34 +554,21 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     return null; // Don't render anything while checking auth
   }
 
-  const contentData = {
-    recentUpdates: [
-      { page: 'About', action: 'Updated content', date: '2024-03-15' },
-      { page: 'FAQ', action: 'Added new question', date: '2024-03-14' },
-      { page: 'Contact', action: 'Updated contact information', date: '2024-03-13' },
-    ]
-  };
-
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Simulate upload
-      setTimeout(() => {
-      }, 2000);
-    }
-  };
-
   const handleUploadSuccess = () => {
     setRefreshKey(prev => prev + 1);
   };
 
   const handleDeleteUser = async (uid: string) => {
     try {
-      const response = await fetch(`${SERVER_URL}/api/users/${uid}`, {
+      const idToken = await getSupabaseAccessToken();
+      if (!idToken) throw new Error('Admin token unavailable');
+
+      const response = await fetch(`${SERVER_URL}/api/users?uid=${encodeURIComponent(uid)}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
         }
       });
 
@@ -539,9 +600,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       setCategoryDescription('');
       setCategoryDialogOpen(false);
       fetchCategories();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao criar categoria';
       console.error('Error creating category:', error);
-      toast.error(error.message || 'Erro ao criar categoria');
+      toast.error(errorMessage);
     }
   };
 
@@ -559,9 +621,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       setCategoryDescription('');
       setCategoryDialogOpen(false);
       fetchCategories();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar categoria';
       console.error('Error updating category:', error);
-      toast.error(error.message || 'Erro ao atualizar categoria');
+      toast.error(errorMessage);
     }
   };
 
@@ -570,9 +633,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       await deleteCategory(id);
       toast.success('Categoria deletada com sucesso');
       fetchCategories();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao deletar categoria';
       console.error('Error deleting category:', error);
-      toast.error(error.message || 'Erro ao deletar categoria');
+      toast.error(errorMessage);
     }
   };
 
@@ -963,6 +1027,58 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             />
             <StripeBalanceChart data={balanceData} />
           </div>
+          <Card className="p-6 w-full">
+            <CardHeader>
+              <CardTitle>Funil de Conversão</CardTitle>
+              <CardDescription>
+                Jornada de visitas ate compras nos ultimos {lifecycleFunnel.windowDays} dias.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {lifecycleFunnelLoading ? (
+                <p className="text-sm text-muted-foreground">Carregando funil...</p>
+              ) : (
+                <div className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <Card className="p-4">
+                      <p className="text-sm text-muted-foreground">Visitas</p>
+                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.visits.toLocaleString('pt-BR')}</p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="text-sm text-muted-foreground">Leads</p>
+                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.leads.toLocaleString('pt-BR')}</p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="text-sm text-muted-foreground">Checkout iniciado</p>
+                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.checkoutStarted.toLocaleString('pt-BR')}</p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="text-sm text-muted-foreground">Compras</p>
+                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.purchaseCompleted.toLocaleString('pt-BR')}</p>
+                    </Card>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card className="p-4">
+                      <p className="text-sm text-muted-foreground">Visita → Lead</p>
+                      <p className="text-xl font-semibold">{lifecycleFunnel.conversionRates.visitToLead}%</p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="text-sm text-muted-foreground">Lead → Checkout</p>
+                      <p className="text-xl font-semibold">{lifecycleFunnel.conversionRates.leadToCheckout}%</p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="text-sm text-muted-foreground">Checkout → Compra</p>
+                      <p className="text-xl font-semibold">{lifecycleFunnel.conversionRates.checkoutToPurchase}%</p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="text-sm text-muted-foreground">Visita → Compra</p>
+                      <p className="text-xl font-semibold">{lifecycleFunnel.conversionRates.visitToPurchase}%</p>
+                    </Card>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
 
@@ -978,7 +1094,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 >
                   <div className="flex items-center gap-4 w-full">
                     <Avatar>
-                      <AvatarImage src={user.photoURL ? `${SERVER_URL}/user-photo/${user.uid}` : undefined} />
+                      <AvatarImage src={user.photoURL || undefined} />
                       <AvatarFallback>{user.displayName?.[0] || user.email?.[0] || user.uid}</AvatarFallback>
                     </Avatar>
                     <div className="w-full">

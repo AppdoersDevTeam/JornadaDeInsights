@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { supabase, getCategories, createCategory, type Category } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import type { User } from '@supabase/supabase-js';
 import {
   Dialog,
   DialogContent,
@@ -28,7 +29,7 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [error, setError] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
@@ -95,8 +96,6 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
 
       // Sanitize filenames
       const sanitizedPdfName = sanitizeFilename(pdfFile.name);
-      const sanitizedCoverName = sanitizeFilename(coverImage.name);
-
       // Check if a file with the same name already exists
       const { data: existingFiles } = await supabase.storage
         .from('store-assets')
@@ -349,9 +348,10 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
                   setCreateCategoryDialogOpen(false);
                   setNewCategoryName('');
                   setNewCategoryDescription('');
-                } catch (error: any) {
+                } catch (error: unknown) {
+                  const errorMessage = error instanceof Error ? error.message : 'Failed to create category';
                   console.error('Error creating category:', error);
-                  toast.error(error.message || 'Failed to create category');
+                  toast.error(errorMessage);
                 } finally {
                   setIsCreatingCategory(false);
                 }

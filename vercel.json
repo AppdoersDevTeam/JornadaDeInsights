@@ -45,7 +45,7 @@
       "methods": ["GET", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
         "Access-Control-Allow-Credentials": "true",
         "Content-Type": "application/json"
@@ -78,7 +78,7 @@
     {
       "src": "/api/users",
       "dest": "/api/users.js",
-      "methods": ["GET", "OPTIONS"],
+      "methods": ["GET", "DELETE", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
         "Access-Control-Allow-Methods": "GET, OPTIONS",
@@ -90,10 +90,10 @@
     {
       "src": "/api/(.*)",
       "dest": "/api/$1.js",
-      "methods": ["GET", "POST", "OPTIONS"],
+      "methods": ["GET", "POST", "DELETE", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
         "Access-Control-Allow-Credentials": "true",
         "Content-Type": "application/json"

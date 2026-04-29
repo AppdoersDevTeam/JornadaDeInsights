@@ -1,14 +1,17 @@
-import { ArrowRight, Play, Bookmark, Award } from 'lucide-react';
+import { ArrowRight, Play, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { EbookCard, type Ebook } from '@/components/shop/ebook-card';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import plogo from '@/plogo.png';
 import { getEbooks, getCuriosidades, type Curiosidade } from '@/lib/supabase';
 import { CuriosidadeCard } from '@/components/curiosidades/curiosidade-card';
+import { NewsletterForm } from '@/components/newsletter-form';
 import { decode } from 'html-entities';
-import { needsIOSVideoFix, getYouTubeEmbedUrl, handleIframeLoad, reloadIframeForIOS } from '@/lib/device-utils';
+import { getYouTubeEmbedUrl, handleIframeLoad, reloadIframeForIOS } from '@/lib/device-utils';
+import { StructuredData } from '@/components/seo/structured-data';
+import { useLanguage } from '@/context/language-context';
 
 // Define type for YouTube API items
 type YouTubeVideo = {
@@ -16,62 +19,38 @@ type YouTubeVideo = {
   snippet: { title: string; description: string };
 };
 
-const testimonials = [
-  {
-    id: "1",
-    quote: "O podcast da Patricia transformou minha maneira de entender as Escrituras. Suas reflexões profundas e acessíveis me ajudaram a aplicar a fé no meu dia a dia. Estou muito grata por ter encontrado esse conteúdo.",
-    author: "Fernanda M.",
-    title: "Professora de História"
-  },
-  {
-    id: "2",
-    quote: "O eBook 'Reflexões de Fé' me guiou a enxergar a Bíblia de uma forma nova. Agora, me sinto mais conectado com minha espiritualidade e com mais equilíbrio na vida. Recomendo a todos que buscam crescimento espiritual.",
-    author: "Lucas P.",
-    title: "Empreendedor"
-  },
-  {
-    id: "3",
-    quote: "Acompanho a Patricia há anos. Seus conteúdos sempre trazem sabedoria prática e inspiradora, ajudando-me a crescer na fé e em minha jornada pessoal. Sou muito grata por todo o aprendizado.",
-    author: "Juliana R.",
-    title: "Coach Espiritual"
-  }
-];
-
-const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
-};
-
 const ctaButtonVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 }
 };
 
-const staggerContainer = {
-  // ... existing code ...
-};
-
-const scrollToSection = (sectionId: string) => {
-  const element = document.getElementById(sectionId);
-  if (!element) return;
-
-  const headerOffset = 80;
-  const elementPosition = element.getBoundingClientRect().top;
-  const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-  // Use smooth scrolling with a fallback
-  try {
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: 'smooth'
-    });
-  } catch (e) {
-    // Fallback for browsers that don't support smooth scrolling
-    window.scrollTo(0, offsetPosition);
-  }
-};
-
 export function HomePage() {
+  const { t, language } = useLanguage();
+  const embedLang = language === 'en' ? 'en' : 'pt-BR';
+  const schemaLang = language === 'en' ? 'en' : 'pt-BR';
+  const testimonials = useMemo(
+    () => [
+      {
+        id: '1',
+        quote: t('home.testimonial.1.quote', ''),
+        author: t('home.testimonial.1.author', ''),
+        title: t('home.testimonial.1.role', ''),
+      },
+      {
+        id: '2',
+        quote: t('home.testimonial.2.quote', ''),
+        author: t('home.testimonial.2.author', ''),
+        title: t('home.testimonial.2.role', ''),
+      },
+      {
+        id: '3',
+        quote: t('home.testimonial.3.quote', ''),
+        author: t('home.testimonial.3.author', ''),
+        title: t('home.testimonial.3.role', ''),
+      },
+    ],
+    [t],
+  );
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [heroVideo, setHeroVideo] = useState<YouTubeVideo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -246,6 +225,29 @@ export function HomePage() {
 
   return (
     <>
+      <StructuredData
+        id="home-org-website"
+        data={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Jornada de Insights',
+            url: 'https://jornadadeinsights.com',
+            logo: 'https://jornadadeinsights.com/favicon.ico',
+            sameAs: [
+              'https://www.youtube.com/@Jornadadeinsights/videos',
+              'https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW',
+            ],
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'Jornada de Insights',
+            url: 'https://jornadadeinsights.com',
+            inLanguage: schemaLang,
+          },
+        ]}
+      />
       {/* Hero Section */}
       <motion.section
         className="relative min-h-[60vh] pt-32 md:pt-36 pb-16 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
@@ -276,7 +278,7 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="text-3xl md:text-5xl font-heading font-bold mb-2 leading-tight"
               >
-                Jornada de <span className="text-primary">Insights</span>
+                {t('home.hero.brand', '')} <span className="text-primary">{t('home.hero.wordmark', '')}</span>
               </motion.h1>
               <motion.h2
                 initial={{ opacity: 0, y: 50 }}
@@ -285,7 +287,7 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="text-2xl md:text-3xl font-heading font-medium mb-6 text-muted-foreground"
               >
-                Com Patricia da Silva
+                {t('home.hero.subtitle', '')}
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, y: 50 }}
@@ -294,7 +296,7 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="text-lg text-muted-foreground mb-2"
               >
-                A verdade da Bíblia é eterna, mas há sempre novos insights a serem descobertos.
+                {t('home.hero.line1', '')}
               </motion.p>
               <motion.p
                 initial={{ opacity: 0, y: 50 }}
@@ -303,7 +305,7 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="text-lg text-muted-foreground mb-2"
               >
-                Ouça agora os nossos episódios no YouTube, Spotify e iHeartRadio.
+                {t('home.hero.line2', '')}
               </motion.p>
               <motion.p
                 initial={{ opacity: 0, y: 50 }}
@@ -312,7 +314,7 @@ export function HomePage() {
                 viewport={{ amount: 0.3 }}
                 className="text-lg text-muted-foreground mb-8"
               >
-                Explore nossos e-books e recursos para crianças, jovens e adultos.
+                {t('home.hero.line3', '')}
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
@@ -324,14 +326,14 @@ export function HomePage() {
                 <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
                   <Button size="lg" asChild className="w-full sm:w-auto">
                     <Link to="/podcast">
-                      Ouvir o Podcast <ArrowRight className="ml-2 h-4 w-4" />
+                      {t('home.cta.podcast', '')} <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 </motion.div>
                 <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
                   <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
                     <Link to="/shop">
-                      Explorar eBooks <ArrowRight className="ml-2 h-4 w-4" />
+                      {t('home.cta.shop', '')} <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 </motion.div>
@@ -342,7 +344,7 @@ export function HomePage() {
                 {/* 'Vídeo em Destaque' overlay at top left */}
                 <div className="absolute top-4 left-4 bg-gradient-to-tr from-black/80 to-black/30 p-2 rounded-lg z-10 flex items-center gap-2 text-white">
                   <Award className="h-5 w-5" />
-                  <span className="text-sm font-medium">Vídeo em Destaque</span>
+                  <span className="text-sm font-medium">{t('home.featuredVideo', '')}</span>
                 </div>
                 {(isLoading || hasError) ? (
                   <div className="w-full aspect-video bg-black" />
@@ -362,7 +364,7 @@ export function HomePage() {
                     <div className="iframe-container">
                       <iframe
                         src={getYouTubeEmbedUrl(heroVideo.id.videoId, {
-                          language: 'pt-BR',
+                          language: embedLang,
                           autoplay: true
                         })}
                         title={heroVideo.snippet.title}
@@ -403,10 +405,10 @@ export function HomePage() {
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold">Episódios Recentes</h2>
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold">{t('home.recentEpisodes', '')}</h2>
             <Button variant="ghost" asChild>
               <Link to="/podcast" className="flex items-center">
-                Ver Todos <ArrowRight className="ml-2 h-4 w-4" />
+                {t('home.viewAll', '')} <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -423,11 +425,11 @@ export function HomePage() {
               ))
             ) : hasError ? (
               <div className="col-span-full text-center py-12">
-                <p className="text-lg text-muted-foreground">Não foi possível carregar os episódios. Por favor, tente novamente mais tarde.</p>
+                <p className="text-lg text-muted-foreground">{t('home.episodesLoadError', '')}</p>
               </div>
             ) : (
               videos.slice(0, 3).map((video) => (
-                <PodcastCard key={video.id.videoId} video={video} />
+                <PodcastCard key={video.id.videoId} video={video} embedLang={embedLang} />
               ))
             )}
           </div>
@@ -466,24 +468,14 @@ export function HomePage() {
               viewport={{ amount: 0.3 }}
               className="w-full md:w-7/12"
             >
-              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">Sobre Mim – Patricia da Silva</h2>
-              <p className="text-muted-foreground mb-4 font-medium">
-                Podcaster, educadora e contadora de histórias bíblicas.
-              </p>
-              <p className="text-muted-foreground mb-4">
-                Minha missão é compartilhar insights profundos e acessíveis das Escrituras, trazendo o contexto histórico, cultural e espiritual que dá vida aos textos bíblicos — de forma clara, envolvente e transformadora.
-              </p>
-              <p className="text-muted-foreground mb-4">
-                Com meu projeto "Jornada de Insights", alcanço pessoas de todas as idades, com materiais que vão desde estudos bíblicos para adultos, até e-books e recursos criativos para crianças, ajudando famílias a crescerem juntas na fé.
-              </p>
-              <p className="text-muted-foreground mb-4">
-                Falar da Bíblia é minha paixão, e procuro falar com simplicidade e reverência — combinando pesquisa, ensino e aplicação prática com uma linguagem que conecta mente e coração.
-              </p>
-              <p className="text-muted-foreground mb-6">
-                Amo ensinar com propósito, educar com criatividade e inspirar com amor pela Palavra de Deus.
-              </p>
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">{t('home.about.title', '')}</h2>
+              <p className="text-muted-foreground mb-4 font-medium">{t('home.about.lead', '')}</p>
+              <p className="text-muted-foreground mb-4">{t('home.about.p1', '')}</p>
+              <p className="text-muted-foreground mb-4">{t('home.about.p2', '')}</p>
+              <p className="text-muted-foreground mb-4">{t('home.about.p3', '')}</p>
+              <p className="text-muted-foreground mb-6">{t('home.about.p4', '')}</p>
               <Button asChild>
-                <Link to="/about">Saiba mais sobre mim</Link>
+                <Link to="/about">{t('home.about.more', '')}</Link>
               </Button>
             </motion.div>
           </div>
@@ -500,10 +492,10 @@ export function HomePage() {
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold">eBooks em Destaque</h2>
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold">{t('home.featuredEbooks', '')}</h2>
             <Button variant="ghost" asChild>
               <Link to="/shop" className="flex items-center">
-                Ver Todos <ArrowRight className="ml-2 h-4 w-4" />
+                {t('home.viewAll', '')} <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -537,7 +529,7 @@ export function HomePage() {
         className="py-16 bg-background"
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-12 text-center">Depoimentos</h2>
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-12 text-center">{t('home.testimonials', '')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial) => (
               <motion.div
@@ -569,11 +561,11 @@ export function HomePage() {
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold">Curiosidades</h2>
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold">{t('home.curiosidades', '')}</h2>
             {curiosidades.length > 0 && (
               <Button variant="ghost" asChild>
                 <Link to="/curiosidades" className="flex items-center">
-                  Ver Todas <ArrowRight className="ml-2 h-4 w-4" />
+                  {t('home.viewAllCuriosidades', '')} <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             )}
@@ -591,7 +583,7 @@ export function HomePage() {
               ))
             ) : curiosidades.length === 0 ? (
               <div className="col-span-full text-center py-12">
-                <p className="text-lg text-muted-foreground">Nenhuma curiosidade disponível ainda.</p>
+                <p className="text-lg text-muted-foreground">{t('home.noCuriosidades', '')}</p>
               </div>
             ) : (
               curiosidades.map((curiosidade) => (
@@ -602,12 +594,19 @@ export function HomePage() {
         </div>
       </motion.section>
 
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
+          <NewsletterForm />
+        </div>
+      </section>
+
     </>
   );
 }
 
 // Add PodcastCard component for flip animation
-function PodcastCard({ video }: { video: YouTubeVideo }) {
+function PodcastCard({ video, embedLang }: { video: YouTubeVideo; embedLang: string }) {
+  const { t } = useLanguage();
   const [flipped, setFlipped] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   
@@ -649,7 +648,7 @@ function PodcastCard({ video }: { video: YouTubeVideo }) {
               <div className="iframe-container">
                 <iframe
                   src={getYouTubeEmbedUrl(video.id.videoId, {
-                    language: 'pt-BR',
+                    language: embedLang,
                     autoplay: true
                   })}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -675,7 +674,7 @@ function PodcastCard({ video }: { video: YouTubeVideo }) {
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
           >
             <p className="text-sm text-muted-foreground">
-              {video.snippet.description || 'No description available.'}
+              {video.snippet.description || t('podcast.card.noDesc', '')}
             </p>
           </div>
         </motion.div>
@@ -683,7 +682,7 @@ function PodcastCard({ video }: { video: YouTubeVideo }) {
           onClick={() => setFlipped(!flipped)}
           className="absolute bottom-2 left-2 bg-primary text-white px-2 py-1 text-xs rounded"
         >
-          {flipped ? 'Ver vídeo' : 'Ver descrição'}
+          {flipped ? t('podcast.card.flipVideo', '') : t('podcast.card.flipDesc', '')}
         </button>
       </div>
       <div className="p-6">

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Search, ShoppingCart, BookOpen, ArrowRight } from 'lucide-react';
+import { Search, ShoppingCart, ArrowRight, ShieldCheck, Clock3, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EbookCard, type Ebook } from '@/components/shop/ebook-card';
 import { useCart } from '@/context/cart-context';
 import { LazyImage } from '@/components/shop/lazy-image';
 import { AnimatedGridItem } from '@/components/shop/animated-grid-item';
 import { AnimatedCartIcon } from '@/components/shop/animated-cart-icon';
-import { motion, useScroll, useTransform, Variants } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { getEbooks, getCategories, type Category } from '@/lib/supabase';
 import { Link } from 'react-router-dom';
 
@@ -37,13 +37,8 @@ export function ShopPage() {
   const [error, setError] = useState<string | null>(null);
   const [featuredEbook, setFeaturedEbook] = useState<Ebook | null>(null);
   const { totalCount } = useCart();
-  const { scrollYProgress } = useScroll();
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
-
-  // Parallax effect for hero section
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, -100]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   // Smooth scroll behavior
   useEffect(() => {
@@ -196,6 +191,26 @@ export function ShopPage() {
           </motion.div>
         </div>
       </motion.section>
+
+      {/* Trust Bar */}
+      <section className="py-6 bg-card border-y border-border/50">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              Checkout seguro com Stripe.
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Clock3 className="h-4 w-4 text-primary" />
+              Entrega digital imediata apos pagamento.
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Download className="h-4 w-4 text-primary" />
+              Acesso aos arquivos no painel do usuario.
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Featured eBook */}
       <section id="featured-ebook" className="py-16 bg-background">
@@ -505,6 +520,29 @@ export function ShopPage() {
           </div>
         </div>
       </motion.section>
+
+      {/* FAQ & Purchase Confidence */}
+      <section className="py-16 bg-muted/20">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-10">
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">
+            Perguntas frequentes antes da compra
+          </h2>
+          <div className="max-w-3xl mx-auto space-y-4 text-sm text-muted-foreground">
+            <div className="rounded-lg border border-border/60 bg-card p-4">
+              <p className="font-medium text-foreground mb-1">Quando recebo meu eBook?</p>
+              <p>Logo apos a confirmacao do pagamento, o acesso aparece no seu painel.</p>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-card p-4">
+              <p className="font-medium text-foreground mb-1">Em qual formato o material vem?</p>
+              <p>Os arquivos sao disponibilizados em PDF para leitura em qualquer dispositivo.</p>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-card p-4">
+              <p className="font-medium text-foreground mb-1">E se eu tiver problema no acesso?</p>
+              <p>Nosso suporte atende por email e formulario de contato para resolver rapidamente.</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
     </div>
   );

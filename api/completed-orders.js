@@ -1,4 +1,7 @@
 import Stripe from 'stripe';
+import { requireAdmin } from './_lib/admin-auth.js';
+import { applyCors, handleOptionsRequest } from './_lib/cors.js';
+import { logger, getRequestMeta } from './_lib/logger.js';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -6,31 +9,26 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
-    ? 'https://jornadadeinsights.com'
-    : 'http://localhost:5173');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With'
-  );
-  res.setHeader('Content-Type', 'application/json');
+  const requestMeta = getRequestMeta(req);
+  applyCors(req, res, { methods: 'GET,OPTIONS' });
 
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
+  if (handleOptionsRequest(req, res)) {
     return;
   }
 
   // Only allow GET requests
   if (req.method !== 'GET') {
+    logger.warn('completed_orders_method_not_allowed', requestMeta);
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
   try {
+    const auth = await requireAdmin(req, res);
+    if (!auth) {
+      return;
+    }
+
     // List all checkout sessions and filter for paid sessions
     const allSessionsList = await stripe.checkout.sessions.list({ limit: 100 });
     const paidSessions = allSessionsList.data.filter(sess => sess.payment_status === 'paid');
@@ -64,7 +62,10 @@ export default async function handler(req, res) {
     );
     res.status(200).json({ orders: ordersList });
   } catch (error) {
-    console.error('Error listing completed orders:', error);
+    logger.error('completed_orders_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
     res.status(500).json({ error: 'Internal server error' });
   }
 } 

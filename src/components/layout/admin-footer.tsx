@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Headphones, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import jornadaLogo from '@/Jornada logo footer.png';
 

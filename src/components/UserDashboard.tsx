@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
-import { Download, Eye, Copy, X, Plus, Minus, ShoppingCart } from 'lucide-react';
+import { Download, Eye, X, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { toast } from 'react-hot-toast';
-import { Fragment } from 'react';
 import { supabase } from '@/lib/supabase';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { EbookCard } from '@/components/shop/ebook-card';
 import { useCart } from '@/context/cart-context';
 import { LazyImage } from '@/components/shop/lazy-image';
@@ -17,7 +18,6 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { Badge } from '@/components/ui/badge';
 import { loadStripe } from '@stripe/stripe-js';
@@ -59,37 +59,31 @@ const DEFAULT_COVER_DATA_URL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIi
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 // Server URL
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
 const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  const [hoverEmail, setHoverEmail] = useState<string | null>(null);
   const [userEbooks, setUserEbooks] = useState<Ebook[]>([]);
   const [completedOrdersList, setCompletedOrdersList] = useState<CompletedOrder[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<CompletedOrder | null>(null);
   const [latestEbooks, setLatestEbooks] = useState<Ebook[]>([]);
   const { state: { items }, totalCount, totalPrice, addItem, removeItem, decrementItem, clearCart } = useCart();
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showSettingsComingSoonDialog, setShowSettingsComingSoonDialog] = useState(false);
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const [sessionStartTime, setSessionStartTime] = useState<number>(Date.now());
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
   const [timeoutCountdown, setTimeoutCountdown] = useState(30);
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [savingSettings, setSavingSettings] = useState(false);
 
   // Add effect to scroll to top when tab changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [activeTab]);
-
-  // Add effect to show settings coming soon dialog
-  useEffect(() => {
-    if (activeTab === 'settings') {
-      setShowSettingsComingSoonDialog(true);
-    }
   }, [activeTab]);
 
   // Add session timeout effect
@@ -146,7 +140,19 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
         return;
       }
 
-      const res = await fetch(`${SERVER_URL}/api/completed-orders`);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) {
+        throw new Error('Sessao expirada. Faca login novamente.');
+      }
+
+      const res = await fetch(`${SERVER_URL}/api/my-orders`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       if (!res.ok) {
         throw new Error(`Failed to fetch orders: ${res.status} ${res.statusText}`);
       }
@@ -159,7 +165,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
         return;
       }
 
-      const userOrders = orders.filter((o: CompletedOrder) => o.email === user.email);
+      const userOrders = orders as CompletedOrder[];
       setCompletedOrdersList(userOrders);
       
       if (userOrders.length === 0) {
@@ -270,23 +276,6 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
     }
   };
 
-  const toggleRow = (id: string) => {
-    setExpandedRows(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
-  const copyEmail = (email: string) => {
-    navigator.clipboard.writeText(email);
-    toast.success('Email copied');
-  };
-
   useEffect(() => {
     const bootstrap = async () => {
       const { data, error } = await supabase.auth.getUser();
@@ -357,8 +346,6 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
               addItem(ebook);
             });
             sessionStorage.removeItem('cartState');
-            // Close auth modal if open
-            setShowAuthModal(false);
           } catch (error) {
             console.error('Error restoring cart state:', error);
           }
@@ -389,18 +376,14 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       const stripe = await stripePromise;
       if (!stripe) throw new Error('Stripe failed to initialize');
 
-      // Get the correct API URL based on environment
-      const apiUrl = process.env.NODE_ENV === 'production'
-        ? 'https://jornadadeinsights.com'
-        : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
       // Create checkout session
-      const response = await fetch(`${apiUrl}/api/create-checkout-session`, {
+      const response = await fetch(`${SERVER_URL}/api/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          customerEmail: user?.email ?? undefined,
           items: items.map(item => {
             // Ensure image URL is absolute and uses HTTPS
             let imageUrl = item.cover_url || '';
@@ -462,12 +445,14 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
     }
   };
 
-  const handleSignOut = () => {
-    // Implement the sign out logic
-    console.log('Signing out');
-    // You might want to call a sign out function from your auth provider
-    // and then navigate to signin page
-    navigate('/signin');
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/signin');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast.error('Nao foi possivel encerrar a sessao.');
+    }
   };
 
   // Add session timeout handler
@@ -482,6 +467,62 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
     setSessionStartTime(Date.now());
     setShowTimeoutDialog(false);
     setTimeoutCountdown(30);
+  };
+
+  const hydrateSettingsForm = (currentUser: User | null) => {
+    if (!currentUser) return;
+    const metadata = (currentUser.user_metadata || {}) as {
+      full_name?: string;
+      contact_email?: string;
+      phone?: string;
+    };
+
+    setFullName(metadata.full_name || currentUser.user_metadata?.name || '');
+    setEmail(currentUser.email || '');
+    setContactEmail(metadata.contact_email || currentUser.email || '');
+    setPhone(metadata.phone || '');
+  };
+
+  useEffect(() => {
+    if (user && activeTab === 'settings') {
+      hydrateSettingsForm(user);
+    }
+  }, [user, activeTab]);
+
+  const handleSaveSettings = async () => {
+    if (!user) return;
+    setSavingSettings(true);
+    try {
+      const emailChanged = email.trim().toLowerCase() !== (user.email || '').toLowerCase();
+
+      if (emailChanged) {
+        const { error: emailError } = await supabase.auth.updateUser({
+          email: email.trim().toLowerCase(),
+        });
+        if (emailError) throw emailError;
+        toast.success('Email de login atualizado. Confirme no seu novo email.');
+      }
+
+      const { data, error } = await supabase.auth.updateUser({
+        data: {
+          full_name: fullName.trim(),
+          contact_email: contactEmail.trim().toLowerCase(),
+          phone: phone.trim(),
+        },
+      });
+
+      if (error) throw error;
+      if (data.user) {
+        setUser(data.user);
+      }
+      toast.success('Configuracoes atualizadas com sucesso.');
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      const message = error instanceof Error ? error.message : 'Nao foi possivel salvar as configuracoes.';
+      toast.error(message);
+    } finally {
+      setSavingSettings(false);
+    }
   };
 
   if (!user) {
@@ -998,10 +1039,46 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                     <h3 className="text-lg font-medium mb-6">Informações da Conta</h3>
                     <div className="space-y-6">
                       <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">
-                          Email
-                        </label>
-                        <p className="text-sm">{user.email}</p>
+                        <Label htmlFor="settings-full-name">Nome completo</Label>
+                        <Input
+                          id="settings-full-name"
+                          value={fullName}
+                          onChange={(event) => setFullName(event.target.value)}
+                          placeholder="Seu nome completo"
+                          className="mt-2"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="settings-email">Email de login</Label>
+                        <Input
+                          id="settings-email"
+                          type="email"
+                          value={email}
+                          onChange={(event) => setEmail(event.target.value)}
+                          placeholder="voce@email.com"
+                          className="mt-2"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="settings-contact-email">Email de contato</Label>
+                        <Input
+                          id="settings-contact-email"
+                          type="email"
+                          value={contactEmail}
+                          onChange={(event) => setContactEmail(event.target.value)}
+                          placeholder="contato@email.com"
+                          className="mt-2"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="settings-phone">Telefone / WhatsApp</Label>
+                        <Input
+                          id="settings-phone"
+                          value={phone}
+                          onChange={(event) => setPhone(event.target.value)}
+                          placeholder="+55 11 90000-0000"
+                          className="mt-2"
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-muted-foreground mb-2">
@@ -1013,6 +1090,11 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                             : 'N/A'}
                         </p>
                       </div>
+                      <div>
+                        <Button onClick={handleSaveSettings} disabled={savingSettings}>
+                          {savingSettings ? 'Salvando...' : 'Salvar configuracoes'}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1021,24 +1103,6 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           </div>
         )}
       </div>
-
-
-      {/* Settings Coming Soon Dialog */}
-      <Dialog open={showSettingsComingSoonDialog} onOpenChange={setShowSettingsComingSoonDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Em Breve!</DialogTitle>
-            <DialogDescription>
-              A funcionalidade de configurações está em desenvolvimento. Em breve você poderá personalizar sua experiência!
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => setShowSettingsComingSoonDialog(false)}>
-              Entendi
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Sign Out Confirmation Dialog */}
       <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>

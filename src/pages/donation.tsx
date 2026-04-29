@@ -9,8 +9,10 @@ import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
 import { Heart, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { trackLifecycleEvent } from '@/lib/lifecycle';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
 const PRESET_AMOUNTS = [25, 50, 100, 250, 500];
 
@@ -62,12 +64,12 @@ export function DonationPage() {
     setIsProcessing(true);
 
     try {
-      const apiUrl = import.meta.env.PROD
-        ? 'https://jornadadeinsights.com'
-        : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
+      await trackLifecycleEvent('donation_started', {
+        amount: Number(finalAmount.toFixed(2)),
+        recurring: isRecurring,
+      });
       // Create donation checkout session
-      const response = await fetch(`${apiUrl}/api/create-donation-session`, {
+      const response = await fetch(`${API_BASE_URL}/api/create-donation-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

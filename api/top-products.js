@@ -1,4 +1,6 @@
 import Stripe from 'stripe';
+import { applyCors, handleOptionsRequest } from './_lib/cors.js';
+import { logger, getRequestMeta } from './_lib/logger.js';
 
 // Initialize Stripe with error handling
 let stripe;
@@ -7,37 +9,29 @@ try {
     apiVersion: '2023-10-16',
   });
 } catch (error) {
-  console.error('Failed to initialize Stripe:', error);
+  logger.error('top_products_stripe_init_failed', {
+    errorMessage: error instanceof Error ? error.message : 'unknown_error',
+  });
 }
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
-    ? 'https://jornadadeinsights.com'
-    : 'http://localhost:5173');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With'
-  );
-  res.setHeader('Content-Type', 'application/json');
+  const requestMeta = getRequestMeta(req);
+  applyCors(req, res, { methods: 'GET,OPTIONS' });
 
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
+  if (handleOptionsRequest(req, res)) {
     return;
   }
 
   // Only allow GET requests
   if (req.method !== 'GET') {
+    logger.warn('top_products_method_not_allowed', requestMeta);
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
   // Validate Stripe initialization
   if (!stripe) {
-    console.error('Stripe not initialized');
+    logger.error('top_products_stripe_unavailable', requestMeta);
     res.status(500).json({ 
       error: 'Payment service unavailable',
       products: [] // Return empty array instead of error
@@ -51,8 +45,6 @@ export default async function handler(req, res) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfMonthUnix = Math.floor(startOfMonth.getTime() / 1000);
     
-    console.log('Fetching charges from:', new Date(startOfMonthUnix * 1000).toISOString());
-
     // Fetch successful charges from this month with error handling
     let charges;
     try {
@@ -61,9 +53,11 @@ export default async function handler(req, res) {
         limit: 100,
         status: 'succeeded'
       });
-      console.log('Received charges:', charges?.data?.length || 0, 'charges');
     } catch (stripeError) {
-      console.error('Stripe API error:', stripeError);
+      logger.error('top_products_stripe_api_failed', {
+        ...requestMeta,
+        errorMessage: stripeError instanceof Error ? stripeError.message : 'unknown_error',
+      });
       // Return empty array instead of error
       res.json({ products: [] });
       return;
@@ -71,50 +65,58 @@ export default async function handler(req, res) {
 
     // Validate charges data
     if (!charges?.data || !Array.isArray(charges.data)) {
-      console.error('Invalid charges data received from Stripe');
+      logger.warn('top_products_invalid_stripe_payload', requestMeta);
       res.json({ products: [] });
       return;
     }
 
-    // Group charges by product name and count sales
+    // Normalize by a single currency to avoid mixing totals from different currencies.
+    const primaryCurrency = charges.data.find((charge) => charge.currency)?.currency || 'brl';
+    const normalizedCharges = charges.data.filter((charge) => charge.currency === primaryCurrency);
+
+    // Group charges by product name and count sales/revenue.
     const productMap = new Map();
 
-    charges.data.forEach(charge => {
+    normalizedCharges.forEach(charge => {
       if (!charge) return; // Skip invalid charges
       const productNames = charge.metadata?.product_names || charge.description || 'Unknown Product';
+      const chargeAmount = (charge.amount || 0) / 100;
       productNames.split(',').forEach(name => {
         const trimmed = name.trim();
         if (!trimmed) return;
-        const current = productMap.get(trimmed) || { sales: 0 };
+        const current = productMap.get(trimmed) || { sales: 0, revenue: 0 };
         productMap.set(trimmed, {
-          sales: current.sales + 1
+          sales: current.sales + 1,
+          revenue: Number((current.revenue + chargeAmount).toFixed(2)),
         });
       });
     });
-
-    console.log('Product map entries:', productMap.size);
 
     // Convert to array and sort by sales
     const products = Array.from(productMap.entries())
       .map(([name, data]) => ({
         name: name || 'Unknown Product',
-        sales: data.sales || 0
+        sales: data.sales || 0,
+        revenue: data.revenue || 0,
       }))
       .sort((a, b) => (b.sales || 0) - (a.sales || 0))
       .slice(0, 3); // Get top 3 products
 
-    console.log('Final products array:', products);
-
     // Always return a valid response
     res.json({ 
       products,
+      currency: primaryCurrency.toUpperCase(),
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error in top-products handler:', error);
+    logger.error('top_products_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
     // Return empty array instead of error
     res.json({ 
       products: [],
+      currency: 'BRL',
       timestamp: new Date().toISOString()
     });
   }

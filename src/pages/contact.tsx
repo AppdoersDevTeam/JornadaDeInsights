@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, MapPin, Send, Clock, CheckCircle, ChevronDown, Loader2, ArrowRight, Facebook } from 'lucide-react';
+import { Mail, MapPin, Send, Clock, CheckCircle, ChevronDown, Loader2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, Variants } from 'framer-motion';
 

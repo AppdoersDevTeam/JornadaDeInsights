@@ -1,4 +1,6 @@
 import Stripe from 'stripe';
+import { applyCors, handleOptionsRequest } from './_lib/cors.js';
+import { logger, getRequestMeta } from './_lib/logger.js';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -6,26 +8,16 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
-    ? 'https://jornadadeinsights.com'
-    : 'http://localhost:5173');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With'
-  );
-  res.setHeader('Content-Type', 'application/json');
+  const requestMeta = getRequestMeta(req);
+  applyCors(req, res, { methods: 'POST,OPTIONS' });
 
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
+  if (handleOptionsRequest(req, res)) {
     return;
   }
 
   // Only allow POST requests
   if (req.method !== 'POST') {
+    logger.warn('create_donation_method_not_allowed', requestMeta);
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
@@ -42,11 +34,11 @@ export default async function handler(req, res) {
 
     // Validate environment variables
     if (!process.env.STRIPE_SECRET_KEY) {
-      console.error('Missing STRIPE_SECRET_KEY environment variable');
+      logger.error('create_donation_missing_stripe_key', requestMeta);
       return res.status(500).json({ error: 'Server configuration error: Missing STRIPE_SECRET_KEY' });
     }
     if (!process.env.FRONTEND_URL) {
-      console.error('Missing FRONTEND_URL environment variable');
+      logger.error('create_donation_missing_frontend_url', requestMeta);
       return res.status(500).json({ error: 'Server configuration error: Missing FRONTEND_URL' });
     }
 
@@ -91,9 +83,12 @@ export default async function handler(req, res) {
 
     res.status(200).json({ sessionId: session.id });
   } catch (error) {
-    console.error('Error creating donation checkout session:', error);
+    logger.error('create_donation_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
     res.status(500).json({ 
-      error: error.message || 'Falha ao criar sessão de pagamento' 
+      error: (error instanceof Error ? error.message : null) || 'Falha ao criar sessão de pagamento' 
     });
   }
 }

@@ -8,12 +8,12 @@ import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { LazyImage } from '@/components/shop/lazy-image';
+import { trackLifecycleEvent } from '@/lib/lifecycle';
 
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-// Server URL
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
 interface CartItem {
   id: string;
@@ -41,6 +41,7 @@ export function CartPage() {
   const location = useLocation();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [recommendedEbooks, setRecommendedEbooks] = useState<Ebook[]>([]);
   const { state: { items }, totalCount, totalPrice, clearCart, addItem, removeItem, decrementItem } = useCart();
 
   // Check authentication status
@@ -82,6 +83,41 @@ export function CartPage() {
     return () => authListener.subscription.unsubscribe();
   }, [clearCart, addItem]);
 
+  useEffect(() => {
+    const loadRecommendations = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('ebooks_metadata')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(6);
+
+        if (error) throw error;
+
+        const cartIds = new Set(items.map((item) => item.id));
+        const suggestions = (data || [])
+          .filter((ebook) => !cartIds.has(ebook.id))
+          .slice(0, 3)
+          .map((ebook) => ({
+            ...ebook,
+            cover_url: ebook.filename
+              ? supabase.storage.from('store-assets').getPublicUrl(`covers/${ebook.filename}`).data.publicUrl
+              : undefined,
+          }));
+
+        setRecommendedEbooks(suggestions);
+      } catch (error) {
+        console.error('Failed to load recommendations:', error);
+      }
+    };
+
+    if (items.length > 0) {
+      loadRecommendations();
+    } else {
+      setRecommendedEbooks([]);
+    }
+  }, [items]);
+
   const formatPrice = (value: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
@@ -101,21 +137,25 @@ export function CartPage() {
     }
 
     try {
+      await trackLifecycleEvent('checkout_started', {
+        itemCount: items.length,
+        total: Number(totalPrice.toFixed(2)),
+        userEmail: user?.email ?? null,
+      });
       const stripe = await stripePromise;
       if (!stripe) throw new Error('Stripe failed to initialize');
-
-      // Get the correct API URL based on environment
-      const apiUrl = process.env.NODE_ENV === 'production'
-        ? 'https://jornadadeinsights.com'
-        : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       // Create checkout session
-      const response = await fetch(`${apiUrl}/api/create-checkout-session`, {
+      const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          customerEmail: user?.email ?? undefined,
           items: items.map(item => {
             // Ensure image URL is absolute and uses HTTPS
             let imageUrl = item.cover_url;
@@ -256,6 +296,39 @@ export function CartPage() {
                   <Button variant="outline" onClick={clearCart}>Limpar Carrinho</Button>
                   <Button onClick={handleCheckout}>Finalizar Compra</Button>
                 </div>
+
+                {recommendedEbooks.length > 0 && (
+                  <div className="pt-8 border-t">
+                    <h3 className="text-lg font-semibold mb-3">Adicione e economize com estes complementos</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Produtos sugeridos para aumentar o valor da sua jornada.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {recommendedEbooks.map((ebook) => (
+                        <div key={ebook.id} className="border rounded-lg p-3">
+                          <div className="flex items-center gap-3">
+                            <LazyImage
+                              src={ebook.cover_url || ''}
+                              alt={ebook.title}
+                              className="w-14 h-14 object-cover rounded"
+                            />
+                            <div className="flex-1">
+                              <p className="font-medium line-clamp-1">{ebook.title}</p>
+                              <p className="text-sm text-muted-foreground">{formatPrice(ebook.price)}</p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            className="w-full mt-3"
+                            onClick={() => addItem(ebook)}
+                          >
+                            Adicionar ao carrinho
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

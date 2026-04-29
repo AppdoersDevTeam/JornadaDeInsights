@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, Headphones, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, LogOut, BookOpen } from 'lucide-react';
+import { Menu, X, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, LogOut, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
 import { useAuth } from '@/context/auth-context';
+import { useLanguage } from '@/context/language-context';
 import jornadaLogo from '@/Jornada logo.png';
 
 export function Header() {
@@ -12,6 +13,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const { totalCount } = useCart();
   const { user } = useAuth();
+  const { language, setLanguage, t, recommendedLanguage } = useLanguage();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -26,19 +28,19 @@ export function Header() {
   }, []);
 
   const navLinks = user ? [
-    { to: '/', label: 'Home' },
-    { to: '/about', label: 'Sobre' },
-    { to: '/podcast', label: 'Podcast' },
-    { to: '/curiosidades', label: 'Curiosidades' },
-    { to: '/shop', label: 'Store' },
-    { to: '/contact', label: 'Contato' }
+    { to: '/', label: t('nav.home', 'Home') },
+    { to: '/about', label: t('nav.about', 'Sobre') },
+    { to: '/podcast', label: t('nav.podcast', 'Podcast') },
+    { to: '/curiosidades', label: t('nav.curiosidades', 'Curiosidades') },
+    { to: '/shop', label: t('nav.shop', 'Loja') },
+    { to: '/contact', label: t('nav.contact', 'Contato') }
   ] : [
-    { to: '/', label: 'Início' },
-    { to: '/about', label: 'Sobre' },
-    { to: '/podcast', label: 'Podcast' },
-    { to: '/curiosidades', label: 'Curiosidades' },
-    { to: '/shop', label: 'Loja' },
-    { to: '/contact', label: 'Contato' }
+    { to: '/', label: t('nav.home', 'Início') },
+    { to: '/about', label: t('nav.about', 'Sobre') },
+    { to: '/podcast', label: t('nav.podcast', 'Podcast') },
+    { to: '/curiosidades', label: t('nav.curiosidades', 'Curiosidades') },
+    { to: '/shop', label: t('nav.shop', 'Loja') },
+    { to: '/contact', label: t('nav.contact', 'Contato') }
   ];
 
   return (
@@ -68,18 +70,27 @@ export function Header() {
         </nav>
         {/* Right: Actions */}
         <div className="hidden lg:flex flex-shrink-0 justify-end items-center gap-2 xl:gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-background border-background hover:bg-background hover:text-primary bg-background/10 whitespace-nowrap px-2 xl:px-3"
+            onClick={() => setLanguage(language === 'pt-BR' ? 'en' : 'pt-BR')}
+            title={recommendedLanguage === 'en' ? 'English' : 'Português (Brasil)'}
+          >
+            {language === 'pt-BR' ? 'PT' : 'EN'}
+          </Button>
           {user ? (
             <>
               <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
                 <Link to="/dashboard" className="flex items-center gap-1.5 xl:gap-2">
                   <LayoutDashboard className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0" />
-                  <span className="text-xs xl:text-sm font-medium">Dashboard</span>
+                  <span className="text-xs xl:text-sm font-medium">{t('nav.dashboard', 'Dashboard')}</span>
                 </Link>
               </Button>
               <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 whitespace-nowrap px-2 xl:px-3">
                 <Link to="/shop" className="text-xs xl:text-sm font-medium">
-                  <span className="hidden xl:inline">Adquirir Meus eBooks</span>
-                  <span className="xl:hidden">eBooks</span>
+                  <span className="hidden xl:inline">{t('nav.ebooks.cta', 'Adquirir Meus eBooks')}</span>
+                  <span className="xl:hidden">{t('nav.ebooks.short', 'eBooks')}</span>
                 </Link>
               </Button>
               <div className="flex items-center gap-1 xl:gap-2">
@@ -100,8 +111,8 @@ export function Header() {
             <>
               <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 whitespace-nowrap px-2 xl:px-3">
                 <Link to="/shop" className="text-xs xl:text-sm font-medium">
-                  <span className="hidden xl:inline">Adquirir Meus eBooks</span>
-                  <span className="xl:hidden">eBooks</span>
+                  <span className="hidden xl:inline">{t('nav.ebooks.cta', 'Adquirir Meus eBooks')}</span>
+                  <span className="xl:hidden">{t('nav.ebooks.short', 'eBooks')}</span>
                 </Link>
               </Button>
               <Link to="/cart" className="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
@@ -190,7 +201,7 @@ export function Header() {
             onClick={closeMenu}
           >
             <ShoppingCart className="h-5 w-5" />
-            Carrinho
+            {t('nav.cart', 'Carrinho')}
             {totalCount > 0 && (
               <span className="ml-2 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
                 {totalCount}
@@ -203,9 +214,7 @@ export function Header() {
             <div className="flex items-center gap-2 w-full">
               <NavLink
                 to="/dashboard?tab=cart"
-                className={({ isActive }) =>
-                  `flex items-center gap-3 text-lg px-4 py-3 flex-1 rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white`
-                }
+                className="flex items-center gap-3 text-lg px-4 py-3 flex-1 rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
                 onClick={closeMenu}
               >
                 <ShoppingCart className="h-5 w-5" />
@@ -240,7 +249,7 @@ export function Header() {
               onClick={closeMenu}
             >
               <User className="h-5 w-5" />
-              Entrar
+              {t('nav.signIn', 'Entrar')}
             </NavLink>
           )}
         </nav>

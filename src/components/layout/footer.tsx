@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { Youtube, Instagram, Headphones, ChevronDown, ChevronUp, Facebook } from 'lucide-react';
+import { Youtube, Instagram, ChevronDown, ChevronUp, Facebook } from 'lucide-react';
 import { FaSpotify } from 'react-icons/fa';
 import jornadaLogo from '@/Jornada logo footer.png';
+import { useLanguage } from '@/context/language-context';
 
 export function Footer() {
+  const { t } = useLanguage();
   const [quickOpen, setQuickOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const currentYear = new Date().getFullYear();
@@ -26,9 +28,7 @@ export function Footer() {
               <Link to="/" className="mb-4">
                 <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
               </Link>
-              <p className="text-muted-foreground mb-6 text-base">
-                Um podcast para entender a Bíblia com profundidade e simplicidade.
-              </p>
+              <p className="text-muted-foreground mb-6 text-base">{t('footer.tagline', '')}</p>
               <div className="flex space-x-4">
                 <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <Youtube className="h-5 w-5" />
@@ -47,48 +47,68 @@ export function Footer() {
             {/* Quick Links Accordion */}
             <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
               <button onClick={() => setQuickOpen(!quickOpen)} className="flex justify-between items-center w-full text-base font-medium text-foreground py-3 px-4 focus:outline-none">
-                Links Rápidos
+                {t('footer.quickLinks', '')}
                 {quickOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
               <ul className={`${quickOpen ? 'block' : 'hidden'} space-y-3 py-2 px-4`}>
                 <li>
-                  <Link to="/user-dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">Dashboard</Link>
+                  <Link to="/user-dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.dashboard', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Início</Link>
+                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.home', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">Sobre</Link>
+                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.about', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">Podcast</Link>
+                  <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.podcast', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Loja</Link>
+                  <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.shop', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contato</Link>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.contact', '')}
+                  </Link>
                 </li>
               </ul>
             </div>
             {/* Resources Accordion */}
             <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
               <button onClick={() => setResourcesOpen(!resourcesOpen)} className="flex justify-between items-center w-full text-base font-medium text-foreground py-3 px-4 focus:outline-none">
-                Recursos
+                {t('footer.resources', '')}
                 {resourcesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
               <ul className={`${resourcesOpen ? 'block' : 'hidden'} space-y-3 py-2 px-4`}>
                 <li>
-                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
+                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('footer.privacy', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
+                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('footer.terms', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</Link>
+                  <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('footer.faq', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</Link>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('footer.support', '')}
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -100,9 +120,7 @@ export function Footer() {
               <Link to="/" className="mb-4">
                 <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
               </Link>
-              <p className="text-muted-foreground mb-6 text-base">
-                Um podcast para entender a Bíblia com profundidade e simplicidade.
-              </p>
+              <p className="text-muted-foreground mb-6 text-base">{t('footer.tagline', '')}</p>
               <div className="flex space-x-4">
                 <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <Youtube className="h-5 w-5" />
@@ -120,53 +138,80 @@ export function Footer() {
             </div>
             {/* Quick Links */}
             <div className="flex flex-col items-center text-center md:items-start md:text-left w-full max-w-xs">
-              <h3 className="text-base font-medium mb-4 text-foreground">Links Rápidos</h3>
+              <h3 className="text-base font-medium mb-4 text-foreground">{t('footer.quickLinks', '')}</h3>
               <ul className="space-y-3 md:block">
                 <li>
-                  <Link to="/user-dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">Dashboard</Link>
+                  <Link to="/user-dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.dashboard', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Início</Link>
+                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.home', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">Sobre</Link>
+                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.about', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">Podcast</Link>
+                  <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.podcast', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Loja</Link>
+                  <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.shop', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contato</Link>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.contact', '')}
+                  </Link>
                 </li>
               </ul>
             </div>
             {/* Resources */}
             <div className="flex flex-col items-center text-center md:items-start md:text-left w-full max-w-xs">
-              <h3 className="text-base font-medium mb-4 text-foreground">Recursos</h3>
+              <h3 className="text-base font-medium mb-4 text-foreground">{t('footer.resources', '')}</h3>
               <ul className="space-y-3 md:block">
                 <li>
-                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
+                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('footer.privacy', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
+                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('footer.terms', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</Link>
+                  <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('footer.faq', '')}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</Link>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('footer.support', '')}
+                  </Link>
                 </li>
               </ul>
             </div>
           </div>
           <div className="border-t border-border/50 mt-12 pt-6 flex flex-col md:flex-row justify-center md:justify-between items-center">
             <p className="text-sm text-muted-foreground">
-              © {currentYear} Patricia. Todos os direitos reservados.
+              © {currentYear} {t('footer.rights', '')}
             </p>
             <p className="text-sm text-muted-foreground mt-2 md:mt-0">
-              Website desenvolvido por <a href="https://appdoers.co.nz" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">appdoers.co.nz</a> em parceria com <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">buildwithsds.com</a>
+              {t('footer.credits', '')}{' '}
+              <a href="https://appdoers.co.nz" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                appdoers.co.nz
+              </a>{' '}
+              {t('footer.and', '')}{' '}
+              <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                buildwithsds.com
+              </a>
             </p>
           </div>
         </div>

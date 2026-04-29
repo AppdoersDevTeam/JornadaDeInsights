@@ -8,6 +8,12 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
 dist
 dist-ssr
 *.local
@@ -34,3 +40,5 @@ server/.env
 *-firebase-adminsdk-*.json
 **/firebase-adminsdk-*.json
 **/*-firebase-adminsdk-*.json
+.vercel
+.env*.local

@@ -1,4 +1,7 @@
 import Stripe from 'stripe';
+import { applyCors, handleOptionsRequest } from './_lib/cors.js';
+import { logger, getRequestMeta } from './_lib/logger.js';
+import { captureServerError } from './_lib/monitoring.js';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -26,50 +29,37 @@ const validateCartItems = (items) => {
 };
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
-    ? 'https://jornadadeinsights.com'
-    : 'http://localhost:5173');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With'
-  );
-  res.setHeader('Content-Type', 'application/json');
+  const requestMeta = getRequestMeta(req);
+  applyCors(req, res, { methods: 'POST,OPTIONS' });
 
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
+  if (handleOptionsRequest(req, res)) {
     return;
   }
 
   // Only allow POST requests
   if (req.method !== 'POST') {
+    logger.warn('create_checkout_method_not_allowed', requestMeta);
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
   try {
-    // Log request body for debugging
-    console.log('Request body:', JSON.stringify(req.body, null, 2));
-
     // Validate environment variables
     if (!process.env.STRIPE_SECRET_KEY) {
-      console.error('Missing STRIPE_SECRET_KEY environment variable');
+      logger.error('create_checkout_missing_stripe_key', requestMeta);
       res.status(500).json({ error: 'Server configuration error: Missing STRIPE_SECRET_KEY' });
       return;
     }
     if (!process.env.FRONTEND_URL) {
-      console.error('Missing FRONTEND_URL environment variable');
+      logger.error('create_checkout_missing_frontend_url', requestMeta);
       res.status(500).json({ error: 'Server configuration error: Missing FRONTEND_URL' });
       return;
     }
 
-    const { items } = req.body;
+    const { items, customerEmail } = req.body;
 
     if (!items) {
-      console.error('No items provided in request body');
+      logger.warn('create_checkout_missing_items', requestMeta);
       res.status(400).json({ error: 'No items provided' });
       return;
     }
@@ -78,8 +68,9 @@ export default async function handler(req, res) {
     try {
       validateCartItems(items);
     } catch (error) {
-      console.error('Cart validation error:', error.message);
-      res.status(400).json({ error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Invalid cart payload';
+      logger.warn('create_checkout_validation_failed', { ...requestMeta, errorMessage });
+      res.status(400).json({ error: errorMessage });
       return;
     }
 
@@ -91,6 +82,7 @@ export default async function handler(req, res) {
       mode: 'payment',
       locale: 'pt-BR',
       currency: 'brl',
+      customer_email: typeof customerEmail === 'string' ? customerEmail : undefined,
       line_items: items.map(item => {
         // Ensure image URL is properly formatted for Stripe
         let imageUrl = item.image;
@@ -102,7 +94,7 @@ export default async function handler(req, res) {
             url.protocol = 'https:';
             imageUrl = url.toString();
           } catch (error) {
-            console.error('Error processing image URL:', error);
+            logger.warn('create_checkout_invalid_image_url', requestMeta);
             imageUrl = undefined;
           }
         }
@@ -130,7 +122,8 @@ export default async function handler(req, res) {
       }),
       payment_intent_data: {
         metadata: {
-          product_names: productNames
+          product_names: productNames,
+          type: 'ebook_purchase'
         }
       },
       success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -139,13 +132,22 @@ export default async function handler(req, res) {
       billing_address_collection: 'required'
     });
 
+    logger.info('create_checkout_session_created', {
+      ...requestMeta,
+      itemCount: items.length,
+      hasCustomerEmail: typeof customerEmail === 'string' && customerEmail.length > 0,
+    });
     res.status(200).json({ sessionId: session.id });
   } catch (error) {
-    console.error('Error creating checkout session:', error);
+    captureServerError(error, { route: 'create-checkout-session' });
+    logger.error('create_checkout_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
     // Ensure we're sending a proper JSON response even for errors
     res.status(500).json({
       error: 'An unexpected error occurred',
-      details: error.message
+      details: error instanceof Error ? error.message : 'unknown_error',
     });
   }
 } 

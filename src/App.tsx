@@ -29,13 +29,104 @@ import { CuriosidadesPage } from '@/pages/curiosidades';
 import { CuriosidadeDetailsPage } from '@/pages/curiosidade-details';
 import { CuriosidadeEditorPage } from '@/pages/curiosidade-editor';
 import { TabType } from '@/types/dashboard';
+import { ForgotPasswordPage } from '@/pages/forgot-password';
+import { captureClientError } from '@/lib/monitoring';
+import { LanguageProvider, useLanguage } from '@/context/language-context';
+import { LanguagePickerDialog } from '@/components/language/language-picker-dialog';
+
+const ROUTE_METADATA: Record<'pt-BR' | 'en', Record<string, { title: string; description: string }>> = {
+  'pt-BR': {
+    '/': {
+      title: 'Jornada de Insights | Patricia',
+      description:
+        'Podcasts, videos e eBooks cristãos para fortalecer sua jornada espiritual com conteúdo bíblico prático.',
+    },
+    '/about': {
+      title: 'Sobre | Jornada de Insights',
+      description:
+        'Conheça a missão da Jornada de Insights e o propósito por trás dos conteúdos cristãos.',
+    },
+    '/podcast': {
+      title: 'Podcast | Jornada de Insights',
+      description:
+        'Ouça episódios com reflexões bíblicas e temas de fé para o seu dia a dia.',
+    },
+    '/shop': {
+      title: 'Loja de eBooks | Jornada de Insights',
+      description:
+        'Acesse eBooks cristãos digitais para aprofundar seus estudos e devocionais.',
+    },
+    '/contact': {
+      title: 'Contato | Jornada de Insights',
+      description:
+        'Fale com a equipe da Jornada de Insights para dúvidas, convites e parcerias.',
+    },
+    '/donation': {
+      title: 'Apoie o Ministério | Jornada de Insights',
+      description:
+        'Contribua para manter o projeto ativo e levar conteúdo cristão a mais pessoas.',
+    },
+    '/signin': {
+      title: 'Entrar | Jornada de Insights',
+      description: 'Acesse sua conta para ver seus eBooks e acompanhar seu histórico.',
+    },
+    '/signup': {
+      title: 'Criar Conta | Jornada de Insights',
+      description: 'Crie sua conta para comprar, acessar e organizar seus conteúdos.',
+    },
+  },
+  en: {
+    '/': {
+      title: 'Journey of Insights | Patricia',
+      description:
+        'Christian podcasts, videos and eBooks to strengthen your spiritual journey with practical biblical teaching.',
+    },
+    '/about': {
+      title: 'About | Journey of Insights',
+      description: 'Learn about the mission behind Journey of Insights and its biblical content.',
+    },
+    '/podcast': {
+      title: 'Podcast | Journey of Insights',
+      description: 'Listen to episodes with biblical reflections and faith-centered topics.',
+    },
+    '/shop': {
+      title: 'eBook Store | Journey of Insights',
+      description: 'Browse Christian eBooks designed to deepen your studies and devotional life.',
+    },
+    '/contact': {
+      title: 'Contact | Journey of Insights',
+      description: 'Reach out to the Journey of Insights team for questions and partnerships.',
+    },
+    '/donation': {
+      title: 'Support the Ministry | Journey of Insights',
+      description: 'Help keep this project active and reach more people with biblical content.',
+    },
+    '/signin': {
+      title: 'Sign In | Journey of Insights',
+      description: 'Access your account to view your eBooks and order history.',
+    },
+    '/signup': {
+      title: 'Create Account | Journey of Insights',
+      description: 'Create your account to buy and manage your content.',
+    },
+  },
+};
 
 function App() {
+  return (
+    <LanguageProvider>
+      <AppRoutes />
+    </LanguageProvider>
+  );
+}
+
+function AppRoutes() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const location = useLocation();
   const navigate = useNavigate();
   const lastTrackedPathRef = useRef<string | null>(null);
-  const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
+  const { language } = useLanguage();
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -98,8 +189,32 @@ function App() {
       body: payload,
     }).catch((error) => {
       console.error('Failed to record page view', error);
+      captureClientError(error, {
+        area: 'site-analytics-track',
+        route: location.pathname,
+      });
     });
   }, [location.pathname, location.search, SERVER_URL]);
+
+  useEffect(() => {
+    const localeMeta = ROUTE_METADATA[language];
+    const routeMeta = localeMeta[location.pathname] || localeMeta['/'];
+    document.title = routeMeta.title;
+
+    const descriptionTag = document.querySelector('meta[name="description"]');
+    if (descriptionTag) {
+      descriptionTag.setAttribute('content', routeMeta.description);
+    }
+
+    const canonicalHref = `https://jornadadeinsights.com${location.pathname}`;
+    let canonicalTag = document.querySelector('link[rel="canonical"]');
+    if (!canonicalTag) {
+      canonicalTag = document.createElement('link');
+      canonicalTag.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalTag);
+    }
+    canonicalTag.setAttribute('href', canonicalHref);
+  }, [location.pathname, language]);
 
   const handleTabChange = (tab: string | TabType) => {
     const newTab = tab as TabType;
@@ -132,6 +247,7 @@ function App() {
             <Route path="signup" element={<SignUp />} />
             <Route path="check-email" element={<CheckEmailPage />} />
             <Route path="confirm-email" element={<ConfirmEmailPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
           </Route>
 
           <Route path="/dashboard" element={
@@ -173,6 +289,7 @@ function App() {
             </AdminLayout>
           } />
         </Routes>
+        <LanguagePickerDialog />
         <Toaster />
       </CartProvider>
     </AuthProvider>

@@ -18,6 +18,20 @@ const QUOTA_LIMIT = 10000; // Daily quota limit
 const QUOTA_RESET_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 let lastQuotaReset = Date.now();
 
+interface YouTubeSearchItem {
+  id?: { videoId?: string };
+  snippet: {
+    title: string;
+    description: string;
+    publishedAt: string;
+  };
+}
+
+interface YouTubeVideoDetailItem {
+  id: string;
+  contentDetails: { duration: string };
+}
+
 // Reset quota counter if 24 hours have passed
 function checkAndResetQuota() {
   const now = Date.now();
@@ -142,9 +156,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Get video details
-    const videoIds = searchData.items
-      .filter((item: any) => item.id?.videoId)
-      .map((item: any) => item.id.videoId)
+    const searchItems = (searchData.items || []) as YouTubeSearchItem[];
+    const videoIds = searchItems
+      .filter((item) => item.id?.videoId)
+      .map((item) => item.id!.videoId!)
       .join(',');
 
     // Calculate quota cost for videos request
@@ -193,14 +208,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return hours * 3600 + minutes * 60 + seconds;
     };
 
-    const allowedIds = detailsData.items
-      .filter((d: any) => parseISO8601(d.contentDetails.duration) > 120)
-      .map((d: any) => d.id);
+    const detailItems = (detailsData.items || []) as YouTubeVideoDetailItem[];
+    const allowedIds = detailItems
+      .filter((detail) => parseISO8601(detail.contentDetails.duration) > 120)
+      .map((detail) => detail.id);
 
-    const videos = searchData.items
-      .filter((item: any) => allowedIds.includes(item.id.videoId))
-      .map((item: any) => ({
-        id: item.id.videoId,
+    const videos = searchItems
+      .filter((item) => item.id?.videoId && allowedIds.includes(item.id.videoId))
+      .map((item) => ({
+        id: item.id!.videoId!,
         title: item.snippet.title,
         description: item.snippet.description,
         date: new Date(item.snippet.publishedAt).toLocaleDateString('en-US', {
@@ -209,8 +225,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           year: 'numeric',
         }),
         duration: '',
-        image: `https://img.youtube.com/vi/${item.id.videoId}/hqdefault.jpg`,
-        youtubeUrl: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+        image: `https://img.youtube.com/vi/${item.id!.videoId!}/hqdefault.jpg`,
+        youtubeUrl: `https://www.youtube.com/watch?v=${item.id!.videoId!}`,
         spotifyUrl: 'https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW',
       }));
 

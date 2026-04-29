@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Book, Headphones } from 'lucide-react';
@@ -211,10 +211,10 @@ const SignIn = () => {
 
                   <div className="flex items-center justify-between">
                     <Button variant="link" asChild className="text-primary hover:text-primary/90">
-                      <a href="/forgot-password">Esqueceu sua senha?</a>
+                      <Link to="/forgot-password">Esqueceu sua senha?</Link>
                     </Button>
                     <Button variant="link" asChild className="text-primary hover:text-primary/90">
-                      <a href="/signup">Criar conta</a>
+                      <Link to="/signup">Criar conta</Link>
                     </Button>
                   </div>
 

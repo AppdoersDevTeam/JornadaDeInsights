@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { supabase, getCategories, createCategory, type Category } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import type { User } from '@supabase/supabase-js';
 import {
   Dialog,
   DialogContent,
@@ -46,8 +47,8 @@ export default function EditEbookForm({ ebook, onEditSuccess, onCancel }: EditEb
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [error, setError] = useState('');
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [error] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(ebook.metadata.category_id || '');
   const [createCategoryDialogOpen, setCreateCategoryDialogOpen] = useState(false);
@@ -312,9 +313,10 @@ export default function EditEbookForm({ ebook, onEditSuccess, onCancel }: EditEb
                   setCreateCategoryDialogOpen(false);
                   setNewCategoryName('');
                   setNewCategoryDescription('');
-                } catch (error: any) {
+                } catch (error: unknown) {
+                  const errorMessage = error instanceof Error ? error.message : 'Failed to create category';
                   console.error('Error creating category:', error);
-                  toast.error(error.message || 'Failed to create category');
+                  toast.error(errorMessage);
                 } finally {
                   setIsCreatingCategory(false);
                 }

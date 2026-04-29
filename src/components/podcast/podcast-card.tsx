@@ -7,6 +7,8 @@ export interface PodcastEpisode {
   id: string;
   title: string;
   description: string;
+  /** ISO 8601 from YouTube; used to reformat `date` when locale changes */
+  publishedAt?: string;
   date: string;
   duration: string;
   image: string;

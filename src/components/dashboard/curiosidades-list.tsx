@@ -85,9 +85,10 @@ export default function CuriosidadesList() {
       setCategoryDescription('');
       setCategoryDialogOpen(false);
       fetchCategories();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao criar categoria';
       console.error('Error creating category:', error);
-      toast.error(error.message || 'Erro ao criar categoria');
+      toast.error(errorMessage);
     }
   };
 
@@ -105,9 +106,10 @@ export default function CuriosidadesList() {
       setCategoryDescription('');
       setCategoryDialogOpen(false);
       fetchCategories();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar categoria';
       console.error('Error updating category:', error);
-      toast.error(error.message || 'Erro ao atualizar categoria');
+      toast.error(errorMessage);
     }
   };
 
@@ -116,9 +118,10 @@ export default function CuriosidadesList() {
       await deleteCuriosidadesCategory(id);
       toast.success('Categoria deletada com sucesso');
       fetchCategories();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao deletar categoria';
       console.error('Error deleting category:', error);
-      toast.error(error.message || 'Erro ao deletar categoria');
+      toast.error(errorMessage);
     }
   };
 

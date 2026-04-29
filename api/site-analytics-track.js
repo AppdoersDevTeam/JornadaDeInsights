@@ -1,18 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
+import { applyCors, handleOptionsRequest } from './_lib/cors.js';
+import { logger, getRequestMeta } from './_lib/logger.js';
+import { captureServerError } from './_lib/monitoring.js';
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
-  .split(',')
-  .map((value) => value.trim())
-  .filter(Boolean);
-
-const DEFAULT_ALLOWED_ORIGINS = [
-  'https://jornadadeinsights.com',
-  'https://www.jornadadeinsights.com',
-  'http://localhost:5173',
-];
 
 const TRACK_RATE_LIMIT = {
   windowMs: 60_000,
@@ -21,12 +13,8 @@ const TRACK_RATE_LIMIT = {
 
 const rateLimitStore = globalThis.__siteAnalyticsRateLimitStore || new Map();
 globalThis.__siteAnalyticsRateLimitStore = rateLimitStore;
-
-const getAllowedOrigin = (origin) => {
-  const allowed = ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS : DEFAULT_ALLOWED_ORIGINS;
-  if (origin && allowed.includes(origin)) return origin;
-  return allowed[0];
-};
+const dedupeStore = globalThis.__siteAnalyticsDedupeStore || new Map();
+globalThis.__siteAnalyticsDedupeStore = dedupeStore;
 
 const isValidString = (value) => typeof value === 'string' && value.trim().length > 0;
 const BOT_USER_AGENT_PATTERN =
@@ -57,7 +45,9 @@ const normalizeReferrer = (referrer) => {
 
 const normalizeId = (id) => {
   if (!isValidString(id)) return null;
-  return id.trim().slice(0, 128);
+  const normalized = id.trim().slice(0, 128);
+  if (!/^[a-zA-Z0-9_-]+$/.test(normalized)) return null;
+  return normalized;
 };
 
 const isRateLimited = (identifier) => {
@@ -75,30 +65,40 @@ const isRateLimited = (identifier) => {
   return false;
 };
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', getAllowedOrigin(req.headers.origin));
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.setHeader('Content-Type', 'application/json');
+const isDuplicateEvent = (fingerprint) => {
+  const now = Date.now();
+  const duplicateWindowMs = 10_000;
+  const existing = dedupeStore.get(fingerprint);
+  if (existing && now - existing < duplicateWindowMs) {
+    return true;
+  }
+  dedupeStore.set(fingerprint, now);
+  return false;
+};
 
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
+export default async function handler(req, res) {
+  const requestMeta = getRequestMeta(req);
+  applyCors(req, res, { methods: 'POST,OPTIONS' });
+
+  if (handleOptionsRequest(req, res)) {
     return;
   }
 
   if (req.method !== 'POST') {
+    logger.warn('site_analytics_track_method_not_allowed', requestMeta);
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
   if (!supabaseUrl || !supabaseServiceRoleKey) {
+    logger.error('site_analytics_track_missing_supabase_config', requestMeta);
     res.status(500).json({ error: 'Missing Supabase configuration for analytics tracking' });
     return;
   }
 
   const userAgent = String(req.headers['user-agent'] || '');
   if (BOT_USER_AGENT_PATTERN.test(userAgent)) {
+    logger.info('site_analytics_track_bot_filtered', requestMeta);
     res.status(204).end();
     return;
   }
@@ -109,7 +109,14 @@ export default async function handler(req, res) {
     'unknown';
 
   if (isRateLimited(clientIp)) {
+    logger.warn('site_analytics_track_rate_limited', { ...requestMeta, clientIp });
     res.status(429).json({ error: 'Too many requests' });
+    return;
+  }
+
+  if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
+    logger.warn('site_analytics_track_invalid_body_shape', requestMeta);
+    res.status(400).json({ error: 'Invalid analytics payload' });
     return;
   }
 
@@ -117,14 +124,30 @@ export default async function handler(req, res) {
   const normalizedPath = normalizePath(pagePath);
   const normalizedVisitorId = normalizeId(visitorId);
   const normalizedSessionId = normalizeId(sessionId);
+  const normalizedTzOffset =
+    typeof tzOffsetMinutes === 'number' && Number.isFinite(tzOffsetMinutes)
+      ? Math.trunc(tzOffsetMinutes)
+      : null;
 
-  if (!normalizedVisitorId || !normalizedSessionId) {
+  if (
+    !normalizedVisitorId ||
+    !normalizedSessionId ||
+    (normalizedTzOffset !== null && (normalizedTzOffset < -840 || normalizedTzOffset > 840))
+  ) {
+    logger.warn('site_analytics_track_invalid_payload', requestMeta);
     res.status(400).json({ error: 'Invalid analytics payload' });
     return;
   }
 
   // Avoid polluting site analytics with admin dashboard activity.
   if (normalizedPath.startsWith('/dashboard') || normalizedPath.startsWith('/user-dashboard')) {
+    res.status(204).end();
+    return;
+  }
+
+  const dedupeFingerprint = `${normalizedSessionId}:${normalizedVisitorId}:${normalizedPath}`;
+  if (isDuplicateEvent(dedupeFingerprint)) {
+    logger.info('site_analytics_track_duplicate_filtered', requestMeta);
     res.status(204).end();
     return;
   }
@@ -148,19 +171,25 @@ export default async function handler(req, res) {
       region,
       city,
       user_agent: userAgent.slice(0, 1024) || null,
-      tz_offset_minutes:
-        typeof tzOffsetMinutes === 'number' && Number.isFinite(tzOffsetMinutes)
-          ? Math.trunc(tzOffsetMinutes)
-          : null,
+      tz_offset_minutes: normalizedTzOffset,
     });
 
     if (error) {
       throw error;
     }
 
+    logger.info('site_analytics_track_recorded', {
+      ...requestMeta,
+      pagePath: normalizedPath,
+      hasReferrer: Boolean(referrer),
+    });
     res.status(201).json({ ok: true });
   } catch (error) {
-    console.error('site-analytics-track error:', error);
+    captureServerError(error, { route: 'site-analytics-track' });
+    logger.error('site_analytics_track_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
     res.status(500).json({ error: 'Failed to record analytics event' });
   }
 }

@@ -1,8 +1,9 @@
-# Stripe Checkout Server
+# Stripe Checkout Server (Deprecated)
 
-A clean, production-ready Express.js server for handling Stripe Checkout integration.
+This Express server is kept only as historical reference.
+The active production backend is Vercel serverless functions under `api/`.
 
-## Setup
+## Legacy Setup (Reference Only)
 
 1. Install dependencies:
 ```bash
@@ -19,14 +20,14 @@ cp .env.example .env
 - `FRONTEND_URL`: Your frontend application URL
 - `PORT`: Server port (default: 3000)
 
-## Development
+## Legacy Development
 
 Run the server in development mode:
 ```bash
 npm run dev
 ```
 
-## Production
+## Legacy Production
 
 Run the server in production mode:
 ```bash

@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { getCuriosidades, type Curiosidade } from '@/lib/supabase';
 import { CuriosidadeCard } from '@/components/curiosidades/curiosidade-card';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/context/language-context';
 
 export function CuriosidadesPage() {
+  const { t } = useLanguage();
   const [curiosidades, setCuriosidades] = useState<Curiosidade[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +55,7 @@ export function CuriosidadesPage() {
             viewport={{ amount: 0.3 }}
             className="text-3xl md:text-5xl font-heading font-bold mb-4 leading-tight"
           >
-            Curiosidades
+            {t('curiosidades.hero.title', 'Curiosidades')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 50 }}
@@ -62,7 +64,10 @@ export function CuriosidadesPage() {
             viewport={{ amount: 0.3 }}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
           >
-            Descubra insights interessantes e curiosidades sobre a Bíblia e a fé cristã.
+            {t(
+              'curiosidades.hero.subtitle',
+              'Descubra insights interessantes e curiosidades sobre a Bíblia e a fé cristã.',
+            )}
           </motion.p>
         </div>
       </motion.section>
@@ -90,8 +95,8 @@ export function CuriosidadesPage() {
             </div>
           ) : curiosidades.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">Nenhuma curiosidade disponível ainda.</p>
-              <p className="text-sm text-muted-foreground mt-2">Volte em breve para novos conteúdos!</p>
+              <p className="text-lg text-muted-foreground">{t('home.noCuriosidades', '')}</p>
+              <p className="text-sm text-muted-foreground mt-2">{t('curiosidades.emptyHint', '')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

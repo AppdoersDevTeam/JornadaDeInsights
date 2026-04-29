@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase, getCategories, type Category } from '@/lib/supabase';
-import { FileObject } from '@supabase/storage-js';
 import { Eye, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import EditEbookForm from './edit-ebook-form';
@@ -42,7 +41,6 @@ export default function EbookList() {
   const [ebooks, setEbooks] = useState<Ebook[]>([]);
   const [allEbooks, setAllEbooks] = useState<Ebook[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(null);
   const [ebookToDelete, setEbookToDelete] = useState<Ebook | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -51,7 +49,6 @@ export default function EbookList() {
   const fetchEbooks = async () => {
     try {
       setLoading(true);
-      setError(null);
 
       // Fetch metadata first
       const { data: metadata, error: metadataError } = await supabase
@@ -71,10 +68,8 @@ export default function EbookList() {
       }
 
       // Get list of filenames from metadata
-      const filenames = metadata.map(m => m.filename);
-
       // Fetch PDFs that match our metadata with retry logic
-      let pdfs: any[] = [];
+      let pdfs: Array<{ id: string; name: string; metadata?: { size?: number }; created_at: string }> = [];
       try {
         const { data: pdfData, error: pdfError } = await supabase.storage
           .from('store-assets')
@@ -96,7 +91,7 @@ export default function EbookList() {
       }
 
       // Fetch covers with retry logic
-      let covers: any[] = [];
+      let covers: Array<{ name: string }> = [];
       try {
         const { data: coverData, error: coverError } = await supabase.storage
           .from('store-assets')
@@ -170,7 +165,6 @@ export default function EbookList() {
       setEbooks(combinedEbooks);
     } catch (err) {
       console.error('Error fetching ebooks:', err);
-      setError('Failed to load ebooks. Please try again later.');
       toast.error('Failed to load ebooks. Please try again later.');
     } finally {
       setLoading(false);

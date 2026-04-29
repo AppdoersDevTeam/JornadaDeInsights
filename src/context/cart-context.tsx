@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode, useRef } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import type { Ebook } from '@/components/shop/ebook-card';
 import { toast } from 'react-hot-toast';
 
@@ -74,7 +74,6 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [] });
-  const toastRef = useRef<string | null>(null);
 
   const addItem = (item: Ebook) => {
     dispatch({ type: 'ADD_ITEM', payload: item });

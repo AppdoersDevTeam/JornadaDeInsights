@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Headphones, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart, Info, BookOpen } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Menu, X, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart, Info, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
@@ -25,7 +25,6 @@ export function AdminHeader() {
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useAuth();
 
   const toggleMenu = () => {
@@ -48,8 +47,6 @@ export function AdminHeader() {
       console.error('Error signing out:', error);
     }
   };
-
-  const isDashboard = location.pathname.startsWith('/dashboard');
 
   const dashboardLinks = [
     { to: '/user-dashboard?tab=overview', label: 'Visão Geral', icon: LayoutDashboard },

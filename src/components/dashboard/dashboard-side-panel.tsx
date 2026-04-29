@@ -2,11 +2,8 @@ import {
   LayoutDashboard, 
   FileText, 
   BarChart3, 
-  Edit, 
   Users, 
-  Settings,
   ShoppingCart,
-  Tag,
   BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

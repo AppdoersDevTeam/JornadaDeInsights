@@ -10,7 +10,6 @@ import {
   uploadAttachment,
   uploadCoverImage,
   getCuriosidadesCategories,
-  type Curiosidade,
   type CuriosidadeCategory
 } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';

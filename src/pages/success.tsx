@@ -1,114 +1,26 @@
-import { useEffect, useState, useRef } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { supabase } from '@/lib/supabase';
-
-// Server URL
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
-console.log('Using server URL:', SERVER_URL);
+import { trackLifecycleEvent } from '@/lib/lifecycle';
 
 export function SuccessPage() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
-    console.log('SuccessPage mounted, sessionId:', sessionId);
-    
-    const handleSuccessfulPurchase = async () => {
-      if (!sessionId) {
-        console.log('No sessionId, skipping email');
-        setIsLoading(false);
-        return;
-      }
+    if (!sessionId) {
+      setIsLoading(false);
+      return;
+    }
 
-      // Check if email was already sent for this session
-      const emailSentKey = `email_sent_${sessionId}`;
-      const emailSentData = sessionStorage.getItem(emailSentKey);
-      
-      if (emailSentData) {
-        const { timestamp } = JSON.parse(emailSentData);
-        // If email was sent less than 5 seconds ago, consider it a duplicate
-        if (Date.now() - timestamp < 5000) {
-          console.log('Email already sent for session:', sessionId);
-          setIsLoading(false);
-          return;
-        }
-      }
+    const timer = window.setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
 
-      try {
-        console.log('Starting email send process for session:', sessionId);
-        
-        // Wait for auth state to be ready
-        const { data: authData } = await supabase.auth.getUser();
-        const user = authData.user;
-        if (!user) {
-          console.error('No authenticated user found');
-          toast.error('Por favor, faça login para receber o e-mail de confirmação da compra');
-          setIsLoading(false);
-          return;
-        }
-
-        const apiUrl = `${SERVER_URL}/api/send-purchase-email`;
-        console.log('Sending request to:', apiUrl);
-
-        // Send purchase confirmation email
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            sessionId,
-            customerEmail: user.email,
-            customerName: (user.user_metadata?.full_name as string | undefined) || user.email,
-          }),
-        });
-
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
-          console.error('Email sending failed:', errorData);
-          throw new Error(errorData.error || 'Failed to send confirmation email');
-        }
-
-        const data = await response.json();
-        console.log('Response data:', data);
-
-        // Mark this session as having sent the email with timestamp
-        sessionStorage.setItem(emailSentKey, JSON.stringify({
-          sent: true,
-          timestamp: Date.now()
-        }));
-        
-        console.log('Email sent successfully for session:', sessionId);
-        toast.success('E-mail de confirmação de compra enviado!');
-      } catch (error: any) {
-        console.error('Erro ao enviar e-mail de confirmação de compra:', error);
-        const errorMessage = error.message || 'Falha ao enviar e-mail de confirmação de compra';
-        toast.error(
-          <div>
-            <p>{errorMessage}</p>
-            <p className="text-sm mt-1">Você ainda pode acessar seus eBooks no seu painel.</p>
-          </div>,
-          { duration: 5000 }
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    handleSuccessfulPurchase();
-
-    // Cleanup function to prevent memory leaks
-    return () => {
-      console.log('SuccessPage cleanup');
-    };
+    return () => window.clearTimeout(timer);
   }, [sessionId]);
 
   useEffect(() => {
@@ -120,6 +32,7 @@ export function SuccessPage() {
       });
       // Mark this session as having shown the toast
       sessionStorage.setItem(`toast_shown_${sessionId}`, 'true');
+      void trackLifecycleEvent('purchase_completed', { sessionId });
     }
   }, [sessionId]);
 
@@ -135,7 +48,7 @@ export function SuccessPage() {
             {isLoading ? (
               'Processando sua compra...'
             ) : (
-              'Seu pagamento foi realizado com sucesso. Você pode acessar seus eBooks no seu painel. Um e-mail de confirmação foi enviado com mais detalhes.'
+              'Seu pagamento foi realizado com sucesso. Você pode acessar seus eBooks no seu painel. O email de confirmacao e enviado automaticamente.'
             )}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

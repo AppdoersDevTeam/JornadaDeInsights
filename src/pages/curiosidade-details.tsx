@@ -4,8 +4,11 @@ import { getCuriosidadeById, type Curiosidade } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { StructuredData } from '@/components/seo/structured-data';
+import { useLanguage } from '@/context/language-context';
 
 export function CuriosidadeDetailsPage() {
+  const { t, language } = useLanguage();
   const { id } = useParams<{ id: string }>();
   const [curiosidade, setCuriosidade] = useState<Curiosidade | null>(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +17,7 @@ export function CuriosidadeDetailsPage() {
   useEffect(() => {
     const fetchCuriosidade = async () => {
       if (!id) {
-        setError('ID não fornecido');
+        setError(t('curiosidade.idMissing', 'ID não fornecido'));
         setLoading(false);
         return;
       }
@@ -25,20 +28,20 @@ export function CuriosidadeDetailsPage() {
         setCuriosidade(data);
       } catch (err) {
         console.error('Error fetching curiosidade:', err);
-        setError('Erro ao carregar curiosidade');
+        setError(t('curiosidade.loadError', 'Erro ao carregar curiosidade'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchCuriosidade();
-  }, [id]);
+  }, [id, t]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    return new Date(dateString).toLocaleDateString(language === 'en' ? 'en-NZ' : 'pt-BR', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -60,10 +63,10 @@ export function CuriosidadeDetailsPage() {
     return (
       <div className="container mx-auto px-6 sm:px-8 lg:px-10 py-16">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-2xl font-bold mb-4">Erro</h1>
-          <p className="text-muted-foreground mb-6">{error || 'Curiosidade não encontrada'}</p>
+          <h1 className="text-2xl font-bold mb-4">{t('common.error', 'Erro')}</h1>
+          <p className="text-muted-foreground mb-6">{error || t('curiosidade.notFound', '')}</p>
           <Button asChild>
-            <Link to="/">Voltar para Home</Link>
+            <Link to="/">{t('common.backHome', '')}</Link>
           </Button>
         </div>
       </div>
@@ -72,6 +75,30 @@ export function CuriosidadeDetailsPage() {
 
   return (
     <div className="container mx-auto px-6 sm:px-8 lg:px-10 pt-28 pb-16 overflow-x-hidden">
+      <StructuredData
+        id={`article-${curiosidade.id}`}
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: curiosidade.title,
+          author: {
+            '@type': 'Person',
+            name: curiosidade.author || 'Patricia da Silva',
+          },
+          datePublished: curiosidade.created_at,
+          dateModified: curiosidade.updated_at || curiosidade.created_at,
+          image: curiosidade.cover_image || undefined,
+          articleSection: curiosidade.category?.name || 'Curiosidades',
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': `https://jornadadeinsights.com/curiosidades/${curiosidade.id}`,
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'Jornada de Insights',
+          },
+        }}
+      />
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -81,7 +108,7 @@ export function CuriosidadeDetailsPage() {
           <Button variant="ghost" asChild className="mb-8 mt-2">
             <Link to="/curiosidades">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar
+              {t('curiosidade.back', 'Voltar')}
             </Link>
           </Button>
 
@@ -112,7 +139,8 @@ export function CuriosidadeDetailsPage() {
               </h1>
 
               <p className="text-muted-foreground mb-8">
-                Por: <span className="font-medium">{curiosidade.author}</span>
+                {t('curiosidade.byAuthor', 'Por:')}{' '}
+                <span className="font-medium">{curiosidade.author}</span>
               </p>
 
             <div 

@@ -1,5 +1,8 @@
 import Stripe from 'stripe';
 import { Resend } from 'resend';
+import { applyCors, handleOptionsRequest } from './_lib/cors.js';
+import { logger, getRequestMeta } from './_lib/logger.js';
+import { captureServerError } from './_lib/monitoring.js';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -10,75 +13,59 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
-  console.log('Request method:', req.method);
-  console.log('Request headers:', req.headers);
-  console.log('Request body:', req.body);
+  const requestMeta = getRequestMeta(req);
 
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
-    ? 'https://jornadadeinsights.com'
-    : 'http://localhost:5173');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With'
-  );
-  res.setHeader('Content-Type', 'application/json');
+  applyCors(req, res, { methods: 'POST,OPTIONS' });
 
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS request');
-    res.status(204).end();
+  if (handleOptionsRequest(req, res)) {
     return;
   }
 
   // Only allow POST requests
   if (req.method !== 'POST') {
-    console.error('Invalid method:', req.method);
+    logger.warn('send_purchase_email_method_not_allowed', requestMeta);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     const { sessionId, customerEmail, customerName } = req.body;
-    console.log('Received email request:', { sessionId, customerEmail, customerName });
+    logger.info('send_purchase_email_requested', {
+      ...requestMeta,
+      hasSessionId: Boolean(sessionId),
+    });
 
     // Validate required fields
     if (!sessionId || !customerEmail || !customerName) {
-      console.error('Missing required fields:', { sessionId, customerEmail, customerName });
+      logger.warn('send_purchase_email_missing_fields', requestMeta);
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     // Validate environment variables
     if (!process.env.RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not configured');
+      logger.error('send_purchase_email_missing_resend_key', requestMeta);
       return res.status(500).json({ error: 'Email service not configured' });
     }
 
     if (!process.env.FRONTEND_URL) {
-      console.error('FRONTEND_URL is not configured');
+      logger.error('send_purchase_email_missing_frontend_url', requestMeta);
       return res.status(500).json({ error: 'Frontend URL not configured' });
     }
 
     if (!process.env.STRIPE_SECRET_KEY) {
-      console.error('STRIPE_SECRET_KEY is not configured');
+      logger.error('send_purchase_email_missing_stripe_key', requestMeta);
       return res.status(500).json({ error: 'Stripe not configured' });
     }
 
     // Get the session details from Stripe
-    console.log('Retrieving Stripe session:', sessionId);
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-    console.log('Stripe session:', session);
     
     if (!session || session.payment_status !== 'paid') {
-      console.error('Invalid or unpaid session:', session);
+      logger.warn('send_purchase_email_unpaid_session', requestMeta);
       return res.status(400).json({ error: 'Invalid or unpaid session' });
     }
 
     // Get line items for the session
-    console.log('Retrieving line items for session:', sessionId);
     const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
-    console.log('Line items:', lineItems.data);
     
     // Get the purchased eBook titles
     const purchasedEbooks = lineItems.data.map(item => ({
@@ -87,7 +74,6 @@ export default async function handler(req, res) {
     }));
 
     // Send email using Resend
-    console.log('Sending email to:', customerEmail);
     const { data, error } = await resend.emails.send({
       from: 'Suporte Jornada de Insights <suporte@jornadadeinsights.com>',
       to: customerEmail,
@@ -126,7 +112,11 @@ export default async function handler(req, res) {
     });
 
     if (error) {
-      console.error('Resend API error:', error);
+      logger.error('send_purchase_email_resend_failed', {
+        ...requestMeta,
+        errorMessage: error.message,
+        statusCode: error.statusCode,
+      });
       return res.status(500).json({ 
         error: 'Failed to send email', 
         details: error.message,
@@ -135,14 +125,20 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log('Email sent successfully:', data);
+    logger.info('send_purchase_email_sent', {
+      ...requestMeta,
+      providerMessageId: data?.id || null,
+    });
     return res.json({ success: true });
   } catch (error) {
-    console.error('Error in send-purchase-email:', error);
+    captureServerError(error, { route: 'send-purchase-email' });
+    logger.error('send_purchase_email_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
     return res.status(500).json({ 
       error: 'Internal server error',
-      details: error.message,
-      stack: error.stack
+      details: error instanceof Error ? error.message : 'unknown_error',
     });
   }
 } 

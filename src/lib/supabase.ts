@@ -38,7 +38,7 @@ export const uploadFile = async (file: File, path: string) => {
 };
 
 // Function to insert ebook metadata
-export const insertEbookMetadata = async (metadata: any) => {
+export const insertEbookMetadata = async (metadata: Record<string, unknown>) => {
   try {
     const { data, error } = await supabase
       .from('ebooks_metadata')
@@ -89,21 +89,29 @@ export const getEbooks = async () => {
     if (error) throw error;
 
     // Add cover image URLs and category info
-    const ebooksWithCoverUrls = data.map((ebook: any) => {
+    const ebooksWithCoverUrls = data.map((ebook: Record<string, unknown>) => {
+      const typedEbook = ebook as {
+        categories?: unknown;
+        filename?: string;
+      };
       // Handle category - Supabase returns it as an object for single relations
       let category = null;
-      if (ebook.categories) {
+      if (typedEbook.categories) {
         // If it's an array (shouldn't happen for many-to-one, but handle it)
-        if (Array.isArray(ebook.categories) && ebook.categories.length > 0) {
-          category = { id: ebook.categories[0].id, name: ebook.categories[0].name };
-        } else if (typeof ebook.categories === 'object' && ebook.categories.id) {
-          category = { id: ebook.categories.id, name: ebook.categories.name };
+        if (Array.isArray(typedEbook.categories) && typedEbook.categories.length > 0) {
+          const firstCategory = typedEbook.categories[0] as { id: string; name: string };
+          category = { id: firstCategory.id, name: firstCategory.name };
+        } else if (typeof typedEbook.categories === 'object') {
+          const singleCategory = typedEbook.categories as { id?: string; name?: string };
+          if (singleCategory.id) {
+            category = { id: singleCategory.id, name: singleCategory.name || '' };
+          }
         }
       }
       
       return {
         ...ebook,
-        cover_url: ebook.filename ? supabase.storage.from('store-assets').getPublicUrl(`covers/${ebook.filename}`).data.publicUrl : null,
+        cover_url: typedEbook.filename ? supabase.storage.from('store-assets').getPublicUrl(`covers/${typedEbook.filename}`).data.publicUrl : null,
         category: category
       };
     });
@@ -269,16 +277,17 @@ export const getCuriosidades = async (includeDrafts: boolean = false): Promise<C
     if (error) throw error;
     
     // If we have data, try to fetch categories separately
-    const curiosidadesWithCategories = await Promise.all((data || []).map(async (item: any) => {
+    const curiosidadesWithCategories = await Promise.all((data || []).map(async (item: Record<string, unknown>) => {
+      const typedItem = item as { category_id?: string | null; attachments?: unknown };
       let category = null;
       
       // Try to fetch category if category_id exists
-      if (item.category_id) {
+      if (typedItem.category_id) {
         try {
           const { data: catData, error: catError } = await supabase
             .from('curiosidades_categories')
             .select('id, name, description')
-            .eq('id', item.category_id)
+            .eq('id', typedItem.category_id)
             .single();
           
           if (!catError && catData) {
@@ -293,7 +302,7 @@ export const getCuriosidades = async (includeDrafts: boolean = false): Promise<C
       return {
         ...item,
         category,
-        attachments: Array.isArray(item.attachments) ? item.attachments : []
+        attachments: Array.isArray(typedItem.attachments) ? typedItem.attachments : []
       };
     }));
     
@@ -472,7 +481,7 @@ export const uploadAttachment = async (file: File, curiosidadeId: string): Promi
     const fileName = `${curiosidadeId}/${Date.now()}.${fileExt}`;
     const filePath = `curiosidades-attachments/${fileName}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('store-assets')
       .upload(filePath, file, {
         cacheControl: '3600',
@@ -499,7 +508,7 @@ export const uploadCoverImage = async (file: File, curiosidadeId: string): Promi
     const fileName = `${curiosidadeId}/cover-${Date.now()}.${fileExt}`;
     const filePath = `curiosidades-covers/${fileName}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('store-assets')
       .upload(filePath, file, {
         cacheControl: '3600',
