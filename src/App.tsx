@@ -29,11 +29,13 @@ import { CuriosidadesPage } from '@/pages/curiosidades';
 import { CuriosidadeDetailsPage } from '@/pages/curiosidade-details';
 import { CuriosidadeEditorPage } from '@/pages/curiosidade-editor';
 import { TabType } from '@/types/dashboard';
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const location = useLocation();
   const navigate = useNavigate();
+  const analyticsPath = `${location.pathname}${location.search}`;
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -116,6 +118,7 @@ function App() {
             </AdminLayout>
           } />
         </Routes>
+        <Analytics route={location.pathname} path={analyticsPath} />
         <Toaster />
       </CartProvider>
     </AuthProvider>

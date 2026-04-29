@@ -22,7 +22,8 @@ import {
   Underline,
   Link as IconLink,
   Image as IconImage,
-  Copy
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -801,6 +802,27 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
       {activeTab === 'analytics' && (
         <div className="space-y-6 w-full">
+          <Card className="p-6 w-full">
+            <CardHeader>
+              <CardTitle>Tráfego do site</CardTitle>
+              <CardDescription>
+                Visualizações, visitantes, países e páginas mais visitadas (Vercel Web Analytics). Os gráficos abaixo são vendas e Stripe.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" asChild>
+                <a
+                  href={import.meta.env.VITE_VERCEL_ANALYTICS_DASHBOARD_URL ?? 'https://vercel.com/dashboard'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Abrir Web Analytics na Vercel
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
             <SalesTrendsChart
               dailyData={salesTrends.daily}
