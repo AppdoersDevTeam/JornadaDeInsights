@@ -3,8 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Headphones, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart, Info, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/auth-context';
 import {
   Dialog,
@@ -18,7 +17,6 @@ import jornadaLogo from '@/Jornada logo.png';
 
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
-  'admin@jornadadeinsights.com',
   'ptasbr2020@gmail.com'
 ];
 
@@ -43,7 +41,7 @@ export function AdminHeader() {
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      await supabase.auth.signOut();
       setShowSignOutDialog(false);
       navigate('/');
     } catch (error) {
@@ -96,7 +94,7 @@ export function AdminHeader() {
           {user ? (
             <>
               <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
-                <Link to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email) ? "/dashboard" : "/user-dashboard"} className="flex items-center gap-1.5 xl:gap-2">
+                <Link to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email.toLowerCase()) ? "/dashboard" : "/user-dashboard"} className="flex items-center gap-1.5 xl:gap-2">
                   <LayoutDashboard className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0" />
                   <span className="text-xs xl:text-sm font-medium">Dashboard</span>
                 </Link>
@@ -153,7 +151,7 @@ export function AdminHeader() {
         <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-2 items-start">
           {/* Dashboard Link */}
           <Link
-            to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email) ? "/dashboard" : "/user-dashboard"}
+            to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email.toLowerCase()) ? "/dashboard" : "/user-dashboard"}
             className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
             onClick={closeMenu}
           >

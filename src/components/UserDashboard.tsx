@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { auth } from '../lib/firebase';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Download, Eye, Copy, X, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -289,17 +288,35 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   };
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (!user) {
+    const bootstrap = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('Error loading user session:', error);
+      }
+      const currentUser = data.user;
+      if (!currentUser) {
         navigate('/signin');
-      } else if (!user.emailVerified) {
+      } else if (!currentUser.email_confirmed_at) {
         navigate('/check-email');
       } else {
-        setUser(user);
+        setUser(currentUser);
+      }
+    };
+
+    bootstrap();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      if (!currentUser) {
+        navigate('/signin');
+      } else if (!currentUser.email_confirmed_at) {
+        navigate('/check-email');
+      } else {
+        setUser(currentUser);
       }
     });
 
-    return () => unsubscribe();
+    return () => authListener.subscription.unsubscribe();
   }, [navigate]);
 
   useEffect(() => {
@@ -315,7 +332,8 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   }, [activeTab]);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const user = session?.user;
       setIsAuthenticated(!!user);
       // If user just signed in and we have saved cart state, restore it
       if (user) {
@@ -348,7 +366,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       }
     });
 
-    return () => unsubscribe();
+    return () => authListener.subscription.unsubscribe();
   }, [clearCart, addItem]);
 
 
@@ -455,7 +473,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   // Add session timeout handler
   const handleSessionTimeout = () => {
     setShowTimeoutDialog(false);
-    auth.signOut();
+    supabase.auth.signOut();
     navigate('/');
   };
 
@@ -990,8 +1008,8 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                           Conta criada em
                         </label>
                         <p className="text-sm">
-                          {user.metadata.creationTime
-                            ? new Date(user.metadata.creationTime).toLocaleDateString()
+                          {user.created_at
+                            ? new Date(user.created_at).toLocaleDateString()
                             : 'N/A'}
                         </p>
                       </div>

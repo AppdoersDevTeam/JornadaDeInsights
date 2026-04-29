@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { AuthError } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -34,26 +34,36 @@ const SignUp = () => {
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      await sendEmailVerification(user, { url: `${window.location.origin}/confirm-email` });
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name || null
+          },
+          emailRedirectTo: `${window.location.origin}/signin`
+        }
+      });
+
+      if (error) throw error;
       navigate('/check-email');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Falha ao criar conta';
+      const errorMessage = error instanceof AuthError ? error.message : 'Falha ao criar conta';
       setError(errorMessage);
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      const user = userCredential.user;
-      if (!user.emailVerified) {
-        await sendEmailVerification(user, { url: `${window.location.origin}/confirm-email` });
-        navigate('/check-email');
-      } else {
-        navigate('/user-dashboard');
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/signin`
+        }
+      });
+
+      if (error) {
+        throw error;
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Falha ao entrar com Google';

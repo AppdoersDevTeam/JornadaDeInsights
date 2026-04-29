@@ -1,9 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-import admin from 'firebase-admin';
 
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
-  'admin@jornadadeinsights.com',
   'ptasbr2020@gmail.com',
 ];
 
@@ -18,16 +16,6 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'https://www.jornadadeinsights.com',
   'http://localhost:5173',
 ];
-
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
 
 const getAllowedOrigin = (origin) => {
   const allowed = ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS : DEFAULT_ALLOWED_ORIGINS;
@@ -92,9 +80,21 @@ export default async function handler(req, res) {
       return;
     }
 
-    const decoded = await admin.auth().verifyIdToken(idToken, true);
-    const user = await admin.auth().getUser(decoded.uid);
-    const userEmail = user.email || '';
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseAdmin.auth.getUser(idToken);
+
+    if (authError || !user) {
+      res.status(401).json({ error: 'Invalid auth token' });
+      return;
+    }
+
+    const userEmail = (user.email || '').toLowerCase();
 
     if (!ALLOWED_ADMIN_EMAILS.includes(userEmail)) {
       res.status(403).json({ error: 'Forbidden' });
@@ -106,11 +106,7 @@ export default async function handler(req, res) {
     const since = new Date();
     since.setDate(since.getDate() - days);
 
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('site_page_views')
       .select('created_at, page_path, country, visitor_id')
       .gte('created_at', since.toISOString())

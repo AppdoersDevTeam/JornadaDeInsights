@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { auth } from '@/lib/firebase';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -16,23 +15,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true
   }
 });
-
-// Function to sync Firebase auth with Supabase
-export const syncFirebaseAuthWithSupabase = async (firebaseUser: any) => {
-  if (!firebaseUser) return null;
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: firebaseUser.email,
-    password: 'dummy-password' // This is just to satisfy the API, won't be used
-  });
-
-  if (error) {
-    console.error('Error syncing auth:', error);
-    return null;
-  }
-
-  return data;
-};
 
 // Function to handle file uploads
 export const uploadFile = async (file: File, path: string) => {
@@ -75,66 +57,20 @@ export const insertEbookMetadata = async (metadata: any) => {
   }
 };
 
-// Create or get Supabase user matching Firebase user
-export const syncFirebaseAuth = async () => {
-  try {
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      throw new Error('No Firebase user found');
-    }
-
-    const email = currentUser.email;
-    if (!email) {
-      throw new Error('Firebase user has no email');
-    }
-
-    // Try to sign in with email
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password: 'admin123' // Use the same password you set in Supabase
-    });
-
-    if (signInError) {
-      // If sign in fails, create a new user
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password: 'admin123', // Use the same password you set in Supabase
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-
-      if (signUpError) throw signUpError;
-      return signUpData.user;
-    }
-
-    return signInData.user;
-  } catch (error) {
-    console.error('Error syncing Firebase auth with Supabase:', error);
+export const getCurrentSupabaseUser = async () => {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
     throw error;
   }
+  return data.user;
 };
 
-// Verify the current session
-export const verifySession = async () => {
-  try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError) throw sessionError;
-    
-    if (!session) {
-      // If no Supabase session exists, sync with Firebase
-      return await syncFirebaseAuth();
-    }
-    
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError) throw userError;
-    if (!user) throw new Error('No user found in session');
-
-    return user;
-  } catch (error) {
-    console.error('Session verification error:', error);
+export const getSupabaseAccessToken = async () => {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) {
     throw error;
   }
+  return data.session?.access_token ?? null;
 };
 
 export const getEbooks = async () => {

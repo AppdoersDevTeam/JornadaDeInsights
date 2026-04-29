@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { supabase, getCategories, createCategory, type Category } from '@/lib/supabase';
-import { auth } from '@/lib/firebase';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
 import {
   Dialog,
   DialogContent,
@@ -58,7 +56,8 @@ export default function EditEbookForm({ ebook, onEditSuccess, onCancel }: EditEb
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const user = session?.user ?? null;
       setIsAuthenticated(!!user);
       setCurrentUser(user);
       
@@ -67,7 +66,7 @@ export default function EditEbookForm({ ebook, onEditSuccess, onCancel }: EditEb
       }
     });
 
-    return () => unsubscribe();
+    return () => authListener.subscription.unsubscribe();
   }, [navigate]);
 
   const fetchCategories = async () => {

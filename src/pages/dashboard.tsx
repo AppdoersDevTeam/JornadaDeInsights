@@ -1,7 +1,6 @@
 import { useState, useEffect, Fragment, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { supabase, getSupabaseAccessToken } from '@/lib/supabase';
 import {
   FileText,
   BarChart3,
@@ -98,7 +97,6 @@ interface SiteAnalyticsSummary {
 
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
-  'admin@jornadadeinsights.com',
   'ptasbr2020@gmail.com'
 ];
 
@@ -409,10 +407,12 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         setSiteAnalyticsLoading(true);
         setSiteAnalyticsError(null);
 
-        const user = auth.currentUser;
+        const { data: authData } = await supabase.auth.getUser();
+        const user = authData.user;
         if (!user) throw new Error('Admin user is not authenticated');
 
-        const idToken = await user.getIdToken();
+        const idToken = await getSupabaseAccessToken();
+        if (!idToken) throw new Error('Admin token is not available');
         const response = await fetch(`${SERVER_URL}/api/site-analytics-summary?days=30`, {
           method: 'GET',
           headers: {
@@ -447,20 +447,33 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   }, [activeTab, SERVER_URL]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('Dashboard auth state:', user);
-      setIsAuthenticated(!!user);
-      
-      if (!user) {
-        console.log('No authenticated user, redirecting to sign in');
+    const bootstrap = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('Dashboard auth check failed:', error);
+      }
+      const currentUser = data.user;
+      setIsAuthenticated(!!currentUser);
+      if (!currentUser) {
         navigate('/signin');
-      } else if (!ALLOWED_ADMIN_EMAILS.includes(user.email || '')) {
-        console.log('Non-admin user, redirecting to user dashboard');
+      } else if (!ALLOWED_ADMIN_EMAILS.includes((currentUser.email || '').toLowerCase())) {
+        navigate('/user-dashboard');
+      }
+    };
+
+    bootstrap();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      setIsAuthenticated(!!currentUser);
+      if (!currentUser) {
+        navigate('/signin');
+      } else if (!ALLOWED_ADMIN_EMAILS.includes((currentUser.email || '').toLowerCase())) {
         navigate('/user-dashboard');
       }
     });
 
-    return () => unsubscribe();
+    return () => authListener.subscription.unsubscribe();
   }, [navigate]);
 
   if (!isAuthenticated) {

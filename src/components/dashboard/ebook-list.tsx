@@ -3,7 +3,6 @@ import { supabase, getCategories, type Category } from '@/lib/supabase';
 import { FileObject } from '@supabase/storage-js';
 import { Eye, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { auth } from '@/lib/firebase';
 import EditEbookForm from './edit-ebook-form';
 import {
   Dialog,

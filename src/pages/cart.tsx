@@ -4,7 +4,7 @@ import { ShoppingCart, X, Plus, Minus } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { loadStripe } from '@stripe/stripe-js';
 import { toast } from 'react-hot-toast';
-import { auth } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { LazyImage } from '@/components/shop/lazy-image';
@@ -45,7 +45,8 @@ export function CartPage() {
 
   // Check authentication status
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const user = session?.user;
       setIsAuthenticated(!!user);
       // If user just signed in and we have saved cart state, restore it
       if (user) {
@@ -78,7 +79,7 @@ export function CartPage() {
       }
     });
 
-    return () => unsubscribe();
+    return () => authListener.subscription.unsubscribe();
   }, [clearCart, addItem]);
 
   const formatPrice = (value: number) =>

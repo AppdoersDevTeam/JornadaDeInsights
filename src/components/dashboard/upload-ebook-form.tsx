@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { supabase, getCategories, createCategory, type Category } from '@/lib/supabase';
-import { auth } from '@/lib/firebase';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
 import {
   Dialog,
   DialogContent,
@@ -20,14 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 interface UploadEbookFormProps {
   onUploadSuccess?: () => void;
 }
-
-// Function to convert Firebase UID to UUID format
-const convertToUUID = (uid: string): string => {
-  // Ensure the string is 32 characters long by padding with zeros if necessary
-  const paddedUid = uid.padEnd(32, '0');
-  // Format into UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-  return `${paddedUid.slice(0, 8)}-${paddedUid.slice(8, 12)}-${paddedUid.slice(12, 16)}-${paddedUid.slice(16, 20)}-${paddedUid.slice(20, 32)}`;
-};
 
 export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProps) {
   const navigate = useNavigate();
@@ -48,7 +38,8 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const user = session?.user ?? null;
       console.log('Auth state changed:', user);
       setIsAuthenticated(!!user);
       setCurrentUser(user);
@@ -59,7 +50,7 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
       }
     });
 
-    return () => unsubscribe();
+    return () => authListener.subscription.unsubscribe();
   }, [navigate]);
 
   const fetchCategories = async () => {

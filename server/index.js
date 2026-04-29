@@ -2,9 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import Stripe from 'stripe';
-import admin from 'firebase-admin';
-import { readFileSync } from 'fs';
-import https from 'https';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import path from 'path';
@@ -44,19 +41,6 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
-
-// Load Firebase service account credentials
-const serviceAccount = JSON.parse(
-  readFileSync(
-    new URL('../jornadadeinsights-firebase-adminsdk-fbsvc-c86c6a1222.json', import.meta.url),
-    'utf8'
-  )
-);
-
-// Initialize Firebase Admin SDK
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
 
 // Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -546,16 +530,24 @@ app.get('/completed-orders', async (req, res) => {
 // Endpoint to list all authenticated users
 app.get('/users', async (req, res) => {
   try {
-    const list = await admin.auth().listUsers(1000);
-    const users = list.users.map(u => {
-      // Prefer top-level photoURL, then Google provider's photo
-      const googleInfo = u.providerData.find(p => p.providerId === 'google.com');
-      const photoURL = u.photoURL || googleInfo?.photoURL || null;
+    const {
+      data: { users: supabaseUsers = [] },
+      error,
+    } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    const users = supabaseUsers.map((u) => {
       return {
-        uid: u.uid,
-        displayName: u.displayName,
+        uid: u.id,
+        displayName: u.user_metadata?.full_name || null,
         email: u.email,
-        photoURL
+        photoURL: u.user_metadata?.avatar_url || null,
       };
     });
     res.json({ users });
@@ -568,22 +560,16 @@ app.get('/users', async (req, res) => {
 // Endpoint to proxy user profile photos (handles Google rate limits)
 app.get('/user-photo/:uid', async (req, res) => {
   try {
-    const user = await admin.auth().getUser(req.params.uid);
-    // Prefer top-level, then Google provider
-    const googleInfo = user.providerData.find(p => p.providerId === 'google.com');
-    const photoURL = user.photoURL || googleInfo?.photoURL;
+    const { data, error } = await supabase.auth.admin.getUserById(req.params.uid);
+    if (error) {
+      throw error;
+    }
+
+    const photoURL = data.user?.user_metadata?.avatar_url;
     if (!photoURL) {
       return res.status(404).send('No photo');
     }
-    // Stream image from Google
-    https.get(photoURL, (imgRes) => {
-      const contentType = imgRes.headers['content-type'] || 'image/jpeg';
-      res.setHeader('Content-Type', contentType);
-      imgRes.pipe(res);
-    }).on('error', (err) => {
-      console.error('Error proxying photo:', err);
-      res.status(500).send('Image fetch error');
-    });
+    return res.redirect(photoURL);
   } catch (err) {
     console.error('Error fetching user for photo:', err);
     res.status(500).json({ error: 'Internal server error' });

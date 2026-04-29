@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { AuthError } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -8,7 +8,6 @@ import { Book, Headphones } from 'lucide-react';
 
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
-  'admin@jornadadeinsights.com',
   'ptasbr2020@gmail.com'
 ];
 
@@ -31,12 +30,12 @@ const SignIn = () => {
     }
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      const user = data.user;
       console.log('Signed in successfully:', user);
       
-      if (!user.emailVerified) {
-        await sendEmailVerification(user, { url: `${window.location.origin}/confirm-email` });
+      if (!user?.email_confirmed_at) {
         navigate('/check-email');
       } else {
         // Check if we have saved cart state
@@ -47,7 +46,7 @@ const SignIn = () => {
         }
         
         // Redirect based on user role
-        if (ALLOWED_ADMIN_EMAILS.includes(user.email || '')) {
+        if (ALLOWED_ADMIN_EMAILS.includes((user.email || '').toLowerCase())) {
           navigate('/dashboard');
         } else {
           navigate(returnPath);
@@ -55,13 +54,13 @@ const SignIn = () => {
       }
     } catch (error) {
       console.error('Sign in error:', error);
-      if (error instanceof Error) {
-        if (error.message.includes('auth/invalid-email')) {
+      if (error instanceof AuthError) {
+        if (error.message.toLowerCase().includes('invalid login credentials')) {
+          setError('Email ou senha incorretos');
+        } else if (error.message.toLowerCase().includes('email not confirmed')) {
+          setError('Confirme seu email antes de entrar');
+        } else if (error.message.toLowerCase().includes('invalid email')) {
           setError('Invalid email format');
-        } else if (error.message.includes('auth/wrong-password')) {
-          setError('Incorrect password');
-        } else if (error.message.includes('auth/user-not-found')) {
-          setError('User not found');
         } else {
           setError(error.message);
         }
@@ -73,26 +72,15 @@ const SignIn = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      const user = userCredential.user;
-      if (!user.emailVerified) {
-        await sendEmailVerification(user, { url: `${window.location.origin}/confirm-email` });
-        navigate('/check-email');
-      } else {
-        // Check if we have saved cart state
-        const savedCart = sessionStorage.getItem('cartState');
-        if (savedCart) {
-          // Clear the saved cart state
-          sessionStorage.removeItem('cartState');
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/signin`
         }
-        
-        // Redirect based on user role
-        if (ALLOWED_ADMIN_EMAILS.includes(user.email || '')) {
-          navigate('/dashboard');
-        } else {
-          navigate(returnPath);
-        }
+      });
+
+      if (error) {
+        throw error;
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Google';

@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { auth } from '@/lib/firebase';
-import { applyActionCode } from 'firebase/auth';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
 
 export function ConfirmEmailPage() {
   const [searchParams] = useSearchParams();
-  const code = searchParams.get('oobCode');
+  const tokenHash = searchParams.get('token_hash');
+  const type = searchParams.get('type');
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
   useEffect(() => {
-    if (!code) {
+    if (!tokenHash || !type) {
       setStatus('error');
       return;
     }
-    applyActionCode(auth, code)
+    supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: type as 'email'
+    })
       .then(() => {
         setStatus('success');
       })
@@ -23,7 +26,7 @@ export function ConfirmEmailPage() {
         console.error('Erro ao verificar o email:', error);
         setStatus('error');
       });
-  }, [code]);
+  }, [tokenHash, type]);
 
   if (status === 'loading') {
     return (

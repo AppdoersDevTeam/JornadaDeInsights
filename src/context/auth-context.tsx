@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { User } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -17,12 +17,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const bootstrap = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('Error loading Supabase user:', error);
+      }
+      setUser(data.user ?? null);
+      setIsLoading(false);
+    };
+
+    bootstrap();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
       setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => authListener.subscription.unsubscribe();
   }, []);
 
   return (

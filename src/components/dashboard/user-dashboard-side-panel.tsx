@@ -8,8 +8,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { useCart } from '@/context/cart-context';
 import { useState } from 'react';
 import {
@@ -34,7 +33,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      await supabase.auth.signOut();
       navigate('/signin');
     } catch (error) {
       console.error('Error signing out:', error);

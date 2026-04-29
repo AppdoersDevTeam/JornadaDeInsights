@@ -1,15 +1,14 @@
-import admin from 'firebase-admin';
+import { createClient } from '@supabase/supabase-js';
 
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -37,17 +36,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    const list = await admin.auth().listUsers(1000);
-    const users = list.users.map(u => {
-      // Prefer top-level photoURL, then Google provider's photo
-      const googleInfo = u.providerData.find(p => p.providerId === 'google.com');
-      const photoURL = u.photoURL || googleInfo?.photoURL || null;
+    const {
+      data: { users: supabaseUsers = [] },
+      error,
+    } = await supabaseAdmin.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    const users = supabaseUsers.map((u) => {
       return {
-        uid: u.uid,
-        displayName: u.displayName,
+        uid: u.id,
+        displayName: u.user_metadata?.full_name || null,
         email: u.email,
-        photoURL
-      };
+        photoURL: u.user_metadata?.avatar_url || null,
+      }
     });
     res.json({ users });
   } catch (error) {

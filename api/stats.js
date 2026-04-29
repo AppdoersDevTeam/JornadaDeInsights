@@ -1,21 +1,19 @@
 import Stripe from 'stripe';
-import admin from 'firebase-admin';
+import { createClient } from '@supabase/supabase-js';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2023-10-16',
 });
 
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
 
 export default async function handler(req, res) {
   console.log('Stats API request:', {
@@ -82,11 +80,22 @@ export default async function handler(req, res) {
     const allChargesEver = await stripe.charges.list({ limit: 100 });
     const completedOrdersEver = allChargesEver.data.filter(ch => ch.status === 'succeeded').length;
 
-    // Fetch Firebase Auth users for total and new signups in last week
-    const allUsers = await admin.auth().listUsers(1000);
-    const totalUsers = allUsers.users.length;
-    const newThisWeek = allUsers.users.filter(user => {
-      const createdSec = Math.floor(new Date(user.metadata.creationTime).getTime() / 1000);
+    // Fetch Supabase Auth users for total and new signups in last week
+    const {
+      data: { users: allUsers = [] },
+      error: usersError,
+    } = await supabaseAdmin.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+
+    if (usersError) {
+      throw usersError;
+    }
+
+    const totalUsers = allUsers.length;
+    const newThisWeek = allUsers.filter((user) => {
+      const createdSec = Math.floor(new Date(user.created_at).getTime() / 1000);
       return createdSec >= weekStart;
     }).length;
 
@@ -268,9 +277,8 @@ export default async function handler(req, res) {
     console.error('Error fetching stats:', error);
     console.error('Environment:', {
       NODE_ENV: process.env.NODE_ENV,
-      FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? 'Set' : 'Not set',
-      FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL ? 'Set' : 'Not set',
-      FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY ? 'Set' : 'Not set',
+      SUPABASE_URL: process.env.SUPABASE_URL ? 'Set' : 'Not set',
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Not set',
       STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ? 'Set' : 'Not set'
     });
     res.status(500).json({ error: 'Internal server error', details: error.message });

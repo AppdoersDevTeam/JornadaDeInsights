@@ -3,7 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { auth } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 
 // Server URL
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
@@ -43,14 +43,8 @@ export function SuccessPage() {
         console.log('Starting email send process for session:', sessionId);
         
         // Wait for auth state to be ready
-        await new Promise((resolve) => {
-          const unsubscribe = auth.onAuthStateChanged((user) => {
-            unsubscribe();
-            resolve(user);
-          });
-        });
-
-        const user = auth.currentUser;
+        const { data: authData } = await supabase.auth.getUser();
+        const user = authData.user;
         if (!user) {
           console.error('No authenticated user found');
           toast.error('Por favor, faça login para receber o e-mail de confirmação da compra');
@@ -70,7 +64,7 @@ export function SuccessPage() {
           body: JSON.stringify({
             sessionId,
             customerEmail: user.email,
-            customerName: user.displayName || user.email,
+            customerName: (user.user_metadata?.full_name as string | undefined) || user.email,
           }),
         });
 
