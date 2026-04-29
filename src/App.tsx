@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/layout';
 import { AdminLayout } from '@/components/layout/admin-layout';
@@ -29,13 +29,13 @@ import { CuriosidadesPage } from '@/pages/curiosidades';
 import { CuriosidadeDetailsPage } from '@/pages/curiosidade-details';
 import { CuriosidadeEditorPage } from '@/pages/curiosidade-editor';
 import { TabType } from '@/types/dashboard';
-import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const location = useLocation();
   const navigate = useNavigate();
-  const analyticsPath = `${location.pathname}${location.search}`;
+  const lastTrackedPathRef = useRef<string | null>(null);
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -45,6 +45,61 @@ function App() {
       setActiveTab(tabParam as TabType);
     }
   }, [location.search]);
+
+  useEffect(() => {
+    const path = `${location.pathname}${location.search}`;
+    const shouldSkipPath = ['/dashboard', '/user-dashboard'].some((prefix) =>
+      location.pathname.startsWith(prefix)
+    );
+
+    if (shouldSkipPath || lastTrackedPathRef.current === path) {
+      return;
+    }
+
+    lastTrackedPathRef.current = path;
+
+    const visitorStorageKey = 'jdi_visitor_id';
+    const sessionStorageKey = 'jdi_session_id';
+    const generateId = () =>
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const visitorId =
+      localStorage.getItem(visitorStorageKey) || generateId();
+    const sessionId =
+      sessionStorage.getItem(sessionStorageKey) || generateId();
+
+    localStorage.setItem(visitorStorageKey, visitorId);
+    sessionStorage.setItem(sessionStorageKey, sessionId);
+
+    const payload = JSON.stringify({
+      pagePath: location.pathname,
+      pageUrl: path,
+      referrer: document.referrer || null,
+      visitorId,
+      sessionId,
+      tzOffsetMinutes: new Date().getTimezoneOffset(),
+    });
+
+    // Prefer beacon for non-blocking delivery during navigation/unload.
+    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+      const blob = new Blob([payload], { type: 'application/json' });
+      navigator.sendBeacon(`${SERVER_URL}/api/site-analytics-track`, blob);
+      return;
+    }
+
+    void fetch(`${SERVER_URL}/api/site-analytics-track`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      keepalive: true,
+      body: payload,
+    }).catch((error) => {
+      console.error('Failed to record page view', error);
+    });
+  }, [location.pathname, location.search, SERVER_URL]);
 
   const handleTabChange = (tab: string | TabType) => {
     const newTab = tab as TabType;
@@ -118,7 +173,6 @@ function App() {
             </AdminLayout>
           } />
         </Routes>
-        <Analytics route={location.pathname} path={analyticsPath} />
         <Toaster />
       </CartProvider>
     </AuthProvider>

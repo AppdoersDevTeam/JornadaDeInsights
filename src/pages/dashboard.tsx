@@ -22,8 +22,7 @@ import {
   Underline,
   Link as IconLink,
   Image as IconImage,
-  Copy,
-  ExternalLink
+  Copy
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,6 +81,20 @@ interface UserData {
   photoURL: string | null;
 }
 
+interface SiteAnalyticsPoint {
+  date: string;
+  views: number;
+}
+
+interface SiteAnalyticsSummary {
+  totalPageViews: number;
+  uniqueVisitors: number;
+  topPages: Array<{ page: string; views: number }>;
+  topCountries: Array<{ country: string; views: number }>;
+  dailyViews: SiteAnalyticsPoint[];
+  windowDays: number;
+}
+
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
   'admin@jornadadeinsights.com',
@@ -129,6 +142,16 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const [categoryDescription, setCategoryDescription] = useState('');
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [siteAnalytics, setSiteAnalytics] = useState<SiteAnalyticsSummary>({
+    totalPageViews: 0,
+    uniqueVisitors: 0,
+    topPages: [],
+    topCountries: [],
+    dailyViews: [],
+    windowDays: 30,
+  });
+  const [siteAnalyticsLoading, setSiteAnalyticsLoading] = useState(false);
+  const [siteAnalyticsError, setSiteAnalyticsError] = useState<string | null>(null);
 
   // Constants
   const itemsPerPage = 20; // Show 20 orders per page in completed orders tab
@@ -376,6 +399,51 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       fetchCategories();
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== 'analytics') return;
+
+    const fetchSiteAnalytics = async () => {
+      try {
+        setSiteAnalyticsLoading(true);
+        setSiteAnalyticsError(null);
+
+        const user = auth.currentUser;
+        if (!user) throw new Error('Admin user is not authenticated');
+
+        const idToken = await user.getIdToken();
+        const response = await fetch(`${SERVER_URL}/api/site-analytics-summary?days=30`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to load site analytics (${response.status})`);
+        }
+
+        const summary = await response.json();
+        setSiteAnalytics({
+          totalPageViews: Number(summary.totalPageViews) || 0,
+          uniqueVisitors: Number(summary.uniqueVisitors) || 0,
+          topPages: Array.isArray(summary.topPages) ? summary.topPages : [],
+          topCountries: Array.isArray(summary.topCountries) ? summary.topCountries : [],
+          dailyViews: Array.isArray(summary.dailyViews) ? summary.dailyViews : [],
+          windowDays: Number(summary.windowDays) || 30,
+        });
+      } catch (error) {
+        console.error('Error fetching site analytics:', error);
+        setSiteAnalyticsError('Nao foi possivel carregar os dados de trafego.');
+      } finally {
+        setSiteAnalyticsLoading(false);
+      }
+    };
+
+    fetchSiteAnalytics();
+  }, [activeTab, SERVER_URL]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -806,21 +874,88 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <CardHeader>
               <CardTitle>Tráfego do site</CardTitle>
               <CardDescription>
-                Visualizações, visitantes, países e páginas mais visitadas (Vercel Web Analytics). Os gráficos abaixo são vendas e Stripe.
+                Dados coletados diretamente no site nos ultimos {siteAnalytics.windowDays} dias.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" asChild>
-                <a
-                  href={import.meta.env.VITE_VERCEL_ANALYTICS_DASHBOARD_URL ?? 'https://vercel.com/dashboard'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Abrir Web Analytics na Vercel
-                </a>
-              </Button>
+              {siteAnalyticsError && (
+                <p className="text-sm text-destructive">{siteAnalyticsError}</p>
+              )}
+              {siteAnalyticsLoading ? (
+                <p className="text-sm text-muted-foreground">Carregando trafego...</p>
+              ) : (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <Card className="p-4">
+                      <p className="text-sm text-muted-foreground">Visualizacoes de pagina</p>
+                      <p className="text-2xl font-bold">{siteAnalytics.totalPageViews.toLocaleString('pt-BR')}</p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="text-sm text-muted-foreground">Visitantes unicos</p>
+                      <p className="text-2xl font-bold">{siteAnalytics.uniqueVisitors.toLocaleString('pt-BR')}</p>
+                    </Card>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <Card className="p-4">
+                      <h3 className="text-sm font-semibold mb-3">Paises</h3>
+                      <div className="space-y-3">
+                        {siteAnalytics.topCountries.length === 0 && (
+                          <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+                        )}
+                        {siteAnalytics.topCountries.map((item) => (
+                          <div key={item.country} className="space-y-1">
+                            <div className="flex justify-between text-sm">
+                              <span>{item.country}</span>
+                              <span>{item.views}</span>
+                            </div>
+                            <Progress
+                              value={siteAnalytics.totalPageViews > 0 ? (item.views / siteAnalytics.totalPageViews) * 100 : 0}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+
+                    <Card className="p-4">
+                      <h3 className="text-sm font-semibold mb-3">Paginas mais vistas</h3>
+                      <div className="space-y-2">
+                        {siteAnalytics.topPages.length === 0 && (
+                          <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+                        )}
+                        {siteAnalytics.topPages.map((item) => (
+                          <div key={item.page} className="flex justify-between text-sm border-b pb-1">
+                            <span className="truncate max-w-[75%]">{item.page}</span>
+                            <span>{item.views}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  </div>
+
+                  <Card className="p-4">
+                    <h3 className="text-sm font-semibold mb-3">Tendencia diaria de visualizacoes</h3>
+                    <div className="space-y-2">
+                      {siteAnalytics.dailyViews.length === 0 && (
+                        <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+                      )}
+                      {siteAnalytics.dailyViews.map((point) => (
+                        <div key={point.date} className="grid grid-cols-[110px_1fr_60px] items-center gap-3 text-sm">
+                          <span>{new Date(point.date).toLocaleDateString('pt-BR')}</span>
+                          <Progress
+                            value={
+                              siteAnalytics.dailyViews.length > 0
+                                ? (point.views / Math.max(...siteAnalytics.dailyViews.map((d) => d.views), 1)) * 100
+                                : 0
+                            }
+                          />
+                          <span className="text-right">{point.views}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                </div>
+              )}
             </CardContent>
           </Card>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
