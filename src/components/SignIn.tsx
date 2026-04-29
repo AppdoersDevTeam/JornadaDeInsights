@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -19,6 +19,28 @@ const SignIn = () => {
   const location = useLocation();
   const state = location.state as { from?: string; returnTo?: string } | undefined;
   const returnPath = state?.returnTo || state?.from || '/user-dashboard';
+
+  useEffect(() => {
+    const redirectSignedInUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data.user) {
+        return;
+      }
+
+      const savedCart = sessionStorage.getItem('cartState');
+      if (savedCart) {
+        sessionStorage.removeItem('cartState');
+      }
+
+      if (ALLOWED_ADMIN_EMAILS.includes((data.user.email || '').toLowerCase())) {
+        navigate('/dashboard');
+      } else {
+        navigate(returnPath);
+      }
+    };
+
+    redirectSignedInUser();
+  }, [navigate, returnPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
