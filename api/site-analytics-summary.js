@@ -81,6 +81,11 @@ export default async function handler(req, res) {
       uniqueVisitors: Number(summary.uniqueVisitors) || 0,
       topPages: Array.isArray(summary.topPages) ? summary.topPages : [],
       topCountries: Array.isArray(summary.topCountries) ? summary.topCountries : [],
+      topReferrers: Array.isArray(summary.topReferrers) ? summary.topReferrers : [],
+      topDevices: Array.isArray(summary.topDevices) ? summary.topDevices : [],
+      topOperatingSystems: Array.isArray(summary.topOperatingSystems)
+        ? summary.topOperatingSystems
+        : [],
       dailyViews: Array.isArray(summary.dailyViews) ? summary.dailyViews : [],
       windowDays: Number(summary.windowDays) || days,
     });

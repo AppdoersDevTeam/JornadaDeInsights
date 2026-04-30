@@ -3,8 +3,10 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
+import { useLanguage } from '@/context/language-context';
 
 export function ConfirmEmailPage() {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const tokenHash = searchParams.get('token_hash');
   const type = searchParams.get('type');
@@ -23,7 +25,7 @@ export function ConfirmEmailPage() {
         setStatus('success');
       })
       .catch((error) => {
-        console.error('Erro ao verificar o email:', error);
+        console.error('Error verifying email:', error);
         setStatus('error');
       });
   }, [tokenHash, type]);
@@ -44,26 +46,26 @@ export function ConfirmEmailPage() {
             <>
               <CheckCircle className="mx-auto mb-6 h-16 w-16 text-primary" />
               <h1 className="text-3xl md:text-4xl font-heading font-bold mb-4">
-                Email confirmado com sucesso!
+                {t('confirm.successTitle', 'Email confirmed!')}
               </h1>
               <p className="text-lg text-muted-foreground mb-8">
-                Seu email foi verificado. Agora você pode acessar seu painel.
+                {t('confirm.successBody', 'Your email is verified. You can open your dashboard.')}
               </p>
               <Button asChild size="lg">
-                <Link to="/user-dashboard">Ir para o painel</Link>
+                <Link to="/user-dashboard">{t('confirm.cta', 'Go to dashboard')}</Link>
               </Button>
             </>
           ) : (
             <>
               <XCircle className="mx-auto mb-6 h-16 w-16 text-destructive" />
               <h1 className="text-3xl md:text-4xl font-heading font-bold mb-4">
-                Falha na confirmação
+                {t('confirm.failTitle', 'Confirmation failed')}
               </h1>
               <p className="text-lg text-muted-foreground mb-8">
-                Não foi possível confirmar seu email. O link pode ter expirado ou ser inválido.
+                {t('confirm.failBody', 'We could not confirm your email. The link may have expired.')}
               </p>
               <Button asChild size="lg">
-                <Link to="/signin">Voltar para Entrar</Link>
+                <Link to="/signin">{t('confirm.retry', 'Back to sign in')}</Link>
               </Button>
             </>
           )}

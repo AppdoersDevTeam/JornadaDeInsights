@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Mail, MapPin, Send, Clock, CheckCircle, ChevronDown, Loader2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, Variants } from 'framer-motion';
+import { useLanguage } from '@/context/language-context';
 
 // Add CTA animations
 const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.5 } } };
 const ctaButtonVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 400, damping: 20 } } };
 
 export function ContactPage() {
+  const { t } = useLanguage();
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -56,6 +58,14 @@ export function ContactPage() {
     setOpenFaq(openFaq === index ? null : index);
   };
 
+  const faqs = [
+    { question: t('contact.faq.1.q', 'How do I download eBooks and guides?'), answer: t('contact.faq.1.a', 'After purchase (or free access, if offered), you receive an immediate PDF download link. Read on phone, tablet, desktop, or print.') },
+    { question: t('contact.faq.2.q', 'Are materials good for beginners?'), answer: t('contact.faq.2.a', 'Yes. Content uses clear, biblical, accessible language—for newcomers and for those who want to go deeper.') },
+    { question: t('contact.faq.3.q', 'Can I use this in small groups or church?'), answer: t('contact.faq.3.a', 'Absolutely. Use eBooks and guides in groups, Bible school, or family study. Please do not resell or redistribute commercially.') },
+    { question: t('contact.faq.4.q', 'Where can I listen to the podcast?'), answer: t('contact.faq.4.a', 'Major platforms including YouTube, Spotify, and iHeartRadio—and links on this site.') },
+    { question: t('contact.faq.5.q', 'Do children’s books include activities?'), answer: t('contact.faq.5.a', 'Yes. Kids’ eBooks include Bible stories, activities, reflections, and coloring pages—fun and formative.') },
+  ];
+
   return (
     <>
       {/* Hero Section */}
@@ -80,7 +90,7 @@ export function ContactPage() {
         
         <div className="max-w-3xl mx-auto text-center px-4 sm:px-6 py-20">
           <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">
-            Entre em Contato
+            {t('contact.hero.title', 'Get in touch')}
           </h1>
           <motion.p className="text-lg text-muted-foreground mb-6"
             initial={{ opacity: 0, y: 20 }}
@@ -88,7 +98,7 @@ export function ContactPage() {
             viewport={{ amount: 0.3 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Tem perguntas sobre meu podcast, eBooks ou palestras? Vamos nos conectar!
+            {t('contact.hero.subtitle', 'Questions about the podcast, eBooks, or speaking? Let’s connect.')}
           </motion.p>
           <motion.div
             variants={ctaContainerVariants}
@@ -99,14 +109,14 @@ export function ContactPage() {
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button size="lg" asChild className="w-full sm:w-auto">
                 <a href="#contact-form">
-                  Enviar Mensagem <ArrowRight className="ml-2 h-4 w-4" />
+                  {t('contact.hero.formCta', 'Send a message')} <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </motion.div>
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
                 <a href="#faq-section">
-                  Perguntas Frequentes <ArrowRight className="ml-2 h-4 w-4" />
+                  {t('contact.hero.faqCta', 'Frequently asked questions')} <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </motion.div>
@@ -121,7 +131,7 @@ export function ContactPage() {
             
             {/* Contact Information */}
             <div>
-              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">Informações de Contato</h2>
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">{t('contact.info.title', 'Contact details')}</h2>
               
               <div className="space-y-6 mb-10">
                 <div className="flex items-start gap-4">
@@ -129,8 +139,8 @@ export function ContactPage() {
                     <Mail className="text-primary h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-medium mb-1">Email</h3>
-                    <p className="text-muted-foreground">patricia@example.com</p>
+                    <h3 className="font-medium mb-1">{t('contact.email', 'Email')}</h3>
+                    <p className="text-muted-foreground">patricia@jornadadeinsights.com</p>
                   </div>
                 </div>
                 
@@ -139,8 +149,8 @@ export function ContactPage() {
                     <MapPin className="text-primary h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-medium mb-1">Localização</h3>
-                    <p className="text-muted-foreground">San Francisco, California</p>
+                    <h3 className="font-medium mb-1">{t('contact.location', 'Location')}</h3>
+                    <p className="text-muted-foreground">Ashburton, New Zealand</p>
                   </div>
                 </div>
                 
@@ -149,13 +159,13 @@ export function ContactPage() {
                     <Clock className="text-primary h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-medium mb-1">Tempo de Resposta</h3>
-                    <p className="text-muted-foreground">Normalmente em 1-2 dias úteis</p>
+                    <h3 className="font-medium mb-1">{t('contact.response', 'Response time')}</h3>
+                    <p className="text-muted-foreground">{t('contact.response.hint', 'Usually within 1–2 business days')}</p>
                   </div>
                 </div>
               </div>
               
-              <h3 className="font-medium mb-4">Conecte-se Comigo</h3>
+              <h3 className="font-medium mb-4">{t('contact.social', 'Connect with me')}</h3>
               <div className="flex space-x-4">
                 <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="bg-primary/10 p-3 rounded-full transition-all duration-300 hover:bg-primary/20 hover:-translate-y-1 hover:shadow-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
@@ -174,21 +184,21 @@ export function ContactPage() {
             
             {/* Contact Form */}
             <div>
-              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">Enviar uma Mensagem</h2>
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8">{t('contact.form.title', 'Send a message')}</h2>
               
               {isSubmitted ? (
                 <div id="success-message" className="bg-secondary/10 text-secondary rounded-md p-6 flex items-center gap-3 animate-in fade-in duration-500 slide-in-from-bottom-4">
                   <CheckCircle className="h-6 w-6 flex-shrink-0 animate-in bounce-in duration-1000" />
                   <div>
-                    <h3 className="font-medium mb-1">Obrigado por entrar em contato!</h3>
-                    <p>Sua mensagem foi recebida. Eu retornarei o mais breve possível.</p>
+                    <h3 className="font-medium mb-1">{t('contact.form.successTitle', 'Thank you for reaching out!')}</h3>
+                    <p>{t('contact.form.successBody', 'Your message was received. I will reply as soon as I can.')}</p>
                   </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium mb-2">Seu Nome</label>
+                      <label htmlFor="name" className="block text-sm font-medium mb-2">{t('contact.form.name', 'Your name')}</label>
                       <input
                         type="text"
                         id="name"
@@ -200,7 +210,7 @@ export function ContactPage() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium mb-2">Seu Email</label>
+                      <label htmlFor="email" className="block text-sm font-medium mb-2">{t('contact.form.email', 'Your email')}</label>
                       <input
                         type="email"
                         id="email"
@@ -214,7 +224,7 @@ export function ContactPage() {
                   </div>
                   
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium mb-2">Assunto</label>
+                    <label htmlFor="subject" className="block text-sm font-medium mb-2">{t('contact.form.subject', 'Subject')}</label>
                     <select
                       id="subject"
                       name="subject"
@@ -223,16 +233,16 @@ export function ContactPage() {
                       required
                       className="w-full px-4 py-2 rounded-md border border-input bg-background transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:shadow-[0_0_0_4px_rgba(var(--primary),0.1)]"
                     >
-                      <option value="">Selecione um assunto</option>
-                      <option value="Podcast Inquiry">Inquérito de Podcast</option>
-                      <option value="eBook Support">Suporte ao eBook</option>
-                      <option value="Speaking Engagement">Palestras</option>
-                      <option value="Other">Outro</option>
+                      <option value="">{t('contact.form.subjectPlaceholder', 'Choose a topic')}</option>
+                      <option value="Podcast Inquiry">{t('contact.form.subject.podcast', 'Podcast inquiry')}</option>
+                      <option value="eBook Support">{t('contact.form.subject.ebook', 'eBook support')}</option>
+                      <option value="Speaking Engagement">{t('contact.form.subject.speaking', 'Speaking invitation')}</option>
+                      <option value="Other">{t('contact.form.subject.other', 'Other')}</option>
                     </select>
                   </div>
                   
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium mb-2">Sua Mensagem</label>
+                    <label htmlFor="message" className="block text-sm font-medium mb-2">{t('contact.form.message', 'Your message')}</label>
                     <textarea
                       id="message"
                       name="message"
@@ -248,11 +258,11 @@ export function ContactPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Enviando...
+                        {t('contact.form.sending', 'Sending...')}
                       </>
                     ) : (
                       <>
-                        Enviar Mensagem <Send className="ml-2 h-4 w-4" />
+                        {t('contact.form.send', 'Send message')} <Send className="ml-2 h-4 w-4" />
                       </>
                     )}
                   </Button>
@@ -266,31 +276,10 @@ export function ContactPage() {
       {/* FAQ Section */}
       <section id="faq-section" className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">Perguntas Frequentes</h2>
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-8 text-center">{t('contact.faq.title', 'Frequently asked questions')}</h2>
           
           <div className="max-w-3xl mx-auto space-y-4">
-            {[
-              {
-                question: "Como faço para baixar os eBooks e guias?",
-                answer: "Após a confirmação da compra (ou acesso gratuito, se for o caso), você receberá um link para download imediato do material em formato PDF. Você pode ler no celular, tablet, computador ou imprimir."
-              },
-              {
-                question: "Os materiais são indicados para iniciantes na fé?",
-                answer: "Sim! Todos os conteúdos são escritos com linguagem clara, bíblica e acessível — ideais tanto para quem está começando quanto para quem deseja aprofundar o conhecimento."
-              },
-              {
-                question: "Posso usar os materiais em grupos de estudo ou na igreja?",
-                answer: "Com certeza! Nossos eBooks, resumos e guias podem ser usados em pequenos grupos, escolas bíblicas e estudos em família. Apenas pedimos que o conteúdo não seja redistribuído comercialmente."
-              },
-              {
-                question: "Onde posso ouvir o podcast \"Uma Jornada de Insights\"?",
-                answer: "Você pode ouvir nas principais plataformas como YouTube, Spotify e iHeartRadio. Também há links disponíveis aqui no site."
-              },
-              {
-                question: "Os livros infantis vêm com atividades?",
-                answer: "Sim! Os eBooks infantis incluem histórias bíblicas, atividades lúdicas, curiosidades, reflexões e até páginas para colorir — tudo pensado para ensinar de forma divertida."
-              }
-            ].map((faq, index) => (
+            {faqs.map((faq, index) => (
               <div key={index} className="bg-card rounded-lg shadow-sm border border-border/50 overflow-hidden">
                 <button
                   onClick={() => toggleFaq(index)}

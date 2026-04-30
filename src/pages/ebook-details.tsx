@@ -8,8 +8,10 @@ import { motion } from 'framer-motion';
 import { getEbookById } from '@/lib/supabase';
 import type { Ebook } from '@/components/shop/ebook-card';
 import { StructuredData } from '@/components/seo/structured-data';
+import { useLanguage } from '@/context/language-context';
 
 export function EbookDetailsPage() {
+  const { t, language } = useLanguage();
   const { id } = useParams<{ id: string }>();
   const { addItem } = useCart();
   const [ebook, setEbook] = useState<Ebook | null>(null);
@@ -20,12 +22,12 @@ export function EbookDetailsPage() {
     const fetchEbook = async () => {
       try {
         setIsLoading(true);
-        if (!id) throw new Error('No ebook ID provided');
+        if (!id) throw new Error(t('ebook.loadError', 'Could not load this eBook. Please try again later.'));
         
         const data = await getEbookById(id);
         setEbook(data);
       } catch (err) {
-        setError('Falha ao carregar detalhes do ebook. Por favor, tente novamente mais tarde.');
+        setError(t('ebook.loadError', 'Could not load this eBook. Please try again later.'));
         console.error(err);
       } finally {
         setIsLoading(false);
@@ -47,12 +49,12 @@ export function EbookDetailsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-red-500 mb-4">Erro</h2>
-          <p className="text-gray-600">{error || 'Ebook não encontrado'}</p>
+          <h2 className="text-2xl font-semibold text-red-500 mb-4">{t('common.error', 'Error')}</h2>
+          <p className="text-gray-600">{error || t('ebook.notFound', 'eBook not found')}</p>
           <Button asChild className="mt-4">
             <Link to="/shop">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar para a Loja
+              {t('common.backToShop', 'Back to the store')}
             </Link>
           </Button>
         </div>
@@ -94,7 +96,7 @@ export function EbookDetailsPage() {
         <Button asChild variant="ghost" className="mb-8">
           <Link to="/shop">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para a Loja
+            {t('common.backToShop', 'Back to the store')}
           </Link>
         </Button>
 
@@ -122,7 +124,7 @@ export function EbookDetailsPage() {
           >
             <h1 className="text-3xl md:text-4xl font-heading font-bold mb-4">{ebook.title}</h1>
             <p className="text-xl text-primary font-medium mb-6">
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ebook.price)}
+              {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(ebook.price)}
             </p>
             <p className="text-lg text-muted-foreground mb-8 whitespace-pre-line">{ebook.description}</p>
             
@@ -133,44 +135,44 @@ export function EbookDetailsPage() {
                 className="flex-1"
               >
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                Adicionar ao Carrinho
+                {t('ebook.addToCart', 'Add to cart')}
               </Button>
               <Button variant="outline" size="lg" asChild className="flex-1">
-                <Link to="/cart">Ir para o Carrinho</Link>
+                <Link to="/cart">{t('ebook.goToCart', 'Go to cart')}</Link>
               </Button>
             </div>
 
             <div className="mt-8 rounded-lg border border-border/60 bg-card/60 p-4 space-y-3">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                Pagamento seguro processado via Stripe.
+                {t('ebook.trust.stripe', 'Secure payment processed by Stripe.')}
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Clock3 className="h-4 w-4 text-primary" />
-                Acesso digital imediato apos a confirmacao da compra.
+                {t('ebook.trust.access', 'Immediate digital access after purchase confirmation.')}
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <BadgeCheck className="h-4 w-4 text-primary" />
-                Suporte por email para duvidas de acesso e download.
+                {t('ebook.trust.support', 'Email support for access and download questions.')}
               </div>
             </div>
           </motion.div>
         </div>
 
         <div className="mt-12 rounded-lg border border-border/60 bg-card p-6">
-          <h2 className="text-xl font-semibold mb-4">Perguntas frequentes sobre a compra</h2>
+          <h2 className="text-xl font-semibold mb-4">{t('ebook.faq.title', 'Purchase FAQ')}</h2>
           <div className="space-y-4 text-sm text-muted-foreground">
             <p>
-              <span className="font-medium text-foreground">Como recebo o eBook?</span><br />
-              Assim que o pagamento for aprovado, o arquivo fica disponivel no seu painel.
+              <span className="font-medium text-foreground">{t('ebook.faq.receive.q', 'How do I receive my eBook?')}</span><br />
+              {t('ebook.faq.receive.a', 'After payment is approved, the file is available in your dashboard.')}
             </p>
             <p>
-              <span className="font-medium text-foreground">Qual formato do arquivo?</span><br />
-              Todos os eBooks sao entregues em PDF para leitura em celular, tablet e computador.
+              <span className="font-medium text-foreground">{t('ebook.faq.format.q', 'What file format?')}</span><br />
+              {t('ebook.faq.format.a', 'All eBooks are delivered as PDFs for phone, tablet, or desktop.')}
             </p>
             <p>
-              <span className="font-medium text-foreground">Posso pedir reembolso?</span><br />
-              Se houver problema tecnico de acesso, entre em contato pelo formulario de contato para avaliacao e suporte.
+              <span className="font-medium text-foreground">{t('ebook.faq.refund.q', 'Can I request a refund?')}</span><br />
+              {t('ebook.faq.refund.a', 'If you have a technical access issue, contact us through the form and we will help.')}
             </p>
           </div>
         </div>

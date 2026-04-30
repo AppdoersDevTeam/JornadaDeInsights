@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { LazyImage } from '@/components/shop/lazy-image';
 import { trackLifecycleEvent } from '@/lib/lifecycle';
+import { useLanguage } from '@/context/language-context';
 
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -37,6 +38,7 @@ interface Ebook {
 }
 
 export function CartPage() {
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -119,7 +121,7 @@ export function CartPage() {
   }, [items]);
 
   const formatPrice = (value: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
   const handleCheckout = async () => {
     // If not authenticated, show auth modal and redirect to sign in
@@ -213,7 +215,7 @@ export function CartPage() {
       }
     } catch (error) {
       console.error('Erro ao iniciar o processo de checkout:', error);
-      toast.error('Falha ao iniciar o processo de checkout. Por favor, tente novamente.');
+      toast.error(t('cart.toast.checkoutFail', 'Could not start checkout. Please try again.'));
     }
   };
 
@@ -236,13 +238,13 @@ export function CartPage() {
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="max-w-3xl mx-auto">
             <ShoppingCart className="mx-auto mb-4 h-12 w-12 text-primary" />
-            <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4 text-center">Seu Carrinho</h1>
+            <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4 text-center">{t('cart.title', 'Your cart')}</h1>
 
             {totalCount === 0 ? (
               <div className="text-center">
-                <p className="text-lg text-muted-foreground mb-6">Seu carrinho está vazio no momento.</p>
+                <p className="text-lg text-muted-foreground mb-6">{t('cart.empty', 'Your cart is empty.')}</p>
                 <Button asChild size="lg">
-                  <Link to="/shop">Continuar Comprando</Link>
+                  <Link to="/shop">{t('cart.continue', 'Continue shopping')}</Link>
                 </Button>
               </div>
             ) : (
@@ -289,19 +291,19 @@ export function CartPage() {
                   ))}
                 </div>
                 <div className="flex justify-between items-center mt-8">
-                  <p className="text-xl font-semibold">Total:</p>
+                  <p className="text-xl font-semibold">{t('ud.cart.total', 'Total:')}</p>
                   <p className="text-2xl font-bold">{formatPrice(totalPrice)}</p>
                 </div>
                 <div className="flex justify-center gap-4 mt-6">
-                  <Button variant="outline" onClick={clearCart}>Limpar Carrinho</Button>
-                  <Button onClick={handleCheckout}>Finalizar Compra</Button>
+                  <Button variant="outline" onClick={clearCart}>{t('cart.clear', 'Clear cart')}</Button>
+                  <Button onClick={handleCheckout}>{t('cart.checkout', 'Checkout')}</Button>
                 </div>
 
                 {recommendedEbooks.length > 0 && (
                   <div className="pt-8 border-t">
-                    <h3 className="text-lg font-semibold mb-3">Adicione e economize com estes complementos</h3>
+                    <h3 className="text-lg font-semibold mb-3">{t('cart.crossSell.title', 'Add these complements')}</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Produtos sugeridos para aumentar o valor da sua jornada.
+                      {t('cart.crossSell.subtitle', 'Suggested items to enrich your journey.')}
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       {recommendedEbooks.map((ebook) => (
@@ -322,7 +324,7 @@ export function CartPage() {
                             className="w-full mt-3"
                             onClick={() => addItem(ebook)}
                           >
-                            Adicionar ao carrinho
+                            {t('cart.crossSell.add', 'Add to cart')}
                           </Button>
                         </div>
                       ))}
@@ -339,15 +341,15 @@ export function CartPage() {
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Atenção</DialogTitle>
+            <DialogTitle>{t('cart.auth.title', 'Attention')}</DialogTitle>
             <DialogDescription>
-              Para finalizar a compra, você precisa estar logado. Deseja continuar?
+              {t('cart.auth.body', 'You need to be signed in to complete checkout. Continue?')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAuthModal(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setShowAuthModal(false)}>{t('cart.auth.cancel', 'Cancel')}</Button>
             <Button onClick={handleAuthRedirect}>
-              Continuar
+              {t('cart.auth.continue', 'Continue')}
             </Button>
           </DialogFooter>
           <DialogClose />

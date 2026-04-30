@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from '@/context/language-context';
 
 interface EbookMetadata {
   title: string;
@@ -38,6 +39,7 @@ interface Ebook {
 }
 
 export default function EbookList() {
+  const { t, language } = useLanguage();
   const [ebooks, setEbooks] = useState<Ebook[]>([]);
   const [allEbooks, setAllEbooks] = useState<Ebook[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,7 +167,7 @@ export default function EbookList() {
       setEbooks(combinedEbooks);
     } catch (err) {
       console.error('Error fetching ebooks:', err);
-      toast.error('Failed to load ebooks. Please try again later.');
+      toast.error(t('admin.ebooks.loadError', 'Failed to load eBooks. Please try again later.'));
     } finally {
       setLoading(false);
     }
@@ -251,13 +253,13 @@ export default function EbookList() {
         }
       }
 
-      toast.success('eBook excluído com sucesso');
+      toast.success(t('admin.ebooks.deleteSuccess', 'eBook deleted successfully'));
       setEbookToDelete(null);
       // Force a refresh of the list
       await fetchEbooks();
     } catch (error) {
       console.error('Error deleting ebook:', error);
-      toast.error('Falha ao excluir o eBook');
+      toast.error(t('admin.ebooks.deleteFail', 'Could not delete the eBook.'));
       // If there was an error, refresh the list to ensure consistency
       await fetchEbooks();
     }
@@ -294,11 +296,11 @@ export default function EbookList() {
   }, [selectedCategoryId, allEbooks]);
 
   if (loading) {
-    return <div>Loading ebooks...</div>;
+    return <div>{t('admin.ebooks.loading', 'Loading eBooks...')}</div>;
   }
 
   if (ebooks.length === 0) {
-    return <div>No ebooks found</div>;
+    return <div>{t('admin.ebooks.empty', 'No eBooks found')}</div>;
   }
 
   return (
@@ -306,13 +308,13 @@ export default function EbookList() {
       {/* Category Filter */}
       <div className="mb-6">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-medium text-gray-700">Filtrar por categoria:</span>
+          <span className="text-sm font-medium text-gray-700">{t('admin.ebooks.filterByCategory', 'Filter by category:')}</span>
           <Button
             variant={selectedCategoryId === '' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setSelectedCategoryId('')}
           >
-            Todos
+            {t('common.all', 'All')}
           </Button>
           {categories.map((category) => (
             <Button
@@ -327,7 +329,9 @@ export default function EbookList() {
         </div>
         {selectedCategoryId && (
           <p className="text-sm text-muted-foreground mt-2">
-            Mostrando {ebooks.length} de {allEbooks.length} eBooks
+            {t('admin.ebooks.showing', 'Showing {shown} of {total} eBooks')
+              .replace('{shown}', String(ebooks.length))
+              .replace('{total}', String(allEbooks.length))}
           </p>
         )}
       </div>
@@ -355,7 +359,7 @@ export default function EbookList() {
                 {ebook.metadata.description}
               </p>
               <p className="text-primary font-semibold mb-2">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ebook.metadata.price)}
+                {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(ebook.metadata.price)}
               </p>
               <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
                 <span>{ebook.size.toFixed(2)} MB</span>
@@ -389,7 +393,7 @@ export default function EbookList() {
       <Dialog open={!!selectedEbook} onOpenChange={() => setSelectedEbook(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit eBook</DialogTitle>
+            <DialogTitle>{t('admin.ebooks.editTitle', 'Edit eBook')}</DialogTitle>
           </DialogHeader>
           {selectedEbook && (
             <EditEbookForm
@@ -404,17 +408,17 @@ export default function EbookList() {
       <Dialog open={!!ebookToDelete} onOpenChange={() => setEbookToDelete(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogTitle>{t('admin.dialog.deleteTitle', 'Confirm delete')}</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir este eBook? Esta ação não pode ser desfeita.
+              {t('admin.ebooks.deleteConfirm', 'Are you sure you want to delete this eBook? This action cannot be undone.')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEbookToDelete(null)}>
-              Cancelar
+              {t('common.cancel', 'Cancel')}
             </Button>
             <Button variant="destructive" onClick={confirmDelete}>
-              Excluir
+              {t('common.delete', 'Delete')}
             </Button>
           </DialogFooter>
         </DialogContent>

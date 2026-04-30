@@ -20,6 +20,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { TabType } from '@/types/dashboard';
+import { useLanguage } from '@/context/language-context';
 
 interface UserDashboardSidePanelProps {
   activeTab: TabType;
@@ -27,6 +28,7 @@ interface UserDashboardSidePanelProps {
 }
 
 export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboardSidePanelProps) {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { totalCount } = useCart();
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
@@ -44,7 +46,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
     <>
       <div className="h-full mt-[52px]">
         <div className="flex h-16 items-center border-b px-6">
-          <h2 className="text-lg font-semibold">Meu Dashboard</h2>
+          <h2 className="text-lg font-semibold">{t('user.panelTitle', 'My dashboard')}</h2>
         </div>
         <nav className="space-y-1 p-4">
           <Button
@@ -53,7 +55,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
             onClick={() => onTabChange('overview')}
           >
             <LayoutDashboard className="mr-2 h-4 w-4" />
-            Visão Geral
+            {t('user.tab.overview', 'Overview')}
           </Button>
           <Button
             variant={activeTab === 'ebooks' ? 'secondary' : 'ghost'}
@@ -61,7 +63,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
             onClick={() => onTabChange('ebooks')}
           >
             <Book className="mr-2 h-4 w-4" />
-            Meus eBooks
+            {t('user.tab.ebooks', 'My eBooks')}
           </Button>
           <Button
             variant={activeTab === 'orders' ? 'secondary' : 'ghost'}
@@ -69,7 +71,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
             onClick={() => onTabChange('orders')}
           >
             <ShoppingBag className="mr-2 h-4 w-4" />
-            Pedidos
+            {t('user.tab.orders', 'Orders')}
           </Button>
           <Button
             variant={activeTab === 'cart' ? 'secondary' : 'ghost'}
@@ -77,7 +79,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
             onClick={() => onTabChange('cart')}
           >
             <ShoppingCart className="mr-2 h-4 w-4" />
-            Meu Carrinho
+            {t('user.tab.cart', 'My cart')}
             {totalCount > 0 && (
               <span className="ml-2 bg-primary text-primary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
                 {totalCount}
@@ -90,7 +92,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
             onClick={() => onTabChange('settings')}
           >
             <Settings className="mr-2 h-4 w-4" />
-            Configurações
+            {t('user.tab.settings', 'Settings')}
           </Button>
           <Button
             variant="ghost"
@@ -98,7 +100,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
             onClick={() => setShowSignOutDialog(true)}
           >
             <LogOut className="mr-2 h-4 w-4" />
-            Sair
+            {t('user.signOut.cta', 'Sign out')}
           </Button>
         </nav>
       </div>
@@ -107,17 +109,17 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
       <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar Saída</DialogTitle>
+            <DialogTitle>{t('user.signOut.confirmTitle', 'Sign out?')}</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja sair da sua conta?
+              {t('user.signOut.confirmBody', 'Are you sure you want to sign out?')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
-              Cancelar
+              {t('user.signOut.cancel', 'Cancel')}
             </Button>
             <Button variant="destructive" onClick={handleSignOut}>
-              Sair
+              {t('user.signOut.cta', 'Sign out')}
             </Button>
           </DialogFooter>
         </DialogContent>

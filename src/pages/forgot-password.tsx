@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/context/language-context';
 
 export function ForgotPasswordPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +23,6 @@ export function ForgotPasswordPage() {
       return;
     }
 
-    // If recovery session is already active, no action needed.
     void supabase.auth.getSession();
   }, [isRecoveryMode]);
 
@@ -30,7 +31,7 @@ export function ForgotPasswordPage() {
     setIsSubmitting(true);
     try {
       if (!email) {
-        throw new Error('Informe seu email para recuperar a senha.');
+        throw new Error(t('forgot.needEmail', 'Enter your email to reset your password.'));
       }
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -38,10 +39,10 @@ export function ForgotPasswordPage() {
       });
       if (error) throw error;
 
-      toast.success('Email de recuperação enviado.');
+      toast.success(t('forgot.sent', 'Password reset email sent.'));
       setEmail('');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Falha ao enviar recuperação.');
+      toast.error(error instanceof Error ? error.message : t('forgot.sendFail', 'Could not send reset email.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -52,19 +53,19 @@ export function ForgotPasswordPage() {
     setIsSubmitting(true);
     try {
       if (!password || password.length < 8) {
-        throw new Error('A nova senha deve ter pelo menos 8 caracteres.');
+        throw new Error(t('forgot.passwordShort', 'New password must be at least 8 characters.'));
       }
       if (password !== confirmPassword) {
-        throw new Error('As senhas não coincidem.');
+        throw new Error(t('forgot.passwordMismatch', 'Passwords do not match.'));
       }
 
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
 
-      toast.success('Senha atualizada com sucesso.');
+      toast.success(t('forgot.updated', 'Password updated successfully.'));
       navigate('/signin');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Falha ao atualizar senha.');
+      toast.error(error instanceof Error ? error.message : t('forgot.updateFail', 'Could not update password.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -75,12 +76,14 @@ export function ForgotPasswordPage() {
       <div className="container mx-auto px-6 sm:px-8 lg:px-10 max-w-xl">
         <div className="bg-card p-8 rounded-lg border border-border/50 shadow-md">
           <h1 className="text-2xl font-heading font-bold mb-2">
-            {isRecoveryMode ? 'Definir nova senha' : 'Esqueceu sua senha?'}
+            {isRecoveryMode
+              ? t('forgot.page.resetTitle', 'Set new password')
+              : t('forgot.page.forgotTitle', 'Forgot your password?')}
           </h1>
           <p className="text-sm text-muted-foreground mb-6">
             {isRecoveryMode
-              ? 'Escolha uma nova senha para continuar.'
-              : 'Enviaremos um link de recuperação para o seu email.'}
+              ? t('forgot.page.resetDesc', 'Choose a new password to continue.')
+              : t('forgot.page.forgotDesc', 'We will send a recovery link to your email.')}
           </p>
 
           {!isRecoveryMode ? (
@@ -89,12 +92,14 @@ export function ForgotPasswordPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Seu email"
+                placeholder={t('forgot.page.emailPlaceholder', 'Your email')}
                 className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? 'Enviando...' : 'Enviar link de recuperação'}
+                {isSubmitting
+                  ? t('forgot.page.sendingReset', 'Sending...')
+                  : t('forgot.page.sendReset', 'Send recovery link')}
               </Button>
             </form>
           ) : (
@@ -103,7 +108,7 @@ export function ForgotPasswordPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Nova senha"
+                placeholder={t('forgot.page.newPassword', 'New password')}
                 className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
@@ -111,19 +116,21 @@ export function ForgotPasswordPage() {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirmar nova senha"
+                placeholder={t('forgot.page.confirmPassword', 'Confirm new password')}
                 className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? 'Salvando...' : 'Atualizar senha'}
+                {isSubmitting
+                  ? t('forgot.page.saving', 'Saving...')
+                  : t('forgot.page.update', 'Update password')}
               </Button>
             </form>
           )}
 
           <div className="mt-6 text-center">
             <Link to="/signin" className="text-primary hover:underline text-sm">
-              Voltar para login
+              {t('forgot.page.backToLogin', 'Back to sign in')}
             </Link>
           </div>
         </div>

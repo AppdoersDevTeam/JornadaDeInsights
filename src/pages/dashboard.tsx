@@ -76,6 +76,9 @@ interface SiteAnalyticsSummary {
   uniqueVisitors: number;
   topPages: Array<{ page: string; views: number }>;
   topCountries: Array<{ country: string; views: number }>;
+  topReferrers: Array<{ referrer: string; views: number }>;
+  topDevices: Array<{ device: string; views: number }>;
+  topOperatingSystems: Array<{ os: string; views: number }>;
   dailyViews: SiteAnalyticsPoint[];
   windowDays: number;
 }
@@ -147,6 +150,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     uniqueVisitors: 0,
     topPages: [],
     topCountries: [],
+    topReferrers: [],
+    topDevices: [],
+    topOperatingSystems: [],
     dailyViews: [],
     windowDays: 30,
   });
@@ -458,6 +464,11 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           uniqueVisitors: Number(summary.uniqueVisitors) || 0,
           topPages: Array.isArray(summary.topPages) ? summary.topPages : [],
           topCountries: Array.isArray(summary.topCountries) ? summary.topCountries : [],
+          topReferrers: Array.isArray(summary.topReferrers) ? summary.topReferrers : [],
+          topDevices: Array.isArray(summary.topDevices) ? summary.topDevices : [],
+          topOperatingSystems: Array.isArray(summary.topOperatingSystems)
+            ? summary.topOperatingSystems
+            : [],
           dailyViews: Array.isArray(summary.dailyViews) ? summary.dailyViews : [],
           windowDays: Number(summary.windowDays) || 30,
         });
@@ -1005,6 +1016,82 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                           <div key={item.page} className="flex justify-between text-sm border-b pb-1">
                             <span className="truncate max-w-[75%]">{item.page}</span>
                             <span>{item.views}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <Card className="p-4">
+                      <h3 className="text-sm font-semibold mb-3">Referenciadores</h3>
+                      <div className="space-y-3">
+                        {siteAnalytics.topReferrers.length === 0 && (
+                          <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+                        )}
+                        {siteAnalytics.topReferrers.map((item) => (
+                          <div key={item.referrer} className="space-y-1">
+                            <div className="flex justify-between text-sm gap-2">
+                              <span className="truncate max-w-[75%]" title={item.referrer}>
+                                {item.referrer}
+                              </span>
+                              <span>{item.views}</span>
+                            </div>
+                            <Progress
+                              value={
+                                siteAnalytics.totalPageViews > 0
+                                  ? (item.views / siteAnalytics.totalPageViews) * 100
+                                  : 0
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+
+                    <Card className="p-4">
+                      <h3 className="text-sm font-semibold mb-3">Dispositivos</h3>
+                      <div className="space-y-3">
+                        {siteAnalytics.topDevices.length === 0 && (
+                          <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+                        )}
+                        {siteAnalytics.topDevices.map((item) => (
+                          <div key={item.device} className="space-y-1">
+                            <div className="flex justify-between text-sm">
+                              <span>{item.device}</span>
+                              <span>{item.views}</span>
+                            </div>
+                            <Progress
+                              value={
+                                siteAnalytics.totalPageViews > 0
+                                  ? (item.views / siteAnalytics.totalPageViews) * 100
+                                  : 0
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+
+                    <Card className="p-4">
+                      <h3 className="text-sm font-semibold mb-3">Sistemas operacionais</h3>
+                      <div className="space-y-3">
+                        {siteAnalytics.topOperatingSystems.length === 0 && (
+                          <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+                        )}
+                        {siteAnalytics.topOperatingSystems.map((item) => (
+                          <div key={item.os} className="space-y-1">
+                            <div className="flex justify-between text-sm">
+                              <span>{item.os}</span>
+                              <span>{item.views}</span>
+                            </div>
+                            <Progress
+                              value={
+                                siteAnalytics.totalPageViews > 0
+                                  ? (item.views / siteAnalytics.totalPageViews) * 100
+                                  : 0
+                              }
+                            />
                           </div>
                         ))}
                       </div>

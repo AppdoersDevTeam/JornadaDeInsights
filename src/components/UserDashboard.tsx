@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
+import { useLanguage } from '@/context/language-context';
 import { Button } from '@/components/ui/button';
 import { Download, Eye, X, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -62,6 +63,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
 const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
+  const { t, language } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -246,7 +248,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       setUserEbooks(ebooksWithCoverUrls);
     } catch (err) {
       console.error('Error fetching orders and ebooks:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load your ebooks';
+      const errorMessage = err instanceof Error ? err.message : t('ud.ebooks.empty', 'Failed to load your eBooks');
       toast.error(errorMessage);
     }
   };
@@ -272,7 +274,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       }
     } catch (err) {
       console.error('Error fetching latest ebooks:', err);
-      toast.error('Failed to load latest ebooks');
+      toast.error(t('ud.recommended.desc', 'Failed to load latest eBooks'));
     }
   };
 
@@ -441,7 +443,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       }
     } catch (error) {
       console.error('Erro ao iniciar o processo de checkout:', error);
-      toast.error('Falha ao iniciar o processo de checkout. Por favor, tente novamente.');
+      toast.error(t('ud.toast.checkoutFail', 'Could not start checkout. Please try again.'));
     }
   };
 
@@ -451,7 +453,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       navigate('/signin');
     } catch (error) {
       console.error('Error signing out:', error);
-      toast.error('Nao foi possivel encerrar a sessao.');
+      toast.error(t('ud.toast.signoutFail', 'Could not sign out.'));
     }
   };
 
@@ -500,7 +502,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           email: email.trim().toLowerCase(),
         });
         if (emailError) throw emailError;
-        toast.success('Email de login atualizado. Confirme no seu novo email.');
+        toast.success(t('ud.toast.emailUpdated', 'Login email updated. Please confirm in your new inbox.'));
       }
 
       const { data, error } = await supabase.auth.updateUser({
@@ -515,10 +517,10 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       if (data.user) {
         setUser(data.user);
       }
-      toast.success('Configuracoes atualizadas com sucesso.');
+      toast.success(t('ud.toast.saved', 'Settings updated successfully.'));
     } catch (error) {
       console.error('Error updating settings:', error);
-      const message = error instanceof Error ? error.message : 'Nao foi possivel salvar as configuracoes.';
+      const message = error instanceof Error ? error.message : t('ud.toast.saveFail', 'Could not save settings.');
       toast.error(message);
     } finally {
       setSavingSettings(false);
@@ -539,18 +541,18 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       <div className="mb-12 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">
-            {activeTab === 'overview' && 'Visão Geral'}
-            {activeTab === 'ebooks' && 'Meus eBooks'}
-            {activeTab === 'orders' && 'Meus Pedidos'}
-            {activeTab === 'settings' && 'Configurações'}
-            {activeTab === 'cart' && 'Meu Carrinho'}
+            {activeTab === 'overview' && t('ud.tab.overview', 'Overview')}
+            {activeTab === 'ebooks' && t('ud.tab.ebooks', 'My eBooks')}
+            {activeTab === 'orders' && t('ud.tab.orders', 'My orders')}
+            {activeTab === 'settings' && t('ud.tab.settings', 'Settings')}
+            {activeTab === 'cart' && t('ud.tab.cart', 'My cart')}
           </h1>
           <p className="text-muted-foreground mt-2">
-            {activeTab === 'overview' && 'Uma visão geral da sua conta e atividades'}
-            {activeTab === 'ebooks' && 'Gerencie seus eBooks e downloads'}
-            {activeTab === 'orders' && 'Acompanhe seus pedidos e compras'}
-            {activeTab === 'settings' && 'Configure as configurações da sua conta'}
-            {activeTab === 'cart' && 'Gerencie os itens do seu carrinho'}
+            {activeTab === 'overview' && t('ud.tab.overview.desc', 'An overview of your account and activity')}
+            {activeTab === 'ebooks' && t('ud.tab.ebooks.desc', 'Manage your eBooks and downloads')}
+            {activeTab === 'orders' && t('ud.tab.orders.desc', 'Track your orders and purchases')}
+            {activeTab === 'settings' && t('ud.tab.settings.desc', 'Manage your account settings')}
+            {activeTab === 'cart' && t('ud.tab.cart.desc', 'Manage your cart items')}
           </p>
         </div>
       </div>
@@ -562,19 +564,19 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
             {/* Purchased eBooks Section */}
             <Card>
               <CardHeader>
-                <CardTitle>Meus eBooks</CardTitle>
+                <CardTitle>{t('ud.ebooks.title', 'My eBooks')}</CardTitle>
                 <CardDescription>
                   {userEbooks.length > 0 
-                    ? `Você tem ${userEbooks.length} eBook${userEbooks.length !== 1 ? 's' : ''}`
-                    : 'Você ainda não comprou nenhum eBook.'}
+                    ? `${userEbooks.length} eBook${userEbooks.length !== 1 ? 's' : ''}`
+                    : t('ud.ebooks.empty', 'You have not purchased any eBooks yet.')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {userEbooks.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-lg text-muted-foreground">Você ainda não comprou nenhum eBook.</p>
+                    <p className="text-lg text-muted-foreground">{t('ud.ebooks.empty', 'You have not purchased any eBooks yet.')}</p>
                     <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
-                      Procurar eBooks
+                      {t('ud.ebooks.browse', 'Browse eBooks')}
                     </Button>
                   </div>
                 ) : (
@@ -614,7 +616,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                                     }}
                                   >
                                     <Eye className="mr-2 h-5 w-5 sm:h-4 sm:w-4" />
-                                    Visualizar
+                                    {t('ud.ebooks.view', 'View')}
                                   </Button>
                                   <Button 
                                     variant="outline" 
@@ -642,12 +644,12 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                                         }
                                       } catch (err) {
                                         console.error('Error downloading file:', err);
-                                        toast.error('Failed to download the file');
+                                        toast.error(t('ud.toast.downloadFail', 'Could not download the file.'));
                                       }
                                     }}
                                   >
                                     <Download className="mr-2 h-4 w-4" />
-                                    Baixar
+                                    {t('ud.ebooks.download', 'Download')}
                                   </Button>
                                 </div>
                               </CardContent>
@@ -662,7 +664,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                         onClick={() => onTabChange('ebooks')}
                         className="w-full sm:w-auto"
                       >
-                        Ver todos os meus eBooks
+                        {t('ud.ebooks.viewAll', 'View all my eBooks')}
                       </Button>
                     </div>
                   </div>
@@ -673,15 +675,15 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
             {/* Orders Section */}
             <Card>
               <CardHeader>
-                <CardTitle>Histórico de Pedidos</CardTitle>
-                <CardDescription>Visualize seus pedidos e compras</CardDescription>
+                <CardTitle>{t('ud.orders.title', 'Order history')}</CardTitle>
+                <CardDescription>{t('ud.orders.desc', 'View your orders and purchases')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {completedOrdersList.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-lg text-muted-foreground">Você ainda não fez nenhuma compra.</p>
+                    <p className="text-lg text-muted-foreground">{t('ud.orders.empty', 'You have not made any purchases yet.')}</p>
                     <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
-                      Procurar eBooks
+                      {t('ud.ebooks.browse', 'Browse eBooks')}
                     </Button>
                   </div>
                 ) : (
@@ -690,12 +692,12 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                       <table className="w-full text-left whitespace-nowrap min-w-[300px]">
                         <thead className="bg-muted/50">
                           <tr>
-                            <th className="py-2 px-2 sm:px-4 border-b font-medium">Data</th>
-                            <th className="py-2 px-2 sm:px-4 border-b font-medium hidden sm:table-cell">Nome</th>
-                            <th className="py-2 px-2 sm:px-4 border-b font-medium hidden sm:table-cell">Email</th>
-                            <th className="py-2 px-2 sm:px-4 border-b font-medium">Itens</th>
-                            <th className="py-2 px-2 sm:px-4 border-b font-medium">Total</th>
-                            <th className="py-2 px-2 sm:px-4 border-b font-medium hidden sm:table-cell">Status</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium">{t('ud.orders.col.date', 'Date')}</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium hidden sm:table-cell">{t('ud.orders.col.name', 'Name')}</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium hidden sm:table-cell">{t('ud.orders.col.email', 'Email')}</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium">{t('ud.orders.col.items', 'Items')}</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium">{t('ud.orders.col.total', 'Total')}</th>
+                            <th className="py-2 px-2 sm:px-4 border-b font-medium hidden sm:table-cell">{t('ud.orders.col.status', 'Status')}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -706,7 +708,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                               onClick={() => setSelectedOrder(order)}
                             >
                               <td className="py-2 px-2 sm:px-4">
-                                {new Date(order.date).toLocaleDateString('pt-BR', {
+                                {new Date(order.date).toLocaleDateString(language === 'en' ? 'en-NZ' : 'pt-BR', {
                                   day: '2-digit',
                                   month: '2-digit',
                                   year: 'numeric'
@@ -722,11 +724,11 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                                 {order.items.length} item{order.items.length>1?'s':''}
                               </td>
                               <td className="py-2 px-2 sm:px-4">
-                                {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(order.total)}
+                                {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', {style:'currency',currency:'BRL'}).format(order.total)}
                               </td>
                               <td className="py-2 px-2 sm:px-4 hidden sm:table-cell">
                                 <Badge variant="outline">
-                                  {order.total > 0 ? 'Concluído' : 'Em processamento'}
+                                  {order.total > 0 ? t('ud.orders.status.completed', 'Completed') : t('ud.orders.status.processing', 'Processing')}
                                 </Badge>
                               </td>
                             </tr>
@@ -741,7 +743,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                           onClick={() => onTabChange('orders')}
                           className="w-full sm:w-auto"
                         >
-                          Ver todo o histórico de pedidos
+                          {t('ud.orders.viewAll', 'View full order history')}
                         </Button>
                       </div>
                     )}
@@ -754,9 +756,9 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
             {/* Recommended Ebooks Section */}
             <Card>
               <CardHeader>
-                <CardTitle>Ebooks que você pode gostar</CardTitle>
+                <CardTitle>{t('ud.recommended.title', 'eBooks you may like')}</CardTitle>
                 <CardDescription>
-                  Confira nossas últimas publicações
+                  {t('ud.recommended.desc', 'Check out our latest releases')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -771,7 +773,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                     onClick={() => navigate('/shop')}
                     className="w-full sm:w-auto"
                   >
-                    Ver todos os ebooks
+                    {t('ud.recommended.viewAll', 'View all eBooks')}
                   </Button>
                 </div>
               </CardContent>
@@ -783,9 +785,9 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           <div className="space-y-8">
             {userEbooks.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-lg text-muted-foreground">Você ainda não comprou nenhum eBook.</p>
+                <p className="text-lg text-muted-foreground">{t('ud.ebooks.empty', 'You have not purchased any eBooks yet.')}</p>
                 <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
-                  Procurar eBooks
+                  {t('ud.ebooks.browse', 'Browse eBooks')}
                 </Button>
               </div>
             ) : (
@@ -824,7 +826,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                               }}
                             >
                               <Eye className="mr-2 h-5 w-5 sm:h-4 sm:w-4" />
-                              Visualizar
+                              {t('ud.ebooks.view', 'View')}
                             </Button>
                             <Button 
                               variant="outline" 
@@ -852,12 +854,12 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                                   }
                                 } catch (err) {
                                   console.error('Error downloading file:', err);
-                                  toast.error('Failed to download the file');
+                                  toast.error(t('ud.toast.downloadFail', 'Could not download the file.'));
                                 }
                               }}
                             >
                               <Download className="mr-2 h-4 w-4" />
-                              Baixar
+                              {t('ud.ebooks.download', 'Download')}
                             </Button>
                           </div>
                         </CardContent>
@@ -874,15 +876,15 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           <div className="space-y-8">
             <Card className="p-6">
               <CardHeader>
-                <CardTitle>Histórico de Pedidos</CardTitle>
-                <CardDescription>Visualize todos os seus pedidos e compras</CardDescription>
+                <CardTitle>{t('ud.orders.title', 'Order history')}</CardTitle>
+                <CardDescription>{t('ud.orders.descFull', 'View all your orders and purchases')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {completedOrdersList.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-lg text-muted-foreground">Você ainda não fez nenhuma compra.</p>
+                    <p className="text-lg text-muted-foreground">{t('ud.orders.empty', 'You have not made any purchases yet.')}</p>
                     <Button variant="outline" className="mt-4" onClick={() => navigate('/shop')}>
-                      Procurar eBooks
+                      {t('ud.ebooks.browse', 'Browse eBooks')}
                     </Button>
                   </div>
                 ) : (
@@ -890,12 +892,12 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                     <table className="w-full text-left whitespace-nowrap min-w-[300px]">
                       <thead className="bg-muted/50">
                         <tr>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium">Data</th>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Nome</th>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Email</th>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium">Itens</th>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium">Total</th>
-                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">Status</th>
+                          <th className="py-2 px-1 sm:px-4 border-b font-medium">{t('ud.orders.col.date', 'Date')}</th>
+                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">{t('ud.orders.col.name', 'Name')}</th>
+                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">{t('ud.orders.col.email', 'Email')}</th>
+                          <th className="py-2 px-1 sm:px-4 border-b font-medium">{t('ud.orders.col.items', 'Items')}</th>
+                          <th className="py-2 px-1 sm:px-4 border-b font-medium">{t('ud.orders.col.total', 'Total')}</th>
+                          <th className="py-2 px-1 sm:px-4 border-b font-medium hidden sm:table-cell">{t('ud.orders.col.status', 'Status')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -906,7 +908,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                             onClick={() => setSelectedOrder(order)}
                           >
                             <td className="py-2 px-1 sm:px-4">
-                              {new Date(order.date).toLocaleDateString('pt-BR', {
+                              {new Date(order.date).toLocaleDateString(language === 'en' ? 'en-NZ' : 'pt-BR', {
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric'
@@ -922,11 +924,11 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                               {order.items.length} item{order.items.length>1?'s':''}
                             </td>
                             <td className="py-2 px-1 sm:px-4">
-                              {new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(order.total)}
+                              {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', {style:'currency',currency:'BRL'}).format(order.total)}
                             </td>
                             <td className="py-2 px-1 sm:px-4 hidden sm:table-cell">
                               <Badge variant="outline">
-                                {order.total > 0 ? 'Concluído' : 'Em processamento'}
+                                {order.total > 0 ? t('ud.orders.status.completed', 'Completed') : t('ud.orders.status.processing', 'Processing')}
                               </Badge>
                             </td>
                           </tr>
@@ -953,13 +955,13 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
             {items.length === 0 ? (
               <div className="text-center">
                 <ShoppingCart className="mx-auto mb-4 h-12 w-12 text-primary" />
-                <p className="text-lg text-muted-foreground mb-6">Seu carrinho está vazio no momento.</p>
+                <p className="text-lg text-muted-foreground mb-6">{t('ud.cart.empty', 'Your cart is empty.')}</p>
                 <Button
                   variant="outline"
                   size="lg"
                   onClick={() => navigate('/shop')}
                 >
-                  Continuar Comprando
+                  {t('ud.cart.continueShopping', 'Continue shopping')}
                 </Button>
               </div>
             ) : (
@@ -977,7 +979,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                           <div className="flex-1">
                             <h3 className="font-semibold">{item.title}</h3>
                             <p className="text-muted-foreground">
-                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
+                              {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
                             </p>
                           </div>
                         </div>
@@ -1010,14 +1012,14 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                   ))}
                 </div>
                 <div className="flex justify-between items-center mt-8">
-                  <p className="text-xl font-semibold">Total:</p>
+                  <p className="text-xl font-semibold">{t('ud.cart.total', 'Total:')}</p>
                   <p className="text-2xl font-bold">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalPrice)}
+                    {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(totalPrice)}
                   </p>
                 </div>
                 <div className="flex justify-center gap-4 mt-6">
-                  <Button variant="outline" onClick={clearCart}>Limpar Carrinho</Button>
-                  <Button onClick={handleCheckout}>Finalizar Compra</Button>
+                  <Button variant="outline" onClick={clearCart}>{t('ud.cart.clearCart', 'Clear cart')}</Button>
+                  <Button onClick={handleCheckout}>{t('ud.cart.checkout', 'Checkout')}</Button>
                 </div>
               </div>
             )}
@@ -1028,71 +1030,71 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           <div className="space-y-8">
             <Card>
               <CardHeader>
-                <CardTitle>Configurações da Conta</CardTitle>
+                <CardTitle>{t('ud.settings.title', 'Account settings')}</CardTitle>
                 <CardDescription>
-                  Gerencie suas preferências e informações da conta
+                  {t('ud.settings.desc', 'Manage your preferences and account information')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-8">
                   <div>
-                    <h3 className="text-lg font-medium mb-6">Informações da Conta</h3>
+                    <h3 className="text-lg font-medium mb-6">{t('ud.settings.accountInfo', 'Account information')}</h3>
                     <div className="space-y-6">
                       <div>
-                        <Label htmlFor="settings-full-name">Nome completo</Label>
+                        <Label htmlFor="settings-full-name">{t('ud.settings.fullName', 'Full name')}</Label>
                         <Input
                           id="settings-full-name"
                           value={fullName}
                           onChange={(event) => setFullName(event.target.value)}
-                          placeholder="Seu nome completo"
+                          placeholder={t('ud.settings.fullNamePlaceholder', 'Your full name')}
                           className="mt-2"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="settings-email">Email de login</Label>
+                        <Label htmlFor="settings-email">{t('ud.settings.loginEmail', 'Login email')}</Label>
                         <Input
                           id="settings-email"
                           type="email"
                           value={email}
                           onChange={(event) => setEmail(event.target.value)}
-                          placeholder="voce@email.com"
+                          placeholder="you@email.com"
                           className="mt-2"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="settings-contact-email">Email de contato</Label>
+                        <Label htmlFor="settings-contact-email">{t('ud.settings.contactEmail', 'Contact email')}</Label>
                         <Input
                           id="settings-contact-email"
                           type="email"
                           value={contactEmail}
                           onChange={(event) => setContactEmail(event.target.value)}
-                          placeholder="contato@email.com"
+                          placeholder="contact@email.com"
                           className="mt-2"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="settings-phone">Telefone / WhatsApp</Label>
+                        <Label htmlFor="settings-phone">{t('ud.settings.phone', 'Phone / WhatsApp')}</Label>
                         <Input
                           id="settings-phone"
                           value={phone}
                           onChange={(event) => setPhone(event.target.value)}
-                          placeholder="+55 11 90000-0000"
+                          placeholder="+64 21 000 0000"
                           className="mt-2"
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-muted-foreground mb-2">
-                          Conta criada em
+                          {t('ud.settings.createdAt', 'Account created')}
                         </label>
                         <p className="text-sm">
                           {user.created_at
-                            ? new Date(user.created_at).toLocaleDateString()
+                            ? new Date(user.created_at).toLocaleDateString(language === 'en' ? 'en-NZ' : 'pt-BR')
                             : 'N/A'}
                         </p>
                       </div>
                       <div>
                         <Button onClick={handleSaveSettings} disabled={savingSettings}>
-                          {savingSettings ? 'Salvando...' : 'Salvar configuracoes'}
+                          {savingSettings ? t('ud.settings.saving', 'Saving...') : t('ud.settings.save', 'Save settings')}
                         </Button>
                       </div>
                     </div>
@@ -1108,17 +1110,17 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar Saída</DialogTitle>
+            <DialogTitle>{t('ud.signout.title', 'Sign out?')}</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja sair da sua conta?
+              {t('ud.signout.body', 'Are you sure you want to sign out?')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
-              Cancelar
+              {t('ud.signout.cancel', 'Cancel')}
             </Button>
             <Button variant="destructive" onClick={handleSignOut}>
-              Sair
+              {t('ud.signout.cta', 'Sign out')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1128,18 +1130,17 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       <Dialog open={showTimeoutDialog} onOpenChange={setShowTimeoutDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Sessão Expirando</DialogTitle>
+            <DialogTitle>{t('ud.session.title', 'Session expiring')}</DialogTitle>
             <DialogDescription>
-              Sua sessão está prestes a expirar. Você será desconectado em {timeoutCountdown} segundos.
-              Deseja estender sua sessão?
+              {t('ud.session.body', 'Your session is about to expire. You will be signed out in {seconds} seconds. Extend your session?').replace('{seconds}', String(timeoutCountdown))}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={handleSessionTimeout}>
-              Sair
+              {t('ud.session.signout', 'Sign out')}
             </Button>
             <Button onClick={handleExtendSession}>
-              Estender Sessão
+              {t('ud.session.extend', 'Extend session')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1149,48 +1150,48 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Detalhes do Pedido</DialogTitle>
+            <DialogTitle>{t('ud.order.title', 'Order details')}</DialogTitle>
             <DialogDescription>
               {selectedOrder && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <p className="font-medium text-muted-foreground">Data</p>
-                      <p>{new Date(selectedOrder.date).toLocaleDateString('pt-BR', {
+                      <p className="font-medium text-muted-foreground">{t('ud.order.date', 'Date')}</p>
+                      <p>{new Date(selectedOrder.date).toLocaleDateString(language === 'en' ? 'en-NZ' : 'pt-BR', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric'
                       })}</p>
                     </div>
                     <div>
-                      <p className="font-medium text-muted-foreground">Total</p>
-                      <p>{new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(selectedOrder.total)}</p>
+                      <p className="font-medium text-muted-foreground">{t('ud.order.total', 'Total')}</p>
+                      <p>{new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', {style:'currency',currency:'BRL'}).format(selectedOrder.total)}</p>
                     </div>
                     <div>
-                      <p className="font-medium text-muted-foreground">Nome</p>
+                      <p className="font-medium text-muted-foreground">{t('ud.order.name', 'Name')}</p>
                       <p>{capitalizeName(selectedOrder.name)}</p>
                     </div>
                     <div>
-                      <p className="font-medium text-muted-foreground">Email</p>
+                      <p className="font-medium text-muted-foreground">{t('ud.order.email', 'Email')}</p>
                       <p>{selectedOrder.email}</p>
                     </div>
                   </div>
                   <div>
-                    <p className="font-medium text-muted-foreground mb-2">Itens</p>
+                    <p className="font-medium text-muted-foreground mb-2">{t('ud.order.items', 'Items')}</p>
                     <div className="space-y-2">
                       {selectedOrder.items.map((item, index) => (
                         <div key={index} className="flex justify-between text-sm">
                           <span>{item.name}</span>
-                          <span>{new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(item.price)}</span>
+                          <span>{new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', {style:'currency',currency:'BRL'}).format(item.price)}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                   <div className="pt-2 border-t">
                     <div className="flex justify-between font-medium">
-                      <span>Status</span>
+                      <span>{t('ud.order.status', 'Status')}</span>
                       <Badge variant="outline">
-                        {selectedOrder.total > 0 ? 'Concluído' : 'Em processamento'}
+                        {selectedOrder.total > 0 ? t('ud.orders.status.completed', 'Completed') : t('ud.orders.status.processing', 'Processing')}
                       </Badge>
                     </div>
                   </div>
@@ -1200,7 +1201,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           </DialogHeader>
           <DialogFooter>
             <Button onClick={() => setSelectedOrder(null)}>
-              Fechar
+              {t('ud.order.close', 'Close')}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -5,8 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Book, Headphones } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 const SignUp = () => {
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,17 +21,17 @@ const SignUp = () => {
     setError('');
 
     if (!email || !password || !confirmPassword) {
-      setError('Por favor, preencha todos os campos');
+      setError(t('signup.fillAll', 'Please fill in all fields'));
       return;
     }
 
     if (password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
+      setError(t('signup.passwordShort', 'Password must be at least 6 characters'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('As senhas não coincidem');
+      setError(t('signup.passwordMismatch', 'Passwords do not match'));
       return;
     }
 
@@ -48,7 +50,7 @@ const SignUp = () => {
       if (error) throw error;
       navigate('/check-email');
     } catch (error) {
-      const errorMessage = error instanceof AuthError ? error.message : 'Falha ao criar conta';
+      const errorMessage = error instanceof AuthError ? error.message : t('signup.fail', 'Could not create account');
       setError(errorMessage);
     }
   };
@@ -66,7 +68,7 @@ const SignUp = () => {
         throw error;
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Falha ao entrar com Google';
+      const errorMessage = error instanceof Error ? error.message : t('signup.googleFail', 'Google sign-in failed');
       setError(errorMessage);
     }
   };
@@ -91,30 +93,30 @@ const SignUp = () => {
               <div className="flex items-center gap-3 mb-6">
                 <Headphones className="h-8 w-8 text-primary" />
                 <h1 className="text-3xl md:text-4xl font-heading font-bold">
-                  Crie sua conta e comece sua jornada
+                  {t('signup.page.heading', 'Create your account and start your journey')}
                 </h1>
               </div>
               <p className="text-lg text-muted-foreground">
-                Junte-se à nossa comunidade e tenha acesso a conteúdo exclusivo, eBooks e muito mais. Comece sua jornada de crescimento hoje mesmo.
+                {t('signup.page.desc', 'Join our community and access exclusive content, eBooks, and much more. Start your growth journey today.')}
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Book className="h-4 w-4 text-primary" />
                   </div>
-                  <p className="text-muted-foreground">Acesso a todos os eBooks</p>
+                  <p className="text-muted-foreground">{t('signup.page.feat1', 'Access to all eBooks')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Book className="h-4 w-4 text-primary" />
                   </div>
-                  <p className="text-muted-foreground">Conteúdo exclusivo</p>
+                  <p className="text-muted-foreground">{t('signup.page.feat2', 'Exclusive content')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Book className="h-4 w-4 text-primary" />
                   </div>
-                  <p className="text-muted-foreground">Atualizações sobre novos lançamentos</p>
+                  <p className="text-muted-foreground">{t('signup.page.feat3', 'Updates on new releases')}</p>
                 </div>
               </div>
             </motion.div>
@@ -127,14 +129,14 @@ const SignUp = () => {
             >
               <div className="bg-card p-8 rounded-lg border border-border/50 shadow-md">
                 <h2 className="text-2xl font-heading font-bold mb-6 text-center">
-                  Criar conta
+                  {t('signup.page.title', 'Create account')}
                 </h2>
                 
                 <form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-1">
-                        Nome completo
+                        {t('signup.page.nameLabel', 'Full name')}
                       </label>
                       <input
                         id="name"
@@ -142,7 +144,7 @@ const SignUp = () => {
                         type="text"
                         autoComplete="name"
                         className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Seu nome completo"
+                        placeholder={t('signup.page.namePlaceholder', 'Your full name')}
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                       />
@@ -158,14 +160,14 @@ const SignUp = () => {
                         autoComplete="email"
                         required
                         className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Seu email"
+                        placeholder={t('signup.page.emailPlaceholder', 'Your email')}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
                     </div>
                     <div>
                       <label htmlFor="password" className="block text-sm font-medium text-muted-foreground mb-1">
-                        Senha
+                        {t('signup.page.passwordLabel', 'Password')}
                       </label>
                       <input
                         id="password"
@@ -174,14 +176,14 @@ const SignUp = () => {
                         autoComplete="new-password"
                         required
                         className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Sua senha"
+                        placeholder={t('signup.page.passwordPlaceholder', 'Your password')}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                       />
                     </div>
                     <div>
                       <label htmlFor="confirmPassword" className="block text-sm font-medium text-muted-foreground mb-1">
-                        Confirmar senha
+                        {t('signup.page.confirmLabel', 'Confirm password')}
                       </label>
                       <input
                         id="confirmPassword"
@@ -190,7 +192,7 @@ const SignUp = () => {
                         autoComplete="new-password"
                         required
                         className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Confirme sua senha"
+                        placeholder={t('signup.page.confirmPlaceholder', 'Confirm your password')}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                       />
@@ -203,12 +205,12 @@ const SignUp = () => {
 
                   <div className="flex items-center justify-center">
                     <Button variant="link" asChild className="text-primary hover:text-primary/90">
-                      <a href="/signin">Já tem uma conta? Entre aqui</a>
+                      <a href="/signin">{t('signup.page.hasAccount', 'Already have an account? Sign in')}</a>
                     </Button>
                   </div>
 
                   <Button type="submit" className="w-full">
-                    Criar conta
+                    {t('signup.page.submit', 'Create account')}
                   </Button>
 
                   <div className="relative">
@@ -216,7 +218,7 @@ const SignUp = () => {
                       <span className="w-full border-t border-border/50" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">Ou continue com</span>
+                      <span className="bg-card px-2 text-muted-foreground">{t('signup.page.orWith', 'Or continue with')}</span>
                     </div>
                   </div>
 
@@ -244,7 +246,7 @@ const SignUp = () => {
                         fill="#EA4335"
                       />
                     </svg>
-                    Criar conta com Google
+                    {t('signup.page.google', 'Sign up with Google')}
                   </Button>
                 </form>
               </div>
@@ -256,4 +258,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp; 
+export default SignUp;

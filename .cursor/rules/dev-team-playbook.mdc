@@ -1,0 +1,12 @@
+---
+description: Multi-agent roles, workflow, and handoffs for this repo
+alwaysApply: true
+---
+
+# Dev team playbook
+
+- Follow **`AGENTS.md`** at the repo root for agent roles (product, architect, frontend, backend, data, QA, DevOps, security), phase gate (intake → discover → design → implement → verify → handoff), handoff checklist, and definition of done.
+- **Stack truth:** Primary app is **Vite + React** under `src/`. Server code lives under **`server/`**. Auth via **Firebase**; data client via **Supabase**; payments via **Stripe**. Do not assume Next.js App Router for the main UI without confirming in code.
+- **Scope:** Prefer minimal diffs; extend existing patterns in `src/components` and `src/pages`. Do not add unrelated refactors or docs the user did not request.
+- **Verify:** Run `npm run lint` after substantive edits; document manual smoke steps for touched user flows (especially auth, shop, donation, dashboard).
+- **Secrets:** Never commit credentials; env-only for keys and webhooks.
