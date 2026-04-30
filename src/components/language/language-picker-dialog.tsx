@@ -12,7 +12,12 @@ export function LanguagePickerDialog() {
   } = useLanguage();
 
   return (
-    <Dialog open={isLanguagePromptOpen} onOpenChange={closeLanguagePrompt}>
+    <Dialog
+      open={isLanguagePromptOpen}
+      onOpenChange={(open) => {
+        if (!open) closeLanguagePrompt();
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t('lang.title', 'Escolha seu idioma')}</DialogTitle>
