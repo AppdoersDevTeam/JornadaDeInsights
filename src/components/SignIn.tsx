@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Book, Headphones } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
+import { trackLifecycleEvent } from '@/lib/lifecycle';
 
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
@@ -27,6 +28,23 @@ const SignIn = () => {
       const { data, error } = await supabase.auth.getUser();
       if (error || !data.user) {
         return;
+      }
+
+      // If this user was just created via OAuth signup, count it as a lead.
+      try {
+        const user = data.user;
+        const userEmail = (user.email || '').trim().toLowerCase();
+        if (userEmail) {
+          const createdAtMs = Date.parse(user.created_at || '');
+          const isNewUser = Number.isFinite(createdAtMs) && Date.now() - createdAtMs < 10 * 60 * 1000;
+          const leadKey = `jdi_lead_captured_signup_${userEmail}`;
+          if (isNewUser && localStorage.getItem(leadKey) !== '1') {
+            await trackLifecycleEvent('lead_captured', { source: 'oauth_signup', provider: 'google', userEmail });
+            localStorage.setItem(leadKey, '1');
+          }
+        }
+      } catch {
+        // Ignore lead tracking failures on sign-in redirect.
       }
 
       const savedCart = sessionStorage.getItem('cartState');
