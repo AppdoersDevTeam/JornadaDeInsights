@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Book, Headphones } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
+import { trackLifecycleEvent } from '@/lib/lifecycle';
 
 const SignUp = () => {
   const { t } = useLanguage();
@@ -15,6 +16,15 @@ const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const markSignupLeadCaptured = async (emailAddress: string) => {
+    const normalized = emailAddress.trim().toLowerCase();
+    if (!normalized) return;
+    const key = `jdi_lead_captured_signup_${normalized}`;
+    if (localStorage.getItem(key) === '1') return;
+    await trackLifecycleEvent('lead_captured', { source: 'signup', userEmail: normalized });
+    localStorage.setItem(key, '1');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +58,7 @@ const SignUp = () => {
       });
 
       if (error) throw error;
+      await markSignupLeadCaptured(email);
       navigate('/check-email');
     } catch (error) {
       const errorMessage = error instanceof AuthError ? error.message : t('signup.fail', 'Could not create account');
