@@ -4,7 +4,8 @@ import {
   BarChart3, 
   Users, 
   ShoppingCart,
-  BookOpen
+  BookOpen,
+  LifeBuoy
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TabType } from '@/types/dashboard';
@@ -62,6 +63,14 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
           {t('admin.tab.orders', 'Completed orders')}
+        </Button>
+        <Button
+          variant={activeTab === 'support' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('support')}
+        >
+          <LifeBuoy className="mr-2 h-4 w-4" />
+          {t('admin.tab.support', 'Support')}
         </Button>
         <Button
           variant={activeTab === 'curiosidades' ? 'secondary' : 'ghost'}

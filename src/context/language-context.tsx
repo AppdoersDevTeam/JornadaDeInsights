@@ -9,6 +9,7 @@ interface LanguageContextValue {
   recommendedLanguage: SupportedLanguage;
   isLanguagePromptOpen: boolean;
   setLanguage: (lang: SupportedLanguage) => void;
+  openLanguagePrompt: () => void;
   closeLanguagePrompt: () => void;
   t: (key: string, fallback: string) => string;
 }
@@ -48,6 +49,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setIsLanguagePromptOpen(false);
   };
 
+  const openLanguagePrompt = () => {
+    setIsLanguagePromptOpen(true);
+  };
+
   const closeLanguagePrompt = () => {
     setIsLanguagePromptOpen(false);
     localStorage.setItem(STORAGE_KEY, language);
@@ -68,6 +73,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         recommendedLanguage,
         isLanguagePromptOpen,
         setLanguage,
+        openLanguagePrompt,
         closeLanguagePrompt,
         t,
       }}

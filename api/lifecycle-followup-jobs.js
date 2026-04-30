@@ -36,7 +36,7 @@ export default async function handler(req, res) {
     const { data, error } = await supabaseAdmin
       .from('lifecycle_followup_jobs')
       .select(
-        'id,status,job_type,user_email,session_id,visitor_id,scheduled_for,last_error,created_at,updated_at'
+        'id,status,job_type,user_email,session_id,visitor_id,scheduled_for,sent_at,created_at,updated_at'
       )
       .eq('status', status)
       .order('scheduled_for', { ascending: true })

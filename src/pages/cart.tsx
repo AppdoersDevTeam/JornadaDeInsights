@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogD
 import { LazyImage } from '@/components/shop/lazy-image';
 import { trackLifecycleEvent } from '@/lib/lifecycle';
 import { useLanguage } from '@/context/language-context';
+import { Label } from '@/components/ui/label';
 
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -44,6 +45,9 @@ export function CartPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [recommendedEbooks, setRecommendedEbooks] = useState<Ebook[]>([]);
+  const [displayCurrency, setDisplayCurrency] = useState<'BRL' | 'USD' | 'EUR' | 'GBP'>('BRL');
+  const [fxRate, setFxRate] = useState<number | null>(null);
+  const [fxLoading, setFxLoading] = useState(false);
   const { state: { items }, totalCount, totalPrice, clearCart, addItem, removeItem, decrementItem } = useCart();
 
   // Check authentication status
@@ -122,6 +126,36 @@ export function CartPage() {
 
   const formatPrice = (value: number) =>
     new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+  const formatDisplayTotal = () => {
+    if (displayCurrency === 'BRL' || !fxRate) return formatPrice(totalPrice);
+    return new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', {
+      style: 'currency',
+      currency: displayCurrency,
+    }).format(totalPrice * fxRate);
+  };
+
+  useEffect(() => {
+    const loadFx = async () => {
+      if (displayCurrency === 'BRL') {
+        setFxRate(null);
+        return;
+      }
+      try {
+        setFxLoading(true);
+        const res = await fetch(`/api/fx-rate?target=${displayCurrency}`);
+        if (!res.ok) throw new Error('FX failed');
+        const data = await res.json();
+        const rate = Number(data?.rate);
+        setFxRate(Number.isFinite(rate) ? rate : null);
+      } catch {
+        setFxRate(null);
+      } finally {
+        setFxLoading(false);
+      }
+    };
+    void loadFx();
+  }, [displayCurrency]);
 
   const handleCheckout = async () => {
     // If not authenticated, show auth modal and redirect to sign in
@@ -300,7 +334,32 @@ export function CartPage() {
                 </div>
                 <div className="flex justify-between items-center mt-8">
                   <p className="text-xl font-semibold">{t('ud.cart.total', 'Total:')}</p>
-                  <p className="text-2xl font-bold">{formatPrice(totalPrice)}</p>
+                  <p className="text-2xl font-bold">{formatDisplayTotal()}</p>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="space-y-2">
+                    <Label htmlFor="cart-display-currency">{t('cart.currency.label', 'Display currency')}</Label>
+                    <select
+                      id="cart-display-currency"
+                      value={displayCurrency}
+                      onChange={(e) => setDisplayCurrency(e.target.value as typeof displayCurrency)}
+                      className="border px-3 py-2 rounded bg-background"
+                    >
+                      <option value="BRL">BRL</option>
+                      <option value="USD">USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="GBP">GBP</option>
+                    </select>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {fxLoading
+                      ? t('cart.currency.loading', 'Loading exchange rate...')
+                      : displayCurrency === 'BRL'
+                        ? t('cart.currency.chargedInBrl', 'Charged in BRL at checkout.')
+                        : fxRate
+                          ? t('cart.currency.estimate', 'Estimate only. Charged in BRL at checkout.')
+                          : t('cart.currency.unavailable', 'Exchange rate unavailable. Charged in BRL.')}
+                  </p>
                 </div>
                 <div className="flex justify-center gap-4 mt-6">
                   <Button variant="outline" onClick={clearCart}>{t('cart.clear', 'Clear cart')}</Button>

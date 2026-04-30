@@ -4,7 +4,8 @@ import {
   Settings,
   LogOut,
   LayoutDashboard,
-  ShoppingCart
+  ShoppingCart,
+  Languages
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -28,7 +29,7 @@ interface UserDashboardSidePanelProps {
 }
 
 export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboardSidePanelProps) {
-  const { t } = useLanguage();
+  const { t, openLanguagePrompt } = useLanguage();
   const navigate = useNavigate();
   const { totalCount } = useCart();
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
@@ -45,8 +46,17 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
   return (
     <>
       <div className="h-full mt-[52px]">
-        <div className="flex h-16 items-center border-b px-6">
+        <div className="flex h-16 items-center justify-between border-b px-6">
           <h2 className="text-lg font-semibold">{t('user.panelTitle', 'My dashboard')}</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openLanguagePrompt}
+            aria-label={t('lang.switch', 'Change language')}
+            title={t('lang.switch', 'Change language')}
+          >
+            <Languages className="h-4 w-4" />
+          </Button>
         </div>
         <nav className="space-y-1 p-4">
           <Button

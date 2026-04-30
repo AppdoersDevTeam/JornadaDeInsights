@@ -67,6 +67,26 @@ interface UserData {
   photoURL: string | null;
 }
 
+interface SupportLookupSession {
+  sessionId: string;
+  createdAt: string;
+  email: string;
+  name: string | null;
+  currency: string;
+  total: number;
+  items: Array<{
+    name: string;
+    quantity: number;
+    amount: number;
+    currency: string;
+    ebookId: string | null;
+    ebookTitle: string | null;
+    filename: string | null;
+    pdfUrl: string | null;
+    coverUrl: string | null;
+  }>;
+}
+
 interface SiteAnalyticsPoint {
   date: string;
   views: number;
@@ -125,7 +145,7 @@ interface LifecycleFollowupJobRow {
   session_id: string | null;
   visitor_id: string | null;
   scheduled_for: string;
-  last_error: string | null;
+  sent_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -145,6 +165,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [hoverEmail, setHoverEmail] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [ordersExportLoading, setOrdersExportLoading] = useState(false);
   const [stats, setStats] = useState({
     today: 0,
     week: 0,
@@ -213,6 +234,16 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const [abandonedCartJobs, setAbandonedCartJobs] = useState<LifecycleFollowupJobRow[]>([]);
   const [abandonedCartJobsLoading, setAbandonedCartJobsLoading] = useState(false);
   const [abandonedCartJobsError, setAbandonedCartJobsError] = useState<string | null>(null);
+  const [supportLookupEmail, setSupportLookupEmail] = useState('');
+  const [supportLookupLoading, setSupportLookupLoading] = useState(false);
+  const [supportLookupError, setSupportLookupError] = useState<string | null>(null);
+  const [supportSessions, setSupportSessions] = useState<SupportLookupSession[]>([]);
+  const [adminAlerts, setAdminAlerts] = useState<{
+    failedPurchaseEmails: number;
+    pendingAbandonedCarts: number;
+    lastWebhookAt: string | null;
+  } | null>(null);
+  const [adminAlertsLoading, setAdminAlertsLoading] = useState(false);
 
   // Constants
   const itemsPerPage = 20; // Show 20 orders per page in completed orders tab
@@ -277,6 +308,92 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const copyEmail = (email: string) => {
     navigator.clipboard.writeText(email);
     toast.success(t('admin.toast.emailCopied', 'Email copied'));
+  };
+
+  const exportOrdersCsv = async () => {
+    try {
+      setOrdersExportLoading(true);
+      const idToken = await getSupabaseAccessToken();
+      if (!idToken) throw new Error('Admin token unavailable');
+
+      const params = new URLSearchParams();
+      if (dateRange.start) params.set('from', dateRange.start);
+      if (dateRange.end) params.set('to', dateRange.end);
+      params.set('paidOnly', 'true');
+
+      const response = await fetch(`${SERVER_URL}/api/orders-export?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body?.error || `Export failed (${response.status})`);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const fileName = `orders-export-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Orders export failed:', error);
+      toast.error(t('admin.orders.exportFail', 'Could not export CSV.'));
+    } finally {
+      setOrdersExportLoading(false);
+    }
+  };
+
+  const runSupportLookup = async () => {
+    try {
+      setSupportLookupLoading(true);
+      setSupportLookupError(null);
+      setSupportSessions([]);
+
+      const email = supportLookupEmail.trim().toLowerCase();
+      if (!email) {
+        setSupportLookupError(t('admin.support.emailRequired', 'Email is required.'));
+        return;
+      }
+
+      const idToken = await getSupabaseAccessToken();
+      if (!idToken) throw new Error('Admin token unavailable');
+
+      const response = await fetch(
+        `${SERVER_URL}/api/admin-customer-lookup?email=${encodeURIComponent(email)}&limit=10`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body?.error || `Lookup failed (${response.status})`);
+      }
+
+      const data = await response.json();
+      setSupportSessions(Array.isArray(data.sessions) ? data.sessions : []);
+    } catch (error) {
+      console.error('Support lookup failed:', error);
+      setSupportLookupError(
+        error instanceof Error ? error.message : t('admin.support.lookupFail', 'Could not load customer purchases.')
+      );
+    } finally {
+      setSupportLookupLoading(false);
+    }
   };
 
   // Calculate top selling products
@@ -426,6 +543,41 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       fetchData();
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== 'overview') return;
+
+    const fetchAlerts = async () => {
+      try {
+        setAdminAlertsLoading(true);
+        const idToken = await getSupabaseAccessToken();
+        if (!idToken) throw new Error('Admin token unavailable');
+
+        const res = await fetch(`${SERVER_URL}/api/admin-alerts`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          credentials: 'include',
+        });
+        if (!res.ok) {
+          throw new Error(`Alerts failed (${res.status})`);
+        }
+        const data = await res.json();
+        setAdminAlerts({
+          failedPurchaseEmails: Number(data.failedPurchaseEmails) || 0,
+          pendingAbandonedCarts: Number(data.pendingAbandonedCarts) || 0,
+          lastWebhookAt: typeof data.lastWebhookAt === 'string' ? data.lastWebhookAt : null,
+        });
+      } catch (error) {
+        console.error('Failed to load admin alerts:', error);
+      } finally {
+        setAdminAlertsLoading(false);
+      }
+    };
+
+    fetchAlerts();
+  }, [activeTab, SERVER_URL]);
 
   // Fetch all users when switching to users tab
   const fetchUsers = async () => {
@@ -800,10 +952,32 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               {activeTab === 'analytics' && t('admin.tab.analytics', 'Analytics')}
               {activeTab === 'users' && t('admin.tab.users', 'Users')}
               {activeTab === 'orders' && t('admin.tab.orders', 'Completed orders')}
+              {activeTab === 'support' && t('admin.tab.support', 'Support')}
               {activeTab === 'curiosidades' && t('admin.tab.curiosidades', 'Insights')}
             </h1>
           )}
         </div>
+
+        {activeTab === 'overview' && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline">
+              {t('admin.alerts.lastWebhook', 'Last webhook')}:{" "}
+              {adminAlertsLoading ? (
+                t('common.processing', 'Processing...')
+              ) : adminAlerts?.lastWebhookAt ? (
+                new Date(adminAlerts.lastWebhookAt).toLocaleString(language === 'en' ? 'en' : 'pt-BR')
+              ) : (
+                t('admin.alerts.none', 'None yet')
+              )}
+            </Badge>
+            <Badge variant={adminAlerts?.failedPurchaseEmails ? 'destructive' : 'outline'}>
+              {t('admin.alerts.failedEmails', 'Failed emails')}: {adminAlerts?.failedPurchaseEmails ?? 0}
+            </Badge>
+            <Badge variant={adminAlerts?.pendingAbandonedCarts ? 'default' : 'outline'}>
+              {t('admin.alerts.pendingCarts', 'Pending carts')}: {adminAlerts?.pendingAbandonedCarts ?? 0}
+            </Badge>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -1514,7 +1688,12 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         <div className="space-y-6 w-full">
           <Card className="p-6 w-full">
             <CardHeader>
-              <CardTitle>{t('admin.orders.allTitle', 'All completed orders')}</CardTitle>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle>{t('admin.orders.allTitle', 'All completed orders')}</CardTitle>
+                <Button variant="outline" onClick={exportOrdersCsv} disabled={ordersExportLoading}>
+                  {ordersExportLoading ? t('common.processing', 'Processing...') : t('admin.orders.exportCsv', 'Export CSV')}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {/* Filters */}
@@ -1638,6 +1817,126 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <span>{t('admin.pagination.pageOf', 'Page {page} of {total}').replace('{page}', String(currentPage)).replace('{total}', String(totalPages))}</span>
                 <Button variant="outline" disabled={currentPage===totalPages} onClick={()=>setCurrentPage(p=>p+1)}>{t('common.next', 'Next')}</Button>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === 'support' && (
+        <div className="space-y-6 w-full">
+          <Card className="p-6 w-full">
+            <CardHeader>
+              <CardTitle>{t('admin.support.title', 'Customer lookup')}</CardTitle>
+              <CardDescription>
+                {t('admin.support.desc', 'Search a customer by email to troubleshoot access and downloads.')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto] md:items-end">
+                <div className="space-y-2">
+                  <Label htmlFor="support-lookup-email">{t('admin.support.emailLabel', 'Customer email')}</Label>
+                  <Input
+                    id="support-lookup-email"
+                    value={supportLookupEmail}
+                    onChange={(e) => setSupportLookupEmail(e.target.value)}
+                    placeholder="customer@email.com"
+                  />
+                </div>
+                <Button onClick={runSupportLookup} disabled={supportLookupLoading}>
+                  {supportLookupLoading ? t('common.processing', 'Processing...') : t('admin.support.lookup', 'Lookup')}
+                </Button>
+              </div>
+
+              {supportLookupError && <p className="text-sm text-destructive">{supportLookupError}</p>}
+
+              {supportSessions.length === 0 && !supportLookupLoading ? (
+                <p className="text-sm text-muted-foreground">{t('admin.support.empty', 'No purchases found yet.')}</p>
+              ) : (
+                <div className="space-y-4">
+                  {supportSessions.map((session) => (
+                    <Card key={session.sessionId} className="p-4">
+                      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(session.createdAt).toLocaleString(language === 'en' ? 'en' : 'pt-BR')}
+                          </p>
+                          <p className="font-medium">{session.email}</p>
+                          {session.name && <p className="text-sm text-muted-foreground">{session.name}</p>}
+                          <p className="text-xs text-muted-foreground font-mono">{session.sessionId}</p>
+                        </div>
+                        <div className="text-sm">
+                          <span className="font-semibold">
+                            {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', {
+                              style: 'currency',
+                              currency: session.currency || 'BRL',
+                            }).format(session.total)}
+                          </span>
+                          <span className="text-muted-foreground"> · {session.items.length} items</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 overflow-x-auto">
+                        <table className="w-full text-left whitespace-nowrap min-w-[760px]">
+                          <thead className="bg-muted/50">
+                            <tr>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.support.col.item', 'Item')}</th>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.support.col.ebookId', 'eBook ID')}</th>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.support.col.download', 'Download')}</th>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.support.col.cover', 'Cover')}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {session.items.map((item, idx) => (
+                              <tr key={`${session.sessionId}-${idx}`} className="border-t">
+                                <td className="py-2 px-2 text-sm">
+                                  <div className="font-medium">{item.ebookTitle || item.name}</div>
+                                  <div className="text-muted-foreground">
+                                    {item.quantity} ×{' '}
+                                    {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', {
+                                      style: 'currency',
+                                      currency: item.currency || session.currency || 'BRL',
+                                    }).format(item.amount)}
+                                  </div>
+                                  {item.filename && (
+                                    <div className="text-xs text-muted-foreground font-mono">{item.filename}</div>
+                                  )}
+                                </td>
+                                <td className="py-2 px-2 text-sm font-mono">{item.ebookId || '—'}</td>
+                                <td className="py-2 px-2 text-sm">
+                                  {item.pdfUrl ? (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => window.open(item.pdfUrl as string, '_blank')}
+                                    >
+                                      {t('admin.support.open', 'Open')}
+                                    </Button>
+                                  ) : (
+                                    <span className="text-muted-foreground">—</span>
+                                  )}
+                                </td>
+                                <td className="py-2 px-2 text-sm">
+                                  {item.coverUrl ? (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => window.open(item.coverUrl as string, '_blank')}
+                                    >
+                                      {t('admin.support.open', 'Open')}
+                                    </Button>
+                                  ) : (
+                                    <span className="text-muted-foreground">—</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
