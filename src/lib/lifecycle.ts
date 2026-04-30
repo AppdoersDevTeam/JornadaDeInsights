@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
+// Lifecycle tracking should hit the same origin as the frontend so it works on
+// Vercel (where `/api/*` lives alongside the SPA) and with local proxies.
+const API_BASE_URL = window.location.origin;
 
 const getOrCreateId = (storage: Storage, key: string) => {
   const existing = storage.getItem(key);

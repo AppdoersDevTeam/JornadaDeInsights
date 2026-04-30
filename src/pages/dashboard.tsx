@@ -117,6 +117,19 @@ interface PurchaseEmailEventRow {
   updated_at: string;
 }
 
+interface LifecycleFollowupJobRow {
+  id: string;
+  status: string;
+  job_type: string;
+  user_email: string | null;
+  session_id: string | null;
+  visitor_id: string | null;
+  scheduled_for: string;
+  last_error: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
   'ptasbr2020@gmail.com'
@@ -197,6 +210,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const [purchaseEmailEvents, setPurchaseEmailEvents] = useState<PurchaseEmailEventRow[]>([]);
   const [stripeWebhookEventsLoading, setStripeWebhookEventsLoading] = useState(false);
   const [stripeWebhookEventsError, setStripeWebhookEventsError] = useState<string | null>(null);
+  const [abandonedCartJobs, setAbandonedCartJobs] = useState<LifecycleFollowupJobRow[]>([]);
+  const [abandonedCartJobsLoading, setAbandonedCartJobsLoading] = useState(false);
+  const [abandonedCartJobsError, setAbandonedCartJobsError] = useState<string | null>(null);
 
   // Constants
   const itemsPerPage = 20; // Show 20 orders per page in completed orders tab
@@ -592,6 +608,45 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     };
 
     fetchStripeWebhookEvents();
+  }, [activeTab, SERVER_URL, t]);
+
+  useEffect(() => {
+    if (activeTab !== 'analytics') return;
+
+    const fetchAbandonedCartJobs = async () => {
+      try {
+        setAbandonedCartJobsLoading(true);
+        setAbandonedCartJobsError(null);
+        const idToken = await getSupabaseAccessToken();
+        if (!idToken) throw new Error('Admin token is not available');
+
+        const response = await fetch(`${SERVER_URL}/api/lifecycle-followup-jobs?status=pending&limit=50`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body?.error || `Failed to load abandoned carts (${response.status})`);
+        }
+
+        const data = await response.json();
+        setAbandonedCartJobs(Array.isArray(data.jobs) ? data.jobs : []);
+      } catch (error) {
+        console.error('Error fetching abandoned cart jobs:', error);
+        setAbandonedCartJobsError(
+          error instanceof Error ? error.message : t('admin.abandoned.loadFail', 'Could not load abandoned carts.')
+        );
+      } finally {
+        setAbandonedCartJobsLoading(false);
+      }
+    };
+
+    fetchAbandonedCartJobs();
   }, [activeTab, SERVER_URL, t]);
 
   useEffect(() => {
@@ -1277,6 +1332,57 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       </div>
                     )}
                   </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="p-6 w-full">
+            <CardHeader>
+              <CardTitle>{t('admin.abandoned.title', 'Abandoned carts')}</CardTitle>
+              <CardDescription>
+                {t('admin.abandoned.desc', 'Pending follow-ups scheduled from checkout attempts.')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {abandonedCartJobsError && (
+                <p className="text-sm text-destructive">{abandonedCartJobsError}</p>
+              )}
+
+              {abandonedCartJobsLoading ? (
+                <p className="text-sm text-muted-foreground">{t('admin.abandoned.loading', 'Loading abandoned carts...')}</p>
+              ) : abandonedCartJobs.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left whitespace-nowrap min-w-[760px]">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="py-2 px-2 border-b font-medium">{t('admin.abandoned.col.scheduled', 'Scheduled')}</th>
+                        <th className="py-2 px-2 border-b font-medium">{t('admin.abandoned.col.email', 'Email')}</th>
+                        <th className="py-2 px-2 border-b font-medium">{t('admin.abandoned.col.type', 'Type')}</th>
+                        <th className="py-2 px-2 border-b font-medium">{t('admin.abandoned.col.session', 'Session')}</th>
+                        <th className="py-2 px-2 border-b font-medium">{t('admin.abandoned.col.status', 'Status')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {abandonedCartJobs.slice(0, 50).map((job) => (
+                        <tr key={job.id} className="border-t">
+                          <td className="py-2 px-2 text-sm">
+                            {new Date(job.scheduled_for).toLocaleString(language === 'en' ? 'en' : 'pt-BR')}
+                          </td>
+                          <td className="py-2 px-2 text-sm">{job.user_email || '—'}</td>
+                          <td className="py-2 px-2 text-sm">
+                            <Badge variant="outline">{job.job_type}</Badge>
+                          </td>
+                          <td className="py-2 px-2 text-sm font-mono">{job.session_id || '—'}</td>
+                          <td className="py-2 px-2 text-sm">
+                            <Badge variant="outline">{job.status}</Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </CardContent>
