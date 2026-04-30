@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, LogOut, BookOpen } from 'lucide-react';
+import { Menu, X, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, LogOut, BookOpen, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
@@ -13,7 +13,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const { totalCount } = useCart();
   const { user } = useAuth();
-  const { language, setLanguage, t, recommendedLanguage } = useLanguage();
+  const { language, openLanguagePrompt, t } = useLanguage();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -74,9 +74,11 @@ export function Header() {
             variant="outline"
             size="sm"
             className="text-background border-background hover:bg-background hover:text-primary bg-background/10 whitespace-nowrap px-2 xl:px-3"
-            onClick={() => setLanguage(language === 'pt-BR' ? 'en' : 'pt-BR')}
-            title={recommendedLanguage === 'en' ? 'English' : 'Português (Brasil)'}
+            onClick={openLanguagePrompt}
+            aria-label={t('lang.switch', 'Change language')}
+            title={t('lang.switch', 'Change language')}
           >
+            <Languages className="h-4 w-4 mr-1.5" />
             {language === 'pt-BR' ? 'PT' : 'EN'}
           </Button>
           {user ? (
@@ -130,13 +132,23 @@ export function Header() {
           )}
         </div>
         {/* Mobile Menu Toggle */}
-        <button 
-          onClick={toggleMenu}
-          className="lg:hidden text-foreground p-2 bg-background rounded-full shadow flex-shrink-0 ml-auto"
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="lg:hidden flex items-center gap-2 ml-auto">
+          <button
+            onClick={openLanguagePrompt}
+            className="text-foreground p-2 bg-background rounded-full shadow flex-shrink-0"
+            aria-label={t('lang.switch', 'Change language')}
+            title={t('lang.switch', 'Change language')}
+          >
+            <Languages className="h-5 w-5" />
+          </button>
+          <button 
+            onClick={toggleMenu}
+            className="text-foreground p-2 bg-background rounded-full shadow flex-shrink-0"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}
@@ -145,6 +157,17 @@ export function Header() {
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-4 items-start">
+          <button
+            type="button"
+            onClick={() => {
+              closeMenu();
+              openLanguagePrompt();
+            }}
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
+          >
+            <Languages className="h-5 w-5" />
+            {t('lang.switch', 'Change language')}
+          </button>
           {/* Dashboard Link for logged-in users */}
           {user && (
             <NavLink
