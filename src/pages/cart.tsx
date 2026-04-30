@@ -126,6 +126,13 @@ export function CartPage() {
   const handleCheckout = async () => {
     // If not authenticated, show auth modal and redirect to sign in
     if (!isAuthenticated) {
+      // Track checkout attempt even if user must sign in first
+      void trackLifecycleEvent('checkout_started', {
+        itemCount: items.length,
+        total: Number(totalPrice.toFixed(2)),
+        userEmail: null,
+      });
+
       // Store current cart state in sessionStorage
       sessionStorage.setItem('cartState', JSON.stringify(items));
       // Navigate to sign in with return path

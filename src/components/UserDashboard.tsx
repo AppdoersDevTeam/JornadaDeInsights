@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { loadStripe } from '@stripe/stripe-js';
 import type { Ebook } from '@/components/shop/ebook-card';
 import { TabType } from '@/types/dashboard';
+import { trackLifecycleEvent } from '@/lib/lifecycle';
 
 interface CompletedOrder {
   id: string;
@@ -362,6 +363,13 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   const handleCheckout = async () => {
     // If not authenticated, show auth modal and redirect to sign in
     if (!isAuthenticated) {
+      // Track checkout attempt even if user must sign in first
+      void trackLifecycleEvent('checkout_started', {
+        itemCount: items.length,
+        total: Number(totalPrice.toFixed(2)),
+        userEmail: null,
+      });
+
       // Store current cart state in sessionStorage
       sessionStorage.setItem('cartState', JSON.stringify(items));
       // Navigate to sign in with return path
