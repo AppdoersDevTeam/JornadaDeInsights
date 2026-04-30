@@ -35,7 +35,25 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
     if (!data || data.length === 0) {
       return (
         <div className="flex items-center justify-center h-[300px]">
-          <p className="text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
+          <p className="text-muted-foreground">{t('admin.salesTrends.empty', 'No sales in the selected period.')}</p>
+        </div>
+      );
+    }
+
+    const allZero = data.every((row) => Number(row.sales || 0) === 0);
+    if (allZero) {
+      const windowLabel =
+        activeTab === 'daily'
+          ? t('admin.salesTrends.window.daily', 'last 7 days')
+          : activeTab === 'weekly'
+            ? t('admin.salesTrends.window.weekly', 'last 4 weeks')
+            : t('admin.salesTrends.window.monthly', 'last 3 months');
+
+      return (
+        <div className="flex items-center justify-center h-[300px]">
+          <p className="text-muted-foreground">
+            {t('admin.salesTrends.noSalesInWindow', 'No sales in {window}.').replace('{window}', windowLabel)}
+          </p>
         </div>
       );
     }
