@@ -106,7 +106,7 @@ const ALLOWED_ADMIN_EMAILS = [
 ];
 
 export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   // All state declarations first
@@ -698,7 +698,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Compras de Hoje</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('admin.stats.today', 'Purchases today')}</p>
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
@@ -713,7 +713,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Compras da Semana</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('admin.stats.week', 'Purchases this week')}</p>
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
@@ -728,7 +728,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Compras do Mês</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('admin.stats.month', 'Purchases this month')}</p>
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
@@ -743,7 +743,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total de Usuários</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('admin.stats.usersTotal', 'Total users')}</p>
                   <h3 className="text-2xl font-bold">
                     {statsLoading
                       ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
@@ -751,7 +751,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                     }
                   </h3>
                   <div className="flex items-center mt-1">
-                    <Badge variant="secondary">Novos esta semana: {stats.users.newThisWeek}</Badge>
+                    <Badge variant="secondary">
+                      {t('admin.stats.usersNewThisWeek', 'New this week: {count}').replace('{count}', String(stats.users.newThisWeek))}
+                    </Badge>
                   </div>
                 </div>
                 <Users className="h-8 w-8 text-primary" />
@@ -765,7 +767,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <Card className="col-span-1 lg:col-span-2">
               <CardHeader>
                 <CardTitle>Produtos Mais Vendidos</CardTitle>
-                <CardDescription>Produtos mais vendidos este mês</CardDescription>
+                <CardDescription>{t('admin.topProducts.desc', 'Top selling products this month')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -806,7 +808,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               <div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Pedidos Concluídos</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t('admin.orders.completed', 'Completed orders')}</p>
                     <h3 className="text-2xl font-bold">
                       {statsLoading
                         ? <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded" />
@@ -819,7 +821,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               </div>
               <div className="mt-4">
                 <Button variant="outline" className="w-full" onClick={() => onTabChange('orders')}>
-                  Ver Pedidos Concluídos
+                  {t('admin.orders.view', 'View completed orders')}
                 </Button>
               </div>
             </Card>
@@ -832,7 +834,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           <Card>
             <CardHeader>
               <CardTitle>Enviar Novo eBook</CardTitle>
-              <CardDescription>Adicionar um novo eBook à loja</CardDescription>
+              <CardDescription>{t('admin.ebooks.uploadDesc', 'Add a new eBook to the store')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -845,25 +847,29 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           <Card className="p-6">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-xl font-semibold">Gerenciamento de Categorias</h2>
+                <h2 className="text-xl font-semibold">{t('admin.categories.title', 'Category management')}</h2>
                 <p className="text-sm text-muted-foreground mt-1">Gerencie categorias para organizar seus eBooks</p>
               </div>
               <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
                 <DialogTrigger asChild>
                   <Button onClick={() => { setEditingCategory(null); setCategoryName(''); setCategoryDescription(''); }}>
-                    Nova Categoria
+                    {t('admin.categories.new', 'New category')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>{editingCategory ? 'Editar Categoria' : 'Nova Categoria'}</DialogTitle>
+                    <DialogTitle>
+                      {editingCategory ? t('admin.categories.editTitle', 'Edit category') : t('admin.categories.newTitle', 'New category')}
+                    </DialogTitle>
                     <DialogDescription>
-                      {editingCategory ? 'Atualize as informações da categoria' : 'Crie uma nova categoria para organizar seus eBooks'}
+                      {editingCategory
+                        ? t('admin.categories.editDesc', 'Update category details')
+                        : t('admin.categories.newDesc', 'Create a new category to organize your eBooks')}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="categoryName">Nome da Categoria *</Label>
+                      <Label htmlFor="categoryName">{t('admin.categories.nameLabel', 'Category name')} *</Label>
                       <Input
                         id="categoryName"
                         value={categoryName}
@@ -872,19 +878,19 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="categoryDescription">Descrição (opcional)</Label>
+                      <Label htmlFor="categoryDescription">{t('admin.categories.descLabel', 'Description (optional)')}</Label>
                       <Textarea
                         id="categoryDescription"
                         value={categoryDescription}
                         onChange={(e) => setCategoryDescription(e.target.value)}
-                        placeholder="Descrição da categoria..."
+                        placeholder={t('admin.categories.descPlaceholder', 'Category description...')}
                         rows={3}
                       />
                     </div>
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={closeCategoryDialog}>
-                      Cancelar
+                      {t('common.cancel', 'Cancel')}
                     </Button>
                     <Button onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}>
                       {editingCategory ? 'Atualizar' : 'Criar'}
@@ -897,7 +903,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               {categories.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-lg text-muted-foreground">Nenhuma categoria criada ainda.</p>
-                  <p className="text-sm text-muted-foreground mt-2">Clique em "Nova Categoria" para começar.</p>
+                  <p className="text-sm text-muted-foreground mt-2">{t('admin.categories.emptyHint', 'Click “New category” to get started.')}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -925,21 +931,23 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                           <DialogTrigger asChild>
                             <Button variant="destructive" size="sm" className="flex-1">
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Deletar
+                              {t('common.delete', 'Delete')}
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
-                              <DialogTitle>Confirmar Exclusão</DialogTitle>
+                              <DialogTitle>{t('admin.dialog.deleteTitle', 'Confirm delete')}</DialogTitle>
                               <DialogDescription>
-                                Tem certeza que deseja excluir a categoria "{category.name}"? Esta ação não pode ser desfeita.
-                                Os eBooks nesta categoria não serão deletados, mas perderão a associação com a categoria.
+                                {t('admin.categories.deleteConfirm', 'Are you sure you want to delete the category "{name}"? This action cannot be undone.')
+                                  .replace('{name}', category.name)}
+                                {' '}
+                                {t('admin.categories.deleteNote', 'eBooks in this category will not be deleted, but will lose the category association.')}
                               </DialogDescription>
                             </DialogHeader>
                             <DialogFooter>
-                              <Button variant="outline">Cancelar</Button>
+                              <Button variant="outline">{t('common.cancel', 'Cancel')}</Button>
                               <Button variant="destructive" onClick={() => handleDeleteCategory(category.id)}>
-                                Deletar
+                                {t('common.delete', 'Delete')}
                               </Button>
                             </DialogFooter>
                           </DialogContent>
@@ -963,7 +971,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         <div className="space-y-6 w-full">
           <Card className="p-6 w-full">
             <CardHeader>
-              <CardTitle>Tráfego do site</CardTitle>
+              <CardTitle>{t('admin.analytics.trafficTitle', 'Site traffic')}</CardTitle>
               <CardDescription>
                 Dados coletados diretamente no site nos ultimos {siteAnalytics.windowDays} dias.
               </CardDescription>
@@ -973,7 +981,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <p className="text-sm text-destructive">{siteAnalyticsError}</p>
               )}
               {siteAnalyticsLoading ? (
-                <p className="text-sm text-muted-foreground">Carregando trafego...</p>
+                <p className="text-sm text-muted-foreground">{t('admin.analytics.loadingTraffic', 'Loading traffic...')}</p>
               ) : (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -992,7 +1000,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       <h3 className="text-sm font-semibold mb-3">Paises</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topCountries.length === 0 && (
-                          <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+                          <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
                         )}
                         {siteAnalytics.topCountries.map((item) => (
                           <div key={item.country} className="space-y-1">
@@ -1012,7 +1020,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       <h3 className="text-sm font-semibold mb-3">Paginas mais vistas</h3>
                       <div className="space-y-2">
                         {siteAnalytics.topPages.length === 0 && (
-                          <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+                          <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
                         )}
                         {siteAnalytics.topPages.map((item) => (
                           <div key={item.page} className="flex justify-between text-sm border-b pb-1">
@@ -1029,7 +1037,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       <h3 className="text-sm font-semibold mb-3">Referenciadores</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topReferrers.length === 0 && (
-                          <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+                          <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
                         )}
                         {siteAnalytics.topReferrers.map((item) => (
                           <div key={item.referrer} className="space-y-1">
@@ -1055,7 +1063,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       <h3 className="text-sm font-semibold mb-3">Dispositivos</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topDevices.length === 0 && (
-                          <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+                          <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
                         )}
                         {siteAnalytics.topDevices.map((item) => (
                           <div key={item.device} className="space-y-1">
@@ -1079,7 +1087,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       <h3 className="text-sm font-semibold mb-3">Sistemas operacionais</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topOperatingSystems.length === 0 && (
-                          <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+                          <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
                         )}
                         {siteAnalytics.topOperatingSystems.map((item) => (
                           <div key={item.os} className="space-y-1">
@@ -1101,7 +1109,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                   </div>
 
                   <Card className="p-4">
-                    <h3 className="text-sm font-semibold mb-3">Tendência diária de visualizações</h3>
+                    <h3 className="text-sm font-semibold mb-3">{t('admin.analytics.dailyTrend', 'Daily views trend')}</h3>
                     <SiteTrafficDailyChart data={siteAnalytics.dailyViews} />
                   </Card>
                 </div>
@@ -1118,14 +1126,14 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           </div>
           <Card className="p-6 w-full">
             <CardHeader>
-              <CardTitle>Funil de Conversão</CardTitle>
+              <CardTitle>{t('admin.analytics.funnelTitle', 'Conversion funnel')}</CardTitle>
               <CardDescription>
                 Jornada de visitas ate compras nos ultimos {lifecycleFunnel.windowDays} dias.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {lifecycleFunnelLoading ? (
-                <p className="text-sm text-muted-foreground">Carregando funil...</p>
+                <p className="text-sm text-muted-foreground">{t('admin.analytics.loadingFunnel', 'Loading funnel...')}</p>
               ) : (
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -1174,7 +1182,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       {activeTab === 'users' && (
         <div className="space-y-6 w-full">
           <Card className="p-6 w-full">
-            <h2 className="text-xl font-semibold mb-6">Gerenciamento de Usuários</h2>
+            <h2 className="text-xl font-semibold mb-6">{t('admin.users.title', 'User management')}</h2>
             <div className="space-y-4 w-full">
               {usersList.map((user) => (
                 <div
@@ -1200,7 +1208,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       onClick={() => {
                         if (user.email) {
                           navigator.clipboard.writeText(user.email);
-                          toast.success('Email copiado para a área de transferência');
+                          toast.success(t('admin.toast.emailCopiedToClipboard', 'Email copied to clipboard'));
                         }
                       }}
                     >
@@ -1214,17 +1222,18 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Confirmar Exclusão</DialogTitle>
+                          <DialogTitle>{t('admin.dialog.deleteTitle', 'Confirm delete')}</DialogTitle>
                           <DialogDescription>
-                            Tem certeza que deseja excluir a conta de {user.email || user.displayName || user.uid}? Esta ação não pode ser desfeita.
+                            {t('admin.users.deleteConfirm', 'Are you sure you want to delete the account for {name}? This action cannot be undone.')
+                              .replace('{name}', user.email || user.displayName || user.uid)}
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
                           <Button variant="outline" onClick={() => setDeleteDialogOpen(null)}>
-                            Cancelar
+                            {t('common.cancel', 'Cancel')}
                           </Button>
                           <Button variant="destructive" onClick={() => handleDeleteUser(user.uid)}>
-                            Deletar Conta
+                            {t('admin.users.deleteAccount', 'Delete account')}
                           </Button>
                         </DialogFooter>
                       </DialogContent>
@@ -1241,7 +1250,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         <div className="space-y-6 w-full">
           <Card className="p-6 w-full">
             <CardHeader>
-              <CardTitle>Todos os Pedidos Concluídos</CardTitle>
+              <CardTitle>{t('admin.orders.allTitle', 'All completed orders')}</CardTitle>
             </CardHeader>
             <CardContent>
               {/* Filters */}
@@ -1361,9 +1370,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               </div>
               {/* Pagination */}
               <div className="flex justify-center mt-4 space-x-2">
-                <Button variant="outline" disabled={currentPage===1} onClick={()=>setCurrentPage(p=>p-1)}>Anterior</Button>
-                <span>Página {currentPage} de {totalPages}</span>
-                <Button variant="outline" disabled={currentPage===totalPages} onClick={()=>setCurrentPage(p=>p+1)}>Próximo</Button>
+                <Button variant="outline" disabled={currentPage===1} onClick={()=>setCurrentPage(p=>p-1)}>{t('common.prev', 'Previous')}</Button>
+                <span>{t('admin.pagination.pageOf', 'Page {page} of {total}').replace('{page}', String(currentPage)).replace('{total}', String(totalPages))}</span>
+                <Button variant="outline" disabled={currentPage===totalPages} onClick={()=>setCurrentPage(p=>p+1)}>{t('common.next', 'Next')}</Button>
               </div>
             </CardContent>
           </Card>

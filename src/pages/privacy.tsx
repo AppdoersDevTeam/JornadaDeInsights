@@ -101,9 +101,6 @@ export function PrivacyPage() {
               <p className="text-muted-foreground mb-2">
                 {t('privacy.contact.emailLabel', '')} patricia@jornadadeinsights.com
               </p>
-              <p className="text-muted-foreground">
-                {t('privacy.contact.phoneLabel', '')} +64 9 123 4567
-              </p>
             </div>
           </section>
         </motion.div>
