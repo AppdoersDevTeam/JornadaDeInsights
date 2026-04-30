@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { useLanguage } from '@/context/language-context';
 
 export interface SiteTrafficDailyPoint {
   date: string;
@@ -18,12 +19,13 @@ interface SiteTrafficDailyChartProps {
 }
 
 export function SiteTrafficDailyChart({ data }: SiteTrafficDailyChartProps) {
+  const { t, language } = useLanguage();
   if (!data.length) {
-    return <p className="text-sm text-muted-foreground">Sem dados ainda.</p>;
+    return <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>;
   }
 
   const chartData = data.map((p) => ({
-    label: new Date(p.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+    label: new Date(p.date).toLocaleDateString(language === 'en' ? 'en' : 'pt-BR', { day: '2-digit', month: '2-digit' }),
     views: p.views,
     fullDate: p.date,
   }));
@@ -35,11 +37,11 @@ export function SiteTrafficDailyChart({ data }: SiteTrafficDailyChartProps) {
         <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
         <YAxis tick={{ fontSize: 11 }} width={36} allowDecimals={false} />
         <Tooltip
-          formatter={(value: number) => [`${value}`, 'Visualizações']}
+          formatter={(value: number) => [`${value}`, t('admin.analytics.pageViews', 'Page views')]}
           labelFormatter={(_, payload) => {
             const row = payload?.[0]?.payload as { fullDate?: string } | undefined;
             return row?.fullDate
-              ? new Date(row.fullDate).toLocaleDateString('pt-BR')
+              ? new Date(row.fullDate).toLocaleDateString(language === 'en' ? 'en' : 'pt-BR')
               : '';
           }}
           contentStyle={{

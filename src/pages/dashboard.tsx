@@ -100,13 +100,30 @@ interface LifecycleFunnelSummary {
   };
 }
 
+interface StripeWebhookEventRow {
+  event_id: string;
+  event_type: string;
+  session_id: string | null;
+  processed_at: string;
+}
+
+interface PurchaseEmailEventRow {
+  session_id: string;
+  customer_email: string;
+  status: string;
+  sent_at: string | null;
+  last_error: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
   'ptasbr2020@gmail.com'
 ];
 
 export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   // All state declarations first
@@ -176,6 +193,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     },
   });
   const [lifecycleFunnelLoading, setLifecycleFunnelLoading] = useState(false);
+  const [stripeWebhookEvents, setStripeWebhookEvents] = useState<StripeWebhookEventRow[]>([]);
+  const [purchaseEmailEvents, setPurchaseEmailEvents] = useState<PurchaseEmailEventRow[]>([]);
+  const [stripeWebhookEventsLoading, setStripeWebhookEventsLoading] = useState(false);
+  const [stripeWebhookEventsError, setStripeWebhookEventsError] = useState<string | null>(null);
 
   // Constants
   const itemsPerPage = 20; // Show 20 orders per page in completed orders tab
@@ -532,6 +553,46 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
     fetchLifecycleFunnel();
   }, [activeTab, SERVER_URL]);
+
+  useEffect(() => {
+    if (activeTab !== 'analytics') return;
+
+    const fetchStripeWebhookEvents = async () => {
+      try {
+        setStripeWebhookEventsLoading(true);
+        setStripeWebhookEventsError(null);
+        const idToken = await getSupabaseAccessToken();
+        if (!idToken) throw new Error('Admin token is not available');
+
+        const response = await fetch(`${SERVER_URL}/api/stripe-webhook-events?limit=50`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body?.error || `Failed to load Stripe webhook events (${response.status})`);
+        }
+
+        const data = await response.json();
+        setStripeWebhookEvents(Array.isArray(data.webhookEvents) ? data.webhookEvents : []);
+        setPurchaseEmailEvents(Array.isArray(data.purchaseEmailEvents) ? data.purchaseEmailEvents : []);
+      } catch (error) {
+        console.error('Error fetching Stripe webhook events:', error);
+        setStripeWebhookEventsError(
+          error instanceof Error ? error.message : t('admin.webhooks.loadFail', 'Could not load Stripe webhook events.')
+        );
+      } finally {
+        setStripeWebhookEventsLoading(false);
+      }
+    };
+
+    fetchStripeWebhookEvents();
+  }, [activeTab, SERVER_URL, t]);
 
   useEffect(() => {
     const bootstrap = async () => {
@@ -1124,6 +1185,103 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             />
             <StripeBalanceChart data={balanceData} />
           </div>
+
+          <Card className="p-6 w-full">
+            <CardHeader>
+              <CardTitle>{t('admin.webhooks.title', 'Stripe webhooks')}</CardTitle>
+              <CardDescription>
+                {t('admin.webhooks.desc', 'Latest webhook deliveries and purchase email processing status.')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {stripeWebhookEventsError && (
+                <p className="text-sm text-destructive">{stripeWebhookEventsError}</p>
+              )}
+
+              {stripeWebhookEventsLoading ? (
+                <p className="text-sm text-muted-foreground">{t('admin.webhooks.loading', 'Loading webhook events...')}</p>
+              ) : (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold">{t('admin.webhooks.eventsTitle', 'Webhook events')}</h3>
+                    {stripeWebhookEvents.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left whitespace-nowrap min-w-[600px]">
+                          <thead className="bg-muted/50">
+                            <tr>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.webhooks.col.time', 'Time')}</th>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.webhooks.col.type', 'Type')}</th>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.webhooks.col.session', 'Session')}</th>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.webhooks.col.eventId', 'Event ID')}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {stripeWebhookEvents.slice(0, 50).map((row) => (
+                              <tr key={row.event_id} className="border-t">
+                                <td className="py-2 px-2 text-sm">
+                                  {new Date(row.processed_at).toLocaleString(language === 'en' ? 'en' : 'pt-BR')}
+                                </td>
+                                <td className="py-2 px-2 text-sm">
+                                  <Badge variant="outline">{row.event_type}</Badge>
+                                </td>
+                                <td className="py-2 px-2 text-sm font-mono">{row.session_id || '—'}</td>
+                                <td className="py-2 px-2 text-sm font-mono">{row.event_id}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold">{t('admin.webhooks.emailsTitle', 'Purchase emails')}</h3>
+                    {purchaseEmailEvents.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left whitespace-nowrap min-w-[700px]">
+                          <thead className="bg-muted/50">
+                            <tr>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.webhooks.col.email', 'Email')}</th>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.webhooks.col.status', 'Status')}</th>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.webhooks.col.sentAt', 'Sent')}</th>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.webhooks.col.session', 'Session')}</th>
+                              <th className="py-2 px-2 border-b font-medium">{t('admin.webhooks.col.error', 'Error')}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {purchaseEmailEvents.slice(0, 50).map((row) => (
+                              <tr key={row.session_id} className="border-t">
+                                <td className="py-2 px-2 text-sm">{row.customer_email}</td>
+                                <td className="py-2 px-2 text-sm">
+                                  <Badge variant={row.status === 'sent' ? 'default' : 'outline'}>
+                                    {row.status}
+                                  </Badge>
+                                </td>
+                                <td className="py-2 px-2 text-sm">
+                                  {row.sent_at
+                                    ? new Date(row.sent_at).toLocaleString(language === 'en' ? 'en' : 'pt-BR')
+                                    : '—'}
+                                </td>
+                                <td className="py-2 px-2 text-sm font-mono">{row.session_id}</td>
+                                <td className="py-2 px-2 text-sm max-w-[360px] truncate" title={row.last_error || ''}>
+                                  {row.last_error || '—'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <Card className="p-6 w-full">
             <CardHeader>
               <CardTitle>{t('admin.analytics.funnelTitle', 'Conversion funnel')}</CardTitle>

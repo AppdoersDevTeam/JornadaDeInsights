@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useLanguage } from '@/context/language-context';
 
 export interface SalesData {
   date: string;
@@ -19,11 +20,12 @@ interface SalesTrendsChartProps {
 
 export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTrendsChartProps) {
   const [activeTab, setActiveTab] = useState('daily');
+  const { t, language } = useLanguage();
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-NZ', {
+    return new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', {
       style: 'currency',
-      currency: 'NZD',
+      currency: 'BRL',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(value);
@@ -33,7 +35,7 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
     if (!data || data.length === 0) {
       return (
         <div className="flex items-center justify-center h-[300px]">
-          <p className="text-muted-foreground">No data available</p>
+          <p className="text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
         </div>
       );
     }
@@ -59,7 +61,7 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
               borderRadius: '4px',
               padding: '8px'
             }}
-            formatter={(value: number) => [formatCurrency(value), 'Sales']}
+            formatter={(value: number) => [formatCurrency(value), t('admin.salesTrends.series.sales', 'Sales')]}
           />
           <Line
             type="monotone"
@@ -77,14 +79,14 @@ export function SalesTrendsChart({ dailyData, weeklyData, monthlyData }: SalesTr
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Tendências de Vendas (NZD)</CardTitle>
+        <CardTitle>{t('admin.salesTrends.title', 'Sales trends')}</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="daily">Diário</TabsTrigger>
-            <TabsTrigger value="weekly">Semanal</TabsTrigger>
-            <TabsTrigger value="monthly">Mensal</TabsTrigger>
+            <TabsTrigger value="daily">{t('admin.salesTrends.tab.daily', 'Daily')}</TabsTrigger>
+            <TabsTrigger value="weekly">{t('admin.salesTrends.tab.weekly', 'Weekly')}</TabsTrigger>
+            <TabsTrigger value="monthly">{t('admin.salesTrends.tab.monthly', 'Monthly')}</TabsTrigger>
           </TabsList>
           <TabsContent value="daily" className="mt-4">
             {renderChart(dailyData)}

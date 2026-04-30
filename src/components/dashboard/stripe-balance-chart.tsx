@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useLanguage } from '@/context/language-context';
 
 export interface BalanceData {
   day: string;
@@ -23,11 +24,12 @@ interface StripeBalanceChartProps {
 
 export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
   const [activeTab, setActiveTab] = useState('all');
+  const { t, language } = useLanguage();
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-NZ', {
+    return new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', {
       style: 'currency',
-      currency: 'NZD',
+      currency: 'BRL',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(value);
@@ -37,7 +39,7 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
     if (!data || data.length === 0) {
       return (
         <div className="flex items-center justify-center h-[300px]">
-          <p className="text-muted-foreground">No data available</p>
+          <p className="text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
         </div>
       );
     }
@@ -63,7 +65,7 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
               <Line
                 type="monotone"
                 dataKey="current_balance"
-                name="Current Balance"
+                name={t('admin.stripeBalance.series.currentBalance', 'Current balance')}
                 stroke={colors.current_balance}
                 strokeWidth={2}
                 dot={{ fill: colors.current_balance, strokeWidth: 2 }}
@@ -72,7 +74,7 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
               <Line
                 type="monotone"
                 dataKey="payments"
-                name="Payments"
+                name={t('admin.stripeBalance.series.payments', 'Payments')}
                 stroke={colors.payments}
                 strokeWidth={2}
                 dot={{ fill: colors.payments, strokeWidth: 2 }}
@@ -81,7 +83,7 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
               <Line
                 type="monotone"
                 dataKey="refunds"
-                name="Refunds"
+                name={t('admin.stripeBalance.series.refunds', 'Refunds')}
                 stroke={colors.refunds}
                 strokeWidth={2}
                 dot={{ fill: colors.refunds, strokeWidth: 2 }}
@@ -95,7 +97,7 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
               <Line
                 type="monotone"
                 dataKey="net_transactions"
-                name="Net Transactions"
+                name={t('admin.stripeBalance.series.netTransactions', 'Net transactions')}
                 stroke={colors.net_transactions}
                 strokeWidth={2}
                 dot={{ fill: colors.net_transactions, strokeWidth: 2 }}
@@ -104,7 +106,7 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
               <Line
                 type="monotone"
                 dataKey="transfers"
-                name="Transfers"
+                name={t('admin.stripeBalance.series.transfers', 'Transfers')}
                 stroke={colors.transfers}
                 strokeWidth={2}
                 dot={{ fill: colors.transfers, strokeWidth: 2 }}
@@ -118,7 +120,7 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
               <Line
                 type="monotone"
                 dataKey="chargeback_withdrawals"
-                name="Chargeback Withdrawals"
+                name={t('admin.stripeBalance.series.chargebackWithdrawals', 'Chargeback withdrawals')}
                 stroke={colors.chargeback_withdrawals}
                 strokeWidth={2}
                 dot={{ fill: colors.chargeback_withdrawals, strokeWidth: 2 }}
@@ -127,7 +129,7 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
               <Line
                 type="monotone"
                 dataKey="chargeback_reversals"
-                name="Chargeback Reversals"
+                name={t('admin.stripeBalance.series.chargebackReversals', 'Chargeback reversals')}
                 stroke={colors.chargeback_reversals}
                 strokeWidth={2}
                 dot={{ fill: colors.chargeback_reversals, strokeWidth: 2 }}
@@ -161,7 +163,7 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
               borderRadius: '4px',
               padding: '8px'
             }}
-            formatter={(value: number) => [formatCurrency(value), 'Amount']}
+            formatter={(value: number) => [formatCurrency(value), t('admin.stripeBalance.tooltip.amount', 'Amount')]}
           />
           <Legend />
           {renderLines()}
@@ -173,13 +175,13 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Visão Geral do Saldo Stripe (NZD)</CardTitle>
+        <CardTitle>{t('admin.stripeBalance.title', 'Stripe balance overview')}</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">Todos</TabsTrigger>
-            <TabsTrigger value="transactions">Transações</TabsTrigger>
+            <TabsTrigger value="all">{t('admin.stripeBalance.tab.all', 'All')}</TabsTrigger>
+            <TabsTrigger value="transactions">{t('admin.stripeBalance.tab.transactions', 'Transactions')}</TabsTrigger>
             <TabsTrigger value="chargebacks">Chargebacks</TabsTrigger>
           </TabsList>
           <TabsContent value="all" className="mt-4">
