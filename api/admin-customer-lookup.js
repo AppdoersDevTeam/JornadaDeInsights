@@ -138,8 +138,17 @@ export default async function handler(req, res) {
         lookup.flatMap((s) => s.items.map((i) => i.ebookId).filter(Boolean))
       )
     );
+    const ebookTitles = Array.from(
+      new Set(
+        lookup
+          .flatMap((s) => s.items.map((i) => i.name).filter(Boolean))
+          .map((title) => String(title).trim())
+          .filter(Boolean)
+      )
+    );
 
     const ebookById = new Map();
+    const ebookByTitle = new Map();
     if (ebookIds.length > 0) {
       const { data: ebooks, error } = await auth.supabaseAdmin
         .from('ebooks_metadata')
@@ -151,9 +160,26 @@ export default async function handler(req, res) {
       }
     }
 
+    // Title fallback for older purchases where ebookId metadata was not included.
+    if (ebookTitles.length > 0) {
+      const { data: ebooks, error } = await auth.supabaseAdmin
+        .from('ebooks_metadata')
+        .select('id,title,filename')
+        .in('title', ebookTitles);
+      if (error) throw error;
+      for (const ebook of ebooks || []) {
+        if (ebook.title) {
+          ebookByTitle.set(String(ebook.title).trim(), ebook);
+        }
+      }
+    }
+
     const results = lookup.map((session) => {
       const enrichedItems = session.items.map((item) => {
-        const ebook = item.ebookId ? ebookById.get(item.ebookId) : null;
+        const ebook =
+          (item.ebookId ? ebookById.get(item.ebookId) : null) ||
+          ebookByTitle.get(String(item.name || '').trim()) ||
+          null;
         const filename = ebook?.filename || null;
         const title = ebook?.title || null;
 
