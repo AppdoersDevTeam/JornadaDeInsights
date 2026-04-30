@@ -26,6 +26,7 @@ import { getCategories, createCategory, updateCategory, deleteCategory, type Cat
 import { SalesTrendsChart, SalesData } from '@/components/dashboard/sales-trends-chart';
 import { StripeBalanceChart, BalanceData } from '@/components/dashboard/stripe-balance-chart';
 import { SiteTrafficDailyChart } from '@/components/dashboard/site-traffic-daily-chart';
+import { useLanguage } from '@/context/language-context';
 import {
   Dialog,
   DialogContent,
@@ -105,6 +106,7 @@ const ALLOWED_ADMIN_EMAILS = [
 ];
 
 export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   // All state declarations first
@@ -237,7 +239,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   };
   const copyEmail = (email: string) => {
     navigator.clipboard.writeText(email);
-    toast.success('Email copied');
+    toast.success(t('admin.toast.emailCopied', 'Email copied'));
   };
 
   // Calculate top selling products
@@ -415,7 +417,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       setCategories(data);
     } catch (error) {
       console.error('Error fetching categories:', error);
-      toast.error('Erro ao carregar categorias');
+      toast.error(t('admin.toast.categoriesLoadFail', 'Could not load categories.'));
     }
   };
 
@@ -589,30 +591,30 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
       // Remove user from the list
       setUsersList(prev => prev.filter(user => user.uid !== uid));
-      toast.success('Usuário deletado com sucesso');
+      toast.success(t('admin.toast.userDeleted', 'User deleted successfully'));
       setDeleteDialogOpen(null);
     } catch (error) {
       console.error('Error deleting user:', error);
-      toast.error('Erro ao deletar usuário');
+      toast.error(t('admin.toast.userDeleteFail', 'Could not delete user.'));
     }
   };
 
   // Category management functions
   const handleCreateCategory = async () => {
     if (!categoryName.trim()) {
-      toast.error('Nome da categoria é obrigatório');
+      toast.error(t('admin.categories.nameRequired', 'Category name is required'));
       return;
     }
 
     try {
       await createCategory(categoryName.trim(), categoryDescription.trim() || undefined);
-      toast.success('Categoria criada com sucesso');
+      toast.success(t('admin.toast.categoryCreated', 'Category created successfully'));
       setCategoryName('');
       setCategoryDescription('');
       setCategoryDialogOpen(false);
       fetchCategories();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao criar categoria';
+      const errorMessage = error instanceof Error ? error.message : t('admin.toast.categoryCreateFail', 'Could not create category.');
       console.error('Error creating category:', error);
       toast.error(errorMessage);
     }
@@ -620,20 +622,20 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
   const handleUpdateCategory = async () => {
     if (!editingCategory || !categoryName.trim()) {
-      toast.error('Nome da categoria é obrigatório');
+      toast.error(t('admin.categories.nameRequired', 'Category name is required'));
       return;
     }
 
     try {
       await updateCategory(editingCategory.id, categoryName.trim(), categoryDescription.trim() || undefined);
-      toast.success('Categoria atualizada com sucesso');
+      toast.success(t('admin.toast.categoryUpdated', 'Category updated successfully'));
       setEditingCategory(null);
       setCategoryName('');
       setCategoryDescription('');
       setCategoryDialogOpen(false);
       fetchCategories();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar categoria';
+      const errorMessage = error instanceof Error ? error.message : t('admin.toast.categoryUpdateFail', 'Could not update category.');
       console.error('Error updating category:', error);
       toast.error(errorMessage);
     }
@@ -642,10 +644,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const handleDeleteCategory = async (id: string) => {
     try {
       await deleteCategory(id);
-      toast.success('Categoria deletada com sucesso');
+      toast.success(t('admin.toast.categoryDeleted', 'Category deleted successfully'));
       fetchCategories();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao deletar categoria';
+      const errorMessage = error instanceof Error ? error.message : t('admin.toast.categoryDeleteFail', 'Could not delete category.');
       console.error('Error deleting category:', error);
       toast.error(errorMessage);
     }
@@ -672,17 +674,17 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         <div>
           {activeTab === 'overview' ? (
             <>
-              <h1 className="text-3xl font-bold">Painel de Controle</h1>
-              <p className="text-muted-foreground">Bem-vindo de volta, Administrador</p>
+              <h1 className="text-3xl font-bold">{t('admin.panelTitle', 'Admin')}</h1>
+              <p className="text-muted-foreground">{t('admin.welcome', 'Welcome back, admin')}</p>
             </>
           ) : (
             <h1 className="text-3xl font-bold">
-              {activeTab === 'overview' && 'Visão Geral'}
-              {activeTab === 'ebooks' && 'eBooks'}
-              {activeTab === 'analytics' && 'Análises'}
-              {activeTab === 'users' && 'Usuários'}
-              {activeTab === 'orders' && 'Pedidos Concluídos'}
-              {activeTab === 'curiosidades' && 'Curiosidades'}
+              {activeTab === 'overview' && t('admin.tab.overview', 'Overview')}
+              {activeTab === 'ebooks' && t('admin.tab.ebooks', 'eBooks')}
+              {activeTab === 'analytics' && t('admin.tab.analytics', 'Analytics')}
+              {activeTab === 'users' && t('admin.tab.users', 'Users')}
+              {activeTab === 'orders' && t('admin.tab.orders', 'Completed orders')}
+              {activeTab === 'curiosidades' && t('admin.tab.curiosidades', 'Insights')}
             </h1>
           )}
         </div>
