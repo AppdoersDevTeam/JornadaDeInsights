@@ -113,10 +113,10 @@ interface LifecycleFunnelSummary {
     purchaseCompleted: number;
   };
   conversionRates: {
-    visitToLead: number;
-    leadToCheckout: number;
-    checkoutToPurchase: number;
-    visitToPurchase: number;
+    visitToLead: number | null;
+    leadToCheckout: number | null;
+    checkoutToPurchase: number | null;
+    visitToPurchase: number | null;
   };
 }
 
@@ -220,10 +220,10 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       purchaseCompleted: 0,
     },
     conversionRates: {
-      visitToLead: 0,
-      leadToCheckout: 0,
-      checkoutToPurchase: 0,
-      visitToPurchase: 0,
+      visitToLead: null,
+      leadToCheckout: null,
+      checkoutToPurchase: null,
+      visitToPurchase: null,
     },
   });
   const [lifecycleFunnelLoading, setLifecycleFunnelLoading] = useState(false);
@@ -706,10 +706,16 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             purchaseCompleted: Number(data?.totals?.purchaseCompleted) || 0,
           },
           conversionRates: {
-            visitToLead: Number(data?.conversionRates?.visitToLead) || 0,
-            leadToCheckout: Number(data?.conversionRates?.leadToCheckout) || 0,
-            checkoutToPurchase: Number(data?.conversionRates?.checkoutToPurchase) || 0,
-            visitToPurchase: Number(data?.conversionRates?.visitToPurchase) || 0,
+            visitToLead:
+              data?.conversionRates?.visitToLead == null ? null : Number(data.conversionRates.visitToLead),
+            leadToCheckout:
+              data?.conversionRates?.leadToCheckout == null ? null : Number(data.conversionRates.leadToCheckout),
+            checkoutToPurchase:
+              data?.conversionRates?.checkoutToPurchase == null
+                ? null
+                : Number(data.conversionRates.checkoutToPurchase),
+            visitToPurchase:
+              data?.conversionRates?.visitToPurchase == null ? null : Number(data.conversionRates.visitToPurchase),
           },
         });
       } catch (error) {
@@ -721,6 +727,8 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
     fetchLifecycleFunnel();
   }, [activeTab, SERVER_URL]);
+
+  const formatRate = (value: number | null) => (value == null ? '—' : `${value}%`);
 
   useEffect(() => {
     if (activeTab !== 'analytics') return;
@@ -1595,19 +1603,19 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Card className="p-4">
                       <p className="text-sm text-muted-foreground">Visita → Lead</p>
-                      <p className="text-xl font-semibold">{lifecycleFunnel.conversionRates.visitToLead}%</p>
+                      <p className="text-xl font-semibold">{formatRate(lifecycleFunnel.conversionRates.visitToLead)}</p>
                     </Card>
                     <Card className="p-4">
                       <p className="text-sm text-muted-foreground">Lead → Checkout</p>
-                      <p className="text-xl font-semibold">{lifecycleFunnel.conversionRates.leadToCheckout}%</p>
+                      <p className="text-xl font-semibold">{formatRate(lifecycleFunnel.conversionRates.leadToCheckout)}</p>
                     </Card>
                     <Card className="p-4">
                       <p className="text-sm text-muted-foreground">Checkout → Compra</p>
-                      <p className="text-xl font-semibold">{lifecycleFunnel.conversionRates.checkoutToPurchase}%</p>
+                      <p className="text-xl font-semibold">{formatRate(lifecycleFunnel.conversionRates.checkoutToPurchase)}</p>
                     </Card>
                     <Card className="p-4">
                       <p className="text-sm text-muted-foreground">Visita → Compra</p>
-                      <p className="text-xl font-semibold">{lifecycleFunnel.conversionRates.visitToPurchase}%</p>
+                      <p className="text-xl font-semibold">{formatRate(lifecycleFunnel.conversionRates.visitToPurchase)}</p>
                     </Card>
                   </div>
                 </div>

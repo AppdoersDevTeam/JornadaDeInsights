@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       if (row.event_name === 'purchase_completed') totals.purchaseCompleted += 1;
     }
 
-    const pct = (value, base) => (base > 0 ? Number(((value / base) * 100).toFixed(2)) : 0);
+    const pct = (value, base) => (base > 0 ? Number(((value / base) * 100).toFixed(2)) : null);
 
     res.status(200).json({
       windowDays: days,

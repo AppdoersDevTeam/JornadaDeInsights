@@ -39,7 +39,9 @@ export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
     if (!data || data.length === 0) {
       return (
         <div className="flex items-center justify-center h-[300px]">
-          <p className="text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
+          <p className="text-muted-foreground">
+            {t('admin.stripeBalance.empty', 'No Stripe transactions yet. This is normal before your first sale.')}
+          </p>
         </div>
       );
     }
