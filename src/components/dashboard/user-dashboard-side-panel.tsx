@@ -29,7 +29,7 @@ interface UserDashboardSidePanelProps {
 }
 
 export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboardSidePanelProps) {
-  const { t, openLanguagePrompt } = useLanguage();
+  const { t, openLanguagePrompt, language } = useLanguage();
   const navigate = useNavigate();
   const { totalCount } = useCart();
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
@@ -103,6 +103,18 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
           >
             <Settings className="mr-2 h-4 w-4" />
             {t('user.tab.settings', 'Settings')}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={openLanguagePrompt}
+          >
+            <Languages className="mr-2 h-4 w-4" />
+            {t('lang.switch', 'Change language')}
+            <span className="ml-auto text-xs font-medium text-muted-foreground">
+              {language === 'pt-BR' ? 'PT' : 'EN'}
+            </span>
           </Button>
           <Button
             variant="ghost"

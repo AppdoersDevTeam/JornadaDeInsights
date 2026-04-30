@@ -5,7 +5,8 @@ import {
   Users, 
   ShoppingCart,
   BookOpen,
-  LifeBuoy
+  LifeBuoy,
+  Languages
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TabType } from '@/types/dashboard';
@@ -17,7 +18,7 @@ interface DashboardSidePanelProps {
 }
 
 export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePanelProps) {
-  const { t } = useLanguage();
+  const { t, openLanguagePrompt, language } = useLanguage();
   return (
     <div className="h-full mt-[52px]">
       <div className="flex h-16 items-center border-b px-6">
@@ -79,6 +80,18 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
         >
           <BookOpen className="mr-2 h-4 w-4" />
           {t('admin.tab.curiosidades', 'Insights')}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full justify-start"
+          onClick={openLanguagePrompt}
+        >
+          <Languages className="mr-2 h-4 w-4" />
+          {t('lang.switch', 'Change language')}
+          <span className="ml-auto text-xs font-medium text-muted-foreground">
+            {language === 'pt-BR' ? 'PT' : 'EN'}
+          </span>
         </Button>
       </nav>
     </div>
