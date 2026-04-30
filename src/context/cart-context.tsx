@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useReducer, ReactNode } from 'react';
 import type { Ebook } from '@/components/shop/ebook-card';
 import { toast } from 'react-hot-toast';
 
@@ -33,6 +33,28 @@ const CartContext = createContext<{
   totalCount: 0,
   totalPrice: 0,
 });
+
+const CART_STORAGE_KEY = 'jdi_cart_v1';
+
+function loadInitialCartState(): CartState {
+  if (typeof window === 'undefined') return { items: [] };
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return { items: [] };
+    const parsed = JSON.parse(raw) as unknown;
+    if (
+      !parsed ||
+      typeof parsed !== 'object' ||
+      !('items' in (parsed as Record<string, unknown>)) ||
+      !Array.isArray((parsed as { items: unknown }).items)
+    ) {
+      return { items: [] };
+    }
+    return { items: (parsed as { items: CartItem[] }).items };
+  } catch {
+    return { items: [] };
+  }
+}
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
@@ -73,7 +95,15 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, { items: [] });
+  const [state, dispatch] = useReducer(cartReducer, undefined, loadInitialCartState);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      // If storage is unavailable/quota exceeded, keep cart in memory only.
+    }
+  }, [state]);
 
   const addItem = (item: Ebook) => {
     dispatch({ type: 'ADD_ITEM', payload: item });

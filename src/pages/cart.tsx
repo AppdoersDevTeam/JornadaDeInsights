@@ -139,6 +139,10 @@ export function CartPage() {
     }
 
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       await trackLifecycleEvent('checkout_started', {
         itemCount: items.length,
         total: Number(totalPrice.toFixed(2)),
@@ -146,9 +150,6 @@ export function CartPage() {
       });
       const stripe = await stripePromise;
       if (!stripe) throw new Error('Stripe failed to initialize');
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
 
       // Create checkout session
       const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {

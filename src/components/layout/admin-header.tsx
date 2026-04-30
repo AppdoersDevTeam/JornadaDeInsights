@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import jornadaLogo from '@/Jornada logo.png';
+import { useLanguage } from '@/context/language-context';
 
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
@@ -26,6 +27,7 @@ export function AdminHeader() {
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -49,20 +51,20 @@ export function AdminHeader() {
   };
 
   const dashboardLinks = [
-    { to: '/user-dashboard?tab=overview', label: 'Visão Geral', icon: LayoutDashboard },
-    { to: '/user-dashboard?tab=ebooks', label: 'Meus eBooks', icon: Book },
-    { to: '/user-dashboard?tab=orders', label: 'Pedidos', icon: ShoppingBag },
-    { to: '/user-dashboard?tab=settings', label: 'Configurações', icon: Settings },
-    { to: '/user-dashboard?tab=cart', label: 'Carrinho', icon: ShoppingCart }
+    { to: '/user-dashboard?tab=overview', label: t('user.tab.overview', 'Overview'), icon: LayoutDashboard },
+    { to: '/user-dashboard?tab=ebooks', label: t('user.tab.ebooks', 'My eBooks'), icon: Book },
+    { to: '/user-dashboard?tab=orders', label: t('user.tab.orders', 'Orders'), icon: ShoppingBag },
+    { to: '/user-dashboard?tab=settings', label: t('user.tab.settings', 'Settings'), icon: Settings },
+    { to: '/user-dashboard?tab=cart', label: t('nav.cart', 'Cart'), icon: ShoppingCart }
   ];
 
   const mainLinks = [
-    { to: '/', label: 'Início' },
-    { to: '/about', label: 'Sobre' },
-    { to: '/podcast', label: 'Podcast' },
-    { to: '/curiosidades', label: 'Curiosidades' },
-    { to: '/shop', label: 'Loja' },
-    { to: '/contact', label: 'Contato' }
+    { to: '/', label: t('nav.home', 'Home') },
+    { to: '/about', label: t('nav.about', 'About') },
+    { to: '/podcast', label: t('nav.podcast', 'Podcast') },
+    { to: '/curiosidades', label: t('nav.curiosidades', 'Insights') },
+    { to: '/shop', label: t('nav.shop', 'Store') },
+    { to: '/contact', label: t('nav.contact', 'Contact') }
   ];
 
   return (
@@ -93,29 +95,29 @@ export function AdminHeader() {
               <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
                 <Link to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email.toLowerCase()) ? "/dashboard" : "/user-dashboard"} className="flex items-center gap-1.5 xl:gap-2">
                   <LayoutDashboard className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0" />
-                  <span className="text-xs xl:text-sm font-medium">Dashboard</span>
+                  <span className="text-xs xl:text-sm font-medium">{t('nav.dashboard', 'Dashboard')}</span>
                 </Link>
               </Button>
               <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
                     <LogOut className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0 mr-1.5 xl:mr-2" />
-                    <span className="text-xs xl:text-sm font-medium">Sair</span>
+                    <span className="text-xs xl:text-sm font-medium">{t('nav.signOut', 'Sign out')}</span>
                   </Button>
                 </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Confirmar saída</DialogTitle>
+                  <DialogTitle>{t('user.signOut.confirmTitle', 'Sign out?')}</DialogTitle>
                   <DialogDescription>
-                    Tem certeza que deseja sair da sua conta?
+                    {t('user.signOut.confirmBody', 'Are you sure you want to sign out?')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="flex justify-end gap-4 mt-4">
                   <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
-                    Cancelar
+                    {t('user.signOut.cancel', 'Cancel')}
                   </Button>
                   <Button variant="destructive" onClick={handleSignOut}>
-                    Sair
+                    {t('user.signOut.cta', 'Sign out')}
                   </Button>
                 </div>
               </DialogContent>
@@ -125,7 +127,7 @@ export function AdminHeader() {
             <Link to="/signin">
               <Button variant="outline" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
                 <User className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0 mr-1.5 xl:mr-2" />
-                <span className="text-xs xl:text-sm font-medium">Entrar</span>
+                <span className="text-xs xl:text-sm font-medium">{t('nav.signIn', 'Sign in')}</span>
               </Button>
             </Link>
           )}
@@ -153,7 +155,7 @@ export function AdminHeader() {
             onClick={closeMenu}
           >
             <LayoutDashboard className="h-5 w-5" />
-            Dashboard
+            {t('nav.dashboard', 'Dashboard')}
           </Link>
           
           {/* Dashboard Links Dropdown */}
@@ -161,7 +163,7 @@ export function AdminHeader() {
             onClick={() => setIsDashboardOpen(!isDashboardOpen)}
             className="flex items-center justify-between w-full text-base px-4 py-2 rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
           >
-            <span className="pl-8">Menu do Dashboard</span>
+            <span className="pl-8">{t('admin.header.dashboardMenu', 'Dashboard menu')}</span>
             {isDashboardOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
           
@@ -192,7 +194,7 @@ export function AdminHeader() {
             onClick={closeMenu}
           >
             <Home className="h-5 w-5" />
-            Início
+            {t('nav.home', 'Home')}
           </Link>
           <Link
             to="/about"
@@ -200,7 +202,7 @@ export function AdminHeader() {
             onClick={closeMenu}
           >
             <Info className="h-5 w-5" />
-            Sobre
+            {t('nav.about', 'About')}
           </Link>
           <Link
             to="/podcast"
@@ -208,7 +210,7 @@ export function AdminHeader() {
             onClick={closeMenu}
           >
             <Mic className="h-5 w-5" />
-            Podcast
+            {t('nav.podcast', 'Podcast')}
           </Link>
           <Link
             to="/curiosidades"
@@ -216,7 +218,7 @@ export function AdminHeader() {
             onClick={closeMenu}
           >
             <BookOpen className="h-5 w-5" />
-            Curiosidades
+            {t('nav.curiosidades', 'Insights')}
           </Link>
           <Link
             to="/shop"
@@ -224,7 +226,7 @@ export function AdminHeader() {
             onClick={closeMenu}
           >
             <ShoppingBag className="h-5 w-5" />
-            Loja
+            {t('nav.shop', 'Store')}
           </Link>
           <Link
             to="/contact"
@@ -232,7 +234,7 @@ export function AdminHeader() {
             onClick={closeMenu}
           >
             <Mail className="h-5 w-5" />
-            Contato
+            {t('nav.contact', 'Contact')}
           </Link>
 
           {/* Logout Button */}
@@ -244,7 +246,7 @@ export function AdminHeader() {
             }}
           >
             <LogOut className="h-5 w-5" />
-            Sair
+            {t('nav.signOut', 'Sign out')}
           </button>
         </nav>
       </div>
@@ -253,17 +255,17 @@ export function AdminHeader() {
       <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar saída</DialogTitle>
+            <DialogTitle>{t('user.signOut.confirmTitle', 'Sign out?')}</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja sair da sua conta?
+              {t('user.signOut.confirmBody', 'Are you sure you want to sign out?')}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-4 mt-4">
             <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
-              Cancelar
+              {t('user.signOut.cancel', 'Cancel')}
             </Button>
             <Button variant="destructive" onClick={handleSignOut}>
-              Sair
+              {t('user.signOut.cta', 'Sign out')}
             </Button>
           </div>
         </DialogContent>

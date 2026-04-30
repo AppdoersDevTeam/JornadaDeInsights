@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/context/language-context';
 
 const DONATION_POPUP_KEY = 'donation-popup-seen';
 const DONATION_POPUP_DELAY = 2 * 60 * 1000; // 2 minutes in milliseconds
@@ -23,6 +24,7 @@ export function DonationPopup() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Don't show on excluded pages
@@ -74,10 +76,10 @@ export function DonationPopup() {
             <Heart className="h-8 w-8 text-primary" fill="currentColor" />
           </motion.div>
           <DialogTitle className="text-2xl font-heading text-center">
-            Apoie Este Ministério
+            {t('donation.popup.title', 'Support this ministry')}
           </DialogTitle>
           <DialogDescription className="text-center text-base mt-2">
-            Se você tem sido abençoado pelo conteúdo, considere fazer uma doação para ajudar a manter este trabalho e criar mais conteúdo inspirador.
+            {t('donation.popup.body', 'If this content has blessed you, consider giving to help keep this work going and create more inspiring resources.')}
           </DialogDescription>
         </DialogHeader>
         
@@ -88,7 +90,7 @@ export function DonationPopup() {
           className="space-y-4"
         >
           <p className="text-sm text-muted-foreground text-center">
-            Sua generosidade permite que eu continue compartilhando a Palavra de Deus e criando conteúdo que transforma vidas.
+            {t('donation.subtitle', 'Your generosity helps me keep sharing God’s Word and creating life-changing content.')}
           </p>
         </motion.div>
 
@@ -98,13 +100,13 @@ export function DonationPopup() {
             onClick={handleClose}
             className="w-full sm:w-auto"
           >
-            Talvez Depois
+            {t('donation.popup.later', 'Maybe later')}
           </Button>
           <Button
             onClick={handleDonate}
             className="w-full sm:w-auto"
           >
-            Fazer uma Doação
+            {t('donation.popup.cta', 'Give')}
           </Button>
         </DialogFooter>
       </DialogContent>

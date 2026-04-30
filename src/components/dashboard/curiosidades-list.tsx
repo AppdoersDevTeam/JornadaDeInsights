@@ -27,8 +27,10 @@ import {
 } from '@/components/ui/dialog';
 import { Edit, Trash2, Plus, FileText, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useLanguage } from '@/context/language-context';
 
 export default function CuriosidadesList() {
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [curiosidades, setCuriosidades] = useState<Curiosidade[]>([]);
   const [drafts, setDrafts] = useState<Curiosidade[]>([]);
@@ -50,7 +52,7 @@ export default function CuriosidadesList() {
       setPublished(data.filter(c => c.status === 'published'));
     } catch (error) {
       console.error('Error fetching curiosidades:', error);
-      toast.error('Erro ao carregar curiosidades');
+      toast.error(t('admin.curiosidades.loadFail', 'Could not load posts.'));
     } finally {
       setLoading(false);
     }
@@ -74,19 +76,19 @@ export default function CuriosidadesList() {
 
   const handleCreateCategory = async () => {
     if (!categoryName.trim()) {
-      toast.error('Nome da categoria é obrigatório');
+      toast.error(t('admin.curiosidades.categories.nameRequired', 'Category name is required'));
       return;
     }
 
     try {
       await createCuriosidadesCategory(categoryName.trim(), categoryDescription.trim() || undefined);
-      toast.success('Categoria criada com sucesso');
+      toast.success(t('admin.curiosidades.categories.created', 'Category created successfully'));
       setCategoryName('');
       setCategoryDescription('');
       setCategoryDialogOpen(false);
       fetchCategories();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao criar categoria';
+      const errorMessage = error instanceof Error ? error.message : t('admin.curiosidades.categories.createFail', 'Could not create category.');
       console.error('Error creating category:', error);
       toast.error(errorMessage);
     }
@@ -94,20 +96,20 @@ export default function CuriosidadesList() {
 
   const handleUpdateCategory = async () => {
     if (!editingCategory || !categoryName.trim()) {
-      toast.error('Nome da categoria é obrigatório');
+      toast.error(t('admin.curiosidades.categories.nameRequired', 'Category name is required'));
       return;
     }
 
     try {
       await updateCuriosidadesCategory(editingCategory.id, categoryName.trim(), categoryDescription.trim() || undefined);
-      toast.success('Categoria atualizada com sucesso');
+      toast.success(t('admin.curiosidades.categories.updated', 'Category updated successfully'));
       setEditingCategory(null);
       setCategoryName('');
       setCategoryDescription('');
       setCategoryDialogOpen(false);
       fetchCategories();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar categoria';
+      const errorMessage = error instanceof Error ? error.message : t('admin.curiosidades.categories.updateFail', 'Could not update category.');
       console.error('Error updating category:', error);
       toast.error(errorMessage);
     }
@@ -116,10 +118,10 @@ export default function CuriosidadesList() {
   const handleDeleteCategory = async (id: string) => {
     try {
       await deleteCuriosidadesCategory(id);
-      toast.success('Categoria deletada com sucesso');
+      toast.success(t('admin.curiosidades.categories.deleted', 'Category deleted successfully'));
       fetchCategories();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao deletar categoria';
+      const errorMessage = error instanceof Error ? error.message : t('admin.curiosidades.categories.deleteFail', 'Could not delete category.');
       console.error('Error deleting category:', error);
       toast.error(errorMessage);
     }
@@ -142,12 +144,12 @@ export default function CuriosidadesList() {
   const handleDelete = async (id: string) => {
     try {
       await deleteCuriosidade(id);
-      toast.success('Curiosidade deletada com sucesso');
+      toast.success(t('admin.curiosidades.deleteSuccess', 'Post deleted successfully'));
       setDeleteDialogOpen(null);
       fetchCuriosidades();
     } catch (error) {
       console.error('Error deleting curiosidade:', error);
-      toast.error('Erro ao deletar curiosidade');
+      toast.error(t('admin.curiosidades.deleteFail', 'Could not delete post.'));
     }
   };
 
@@ -160,7 +162,7 @@ export default function CuriosidadesList() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    return new Date(dateString).toLocaleDateString(language === 'en' ? 'en' : 'pt-BR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -183,10 +185,10 @@ export default function CuriosidadesList() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Curiosidades</h2>
+        <h2 className="text-xl font-semibold">{t('admin.tab.curiosidades', 'Insights')}</h2>
         <Button onClick={handleCreate}>
           <Plus className="h-4 w-4 mr-2" />
-          Nova Curiosidade
+          {t('admin.curiosidades.new', 'New post')}
         </Button>
       </div>
 
@@ -195,7 +197,7 @@ export default function CuriosidadesList() {
         <div className="space-y-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Rascunhos ({drafts.length})
+            {t('admin.curiosidades.drafts', 'Drafts')} ({drafts.length})
           </h3>
           <div className="space-y-4">
             {drafts.map((curiosidade) => (
@@ -204,15 +206,15 @@ export default function CuriosidadesList() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-lg font-semibold">{curiosidade.title}</h3>
-                      <Badge variant="secondary">Rascunho</Badge>
+                      <Badge variant="secondary">{t('admin.curiosidades.status.draft', 'Draft')}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-2 mb-2">
                       <span className="text-sm text-muted-foreground">
-                        Por: {curiosidade.author}
+                        {t('curiosidade.byAuthor', 'By:')} {curiosidade.author}
                       </span>
                       {curiosidade.category && (
                         <span className="text-sm text-muted-foreground">
-                          • Categoria: {curiosidade.category.name}
+                          • {t('admin.curiosidades.category', 'Category')}: {curiosidade.category.name}
                         </span>
                       )}
                       <span className="text-sm text-muted-foreground">
@@ -235,7 +237,7 @@ export default function CuriosidadesList() {
                       onClick={() => handleEdit(curiosidade)}
                     >
                       <Edit className="h-4 w-4 mr-2" />
-                      Editar
+                      {t('admin.actions.edit', 'Edit')}
                     </Button>
                     <Button
                       variant="destructive"
@@ -243,7 +245,7 @@ export default function CuriosidadesList() {
                       onClick={() => setDeleteDialogOpen(curiosidade.id)}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Deletar
+                      {t('common.delete', 'Delete')}
                     </Button>
                   </div>
                 </div>
@@ -255,11 +257,11 @@ export default function CuriosidadesList() {
 
       {/* Published Section */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Publicadas ({published.length})</h3>
+        <h3 className="text-lg font-semibold">{t('admin.curiosidades.published', 'Published')} ({published.length})</h3>
         {published.length === 0 && curiosidades.length === 0 ? (
           <Card className="p-12 text-center">
-            <p className="text-lg text-muted-foreground">Nenhuma curiosidade criada ainda.</p>
-            <p className="text-sm text-muted-foreground mt-2">Clique em "Nova Curiosidade" para começar.</p>
+            <p className="text-lg text-muted-foreground">{t('admin.curiosidades.empty', 'No posts created yet.')}</p>
+            <p className="text-sm text-muted-foreground mt-2">{t('admin.curiosidades.emptyHint', 'Click “New post” to get started.')}</p>
           </Card>
         ) : (
           <div className="space-y-4">
@@ -269,15 +271,15 @@ export default function CuriosidadesList() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-lg font-semibold">{curiosidade.title}</h3>
-                      <Badge variant="default">Publicado</Badge>
+                      <Badge variant="default">{t('admin.curiosidades.status.published', 'Published')}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-2 mb-2">
                       <span className="text-sm text-muted-foreground">
-                        Por: {curiosidade.author}
+                        {t('curiosidade.byAuthor', 'By:')} {curiosidade.author}
                       </span>
                       {curiosidade.category && (
                         <span className="text-sm text-muted-foreground">
-                          • Categoria: {curiosidade.category.name}
+                          • {t('admin.curiosidades.category', 'Category')}: {curiosidade.category.name}
                         </span>
                       )}
                       <span className="text-sm text-muted-foreground">
@@ -300,7 +302,7 @@ export default function CuriosidadesList() {
                       onClick={() => handleEdit(curiosidade)}
                     >
                       <Edit className="h-4 w-4 mr-2" />
-                      Editar
+                      {t('admin.actions.edit', 'Edit')}
                     </Button>
                     <Button
                       variant="destructive"
@@ -308,7 +310,7 @@ export default function CuriosidadesList() {
                       onClick={() => setDeleteDialogOpen(curiosidade.id)}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Deletar
+                      {t('common.delete', 'Delete')}
                     </Button>
                   </div>
                 </div>
@@ -326,48 +328,52 @@ export default function CuriosidadesList() {
               <Tag className="h-5 w-5" />
               Gerenciamento de Categorias
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">Gerencie categorias para organizar suas curiosidades</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('admin.curiosidades.categories.subtitle', 'Manage categories to organize your posts')}</p>
           </div>
           <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => { setEditingCategory(null); setCategoryName(''); setCategoryDescription(''); }}>
-                Nova Categoria
+                {t('admin.curiosidades.categories.new', 'New category')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{editingCategory ? 'Editar Categoria' : 'Nova Categoria'}</DialogTitle>
+                <DialogTitle>
+                  {editingCategory ? t('admin.curiosidades.categories.editTitle', 'Edit category') : t('admin.curiosidades.categories.newTitle', 'New category')}
+                </DialogTitle>
                 <DialogDescription>
-                  {editingCategory ? 'Atualize as informações da categoria' : 'Crie uma nova categoria para organizar suas curiosidades'}
+                  {editingCategory
+                    ? t('admin.curiosidades.categories.editDesc', 'Update category details')
+                    : t('admin.curiosidades.categories.newDesc', 'Create a new category to organize your posts')}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="categoryName">Nome da Categoria *</Label>
+                  <Label htmlFor="categoryName">{t('admin.curiosidades.categories.nameLabel', 'Category name')} *</Label>
                   <Input
                     id="categoryName"
                     value={categoryName}
                     onChange={(e) => setCategoryName(e.target.value)}
-                    placeholder="Ex: História, Cultura, Religião..."
+                    placeholder={t('admin.curiosidades.categories.namePlaceholder', 'e.g. History, Culture...')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="categoryDescription">Descrição (opcional)</Label>
+                  <Label htmlFor="categoryDescription">{t('admin.curiosidades.categories.descLabel', 'Description (optional)')}</Label>
                   <Textarea
                     id="categoryDescription"
                     value={categoryDescription}
                     onChange={(e) => setCategoryDescription(e.target.value)}
-                    placeholder="Descrição da categoria..."
+                    placeholder={t('admin.curiosidades.categories.descPlaceholder', 'Category description...')}
                     rows={3}
                   />
                 </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={closeCategoryDialog}>
-                  Cancelar
+                  {t('common.cancel', 'Cancel')}
                 </Button>
                 <Button onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}>
-                  {editingCategory ? 'Atualizar' : 'Criar'}
+                  {editingCategory ? t('admin.curiosidades.categories.update', 'Update') : t('admin.curiosidades.categories.create', 'Create')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -376,8 +382,8 @@ export default function CuriosidadesList() {
         <div className="space-y-4">
           {categories.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">Nenhuma categoria criada ainda.</p>
-              <p className="text-sm text-muted-foreground mt-2">Clique em "Nova Categoria" para começar.</p>
+              <p className="text-lg text-muted-foreground">{t('admin.curiosidades.categories.empty', 'No categories created yet.')}</p>
+              <p className="text-sm text-muted-foreground mt-2">{t('admin.curiosidades.categories.emptyHint', 'Click “New category” to get started.')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -399,27 +405,29 @@ export default function CuriosidadesList() {
                       className="flex-1"
                     >
                       <Edit className="h-4 w-4 mr-2" />
-                      Editar
+                      {t('admin.actions.edit', 'Edit')}
                     </Button>
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button variant="destructive" size="sm" className="flex-1">
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Deletar
+                          {t('common.delete', 'Delete')}
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Confirmar Exclusão</DialogTitle>
+                          <DialogTitle>{t('admin.dialog.deleteTitle', 'Confirm delete')}</DialogTitle>
                           <DialogDescription>
-                            Tem certeza que deseja excluir a categoria "{category.name}"? Esta ação não pode ser desfeita.
-                            As curiosidades nesta categoria não serão deletadas, mas perderão a associação com a categoria.
+                            {t('admin.curiosidades.categories.deleteConfirm', 'Are you sure you want to delete the category "{name}"? This action cannot be undone.')
+                              .replace('{name}', category.name)}
+                            {' '}
+                            {t('admin.curiosidades.categories.deleteNote', 'Posts in this category will not be deleted, but will lose the category association.')}
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
-                          <Button variant="outline">Cancelar</Button>
+                          <Button variant="outline">{t('common.cancel', 'Cancel')}</Button>
                           <Button variant="destructive" onClick={() => handleDeleteCategory(category.id)}>
-                            Deletar
+                            {t('common.delete', 'Delete')}
                           </Button>
                         </DialogFooter>
                       </DialogContent>
@@ -436,20 +444,20 @@ export default function CuriosidadesList() {
       <Dialog open={deleteDialogOpen !== null} onOpenChange={(open) => setDeleteDialogOpen(open ? deleteDialogOpen : null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogTitle>{t('admin.dialog.deleteTitle', 'Confirm delete')}</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir esta curiosidade? Esta ação não pode ser desfeita.
+              {t('admin.curiosidades.deleteConfirm', 'Are you sure you want to delete this post? This action cannot be undone.')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(null)}>
-              Cancelar
+              {t('common.cancel', 'Cancel')}
             </Button>
             <Button 
               variant="destructive" 
               onClick={() => deleteDialogOpen && handleDelete(deleteDialogOpen)}
             >
-              Deletar
+              {t('common.delete', 'Delete')}
             </Button>
           </DialogFooter>
         </DialogContent>

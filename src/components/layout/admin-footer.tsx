@@ -2,10 +2,12 @@ import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import jornadaLogo from '@/Jornada logo footer.png';
+import { useLanguage } from '@/context/language-context';
 
 export function AdminFooter() {
   const currentYear = new Date().getFullYear();
   const [open, setOpen] = useState<string | null>(null);
+  const { t } = useLanguage();
 
   const toggle = (section: string) => setOpen(open === section ? null : section);
 
@@ -29,7 +31,7 @@ export function AdminFooter() {
           {/* Quick Links Accordion */}
           <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
             <button className="flex justify-between items-center w-full text-base font-medium text-foreground py-3 px-4 focus:outline-none" onClick={() => toggle('quick')}>
-              Links Rápidos {open === 'quick' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {t('footer.quickLinks', 'Quick links')} {open === 'quick' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
             {open === 'quick' && (
               <ul className="space-y-3 py-2 px-4">
@@ -37,19 +39,19 @@ export function AdminFooter() {
                   <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">Dashboard</Link>
                 </li>
                 <li>
-                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Início</Link>
+                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('nav.home', 'Home')}</Link>
                 </li>
                 <li>
-                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">Sobre</Link>
+                  <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('nav.about', 'About')}</Link>
                 </li>
                 <li>
-                  <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">Podcast</Link>
+                  <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('nav.podcast', 'Podcast')}</Link>
                 </li>
                 <li>
-                  <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Ebooks</Link>
+                  <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('nav.ebooks.short', 'eBooks')}</Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contato</Link>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('nav.contact', 'Contact')}</Link>
                 </li>
               </ul>
             )}
@@ -57,21 +59,21 @@ export function AdminFooter() {
           {/* Legal Accordion */}
           <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
             <button className="flex justify-between items-center w-full text-base font-medium text-foreground py-3 px-4 focus:outline-none" onClick={() => toggle('legal')}>
-              Recursos {open === 'legal' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {t('footer.resources', 'Resources')} {open === 'legal' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
             {open === 'legal' && (
               <ul className="space-y-3 py-2 px-4">
                 <li>
-                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
+                  <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('footer.privacy', 'Privacy policy')}</Link>
                 </li>
                 <li>
-                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
+                  <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('footer.terms', 'Terms of service')}</Link>
                 </li>
                 <li>
                   <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</Link>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('footer.support', 'Support')}</Link>
                 </li>
               </ul>
             )}
@@ -79,12 +81,12 @@ export function AdminFooter() {
           {/* Support Accordion */}
           <div className="w-full max-w-xs mx-auto bg-background rounded-lg shadow-sm">
             <button className="flex justify-between items-center w-full text-base font-medium text-foreground py-3 px-4 focus:outline-none" onClick={() => toggle('support')}>
-              Precisa de Ajuda? {open === 'support' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {t('common.needHelp', 'Need help?')} {open === 'support' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
             {open === 'support' && (
               <div className="py-2 px-4">
-                <p className="text-muted-foreground text-base mb-2">Entre em contato com nossa equipe de suporte para obter ajuda com seu painel de controle.</p>
-                <Link to="/dashboard/support" className="text-primary hover:underline text-base">Obter Suporte →</Link>
+                <p className="text-muted-foreground text-base mb-2">{t('admin.footer.supportBlurb', 'Contact our support team for help with your dashboard.')}</p>
+                <Link to="/dashboard/support" className="text-primary hover:underline text-base">{t('admin.footer.getSupport', 'Get support →')}</Link>
               </div>
             )}
           </div>
@@ -99,56 +101,61 @@ export function AdminFooter() {
           </div>
           {/* Quick Links */}
           <div>
-            <h3 className="text-base font-medium mb-4 text-foreground">Links Rápidos</h3>
+            <h3 className="text-base font-medium mb-4 text-foreground">{t('footer.quickLinks', 'Quick links')}</h3>
             <ul className="space-y-3">
               <li>
                 <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors text-base">Dashboard</Link>
               </li>
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">Início</Link>
+                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('nav.home', 'Home')}</Link>
               </li>
               <li>
-                <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">Sobre</Link>
+                <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('nav.about', 'About')}</Link>
               </li>
               <li>
-                <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">Podcast</Link>
+                <Link to="/podcast" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('nav.podcast', 'Podcast')}</Link>
               </li>
               <li>
-                <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">Ebooks</Link>
+                <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('nav.ebooks.short', 'eBooks')}</Link>
               </li>
               <li>
-                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Contato</Link>
+                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('nav.contact', 'Contact')}</Link>
               </li>
             </ul>
           </div>
           {/* Legal Links */}
           <div>
-            <h3 className="text-base font-medium mb-4 text-foreground">Recursos</h3>
+            <h3 className="text-base font-medium mb-4 text-foreground">{t('footer.resources', 'Resources')}</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">Política de Privacidade</Link>
+                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('footer.privacy', 'Privacy policy')}</Link>
               </li>
               <li>
-                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">Termos de Serviço</Link>
+                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('footer.terms', 'Terms of service')}</Link>
               </li>
               <li>
                 <Link to="/contact#faq-section" className="text-muted-foreground hover:text-primary transition-colors text-base">FAQ</Link>
               </li>
               <li>
-                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">Suporte</Link>
+                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">{t('footer.support', 'Support')}</Link>
               </li>
             </ul>
           </div>
           {/* Support Section */}
           <div>
-            <h3 className="text-base font-medium mb-4 text-foreground">Precisa de Ajuda?</h3>
-            <p className="text-muted-foreground text-base mb-2">Entre em contato com nossa equipe de suporte para obter ajuda com seu painel de controle.</p>
-            <Link to="/dashboard/support" className="text-primary hover:underline text-base">Obter Suporte →</Link>
+            <h3 className="text-base font-medium mb-4 text-foreground">{t('common.needHelp', 'Need help?')}</h3>
+            <p className="text-muted-foreground text-base mb-2">{t('admin.footer.supportBlurb', 'Contact our support team for help with your dashboard.')}</p>
+            <Link to="/dashboard/support" className="text-primary hover:underline text-base">{t('admin.footer.getSupport', 'Get support →')}</Link>
           </div>
         </div>
         <div className="border-t border-border/50 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-muted-foreground">© {currentYear} Patricia. Todos os direitos reservados.</p>
-          <p className="text-sm text-muted-foreground mt-2 md:mt-0">Website desenvolvido por <a href="https://appdoers.co.nz" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">appdoers.co.nz</a> em parceria com <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">buildwithsds.com</a></p>
+          <p className="text-sm text-muted-foreground">© {currentYear} {t('footer.rights', 'Patricia. All rights reserved.')}</p>
+          <p className="text-sm text-muted-foreground mt-2 md:mt-0">
+            {t('footer.credits', 'Website built by')}{' '}
+            <a href="https://appdoers.co.nz" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">appdoers.co.nz</a>{' '}
+            {t('footer.and', 'in partnership with')}{' '}
+            <a href="https://buildwithsds.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">buildwithsds.com</a>
+          </p>
         </div>
       </div>
     </footer>
