@@ -32,7 +32,7 @@ export function CuriosidadesPage() {
         className="relative min-h-[60vh] pt-32 md:pt-36 pb-16 flex items-center justify-center overflow-hidden bg-fixed bg-center bg-gradient-to-br from-primary/10 to-background"
         initial={{ opacity: 0, y: 50, rotate: -3, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
-        viewport={{ amount: 0.3 }}
+        viewport={{ once: true, amount: 0.1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         {/* Background blurred blobs */}
@@ -52,7 +52,7 @@ export function CuriosidadesPage() {
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ amount: 0.3 }}
+            viewport={{ once: true, amount: 0.1 }}
             className="text-3xl md:text-5xl font-heading font-bold mb-4 leading-tight"
           >
             {t('curiosidades.hero.title', 'Curiosidades')}
@@ -61,7 +61,7 @@ export function CuriosidadesPage() {
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            viewport={{ amount: 0.3 }}
+            viewport={{ once: true, amount: 0.1 }}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
           >
             {t(
@@ -77,7 +77,7 @@ export function CuriosidadesPage() {
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        viewport={{ amount: 0.3 }}
+        viewport={{ once: true, amount: 0.1 }}
         className="py-16 bg-background"
       >
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
