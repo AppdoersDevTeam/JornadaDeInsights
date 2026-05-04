@@ -1,17 +1,20 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { type Curiosidade } from '@/lib/supabase';
+import { useLanguage } from '@/context/language-context';
 
 interface CuriosidadeCardProps {
   curiosidade: Curiosidade;
 }
 
 export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
+  const { t, language } = useLanguage();
+
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    return new Date(dateString).toLocaleDateString(language === 'en' ? 'en-NZ' : 'pt-BR', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -55,7 +58,7 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
           {curiosidade.title}
         </h3>
         <p className="text-sm text-muted-foreground mb-3">
-          Por: {curiosidade.author}
+          {t('curiosidade.byAuthor', 'Por:')} {curiosidade.author}
         </p>
         <p className="text-muted-foreground mb-4 line-clamp-3">
           {getPreview(curiosidade.body)}
@@ -64,7 +67,7 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
           to={`/curiosidades/${curiosidade.id}`}
           className="text-primary hover:underline font-medium text-sm inline-flex items-center"
         >
-          Ler mais →
+          {t('curiosidade.readMore', 'Ler mais →')}
         </Link>
       </div>
     </motion.div>

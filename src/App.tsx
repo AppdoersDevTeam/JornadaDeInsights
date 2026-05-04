@@ -51,6 +51,11 @@ const ROUTE_METADATA: Record<'pt-BR' | 'en', Record<string, { title: string; des
       description:
         'Ouça episódios com reflexões bíblicas e temas de fé para o seu dia a dia.',
     },
+    '/curiosidades': {
+      title: 'Curiosidades | Jornada de Insights',
+      description:
+        'Insights, curiosidades e reflexões sobre a Bíblia e a fé cristã.',
+    },
     '/shop': {
       title: 'Loja de eBooks | Jornada de Insights',
       description:
@@ -88,6 +93,10 @@ const ROUTE_METADATA: Record<'pt-BR' | 'en', Record<string, { title: string; des
     '/podcast': {
       title: 'Podcast | Journey of Insights',
       description: 'Listen to episodes with biblical reflections and faith-centered topics.',
+    },
+    '/curiosidades': {
+      title: 'Insights | Journey of Insights',
+      description: 'Short articles and reflections on the Bible and the Christian faith.',
     },
     '/shop': {
       title: 'eBook Store | Journey of Insights',
@@ -198,7 +207,12 @@ function AppRoutes() {
 
   useEffect(() => {
     const localeMeta = ROUTE_METADATA[language];
-    const routeMeta = localeMeta[location.pathname] || localeMeta['/'];
+    const routeMeta =
+      localeMeta[location.pathname] ??
+      (location.pathname.startsWith('/curiosidades/')
+        ? localeMeta['/curiosidades']
+        : undefined) ??
+      localeMeta['/'];
     document.title = routeMeta.title;
 
     const descriptionTag = document.querySelector('meta[name="description"]');

@@ -611,6 +611,7 @@ function fill() {
     'curiosidade.loadError': 'Erro ao carregar curiosidade',
     'curiosidade.notFound': 'Curiosidade não encontrada',
     'curiosidade.byAuthor': 'Por:',
+    'curiosidade.readMore': 'Ler mais →',
     'terms.effectiveDate': 'Data de Efetivação: 16 de Maio de 2025',
     'terms.s1.h': '1. Aceitação dos Termos',
     'terms.s1.p':
@@ -1390,6 +1391,7 @@ function fill() {
     'curiosidade.loadError': 'Could not load this article',
     'curiosidade.notFound': 'Article not found',
     'curiosidade.byAuthor': 'By:',
+    'curiosidade.readMore': 'Read more →',
     'terms.effectiveDate': 'Effective date: 16 May 2025',
     'terms.s1.h': '1. Acceptance of terms',
     'terms.s1.p':

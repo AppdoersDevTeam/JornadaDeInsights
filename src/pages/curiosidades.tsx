@@ -95,7 +95,7 @@ export function CuriosidadesPage() {
             </div>
           ) : curiosidades.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">{t('home.noCuriosidades', '')}</p>
+              <p className="text-lg text-muted-foreground">{t('curiosidades.empty', '')}</p>
               <p className="text-sm text-muted-foreground mt-2">{t('curiosidades.emptyHint', '')}</p>
             </div>
           ) : (
