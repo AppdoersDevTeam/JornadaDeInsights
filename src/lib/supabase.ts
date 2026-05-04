@@ -241,6 +241,7 @@ export const deleteCategory = async (id: string): Promise<void> => {
 export interface CuriosidadeCategory {
   id: string;
   name: string;
+  name_en?: string | null;
   description?: string;
   created_at?: string;
   updated_at?: string;
@@ -249,10 +250,12 @@ export interface CuriosidadeCategory {
 export interface Curiosidade {
   id: string;
   title: string;
+  title_en?: string | null;
   author: string;
   category_id: string | null;
   category?: CuriosidadeCategory | null;
   body: string;
+  body_en?: string | null;
   status: 'draft' | 'published';
   attachments: string[];
   cover_image: string | null;
@@ -286,7 +289,7 @@ export const getCuriosidades = async (includeDrafts: boolean = false): Promise<C
         try {
           const { data: catData, error: catError } = await supabase
             .from('curiosidades_categories')
-            .select('id, name, description')
+            .select('id, name, name_en, description')
             .eq('id', typedItem.category_id)
             .single();
           
@@ -335,7 +338,7 @@ export const getCuriosidadeById = async (id: string, includeDrafts: boolean = fa
       try {
         const { data: catData, error: catError } = await supabase
           .from('curiosidades_categories')
-          .select('id, name, description')
+          .select('id, name, name_en, description')
           .eq('id', data.category_id)
           .single();
         
@@ -366,7 +369,9 @@ export const createCuriosidade = async (
   body: string,
   status: 'draft' | 'published' = 'draft',
   attachments: string[] = [],
-  cover_image: string | null = null
+  cover_image: string | null = null,
+  title_en: string | null = null,
+  body_en: string | null = null
 ): Promise<Curiosidade> => {
   try {
     const { data, error } = await supabase
@@ -378,7 +383,9 @@ export const createCuriosidade = async (
         body, 
         status,
         attachments: attachments.length > 0 ? attachments : [],
-        cover_image
+        cover_image,
+        title_en: title_en?.trim() ? title_en.trim() : null,
+        body_en: body_en?.trim() ? body_en.trim() : null,
       })
       .select('*')
       .single();
@@ -391,7 +398,7 @@ export const createCuriosidade = async (
       try {
         const { data: catData, error: catError } = await supabase
           .from('curiosidades_categories')
-          .select('id, name, description')
+          .select('id, name, name_en, description')
           .eq('id', data.category_id)
           .single();
         
@@ -423,7 +430,9 @@ export const updateCuriosidade = async (
   body: string,
   status: 'draft' | 'published' = 'draft',
   attachments: string[] = [],
-  cover_image: string | null = null
+  cover_image: string | null = null,
+  title_en: string | null = null,
+  body_en: string | null = null
 ): Promise<Curiosidade> => {
   try {
     const { data, error } = await supabase
@@ -436,6 +445,8 @@ export const updateCuriosidade = async (
         status,
         attachments: attachments.length > 0 ? attachments : [],
         cover_image,
+        title_en: title_en?.trim() ? title_en.trim() : null,
+        body_en: body_en?.trim() ? body_en.trim() : null,
         updated_at: new Date().toISOString() 
       })
       .eq('id', id)
@@ -450,7 +461,7 @@ export const updateCuriosidade = async (
       try {
         const { data: catData, error: catError } = await supabase
           .from('curiosidades_categories')
-          .select('id, name, description')
+          .select('id, name, name_en, description')
           .eq('id', data.category_id)
           .single();
         
@@ -569,11 +580,19 @@ export const getCuriosidadesCategories = async (): Promise<CuriosidadeCategory[]
   }
 };
 
-export const createCuriosidadesCategory = async (name: string, description?: string): Promise<CuriosidadeCategory> => {
+export const createCuriosidadesCategory = async (
+  name: string,
+  description?: string,
+  name_en?: string | null
+): Promise<CuriosidadeCategory> => {
   try {
     const { data, error } = await supabase
       .from('curiosidades_categories')
-      .insert({ name, description })
+      .insert({
+        name,
+        description,
+        name_en: name_en?.trim() ? name_en.trim() : null,
+      })
       .select()
       .single();
 
@@ -591,11 +610,21 @@ export const createCuriosidadesCategory = async (name: string, description?: str
   }
 };
 
-export const updateCuriosidadesCategory = async (id: string, name: string, description?: string): Promise<CuriosidadeCategory> => {
+export const updateCuriosidadesCategory = async (
+  id: string,
+  name: string,
+  description?: string,
+  name_en?: string | null
+): Promise<CuriosidadeCategory> => {
   try {
     const { data, error } = await supabase
       .from('curiosidades_categories')
-      .update({ name, description, updated_at: new Date().toISOString() })
+      .update({
+        name,
+        description,
+        name_en: name_en?.trim() ? name_en.trim() : null,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', id)
       .select()
       .single();

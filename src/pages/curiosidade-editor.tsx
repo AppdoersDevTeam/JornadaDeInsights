@@ -19,17 +19,21 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Save, Eye, Upload, X, File, Image as ImageIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useLanguage } from '@/context/language-context';
 
 export function CuriosidadeEditorPage() {
+  const { t } = useLanguage();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverImageInputRef = useRef<HTMLInputElement>(null);
   
   const [title, setTitle] = useState('');
+  const [titleEn, setTitleEn] = useState('');
   const [author, setAuthor] = useState('');
   const [categoryId, setCategoryId] = useState<string>('__none__');
   const [body, setBody] = useState('');
+  const [bodyEn, setBodyEn] = useState('');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [attachments, setAttachments] = useState<string[]>([]);
   const [coverImage, setCoverImage] = useState<string | null>(null);
@@ -62,9 +66,11 @@ export function CuriosidadeEditorPage() {
       setLoading(true);
       const data = await getCuriosidadeById(id, true); // Include drafts
       setTitle(data.title);
+      setTitleEn(data.title_en ?? '');
       setAuthor(data.author);
       setCategoryId(data.category_id || '__none__');
       setBody(data.body);
+      setBodyEn(data.body_en ?? '');
       setStatus(data.status || 'draft');
       setAttachments(data.attachments || []);
       setCoverImage(data.cover_image || null);
@@ -109,7 +115,9 @@ export function CuriosidadeEditorPage() {
           body.trim(),
           newStatus,
           attachments,
-          coverImage
+          coverImage,
+          titleEn.trim() || null,
+          bodyEn.trim() || null
         );
         toast.success(publish ? 'Curiosidade publicada com sucesso!' : 'Rascunho salvo com sucesso!');
       } else {
@@ -120,7 +128,9 @@ export function CuriosidadeEditorPage() {
           body.trim(),
           newStatus,
           attachments,
-          coverImage
+          coverImage,
+          titleEn.trim() || null,
+          bodyEn.trim() || null
         );
         toast.success(publish ? 'Curiosidade publicada com sucesso!' : 'Rascunho salvo com sucesso!');
         navigate(`/dashboard/curiosidades/${newCuriosidade.id}`);
@@ -273,6 +283,17 @@ export function CuriosidadeEditorPage() {
               />
             </div>
 
+            <div>
+              <Label htmlFor="titleEn">{t('admin.curiosidades.titleEnOptional', 'English title (optional)')}</Label>
+              <Input
+                id="titleEn"
+                value={titleEn}
+                onChange={(e) => setTitleEn(e.target.value)}
+                placeholder="English title (optional)"
+                className="mt-1"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="author">Autor *</Label>
@@ -376,6 +397,22 @@ export function CuriosidadeEditorPage() {
                 modules={quillModules}
                 placeholder="Digite o conteúdo da curiosidade..."
                 style={{ minHeight: '400px' }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <Label htmlFor="bodyEn">{t('admin.curiosidades.bodyEnOptional', 'English content (optional)')}</Label>
+            <div className="mt-2">
+              <ReactQuill
+                theme="snow"
+                value={bodyEn}
+                onChange={setBodyEn}
+                modules={quillModules}
+                placeholder="English article body (optional)..."
+                style={{ minHeight: '320px' }}
               />
             </div>
           </CardContent>

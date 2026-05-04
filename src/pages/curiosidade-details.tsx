@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getCuriosidadeById, type Curiosidade } from '@/lib/supabase';
+import {
+  categoryDisplayName,
+  curiosidadeDisplayBody,
+  curiosidadeDisplayTitle,
+} from '@/lib/curiosidade-locale';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -73,6 +78,11 @@ export function CuriosidadeDetailsPage() {
     );
   }
 
+  const displayTitle = curiosidadeDisplayTitle(curiosidade, language);
+  const displayBodyHtml = curiosidadeDisplayBody(curiosidade, language);
+  const displayCategoryLabel =
+    categoryDisplayName(curiosidade.category, language) ?? t('nav.curiosidades', 'Curiosidades');
+
   return (
     <div className="container mx-auto px-6 sm:px-8 lg:px-10 pt-28 pb-16 overflow-x-hidden">
       <StructuredData
@@ -80,7 +90,7 @@ export function CuriosidadeDetailsPage() {
         data={{
           '@context': 'https://schema.org',
           '@type': 'Article',
-          headline: curiosidade.title,
+          headline: displayTitle,
           author: {
             '@type': 'Person',
             name: curiosidade.author || 'Patricia da Silva',
@@ -88,7 +98,7 @@ export function CuriosidadeDetailsPage() {
           datePublished: curiosidade.created_at,
           dateModified: curiosidade.updated_at || curiosidade.created_at,
           image: curiosidade.cover_image || undefined,
-          articleSection: curiosidade.category?.name || 'Curiosidades',
+          articleSection: displayCategoryLabel,
           mainEntityOfPage: {
             '@type': 'WebPage',
             '@id': `https://jornadadeinsights.com/curiosidades/${curiosidade.id}`,
@@ -117,7 +127,7 @@ export function CuriosidadeDetailsPage() {
               <div className="w-full h-64 md:h-96 overflow-hidden">
                 <img 
                   src={curiosidade.cover_image} 
-                  alt={curiosidade.title}
+                  alt={displayTitle}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -126,7 +136,7 @@ export function CuriosidadeDetailsPage() {
               <div className="flex flex-wrap gap-2 mb-4">
                 {curiosidade.category && (
                   <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded">
-                    {curiosidade.category.name}
+                    {categoryDisplayName(curiosidade.category, language)}
                   </span>
                 )}
                 <span className="text-sm text-muted-foreground">
@@ -135,7 +145,7 @@ export function CuriosidadeDetailsPage() {
               </div>
 
               <h1 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-                {curiosidade.title}
+                {displayTitle}
               </h1>
 
               <p className="text-muted-foreground mb-8">
@@ -145,7 +155,7 @@ export function CuriosidadeDetailsPage() {
 
             <div 
               className="curiosidade-content text-muted-foreground overflow-wrap break-words"
-              dangerouslySetInnerHTML={{ __html: curiosidade.body }}
+              dangerouslySetInnerHTML={{ __html: displayBodyHtml }}
               style={{
                 lineHeight: '1.8',
                 wordWrap: 'break-word',

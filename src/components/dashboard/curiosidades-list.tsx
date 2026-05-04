@@ -39,6 +39,7 @@ export default function CuriosidadesList() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
   const [categories, setCategories] = useState<CuriosidadeCategory[]>([]);
   const [categoryName, setCategoryName] = useState('');
+  const [categoryNameEn, setCategoryNameEn] = useState('');
   const [categoryDescription, setCategoryDescription] = useState('');
   const [editingCategory, setEditingCategory] = useState<CuriosidadeCategory | null>(null);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
@@ -81,9 +82,14 @@ export default function CuriosidadesList() {
     }
 
     try {
-      await createCuriosidadesCategory(categoryName.trim(), categoryDescription.trim() || undefined);
+      await createCuriosidadesCategory(
+        categoryName.trim(),
+        categoryDescription.trim() || undefined,
+        categoryNameEn.trim() || undefined
+      );
       toast.success(t('admin.curiosidades.categories.created', 'Category created successfully'));
       setCategoryName('');
+      setCategoryNameEn('');
       setCategoryDescription('');
       setCategoryDialogOpen(false);
       fetchCategories();
@@ -101,10 +107,16 @@ export default function CuriosidadesList() {
     }
 
     try {
-      await updateCuriosidadesCategory(editingCategory.id, categoryName.trim(), categoryDescription.trim() || undefined);
+      await updateCuriosidadesCategory(
+        editingCategory.id,
+        categoryName.trim(),
+        categoryDescription.trim() || undefined,
+        categoryNameEn.trim() || undefined
+      );
       toast.success(t('admin.curiosidades.categories.updated', 'Category updated successfully'));
       setEditingCategory(null);
       setCategoryName('');
+      setCategoryNameEn('');
       setCategoryDescription('');
       setCategoryDialogOpen(false);
       fetchCategories();
@@ -130,6 +142,7 @@ export default function CuriosidadesList() {
   const openEditDialog = (category: CuriosidadeCategory) => {
     setEditingCategory(category);
     setCategoryName(category.name);
+    setCategoryNameEn(category.name_en ?? '');
     setCategoryDescription(category.description || '');
     setCategoryDialogOpen(true);
   };
@@ -138,6 +151,7 @@ export default function CuriosidadesList() {
     setCategoryDialogOpen(false);
     setEditingCategory(null);
     setCategoryName('');
+    setCategoryNameEn('');
     setCategoryDescription('');
   };
 
@@ -332,7 +346,7 @@ export default function CuriosidadesList() {
           </div>
           <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => { setEditingCategory(null); setCategoryName(''); setCategoryDescription(''); }}>
+              <Button onClick={() => { setEditingCategory(null); setCategoryName(''); setCategoryNameEn(''); setCategoryDescription(''); }}>
                 {t('admin.curiosidades.categories.new', 'New category')}
               </Button>
             </DialogTrigger>
@@ -355,6 +369,15 @@ export default function CuriosidadesList() {
                     value={categoryName}
                     onChange={(e) => setCategoryName(e.target.value)}
                     placeholder={t('admin.curiosidades.categories.namePlaceholder', 'e.g. History, Culture...')}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="categoryNameEn">{t('admin.curiosidades.categories.nameEnLabel', 'English name (optional)')}</Label>
+                  <Input
+                    id="categoryNameEn"
+                    value={categoryNameEn}
+                    onChange={(e) => setCategoryNameEn(e.target.value)}
+                    placeholder="e.g. History, Culture..."
                   />
                 </div>
                 <div>
@@ -392,6 +415,9 @@ export default function CuriosidadesList() {
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">{category.name}</h3>
+                      {category.name_en?.trim() && (
+                        <p className="text-xs text-muted-foreground">{category.name_en}</p>
+                      )}
                       {category.description && (
                         <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
                       )}

@@ -2,6 +2,11 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { type Curiosidade } from '@/lib/supabase';
 import { useLanguage } from '@/context/language-context';
+import {
+  categoryDisplayName,
+  curiosidadeDisplayBody,
+  curiosidadeDisplayTitle,
+} from '@/lib/curiosidade-locale';
 
 interface CuriosidadeCardProps {
   curiosidade: Curiosidade;
@@ -17,6 +22,10 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
       day: 'numeric',
     });
   };
+
+  const displayTitle = curiosidadeDisplayTitle(curiosidade, language);
+  const displayBodyHtml = curiosidadeDisplayBody(curiosidade, language);
+  const displayCategory = categoryDisplayName(curiosidade.category, language);
 
   // Extract a preview of the body (first 200 characters, strip HTML)
   const getPreview = (html: string) => {
@@ -38,16 +47,16 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
         <div className="w-full h-48 overflow-hidden">
           <img 
             src={curiosidade.cover_image} 
-            alt={curiosidade.title}
+            alt={displayTitle}
             className="w-full h-full object-cover"
           />
         </div>
       )}
       <div className="p-6">
         <div className="flex flex-wrap gap-2 mb-3">
-          {curiosidade.category && (
+          {displayCategory && (
             <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">
-              {curiosidade.category.name}
+              {displayCategory}
             </span>
           )}
           <span className="text-xs text-muted-foreground">
@@ -55,13 +64,13 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
           </span>
         </div>
         <h3 className="font-heading text-xl font-semibold mb-2 line-clamp-2 hover:text-primary transition-colors">
-          {curiosidade.title}
+          {displayTitle}
         </h3>
         <p className="text-sm text-muted-foreground mb-3">
           {t('curiosidade.byAuthor', 'Por:')} {curiosidade.author}
         </p>
         <p className="text-muted-foreground mb-4 line-clamp-3">
-          {getPreview(curiosidade.body)}
+          {getPreview(displayBodyHtml)}
         </p>
         <Link
           to={`/curiosidades/${curiosidade.id}`}
