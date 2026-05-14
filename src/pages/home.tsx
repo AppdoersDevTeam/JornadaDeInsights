@@ -236,7 +236,7 @@ export function HomePage() {
             logo: 'https://jornadadeinsights.com/favicon.ico',
             sameAs: [
               'https://www.youtube.com/@Jornadadeinsights/videos',
-              'https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW',
+              'https://open.spotify.com/show/033dE0OxeExcL0bM8Q9AcT',
             ],
           },
           {

@@ -33,7 +33,7 @@ export function Footer() {
                 <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <Youtube className="h-5 w-5" />
                 </a>
-                <a href="https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW" target="_blank" rel="noopener noreferrer" aria-label="Spotify" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
+                <a href="https://open.spotify.com/show/033dE0OxeExcL0bM8Q9AcT" target="_blank" rel="noopener noreferrer" aria-label="Spotify" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <FaSpotify className="h-5 w-5" />
                 </a>
                 <a href="https://www.instagram.com/jornada_de_insights/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
@@ -125,7 +125,7 @@ export function Footer() {
                 <a href="https://www.youtube.com/@Jornadadeinsights/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <Youtube className="h-5 w-5" />
                 </a>
-                <a href="https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW" target="_blank" rel="noopener noreferrer" aria-label="Spotify" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
+                <a href="https://open.spotify.com/show/033dE0OxeExcL0bM8Q9AcT" target="_blank" rel="noopener noreferrer" aria-label="Spotify" className="text-muted-foreground hover:text-primary transition-colors footer-icon">
                   <FaSpotify className="h-5 w-5" />
                 </a>
                 <a href="https://www.instagram.com/jornada_de_insights/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors footer-icon">

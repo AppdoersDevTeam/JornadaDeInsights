@@ -102,9 +102,9 @@ export function PodcastPage() {
   const isInView = useInView(episodesRef, { once: true, margin: "-100px" });
 
   useEffect(() => {
-    // bump cache key to v4 to clear old cached episodes and include Spotify links
-    const CACHE_KEY = "youtube-videos-podcast-v4";
-    const CACHE_TIME_KEY = "youtube-videos-podcast-v4-timestamp";
+    // bump cache key to v5 to clear old cached episodes after Spotify show URL change
+    const CACHE_KEY = "youtube-videos-podcast-v5";
+    const CACHE_TIME_KEY = "youtube-videos-podcast-v5-timestamp";
     const oneDay = 24 * 60 * 60 * 1000;
     const now = Date.now();
     const cachedData = localStorage.getItem(CACHE_KEY);
@@ -160,7 +160,7 @@ export function PodcastPage() {
             duration: '',
             image: item.snippet.thumbnails.high.url || item.snippet.thumbnails.medium.url,
             youtubeUrl: `https://www.youtube.com/watch?v=${item.id}`,
-            spotifyUrl: item.snippet.description.match(/https:\/\/open\.spotify\.com\/\S+/)?.[0] || 'https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW',
+            spotifyUrl: item.snippet.description.match(/https:\/\/open\.spotify\.com\/\S+/)?.[0] || 'https://open.spotify.com/show/033dE0OxeExcL0bM8Q9AcT',
           }));
           setEpisodes(mapped);
           localStorage.setItem(CACHE_KEY, JSON.stringify(mapped));
@@ -250,7 +250,7 @@ export function PodcastPage() {
             </motion.div>
             <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
               <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                <a href="https://open.spotify.com/show/6woq3ZR2Z9SWbl2n6FAlrW" target="_blank" rel="noopener noreferrer">
+                <a href="https://open.spotify.com/show/033dE0OxeExcL0bM8Q9AcT" target="_blank" rel="noopener noreferrer">
                   <Play className="mr-2 h-4 w-4" /> {t('podcast.listenSpotify', 'Ouça no Spotify')}
                 </a>
               </Button>
