@@ -102,9 +102,9 @@ export function PodcastPage() {
   const isInView = useInView(episodesRef, { once: true, margin: "-100px" });
 
   useEffect(() => {
-    // bump cache key to v6 to force refresh of cached episodes so per-episode Spotify links re-parse from descriptions
-    const CACHE_KEY = "youtube-videos-podcast-v6";
-    const CACHE_TIME_KEY = "youtube-videos-podcast-v6-timestamp";
+    // bump cache key to v7 after Spotify URL extraction now prefers /episode/ links over /show/ links
+    const CACHE_KEY = "youtube-videos-podcast-v7";
+    const CACHE_TIME_KEY = "youtube-videos-podcast-v7-timestamp";
     const oneDay = 24 * 60 * 60 * 1000;
     const now = Date.now();
     const cachedData = localStorage.getItem(CACHE_KEY);
@@ -147,6 +147,16 @@ export function PodcastPage() {
             });
         })
         .then((filteredItems: VideoDetail[]) => {
+          // Prefer per-episode Spotify links (/episode/...) over channel/show links, and
+          // strip trailing punctuation that descriptions often glue onto URLs (e.g. "URL).").
+          const SHOW_FALLBACK_URL = 'https://open.spotify.com/show/033dE0OxeExcL0bM8Q9AcT';
+          const extractSpotifyUrl = (description: string): string => {
+            const episodeMatch = description.match(/https:\/\/open\.spotify\.com\/episode\/\S+/);
+            const anyMatch = description.match(/https:\/\/open\.spotify\.com\/\S+/);
+            const raw = episodeMatch?.[0] ?? anyMatch?.[0];
+            if (!raw) return SHOW_FALLBACK_URL;
+            return raw.replace(/[).,;\]'"!?]+$/, '');
+          };
           const mapped = filteredItems.map(item => ({
             id: item.id,
             title: item.snippet.title,
@@ -160,7 +170,7 @@ export function PodcastPage() {
             duration: '',
             image: item.snippet.thumbnails.high.url || item.snippet.thumbnails.medium.url,
             youtubeUrl: `https://www.youtube.com/watch?v=${item.id}`,
-            spotifyUrl: item.snippet.description.match(/https:\/\/open\.spotify\.com\/\S+/)?.[0] || 'https://open.spotify.com/show/033dE0OxeExcL0bM8Q9AcT',
+            spotifyUrl: extractSpotifyUrl(item.snippet.description),
           }));
           setEpisodes(mapped);
           localStorage.setItem(CACHE_KEY, JSON.stringify(mapped));
