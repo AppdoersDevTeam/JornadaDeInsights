@@ -102,9 +102,9 @@ export function PodcastPage() {
   const isInView = useInView(episodesRef, { once: true, margin: "-100px" });
 
   useEffect(() => {
-    // bump cache key to v5 to clear old cached episodes after Spotify show URL change
-    const CACHE_KEY = "youtube-videos-podcast-v5";
-    const CACHE_TIME_KEY = "youtube-videos-podcast-v5-timestamp";
+    // bump cache key to v6 to force refresh of cached episodes so per-episode Spotify links re-parse from descriptions
+    const CACHE_KEY = "youtube-videos-podcast-v6";
+    const CACHE_TIME_KEY = "youtube-videos-podcast-v6-timestamp";
     const oneDay = 24 * 60 * 60 * 1000;
     const now = Date.now();
     const cachedData = localStorage.getItem(CACHE_KEY);
