@@ -95,6 +95,7 @@ export function CartPage() {
         const { data, error } = await supabase
           .from('ebooks_metadata')
           .select('*')
+          .eq('content_locale', language)
           .order('created_at', { ascending: false })
           .limit(6);
 
@@ -122,7 +123,7 @@ export function CartPage() {
     } else {
       setRecommendedEbooks([]);
     }
-  }, [items]);
+  }, [items, language]);
 
   const formatPrice = (value: number) =>
     new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(value);

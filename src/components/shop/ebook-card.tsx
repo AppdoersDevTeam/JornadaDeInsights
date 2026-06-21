@@ -4,6 +4,8 @@ import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { LazyImage } from './lazy-image';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/context/language-context';
+import type { EbookContentLocale } from '@/lib/ebook-locale';
 
 export interface Ebook {
   id: string;
@@ -18,6 +20,7 @@ export interface Ebook {
     id: string;
     name: string;
   } | null;
+  content_locale?: EbookContentLocale;
 }
 
 interface EbookCardProps {
@@ -25,6 +28,7 @@ interface EbookCardProps {
 }
 
 export function EbookCard({ book }: EbookCardProps) {
+  const { t, language } = useLanguage();
   const { addItem } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -55,14 +59,14 @@ export function EbookCard({ book }: EbookCardProps) {
       </Link>
       <div className="p-4 pt-0 flex items-center justify-between mt-auto">
         <p className="font-medium group-hover:text-primary transition-colors">
-          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(book.price)}
+          {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(book.price)}
         </p>
         <Button 
           size="sm" 
           onClick={handleAddToCart}
           className="transition-all duration-300 hover:scale-105 hover:shadow-md"
         >
-          <ShoppingCart className="mr-2 h-4 w-4" /> Adicionar ao carrinho
+          <ShoppingCart className="mr-2 h-4 w-4" /> {t('shop.featured.add', 'Adicionar ao carrinho')}
         </Button>
       </div>
     </div>

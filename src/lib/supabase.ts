@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
+import type { AppLocale } from '@/locales/messages';
+import { ebookMatchesSiteLanguage, type EbookContentLocale } from '@/lib/ebook-locale';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -73,9 +75,9 @@ export const getSupabaseAccessToken = async () => {
   return data.session?.access_token ?? null;
 };
 
-export const getEbooks = async () => {
+export const getEbooks = async (options?: { locale?: AppLocale }) => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('ebooks_metadata')
       .select(`
         *,
@@ -85,6 +87,12 @@ export const getEbooks = async () => {
         )
       `)
       .order('created_at', { ascending: false });
+
+    if (options?.locale) {
+      query = query.eq('content_locale', options.locale);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 
@@ -111,6 +119,7 @@ export const getEbooks = async () => {
       
       return {
         ...ebook,
+        content_locale: (ebook.content_locale as EbookContentLocale | undefined) ?? 'pt-BR',
         cover_url: typedEbook.filename ? supabase.storage.from('store-assets').getPublicUrl(`covers/${typedEbook.filename}`).data.publicUrl : null,
         category: category
       };
@@ -123,7 +132,7 @@ export const getEbooks = async () => {
   }
 };
 
-export const getEbookById = async (id: string) => {
+export const getEbookById = async (id: string, options?: { locale?: AppLocale }) => {
   try {
     const { data, error } = await supabase
       .from('ebooks_metadata')
@@ -140,6 +149,10 @@ export const getEbookById = async (id: string) => {
     if (error) throw error;
     if (!data) throw new Error('Ebook not found');
 
+    if (options?.locale && !ebookMatchesSiteLanguage(data.content_locale, options.locale)) {
+      throw new Error('Ebook not found');
+    }
+
     // Add cover image URL and category info
     let category = null;
     if (data.categories) {
@@ -153,6 +166,7 @@ export const getEbookById = async (id: string) => {
     
     const ebookWithCoverUrl = {
       ...data,
+      content_locale: (data.content_locale as EbookContentLocale | undefined) ?? 'pt-BR',
       cover_url: data.filename 
         ? supabase.storage.from('store-assets').getPublicUrl(`covers/${data.filename}`).data.publicUrl 
         : null,
@@ -249,12 +263,12 @@ export interface CuriosidadeCategory {
 
 export interface Curiosidade {
   id: string;
-  title: string;
+  title: string | null;
   title_en?: string | null;
   author: string;
   category_id: string | null;
   category?: CuriosidadeCategory | null;
-  body: string;
+  body: string | null;
   body_en?: string | null;
   status: 'draft' | 'published';
   attachments: string[];
@@ -363,10 +377,10 @@ export const getCuriosidadeById = async (id: string, includeDrafts: boolean = fa
 };
 
 export const createCuriosidade = async (
-  title: string,
+  title: string | null,
   author: string,
   category_id: string | null,
-  body: string,
+  body: string | null,
   status: 'draft' | 'published' = 'draft',
   attachments: string[] = [],
   cover_image: string | null = null,
@@ -377,10 +391,10 @@ export const createCuriosidade = async (
     const { data, error } = await supabase
       .from('curiosidades')
       .insert({ 
-        title, 
-        author, 
-        category_id, 
-        body, 
+        title: title?.trim() ? title.trim() : null,
+        author,
+        category_id,
+        body: body?.trim() ? body.trim() : null,
         status,
         attachments: attachments.length > 0 ? attachments : [],
         cover_image,
@@ -424,10 +438,10 @@ export const createCuriosidade = async (
 
 export const updateCuriosidade = async (
   id: string,
-  title: string,
+  title: string | null,
   author: string,
   category_id: string | null,
-  body: string,
+  body: string | null,
   status: 'draft' | 'published' = 'draft',
   attachments: string[] = [],
   cover_image: string | null = null,
@@ -438,10 +452,10 @@ export const updateCuriosidade = async (
     const { data, error } = await supabase
       .from('curiosidades')
       .update({ 
-        title, 
-        author, 
-        category_id, 
-        body, 
+        title: title?.trim() ? title.trim() : null,
+        author,
+        category_id,
+        body: body?.trim() ? body.trim() : null,
         status,
         attachments: attachments.length > 0 ? attachments : [],
         cover_image,

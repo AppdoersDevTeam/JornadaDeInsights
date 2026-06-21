@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
+import { useLanguage } from '@/context/language-context';
 
 const ScrollIcon = () => {
+  const { t } = useLanguage();
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
@@ -25,7 +27,7 @@ const ScrollIcon = () => {
   return (
     <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 animate-bounce flex flex-col items-center gap-1">
       <FaChevronDown className="text-primary text-3xl" />
-      <span className="text-primary text-sm font-medium">Rolar</span>
+      <span className="text-primary text-sm font-medium">{t('common.scrollDown', 'Scroll')}</span>
     </div>
   );
 };

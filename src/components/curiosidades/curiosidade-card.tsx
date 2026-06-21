@@ -27,7 +27,6 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
   const displayBodyHtml = curiosidadeDisplayBody(curiosidade, language);
   const displayCategory = categoryDisplayName(curiosidade.category, language);
 
-  // Extract a preview of the body (first 200 characters, strip HTML)
   const getPreview = (html: string) => {
     const div = document.createElement('div');
     div.innerHTML = html;
@@ -45,8 +44,8 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
     >
       {curiosidade.cover_image && (
         <div className="w-full h-48 overflow-hidden">
-          <img 
-            src={curiosidade.cover_image} 
+          <img
+            src={curiosidade.cover_image}
             alt={displayTitle}
             className="w-full h-full object-cover"
           />
@@ -59,9 +58,7 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
               {displayCategory}
             </span>
           )}
-          <span className="text-xs text-muted-foreground">
-            {formatDate(curiosidade.created_at)}
-          </span>
+          <span className="text-xs text-muted-foreground">{formatDate(curiosidade.created_at)}</span>
         </div>
         <h3 className="font-heading text-xl font-semibold mb-2 line-clamp-2 hover:text-primary transition-colors">
           {displayTitle}
@@ -69,9 +66,7 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
         <p className="text-sm text-muted-foreground mb-3">
           {t('curiosidade.byAuthor', 'Por:')} {curiosidade.author}
         </p>
-        <p className="text-muted-foreground mb-4 line-clamp-3">
-          {getPreview(displayBodyHtml)}
-        </p>
+        <p className="text-muted-foreground mb-4 line-clamp-3">{getPreview(displayBodyHtml)}</p>
         <Link
           to={`/curiosidades/${curiosidade.id}`}
           className="text-primary hover:underline font-medium text-sm inline-flex items-center"
@@ -82,4 +77,3 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
     </motion.div>
   );
 }
-

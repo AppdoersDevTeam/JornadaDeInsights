@@ -1,27 +1,36 @@
 import type { Curiosidade, CuriosidadeCategory } from '@/lib/supabase';
 import type { AppLocale } from '@/locales/messages';
 
+function pickText(
+  language: AppLocale,
+  pt: string | null | undefined,
+  en: string | null | undefined,
+): string {
+  const ptTrim = pt?.trim() || '';
+  const enTrim = en?.trim() || '';
+  if (language === 'en') {
+    return enTrim || ptTrim;
+  }
+  return ptTrim || enTrim;
+}
+
 export function categoryDisplayName(
   category: CuriosidadeCategory | null | undefined,
   language: AppLocale,
 ): string | null {
   if (!category) return null;
-  if (language === 'en' && category.name_en?.trim()) {
-    return category.name_en.trim();
+  const pt = category.name?.trim() || '';
+  const en = category.name_en?.trim() || '';
+  if (language === 'en') {
+    return en || pt || null;
   }
-  return category.name;
+  return pt || en || null;
 }
 
 export function curiosidadeDisplayTitle(curiosidade: Curiosidade, language: AppLocale): string {
-  if (language === 'en' && curiosidade.title_en?.trim()) {
-    return curiosidade.title_en.trim();
-  }
-  return curiosidade.title;
+  return pickText(language, curiosidade.title, curiosidade.title_en);
 }
 
 export function curiosidadeDisplayBody(curiosidade: Curiosidade, language: AppLocale): string {
-  if (language === 'en' && curiosidade.body_en?.trim()) {
-    return curiosidade.body_en.trim();
-  }
-  return curiosidade.body;
+  return pickText(language, curiosidade.body, curiosidade.body_en);
 }

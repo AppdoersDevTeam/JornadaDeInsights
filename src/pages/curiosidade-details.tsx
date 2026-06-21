@@ -125,8 +125,8 @@ export function CuriosidadeDetailsPage() {
           <article className="bg-card rounded-lg shadow-md border border-border/50 overflow-hidden">
             {curiosidade.cover_image && (
               <div className="w-full h-64 md:h-96 overflow-hidden">
-                <img 
-                  src={curiosidade.cover_image} 
+                <img
+                  src={curiosidade.cover_image}
                   alt={displayTitle}
                   className="w-full h-full object-cover"
                 />
@@ -144,25 +144,23 @@ export function CuriosidadeDetailsPage() {
                 </span>
               </div>
 
-              <h1 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-                {displayTitle}
-              </h1>
+              <h1 className="font-heading text-3xl md:text-4xl font-bold mb-4">{displayTitle}</h1>
 
               <p className="text-muted-foreground mb-8">
                 {t('curiosidade.byAuthor', 'Por:')}{' '}
                 <span className="font-medium">{curiosidade.author}</span>
               </p>
 
-            <div 
-              className="curiosidade-content text-muted-foreground overflow-wrap break-words"
-              dangerouslySetInnerHTML={{ __html: displayBodyHtml }}
-              style={{
-                lineHeight: '1.8',
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word',
-              }}
-            />
-            <style>{`
+              <div
+                className="curiosidade-content text-muted-foreground overflow-wrap break-words"
+                dangerouslySetInnerHTML={{ __html: displayBodyHtml }}
+                style={{
+                  lineHeight: '1.8',
+                  wordWrap: 'break-word',
+                  overflowWrap: 'break-word',
+                }}
+              />
+              <style>{`
               .curiosidade-content {
                 font-size: 1.125rem;
               }
@@ -202,4 +200,3 @@ export function CuriosidadeDetailsPage() {
     </div>
   );
 }
-

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
 import { useAuth } from '@/context/auth-context';
 import { useLanguage } from '@/context/language-context';
-import jornadaLogo from '@/Jornada logo.png';
+import { siteLogoAlt, siteLogoSrc } from '@/lib/site-logo';
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,7 +52,7 @@ export function Header() {
         {/* Left: Logo */}
         <div className="flex-shrink-0 flex items-center min-w-0">
           <Link to="/" className="flex items-center">
-            <img src={jornadaLogo} alt="Jornada de Insights" className="h-8 sm:h-10 lg:h-12 w-auto" />
+            <img src={siteLogoSrc(language, 'header')} alt={siteLogoAlt(language)} className="h-8 sm:h-10 lg:h-12 w-auto" />
           </Link>
         </div>
         {/* Center: Nav Links */}

@@ -71,7 +71,7 @@ export function HomePage() {
     // Fetch featured ebooks
     const fetchEbooks = async () => {
       try {
-        const ebooks = await getEbooks();
+        const ebooks = await getEbooks({ locale: language });
         setFeaturedEbooks(ebooks);
       } catch (error) {
         console.error('Error fetching ebooks:', error);
@@ -94,7 +94,7 @@ export function HomePage() {
 
     fetchEbooks();
     fetchCuriosidades();
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     setIsLoading(true);

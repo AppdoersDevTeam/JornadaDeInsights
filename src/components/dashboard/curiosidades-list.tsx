@@ -28,6 +28,14 @@ import {
 import { Edit, Trash2, Plus, FileText, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/context/language-context';
+import { curiosidadeDisplayBody, curiosidadeDisplayTitle, categoryDisplayName } from '@/lib/curiosidade-locale';
+
+function stripHtmlPreview(html: string, maxLen: number): string {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  const text = (d.textContent || d.innerText || '').replace(/\s+/g, ' ').trim();
+  return text.length > maxLen ? `${text.slice(0, maxLen)}…` : text;
+}
 
 export default function CuriosidadesList() {
   const { t, language } = useLanguage();
@@ -219,7 +227,7 @@ export default function CuriosidadesList() {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-semibold">{curiosidade.title}</h3>
+                      <h3 className="text-lg font-semibold">{curiosidadeDisplayTitle(curiosidade, language)}</h3>
                       <Badge variant="secondary">{t('admin.curiosidades.status.draft', 'Draft')}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-2 mb-2">
@@ -228,21 +236,17 @@ export default function CuriosidadesList() {
                       </span>
                       {curiosidade.category && (
                         <span className="text-sm text-muted-foreground">
-                          • {t('admin.curiosidades.category', 'Category')}: {curiosidade.category.name}
+                          • {t('admin.curiosidades.category', 'Category')}:{' '}
+                          {categoryDisplayName(curiosidade.category, language) ?? curiosidade.category.name}
                         </span>
                       )}
                       <span className="text-sm text-muted-foreground">
                         • {formatDate(curiosidade.created_at)}
                       </span>
                     </div>
-                    <div 
-                      className="text-sm text-muted-foreground line-clamp-3"
-                      dangerouslySetInnerHTML={{ 
-                        __html: curiosidade.body.length > 200 
-                          ? curiosidade.body.substring(0, 200) + '...' 
-                          : curiosidade.body 
-                      }}
-                    />
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {stripHtmlPreview(curiosidadeDisplayBody(curiosidade, language), 220)}
+                    </p>
                   </div>
                   <div className="flex gap-2 ml-4">
                     <Button
@@ -284,7 +288,7 @@ export default function CuriosidadesList() {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-semibold">{curiosidade.title}</h3>
+                      <h3 className="text-lg font-semibold">{curiosidadeDisplayTitle(curiosidade, language)}</h3>
                       <Badge variant="default">{t('admin.curiosidades.status.published', 'Published')}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-2 mb-2">
@@ -293,21 +297,17 @@ export default function CuriosidadesList() {
                       </span>
                       {curiosidade.category && (
                         <span className="text-sm text-muted-foreground">
-                          • {t('admin.curiosidades.category', 'Category')}: {curiosidade.category.name}
+                          • {t('admin.curiosidades.category', 'Category')}:{' '}
+                          {categoryDisplayName(curiosidade.category, language) ?? curiosidade.category.name}
                         </span>
                       )}
                       <span className="text-sm text-muted-foreground">
                         • {formatDate(curiosidade.created_at)}
                       </span>
                     </div>
-                    <div 
-                      className="text-sm text-muted-foreground line-clamp-3"
-                      dangerouslySetInnerHTML={{ 
-                        __html: curiosidade.body.length > 200 
-                          ? curiosidade.body.substring(0, 200) + '...' 
-                          : curiosidade.body 
-                      }}
-                    />
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {stripHtmlPreview(curiosidadeDisplayBody(curiosidade, language), 220)}
+                    </p>
                   </div>
                   <div className="flex gap-2 ml-4">
                     <Button

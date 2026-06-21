@@ -59,17 +59,23 @@ export function CuriosidadeEditorPage() {
     }
   };
 
+  const htmlToPlain = (html: string) => {
+    const d = document.createElement('div');
+    d.innerHTML = html || '';
+    return (d.textContent || d.innerText || '').trim();
+  };
+
   const loadCuriosidade = async () => {
     if (!id) return;
     
     try {
       setLoading(true);
       const data = await getCuriosidadeById(id, true); // Include drafts
-      setTitle(data.title);
+      setTitle(data.title ?? '');
       setTitleEn(data.title_en ?? '');
       setAuthor(data.author);
       setCategoryId(data.category_id || '__none__');
-      setBody(data.body);
+      setBody(data.body ?? '');
       setBodyEn(data.body_en ?? '');
       setStatus(data.status || 'draft');
       setAttachments(data.attachments || []);
@@ -84,18 +90,25 @@ export function CuriosidadeEditorPage() {
   };
 
   const handleSave = async (publish: boolean = false) => {
-    if (!title.trim()) {
-      toast.error('Título é obrigatório');
-      return;
-    }
-
     if (!author.trim()) {
-      toast.error('Autor é obrigatório');
+      toast.error(t('admin.curiosidades.authorRequired', 'Author is required'));
       return;
     }
 
-    if (!body.trim()) {
-      toast.error('Conteúdo é obrigatório');
+    const ptTitle = title.trim();
+    const ptBodyText = htmlToPlain(body);
+    const enTitle = titleEn.trim();
+    const enBodyText = htmlToPlain(bodyEn);
+    const ptComplete = Boolean(ptTitle && ptBodyText);
+    const enComplete = Boolean(enTitle && enBodyText);
+
+    if (!ptComplete && !enComplete) {
+      toast.error(
+        t(
+          'admin.curiosidades.needOneLocale',
+          'Add a full Portuguese title and body, or a full English title and body (or both).',
+        ),
+      );
       return;
     }
 
@@ -105,32 +118,37 @@ export function CuriosidadeEditorPage() {
 
       // Convert __none__ to null for database
       const finalCategoryId = categoryId === '__none__' ? null : categoryId;
+
+      const titlePt = ptComplete ? ptTitle : null;
+      const bodyPt = ptComplete ? body.trim() : null;
+      const titleEnDb = enComplete ? enTitle : null;
+      const bodyEnDb = enComplete ? bodyEn.trim() : null;
       
       if (id) {
         await updateCuriosidade(
           id,
-          title.trim(),
+          titlePt,
           author.trim(),
           finalCategoryId,
-          body.trim(),
+          bodyPt,
           newStatus,
           attachments,
           coverImage,
-          titleEn.trim() || null,
-          bodyEn.trim() || null
+          titleEnDb,
+          bodyEnDb
         );
         toast.success(publish ? 'Curiosidade publicada com sucesso!' : 'Rascunho salvo com sucesso!');
       } else {
         const newCuriosidade = await createCuriosidade(
-          title.trim(),
+          titlePt,
           author.trim(),
           finalCategoryId,
-          body.trim(),
+          bodyPt,
           newStatus,
           attachments,
           coverImage,
-          titleEn.trim() || null,
-          bodyEn.trim() || null
+          titleEnDb,
+          bodyEnDb
         );
         toast.success(publish ? 'Curiosidade publicada com sucesso!' : 'Rascunho salvo com sucesso!');
         navigate(`/dashboard/curiosidades/${newCuriosidade.id}`);
@@ -272,26 +290,72 @@ export function CuriosidadeEditorPage() {
       <div className="space-y-6">
         <Card>
           <CardContent className="p-6 space-y-4">
-            <div>
-              <Label htmlFor="title">Título *</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Digite o título da curiosidade"
-                className="mt-1"
-              />
+            <p className="text-sm text-muted-foreground">
+              {t(
+                'admin.curiosidades.bilingualEditorHint',
+                'Fill Portuguese, English, or both. Visitors see the version that matches the site language, with fallback to the other language if needed.',
+              )}
+            </p>
+            <div className="rounded-md border border-border bg-muted/30 px-4 py-3">
+              <h2 className="text-sm font-semibold mb-3">
+                {t('admin.curiosidades.sectionPt', 'Portuguese (Brazil)')}
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="title">{t('admin.curiosidades.titlePt', 'Title (Portuguese)')}</Label>
+                  <Input
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder={t('admin.curiosidades.titlePtPlaceholder', 'Portuguese title')}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="body">{t('admin.curiosidades.bodyPt', 'Content (Portuguese)')}</Label>
+                  <div className="mt-2">
+                    <ReactQuill
+                      theme="snow"
+                      value={body}
+                      onChange={setBody}
+                      modules={quillModules}
+                      placeholder={t('admin.curiosidades.bodyPtPlaceholder', 'Portuguese article…')}
+                      style={{ minHeight: '280px' }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <Label htmlFor="titleEn">{t('admin.curiosidades.titleEnOptional', 'English title (optional)')}</Label>
-              <Input
-                id="titleEn"
-                value={titleEn}
-                onChange={(e) => setTitleEn(e.target.value)}
-                placeholder="English title (optional)"
-                className="mt-1"
-              />
+            <div className="rounded-md border border-border bg-muted/30 px-4 py-3">
+              <h2 className="text-sm font-semibold mb-3">
+                {t('admin.curiosidades.sectionEn', 'English')}
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="titleEn">{t('admin.curiosidades.titleEn', 'Title (English)')}</Label>
+                  <Input
+                    id="titleEn"
+                    value={titleEn}
+                    onChange={(e) => setTitleEn(e.target.value)}
+                    placeholder={t('admin.curiosidades.titleEnPlaceholder', 'English title')}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="bodyEn">{t('admin.curiosidades.bodyEn', 'Content (English)')}</Label>
+                  <div className="mt-2">
+                    <ReactQuill
+                      theme="snow"
+                      value={bodyEn}
+                      onChange={setBodyEn}
+                      modules={quillModules}
+                      placeholder={t('admin.curiosidades.bodyEnPlaceholder', 'English article…')}
+                      style={{ minHeight: '280px' }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -306,16 +370,16 @@ export function CuriosidadeEditorPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="category">Categoria (opcional)</Label>
+                <Label htmlFor="category">{t('admin.curiosidades.categorySelect', 'Category (optional)')}</Label>
                 <Select value={categoryId} onValueChange={setCategoryId}>
                   <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Selecione uma categoria" />
+                    <SelectValue placeholder={t('admin.curiosidades.categoryPlaceholder', 'Select a category')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__">Nenhuma categoria</SelectItem>
+                    <SelectItem value="__none__">{t('admin.curiosidades.categoryNone', 'No category')}</SelectItem>
                     {categories.map((cat) => (
                       <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
+                        {cat.name_en?.trim() ? `${cat.name} — ${cat.name_en}` : cat.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -382,38 +446,6 @@ export function CuriosidadeEditorPage() {
                   </div>
                 )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <Label htmlFor="body">Conteúdo *</Label>
-            <div className="mt-2">
-              <ReactQuill
-                theme="snow"
-                value={body}
-                onChange={setBody}
-                modules={quillModules}
-                placeholder="Digite o conteúdo da curiosidade..."
-                style={{ minHeight: '400px' }}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <Label htmlFor="bodyEn">{t('admin.curiosidades.bodyEnOptional', 'English content (optional)')}</Label>
-            <div className="mt-2">
-              <ReactQuill
-                theme="snow"
-                value={bodyEn}
-                onChange={setBodyEn}
-                modules={quillModules}
-                placeholder="English article body (optional)..."
-                style={{ minHeight: '320px' }}
-              />
             </div>
           </CardContent>
         </Card>

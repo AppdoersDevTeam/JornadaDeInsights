@@ -2,11 +2,11 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Youtube, Instagram, ChevronDown, ChevronUp, Facebook } from 'lucide-react';
 import { FaSpotify } from 'react-icons/fa';
-import jornadaLogo from '@/Jornada logo footer.png';
 import { useLanguage } from '@/context/language-context';
+import { siteLogoAlt, siteLogoSrc } from '@/lib/site-logo';
 
 export function Footer() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [quickOpen, setQuickOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const currentYear = new Date().getFullYear();
@@ -26,7 +26,7 @@ export function Footer() {
             {/* Brand Column */}
             <div className="flex flex-col items-center text-center">
               <Link to="/" className="mb-4">
-                <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
+                <img src={siteLogoSrc(language, 'footer')} alt={siteLogoAlt(language)} className="h-16 w-auto" />
               </Link>
               <p className="text-muted-foreground mb-6 text-base">{t('footer.tagline', '')}</p>
               <div className="flex space-x-4">
@@ -118,7 +118,7 @@ export function Footer() {
             {/* Brand Column */}
             <div className="md:col-span-1 flex flex-col items-center text-center md:items-start md:text-left">
               <Link to="/" className="mb-4">
-                <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
+                <img src={siteLogoSrc(language, 'footer')} alt={siteLogoAlt(language)} className="h-16 w-auto" />
               </Link>
               <p className="text-muted-foreground mb-6 text-base">{t('footer.tagline', '')}</p>
               <div className="flex space-x-4">

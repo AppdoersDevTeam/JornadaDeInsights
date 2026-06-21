@@ -24,7 +24,7 @@ export function EbookDetailsPage() {
         setIsLoading(true);
         if (!id) throw new Error(t('ebook.loadError', 'Could not load this eBook. Please try again later.'));
         
-        const data = await getEbookById(id);
+        const data = await getEbookById(id, { locale: language });
         setEbook(data);
       } catch (err) {
         setError(t('ebook.loadError', 'Could not load this eBook. Please try again later.'));
@@ -35,7 +35,7 @@ export function EbookDetailsPage() {
     };
 
     fetchEbook();
-  }, [id]);
+  }, [id, language, t]);
 
   if (isLoading) {
     return (

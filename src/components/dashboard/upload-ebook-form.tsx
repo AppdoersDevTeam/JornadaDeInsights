@@ -3,6 +3,8 @@ import { toast } from 'react-hot-toast';
 import { supabase, getCategories, createCategory, type Category } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
+import type { EbookContentLocale } from '@/lib/ebook-locale';
+import { useLanguage } from '@/context/language-context';
 import {
   Dialog,
   DialogContent,
@@ -22,9 +24,11 @@ interface UploadEbookFormProps {
 
 export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProps) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [contentLocale, setContentLocale] = useState<EbookContentLocale>('pt-BR');
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -130,7 +134,8 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
           title: title,
           description: description,
           price: parseFloat(price),
-          category_id: selectedCategoryId || null
+          category_id: selectedCategoryId || null,
+          content_locale: contentLocale,
         });
 
       if (metadataError) throw metadataError;
@@ -154,6 +159,7 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
     setPdfFile(null);
     setError('');
     setSelectedCategoryId('');
+    setContentLocale('pt-BR');
 
     // Clear file input elements
     const coverInput = document.getElementById('coverImage') as HTMLInputElement;
@@ -209,6 +215,22 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
           disabled={!isAuthenticated || isUploading}
         />
+      </div>
+
+      <div>
+        <label htmlFor="contentLocale" className="block text-sm font-medium text-gray-700">
+          {t('admin.ebooks.contentLocale', 'Content language')}
+        </label>
+        <select
+          id="contentLocale"
+          value={contentLocale}
+          onChange={(e) => setContentLocale(e.target.value as EbookContentLocale)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+          disabled={!isAuthenticated || isUploading}
+        >
+          <option value="pt-BR">{t('admin.ebooks.contentLocale.pt', 'Portuguese')}</option>
+          <option value="en">{t('admin.ebooks.contentLocale.en', 'English')}</option>
+        </select>
       </div>
 
       <div>

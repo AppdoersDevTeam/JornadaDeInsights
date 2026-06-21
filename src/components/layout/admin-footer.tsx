@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
-import jornadaLogo from '@/Jornada logo footer.png';
 import { useLanguage } from '@/context/language-context';
+import { siteLogoAlt, siteLogoSrc } from '@/lib/site-logo';
 
 export function AdminFooter() {
   const currentYear = new Date().getFullYear();
   const [open, setOpen] = useState<string | null>(null);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const toggle = (section: string) => setOpen(open === section ? null : section);
 
@@ -25,7 +25,7 @@ export function AdminFooter() {
           {/* Brand Section */}
           <div className="flex flex-col items-center text-center">
             <Link to="/" className="mb-4">
-              <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
+              <img src={siteLogoSrc(language, 'footer')} alt={siteLogoAlt(language)} className="h-16 w-auto" />
             </Link>
           </div>
           {/* Quick Links Accordion */}
@@ -96,7 +96,7 @@ export function AdminFooter() {
           {/* Brand Section */}
           <div className="flex flex-col">
             <Link to="/" className="mb-4">
-              <img src={jornadaLogo} alt="Jornada de Insights" className="h-16 w-auto" />
+              <img src={siteLogoSrc(language, 'footer')} alt={siteLogoAlt(language)} className="h-16 w-auto" />
             </Link>
           </div>
           {/* Quick Links */}

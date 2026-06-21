@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from '@/context/language-context';
+import type { EbookContentLocale } from '@/lib/ebook-locale';
 
 interface EbookMetadata {
   title: string;
@@ -21,6 +22,7 @@ interface EbookMetadata {
   price: number;
   filename: string;
   category_id?: string | null;
+  content_locale?: EbookContentLocale;
   category?: {
     id: string;
     name: string;
@@ -156,6 +158,7 @@ export default function EbookList() {
               price: ebookMetadata.price,
               filename: ebookMetadata.filename,
               category_id: ebookMetadata.category_id || null,
+              content_locale: (ebookMetadata.content_locale as EbookContentLocale | undefined) ?? 'pt-BR',
               category: category
             }
           };
@@ -347,11 +350,18 @@ export default function EbookList() {
               />
             </div>
             <div className="p-4 flex flex-col flex-1">
-              {ebook.metadata.category && (
-                <Badge variant="secondary" className="w-fit mb-2">
-                  {ebook.metadata.category.name}
+              <div className="flex flex-wrap gap-2 mb-2">
+                {ebook.metadata.category && (
+                  <Badge variant="secondary" className="w-fit">
+                    {ebook.metadata.category.name}
+                  </Badge>
+                )}
+                <Badge variant="outline" className="w-fit">
+                  {ebook.metadata.content_locale === 'en'
+                    ? t('admin.ebooks.contentLocale.en', 'English')
+                    : t('admin.ebooks.contentLocale.pt', 'Portuguese')}
                 </Badge>
-              )}
+              </div>
               <h3 className="text-lg font-semibold truncate mb-1" title={ebook.metadata.title}>
                 {ebook.metadata.title}
               </h3>
