@@ -24,22 +24,20 @@ export default async function handler(req, res) {
     const days = Number.isFinite(daysRaw) ? Math.min(90, Math.max(7, daysRaw)) : 30;
     const sinceIso = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
-    const [{ count: visitsCount, error: visitsError }, { data: lifecycleRows, error: lifecycleError }] = await Promise.all([
-      admin.supabaseAdmin
-        .from('site_page_views')
-        .select('id', { count: 'exact', head: true })
-        .gte('created_at', sinceIso),
-      admin.supabaseAdmin
-        .from('lifecycle_events')
-        .select('event_name')
-        .gte('created_at', sinceIso),
-    ]);
+    const [{ data: analyticsSummary, error: visitsError }, { data: lifecycleRows, error: lifecycleError }] =
+      await Promise.all([
+        admin.supabaseAdmin.rpc('get_site_analytics_summary', { window_days: days }),
+        admin.supabaseAdmin
+          .from('lifecycle_events')
+          .select('event_name')
+          .gte('created_at', sinceIso),
+      ]);
 
     if (visitsError) throw visitsError;
     if (lifecycleError) throw lifecycleError;
 
     const totals = {
-      visits: visitsCount || 0,
+      visits: Number(analyticsSummary?.totalPageViews) || 0,
       leads: 0,
       checkoutStarted: 0,
       purchaseCompleted: 0,
