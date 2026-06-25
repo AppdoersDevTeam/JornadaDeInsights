@@ -1305,7 +1305,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                         {siteAnalytics.topCountries.map((item) => (
                           <div key={item.country} className="space-y-1">
                             <div className="flex justify-between text-sm">
-                              <span>{formatCountryName(item.country)}</span>
+                              <span>{formatCountryName(item.country, language)}</span>
                               <span>{item.views}</span>
                             </div>
                             <Progress
