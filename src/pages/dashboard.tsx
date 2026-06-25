@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase, getSupabaseAccessToken } from '@/lib/supabase';
 import {
   BarChart3,
@@ -26,6 +26,7 @@ import { getCategories, createCategory, updateCategory, deleteCategory, type Cat
 import { SalesTrendsChart, SalesData } from '@/components/dashboard/sales-trends-chart';
 import { StripeBalanceChart, BalanceData } from '@/components/dashboard/stripe-balance-chart';
 import { SiteTrafficDailyChart } from '@/components/dashboard/site-traffic-daily-chart';
+import { formatCountryName, isLocalhostTraffic } from '@/lib/analytics-display';
 import { useLanguage } from '@/context/language-context';
 import {
   Dialog,
@@ -1303,7 +1304,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                         {siteAnalytics.topCountries.map((item) => (
                           <div key={item.country} className="space-y-1">
                             <div className="flex justify-between text-sm">
-                              <span>{item.country}</span>
+                              <span>{formatCountryName(item.country)}</span>
                               <span>{item.views}</span>
                             </div>
                             <Progress
@@ -1321,9 +1322,17 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                           <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
                         )}
                         {siteAnalytics.topPages.map((item) => (
-                          <div key={item.page} className="flex justify-between text-sm border-b pb-1">
-                            <span className="truncate max-w-[75%]">{item.page}</span>
-                            <span>{item.views}</span>
+                          <div key={item.page} className="flex justify-between text-sm border-b pb-1 gap-2">
+                            <Link
+                              to={item.page}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="truncate max-w-[75%] text-primary hover:underline"
+                              title={item.page}
+                            >
+                              {item.page}
+                            </Link>
+                            <span className="shrink-0">{item.views}</span>
                           </div>
                         ))}
                       </div>
@@ -1337,7 +1346,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                         {siteAnalytics.topReferrers.length === 0 && (
                           <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
                         )}
-                        {siteAnalytics.topReferrers.map((item) => (
+                        {siteAnalytics.topReferrers
+                          .filter((item) => !isLocalhostTraffic(item.referrer))
+                          .map((item) => (
                           <div key={item.referrer} className="space-y-1">
                             <div className="flex justify-between text-sm gap-2">
                               <span className="truncate max-w-[75%]" title={item.referrer}>

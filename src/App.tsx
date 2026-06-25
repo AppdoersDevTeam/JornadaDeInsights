@@ -151,8 +151,10 @@ function AppRoutes() {
     const shouldSkipPath = ['/dashboard', '/user-dashboard'].some((prefix) =>
       location.pathname.startsWith(prefix)
     );
+    const isLocalhost =
+      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-    if (shouldSkipPath || lastTrackedPathRef.current === path) {
+    if (shouldSkipPath || isLocalhost || lastTrackedPathRef.current === path) {
       return;
     }
 

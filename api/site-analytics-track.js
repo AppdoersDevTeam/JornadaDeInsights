@@ -65,6 +65,16 @@ const isRateLimited = (identifier) => {
   return false;
 };
 
+const isLocalhostRequest = (req, pageUrl) => {
+  const candidates = [
+    req.headers.origin,
+    req.headers.referer,
+    req.headers.host,
+    pageUrl,
+  ];
+  return candidates.some((value) => isValidString(value) && /localhost|127\.0\.0\.1/i.test(value));
+};
+
 const isDuplicateEvent = (fingerprint) => {
   const now = Date.now();
   const duplicateWindowMs = 10_000;
@@ -121,6 +131,13 @@ export default async function handler(req, res) {
   }
 
   const { pagePath, pageUrl, referrer, visitorId, sessionId, tzOffsetMinutes } = req.body || {};
+
+  if (isLocalhostRequest(req, pageUrl) || isLocalhostRequest(req, referrer)) {
+    logger.info('site_analytics_track_localhost_filtered', requestMeta);
+    res.status(204).end();
+    return;
+  }
+
   const normalizedPath = normalizePath(pagePath);
   const normalizedVisitorId = normalizeId(visitorId);
   const normalizedSessionId = normalizeId(sessionId);
