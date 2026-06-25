@@ -340,7 +340,7 @@ export default function CuriosidadesList() {
           <div>
             <h2 className="text-xl font-semibold flex items-center gap-2">
               <Tag className="h-5 w-5" />
-              Gerenciamento de Categorias
+              {t('admin.curiosidades.categories.title', 'Category management')}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">{t('admin.curiosidades.categories.subtitle', 'Manage categories to organize your posts')}</p>
           </div>

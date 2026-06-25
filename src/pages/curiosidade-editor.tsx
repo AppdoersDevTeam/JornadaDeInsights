@@ -82,7 +82,7 @@ export function CuriosidadeEditorPage() {
       setCoverImage(data.cover_image || null);
     } catch (error) {
       console.error('Error loading curiosidade:', error);
-      toast.error('Erro ao carregar curiosidade');
+      toast.error(t('admin.curiosidades.loadError', 'Could not load post'));
       navigate('/dashboard?tab=curiosidades');
     } finally {
       setLoading(false);
@@ -137,7 +137,7 @@ export function CuriosidadeEditorPage() {
           titleEnDb,
           bodyEnDb
         );
-        toast.success(publish ? 'Curiosidade publicada com sucesso!' : 'Rascunho salvo com sucesso!');
+        toast.success(publish ? t('admin.curiosidades.publishSuccess', 'Post published successfully!') : t('admin.curiosidades.draftSaved', 'Draft saved successfully!'));
       } else {
         const newCuriosidade = await createCuriosidade(
           titlePt,
@@ -150,12 +150,12 @@ export function CuriosidadeEditorPage() {
           titleEnDb,
           bodyEnDb
         );
-        toast.success(publish ? 'Curiosidade publicada com sucesso!' : 'Rascunho salvo com sucesso!');
+        toast.success(publish ? t('admin.curiosidades.publishSuccess', 'Post published successfully!') : t('admin.curiosidades.draftSaved', 'Draft saved successfully!'));
         navigate(`/dashboard/curiosidades/${newCuriosidade.id}`);
       }
     } catch (error) {
       console.error('Error saving curiosidade:', error);
-      toast.error('Erro ao salvar curiosidade');
+      toast.error(t('admin.curiosidades.saveError', 'Could not save post'));
     } finally {
       setSaving(false);
     }
@@ -173,14 +173,14 @@ export function CuriosidadeEditorPage() {
           return await uploadAttachment(file, id);
         } else {
           // For new curiosidades, we'll need to save first or use a temp approach
-          toast.error('Salve o rascunho primeiro antes de adicionar anexos');
+          toast.error(t('admin.curiosidades.editor.saveDraftFirstAttachments', 'Save a draft first before adding attachments'));
           throw new Error('Save draft first');
         }
       });
 
       const urls = await Promise.all(uploadPromises);
       setAttachments([...attachments, ...urls]);
-      toast.success('Anexos adicionados com sucesso!');
+      toast.success(t('admin.curiosidades.editor.attachmentsUploaded', 'Attachments added successfully!'));
       
       // Reset file input
       if (fileInputRef.current) {
@@ -189,7 +189,7 @@ export function CuriosidadeEditorPage() {
     } catch (error) {
       console.error('Error uploading files:', error);
       if (!error.message.includes('Save draft first')) {
-        toast.error('Erro ao fazer upload dos anexos');
+        toast.error(t('admin.curiosidades.editor.uploadAttachmentsFail', 'Could not upload attachments'));
       }
     } finally {
       setUploading(false);
@@ -206,13 +206,13 @@ export function CuriosidadeEditorPage() {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast.error('Por favor, selecione um arquivo de imagem');
+      toast.error(t('admin.curiosidades.editor.imageFileRequired', 'Please select an image file'));
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('A imagem deve ter no máximo 5MB');
+      toast.error(t('admin.curiosidades.editor.coverImageMaxSize', 'Image must be 5MB or smaller'));
       return;
     }
 
@@ -223,9 +223,9 @@ export function CuriosidadeEditorPage() {
       if (id) {
         const url = await uploadCoverImage(file, id);
         setCoverImage(url);
-        toast.success('Imagem de capa adicionada com sucesso!');
+        toast.success(t('admin.curiosidades.editor.coverImageAdded', 'Cover image added successfully!'));
       } else {
-        toast.error('Salve o rascunho primeiro antes de adicionar uma imagem de capa');
+        toast.error(t('admin.curiosidades.editor.saveDraftFirstCover', 'Save a draft first before adding a cover image'));
       }
       
       // Reset file input
@@ -235,7 +235,7 @@ export function CuriosidadeEditorPage() {
     } catch (error) {
       console.error('Error uploading cover image:', error);
       if (!error.message?.includes('Save draft first')) {
-        toast.error('Erro ao fazer upload da imagem de capa');
+        toast.error(t('admin.curiosidades.editor.uploadCoverFail', 'Could not upload cover image'));
       }
     } finally {
       setUploadingCover(false);
@@ -274,15 +274,15 @@ export function CuriosidadeEditorPage() {
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => navigate('/dashboard?tab=curiosidades')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
+            {t('curiosidade.back', 'Back')}
           </Button>
           <h1 className="text-2xl font-bold">
-            {id ? 'Editar Curiosidade' : 'Nova Curiosidade'}
+            {id ? t('admin.curiosidades.editor.editTitle', 'Edit post') : t('admin.curiosidades.editor.newTitle', 'New post')}
           </h1>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant={status === 'published' ? 'default' : 'secondary'}>
-            {status === 'published' ? 'Publicado' : 'Rascunho'}
+            {status === 'published' ? t('admin.curiosidades.status.published', 'Published') : t('admin.curiosidades.status.draft', 'Draft')}
           </Badge>
         </div>
       </div>
@@ -360,12 +360,12 @@ export function CuriosidadeEditorPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="author">Autor *</Label>
+                <Label htmlFor="author">{t('admin.curiosidades.authorLabel', 'Author')} *</Label>
                 <Input
                   id="author"
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
-                  placeholder="Nome do autor"
+                  placeholder={t('admin.curiosidades.authorPlaceholder', 'Author name')}
                   className="mt-1"
                 />
               </div>
@@ -392,7 +392,7 @@ export function CuriosidadeEditorPage() {
         <Card>
           <CardContent className="p-6 space-y-4">
             <div>
-              <Label>Imagem de Capa</Label>
+              <Label>{t('admin.curiosidades.editor.coverImage', 'Cover image')}</Label>
               <div className="mt-2 space-y-4">
                 {coverImage ? (
                   <div className="relative">
@@ -409,7 +409,7 @@ export function CuriosidadeEditorPage() {
                       onClick={removeCoverImage}
                     >
                       <X className="h-4 w-4 mr-2" />
-                      Remover
+                      {t('admin.curiosidades.editor.remove', 'Remove')}
                     </Button>
                   </div>
                 ) : (
@@ -428,7 +428,7 @@ export function CuriosidadeEditorPage() {
                       variant="outline"
                       onClick={() => {
                         if (!id) {
-                          toast.error('Salve o rascunho primeiro antes de adicionar uma imagem de capa');
+                          toast.error(t('admin.curiosidades.editor.saveDraftFirstCover', 'Save a draft first before adding a cover image'));
                           return;
                         }
                         coverImageInputRef.current?.click();
@@ -436,11 +436,11 @@ export function CuriosidadeEditorPage() {
                       disabled={!id || uploadingCover}
                     >
                       <ImageIcon className="h-4 w-4 mr-2" />
-                      {uploadingCover ? 'Enviando...' : 'Adicionar Imagem de Capa'}
+                      {uploadingCover ? t('admin.curiosidades.editor.uploading', 'Uploading...') : t('admin.curiosidades.editor.addCoverImage', 'Add cover image')}
                     </Button>
                     {!id && (
                       <p className="text-xs text-muted-foreground mt-2">
-                        Salve o rascunho primeiro para adicionar uma imagem de capa
+                        {t('admin.curiosidades.editor.saveDraftFirstHintCover', 'Save a draft first to add a cover image')}
                       </p>
                     )}
                   </div>
@@ -453,7 +453,7 @@ export function CuriosidadeEditorPage() {
         <Card>
           <CardContent className="p-6 space-y-4">
             <div>
-              <Label>Anexos</Label>
+              <Label>{t('admin.curiosidades.editor.attachments', 'Attachments')}</Label>
               <div className="mt-2">
                 <input
                   ref={fileInputRef}
@@ -469,7 +469,7 @@ export function CuriosidadeEditorPage() {
                   variant="outline"
                   onClick={() => {
                     if (!id) {
-                      toast.error('Salve o rascunho primeiro antes de adicionar anexos');
+                      toast.error(t('admin.curiosidades.editor.saveDraftFirstAttachments', 'Save a draft first before adding attachments'));
                       return;
                     }
                     fileInputRef.current?.click();
@@ -477,11 +477,11 @@ export function CuriosidadeEditorPage() {
                   disabled={!id || uploading}
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  {uploading ? 'Enviando...' : 'Adicionar Anexos'}
+                  {uploading ? t('admin.curiosidades.editor.uploading', 'Uploading...') : t('admin.curiosidades.editor.addAttachments', 'Add attachments')}
                 </Button>
                 {!id && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Salve o rascunho primeiro para adicionar anexos
+                    {t('admin.curiosidades.editor.saveDraftFirstHintAttachments', 'Save a draft first to add attachments')}
                   </p>
                 )}
               </div>
@@ -489,7 +489,7 @@ export function CuriosidadeEditorPage() {
 
             {attachments.length > 0 && (
               <div className="space-y-2">
-                <Label>Anexos Adicionados</Label>
+                <Label>{t('admin.curiosidades.editor.attachmentsAdded', 'Added attachments')}</Label>
                 <div className="space-y-2">
                   {attachments.map((url, index) => (
                     <div key={index} className="flex items-center justify-between p-2 border rounded">
@@ -527,14 +527,14 @@ export function CuriosidadeEditorPage() {
             disabled={saving}
           >
             <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Salvando...' : 'Salvar Rascunho'}
+            {saving ? t('admin.curiosidades.editor.saving', 'Saving...') : t('admin.curiosidades.editor.saveDraft', 'Save draft')}
           </Button>
           <Button
             onClick={() => handleSave(true)}
             disabled={saving}
           >
             <Eye className="h-4 w-4 mr-2" />
-            {saving ? 'Publicando...' : 'Publicar'}
+            {saving ? t('admin.curiosidades.editor.publishing', 'Publishing...') : t('admin.curiosidades.editor.publish', 'Publish')}
           </Button>
         </div>
       </div>

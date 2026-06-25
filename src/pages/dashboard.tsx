@@ -158,6 +158,7 @@ const ALLOWED_ADMIN_EMAILS = [
 
 export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   const { t, language } = useLanguage();
+  const numberLocale = language === 'en' ? 'en' : 'pt-BR';
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   // All state declarations first
@@ -666,14 +667,14 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         });
       } catch (error) {
         console.error('Error fetching site analytics:', error);
-        setSiteAnalyticsError('Nao foi possivel carregar os dados de trafego.');
+        setSiteAnalyticsError(t('admin.analytics.trafficLoadFail', 'Could not load traffic data.'));
       } finally {
         setSiteAnalyticsLoading(false);
       }
     };
 
     fetchSiteAnalytics();
-  }, [activeTab, SERVER_URL]);
+  }, [activeTab, SERVER_URL, t]);
 
   useEffect(() => {
     if (activeTab !== 'analytics') return;
@@ -1065,7 +1066,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             {/* Produtos Mais Vendidos (2/3 width on lg) */}
             <Card className="col-span-1 lg:col-span-2">
               <CardHeader>
-                <CardTitle>Produtos Mais Vendidos</CardTitle>
+                <CardTitle>{t('admin.topProducts.title', 'Top products')}</CardTitle>
                 <CardDescription>{t('admin.topProducts.desc', 'Top selling products this month')}</CardDescription>
               </CardHeader>
               <CardContent>
@@ -1088,7 +1089,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                         <div>
                           <p className="font-medium">{product.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {product.sales} vendas
+                            {t('admin.topProducts.sales', '{count} sales').replace('{count}', String(product.sales))}
                           </p>
                         </div>
                       </div>
@@ -1098,7 +1099,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full" onClick={() => onTabChange('analytics')}>
-                  Ver Todos os Produtos
+                  {t('admin.topProducts.viewAll', 'View all products')}
                 </Button>
               </CardFooter>
             </Card>
@@ -1132,7 +1133,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Enviar Novo eBook</CardTitle>
+              <CardTitle>{t('admin.ebooks.uploadTitle', 'Upload new eBook')}</CardTitle>
               <CardDescription>{t('admin.ebooks.uploadDesc', 'Add a new eBook to the store')}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -1147,7 +1148,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-xl font-semibold">{t('admin.categories.title', 'Category management')}</h2>
-                <p className="text-sm text-muted-foreground mt-1">Gerencie categorias para organizar seus eBooks</p>
+                <p className="text-sm text-muted-foreground mt-1">{t('admin.categories.subtitle', 'Manage categories to organize your eBooks')}</p>
               </div>
               <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
                 <DialogTrigger asChild>
@@ -1173,7 +1174,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                         id="categoryName"
                         value={categoryName}
                         onChange={(e) => setCategoryName(e.target.value)}
-                        placeholder="Ex: Autoajuda, Produtividade..."
+                        placeholder={t('admin.categories.namePlaceholder', 'e.g. Kids, Bible study...')}
                       />
                     </div>
                     <div>
@@ -1192,7 +1193,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       {t('common.cancel', 'Cancel')}
                     </Button>
                     <Button onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}>
-                      {editingCategory ? 'Atualizar' : 'Criar'}
+                      {editingCategory ? t('admin.categories.update', 'Update') : t('admin.categories.create', 'Create')}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -1201,7 +1202,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <div className="space-y-4">
               {categories.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">Nenhuma categoria criada ainda.</p>
+                  <p className="text-lg text-muted-foreground">{t('admin.categories.empty', 'No categories created yet.')}</p>
                   <p className="text-sm text-muted-foreground mt-2">{t('admin.categories.emptyHint', 'Click “New category” to get started.')}</p>
                 </div>
               ) : (
@@ -1224,7 +1225,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                           className="flex-1"
                         >
                           <Edit className="h-4 w-4 mr-2" />
-                          Editar
+                          {t('admin.actions.edit', 'Edit')}
                         </Button>
                         <Dialog>
                           <DialogTrigger asChild>
@@ -1260,7 +1261,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           </Card>
 
           <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-6">eBooks Enviados</h2>
+            <h2 className="text-xl font-semibold mb-6">{t('admin.ebooks.sentTitle', 'Uploaded eBooks')}</h2>
             <EbookList key={refreshKey} />
           </Card>
         </div>
@@ -1272,7 +1273,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <CardHeader>
               <CardTitle>{t('admin.analytics.trafficTitle', 'Site traffic')}</CardTitle>
               <CardDescription>
-                Dados coletados diretamente no site nos ultimos {siteAnalytics.windowDays} dias.
+                {t('admin.analytics.trafficDesc', 'Data collected directly on the site over the last {days} days.').replace('{days}', String(siteAnalytics.windowDays))}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1285,18 +1286,18 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <Card className="p-4">
-                      <p className="text-sm text-muted-foreground">Visualizacoes de pagina</p>
-                      <p className="text-2xl font-bold">{siteAnalytics.totalPageViews.toLocaleString('pt-BR')}</p>
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.pageViews', 'Page views')}</p>
+                      <p className="text-2xl font-bold">{siteAnalytics.totalPageViews.toLocaleString(numberLocale)}</p>
                     </Card>
                     <Card className="p-4">
-                      <p className="text-sm text-muted-foreground">Visitantes unicos</p>
-                      <p className="text-2xl font-bold">{siteAnalytics.uniqueVisitors.toLocaleString('pt-BR')}</p>
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.uniqueVisitors', 'Unique visitors')}</p>
+                      <p className="text-2xl font-bold">{siteAnalytics.uniqueVisitors.toLocaleString(numberLocale)}</p>
                     </Card>
                   </div>
 
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <Card className="p-4">
-                      <h3 className="text-sm font-semibold mb-3">Paises</h3>
+                      <h3 className="text-sm font-semibold mb-3">{t('admin.analytics.countries', 'Countries')}</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topCountries.length === 0 && (
                           <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
@@ -1316,7 +1317,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                     </Card>
 
                     <Card className="p-4">
-                      <h3 className="text-sm font-semibold mb-3">Paginas mais vistas</h3>
+                      <h3 className="text-sm font-semibold mb-3">{t('admin.analytics.topPages', 'Top pages')}</h3>
                       <div className="space-y-2">
                         {siteAnalytics.topPages.length === 0 && (
                           <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
@@ -1341,7 +1342,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                     <Card className="p-4">
-                      <h3 className="text-sm font-semibold mb-3">Referenciadores</h3>
+                      <h3 className="text-sm font-semibold mb-3">{t('admin.analytics.referrers', 'Referrers')}</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topReferrers.length === 0 && (
                           <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
@@ -1369,7 +1370,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                     </Card>
 
                     <Card className="p-4">
-                      <h3 className="text-sm font-semibold mb-3">Dispositivos</h3>
+                      <h3 className="text-sm font-semibold mb-3">{t('admin.analytics.devices', 'Devices')}</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topDevices.length === 0 && (
                           <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
@@ -1393,7 +1394,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                     </Card>
 
                     <Card className="p-4">
-                      <h3 className="text-sm font-semibold mb-3">Sistemas operacionais</h3>
+                      <h3 className="text-sm font-semibold mb-3">{t('admin.analytics.operatingSystems', 'Operating systems')}</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topOperatingSystems.length === 0 && (
                           <p className="text-sm text-muted-foreground">{t('admin.analytics.noData', 'No data yet.')}</p>
@@ -1585,7 +1586,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <CardHeader>
               <CardTitle>{t('admin.analytics.funnelTitle', 'Conversion funnel')}</CardTitle>
               <CardDescription>
-                Jornada de visitas ate compras nos ultimos {lifecycleFunnel.windowDays} dias.
+                {t('admin.analytics.funnelDesc', 'Journey from visits to purchases over the last {days} days.').replace('{days}', String(lifecycleFunnel.windowDays))}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1595,37 +1596,37 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <Card className="p-4">
-                      <p className="text-sm text-muted-foreground">Visitas</p>
-                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.visits.toLocaleString('pt-BR')}</p>
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.funnel.visits', 'Visits')}</p>
+                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.visits.toLocaleString(numberLocale)}</p>
                     </Card>
                     <Card className="p-4">
-                      <p className="text-sm text-muted-foreground">Leads</p>
-                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.leads.toLocaleString('pt-BR')}</p>
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.funnel.leads', 'Leads')}</p>
+                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.leads.toLocaleString(numberLocale)}</p>
                     </Card>
                     <Card className="p-4">
-                      <p className="text-sm text-muted-foreground">Checkout iniciado</p>
-                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.checkoutStarted.toLocaleString('pt-BR')}</p>
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.funnel.checkoutStarted', 'Checkout started')}</p>
+                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.checkoutStarted.toLocaleString(numberLocale)}</p>
                     </Card>
                     <Card className="p-4">
-                      <p className="text-sm text-muted-foreground">Compras</p>
-                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.purchaseCompleted.toLocaleString('pt-BR')}</p>
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.funnel.purchases', 'Purchases')}</p>
+                      <p className="text-2xl font-bold">{lifecycleFunnel.totals.purchaseCompleted.toLocaleString(numberLocale)}</p>
                     </Card>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Card className="p-4">
-                      <p className="text-sm text-muted-foreground">Visita → Lead</p>
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.funnelRate.visitToLead', 'Visit → Lead')}</p>
                       <p className="text-xl font-semibold">{formatRate(lifecycleFunnel.conversionRates.visitToLead)}</p>
                     </Card>
                     <Card className="p-4">
-                      <p className="text-sm text-muted-foreground">Lead → Checkout</p>
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.funnelRate.leadToCheckout', 'Lead → Checkout')}</p>
                       <p className="text-xl font-semibold">{formatRate(lifecycleFunnel.conversionRates.leadToCheckout)}</p>
                     </Card>
                     <Card className="p-4">
-                      <p className="text-sm text-muted-foreground">Checkout → Compra</p>
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.funnelRate.checkoutToPurchase', 'Checkout → Purchase')}</p>
                       <p className="text-xl font-semibold">{formatRate(lifecycleFunnel.conversionRates.checkoutToPurchase)}</p>
                     </Card>
                     <Card className="p-4">
-                      <p className="text-sm text-muted-foreground">Visita → Compra</p>
+                      <p className="text-sm text-muted-foreground">{t('admin.analytics.funnelRate.visitToPurchase', 'Visit → Purchase')}</p>
                       <p className="text-xl font-semibold">{formatRate(lifecycleFunnel.conversionRates.visitToPurchase)}</p>
                     </Card>
                   </div>
@@ -1720,7 +1721,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <div className="flex-grow w-full">
                   <input
                     type="text"
-                    placeholder="Pesquisar por nome, email, data ou item"
+                    placeholder={t('admin.orders.searchPlaceholder', 'Search by name, email, date, or item')}
                     value={searchQuery}
                     onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                     className="w-full border px-3 py-1 rounded"
@@ -1736,8 +1737,8 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <table className="min-w-full text-left whitespace-nowrap md:hidden">
                   <thead>
                     <tr>
-                      <th style={{ color: '#808000' }}>Name</th>
-                      <th style={{ color: '#808000' }}>Total</th>
+                      <th style={{ color: '#808000' }}>{t('ud.orders.col.name', 'Name')}</th>
+                      <th style={{ color: '#808000' }}>{t('ud.orders.col.total', 'Total')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1748,7 +1749,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                             {o.name}
                           </div>
                         </td>
-                        <td>{new Intl.NumberFormat('pt-BR', {
+                        <td>{new Intl.NumberFormat(numberLocale, {
                           style: 'currency',
                           currency: 'BRL'
                         }).format(o.total)}</td>
@@ -1760,11 +1761,11 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <table className="min-w-full text-left whitespace-nowrap hidden md:table">
                   <thead>
                     <tr>
-                      <th style={{ color: '#808000' }}>Date</th>
-                      <th style={{ color: '#808000' }}>Name</th>
-                      <th style={{ color: '#808000' }}>Email</th>
-                      <th style={{ color: '#808000' }}>Total</th>
-                      <th style={{ color: '#808000' }}>Items</th>
+                      <th style={{ color: '#808000' }}>{t('ud.orders.col.date', 'Date')}</th>
+                      <th style={{ color: '#808000' }}>{t('ud.orders.col.name', 'Name')}</th>
+                      <th style={{ color: '#808000' }}>{t('ud.orders.col.email', 'Email')}</th>
+                      <th style={{ color: '#808000' }}>{t('ud.orders.col.total', 'Total')}</th>
+                      <th style={{ color: '#808000' }}>{t('ud.orders.col.items', 'Items')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1773,7 +1774,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                         <tr
                           className="border-t hover:bg-gray-50"
                         >
-                          <td>{new Date(o.date).toLocaleDateString('en-US', {
+                          <td>{new Date(o.date).toLocaleDateString(numberLocale, {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric'
@@ -1795,13 +1796,13 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                               <Copy className="absolute right-1 top-1 cursor-pointer" onClick={() => copyEmail(o.email)} />
                             )}
                           </td>
-                          <td>{new Intl.NumberFormat('pt-BR', {
+                          <td>{new Intl.NumberFormat(numberLocale, {
                             style: 'currency',
                             currency: 'BRL'
                           }).format(o.total)}</td>
                           <td style={{ color: '#8B4513' }}>
                             <button className="text-[#8B4513] hover:underline" onClick={() => toggleRow(o.id)}>
-                              {o.items.length} item{o.items.length>1?'s':''}
+                              {t('admin.support.itemCount', '{count} items').replace('{count}', String(o.items.length))}
                             </button>
                           </td>
                         </tr>
@@ -1814,8 +1815,8 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                                     <div style={{ color: '#808000' }} className="font-medium" title={item.name}>
                                       {item.name.length > 40 ? item.name.slice(0, 40) + '...' : item.name}
                                     </div>
-                                    <div className="text-gray-600">Format: PDF</div>
-                                    <div className="text-gray-600">Price: {new Intl.NumberFormat('pt-BR', {
+                                    <div className="text-gray-600">{t('admin.orders.itemFormat', 'Format')}: PDF</div>
+                                    <div className="text-gray-600">{t('admin.orders.itemPrice', 'Price')}: {new Intl.NumberFormat(numberLocale, {
                                       style: 'currency',
                                       currency: 'BRL'
                                     }).format(item.price)}</div>
@@ -1890,7 +1891,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                               currency: session.currency || 'BRL',
                             }).format(session.total)}
                           </span>
-                          <span className="text-muted-foreground"> · {session.items.length} items</span>
+                          <span className="text-muted-foreground"> · {t('admin.support.itemCount', '{count} items').replace('{count}', String(session.items.length))}</span>
                         </div>
                       </div>
 
