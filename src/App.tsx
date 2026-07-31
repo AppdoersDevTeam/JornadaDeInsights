@@ -33,6 +33,7 @@ import { ForgotPasswordPage } from '@/pages/forgot-password';
 import { captureClientError } from '@/lib/monitoring';
 import { LanguageProvider, useLanguage } from '@/context/language-context';
 import { LanguagePickerDialog } from '@/components/language/language-picker-dialog';
+import { InstallPrompt } from '@/components/pwa/install-prompt';
 
 const ROUTE_METADATA: Record<'pt-BR' | 'en', Record<string, { title: string; description: string }>> = {
   'pt-BR': {
@@ -307,6 +308,7 @@ function AppRoutes() {
         </Routes>
         <LanguagePickerDialog />
         <Toaster />
+        <InstallPrompt />
       </CartProvider>
     </AuthProvider>
   );

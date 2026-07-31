@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { useLanguage } from '@/context/language-context';
 import { siteLogoAlt, siteLogoSrc } from '@/lib/site-logo';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
@@ -98,6 +99,7 @@ export function AdminHeader() {
                   <span className="text-xs xl:text-sm font-medium">{t('nav.dashboard', 'Dashboard')}</span>
                 </Link>
               </Button>
+              <NotificationBell triggerClassName="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0 text-background" />
               <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">

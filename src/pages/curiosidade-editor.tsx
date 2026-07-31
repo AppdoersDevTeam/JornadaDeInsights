@@ -12,6 +12,7 @@ import {
   getCuriosidadesCategories,
   type CuriosidadeCategory
 } from '@/lib/supabase';
+import { notifyNewContent } from '@/lib/notifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -137,6 +138,13 @@ export function CuriosidadeEditorPage() {
           titleEnDb,
           bodyEnDb
         );
+        if (publish) {
+          void notifyNewContent('new_curiosidade', {
+            title: titlePt || titleEnDb || 'New post',
+            link: `/curiosidades/${id}`,
+            sourceId: id,
+          });
+        }
         toast.success(publish ? t('admin.curiosidades.publishSuccess', 'Post published successfully!') : t('admin.curiosidades.draftSaved', 'Draft saved successfully!'));
       } else {
         const newCuriosidade = await createCuriosidade(
@@ -150,6 +158,13 @@ export function CuriosidadeEditorPage() {
           titleEnDb,
           bodyEnDb
         );
+        if (publish) {
+          void notifyNewContent('new_curiosidade', {
+            title: titlePt || titleEnDb || 'New post',
+            link: `/curiosidades/${newCuriosidade.id}`,
+            sourceId: newCuriosidade.id,
+          });
+        }
         toast.success(publish ? t('admin.curiosidades.publishSuccess', 'Post published successfully!') : t('admin.curiosidades.draftSaved', 'Draft saved successfully!'));
         navigate(`/dashboard/curiosidades/${newCuriosidade.id}`);
       }

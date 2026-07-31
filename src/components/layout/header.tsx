@@ -7,6 +7,7 @@ import { useCart } from '@/context/cart-context';
 import { useAuth } from '@/context/auth-context';
 import { useLanguage } from '@/context/language-context';
 import { siteLogoAlt, siteLogoSrc } from '@/lib/site-logo';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -104,6 +105,7 @@ export function Header() {
                     </span>
                   )}
                 </Link>
+                <NotificationBell triggerClassName="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0 text-background" />
                 <Link to="/dashboard" className="p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
                   <User className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
                 </Link>

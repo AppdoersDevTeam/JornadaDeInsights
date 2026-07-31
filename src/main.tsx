@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
 import { initClientMonitoring } from '@/lib/monitoring';
+import { registerSW } from 'virtual:pwa-register';
 
 // Configure future flags for React Router
 const router = {
@@ -14,6 +15,8 @@ const router = {
 };
 
 initClientMonitoring();
+
+registerSW({ immediate: true });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

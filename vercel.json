@@ -123,6 +123,21 @@
       "methods": ["GET", "OPTIONS"]
     },
     {
+      "src": "/api/notifications",
+      "dest": "/api/notifications.js?action=list",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/notifications-mark-read",
+      "dest": "/api/notifications.js?action=mark-read",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/notifications-cron",
+      "dest": "/api/notifications.js?action=cron-check",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
       "src": "/api/lifecycle-event-track",
       "dest": "/api/lifecycle.js?action=track",
       "methods": ["POST", "OPTIONS"]
@@ -168,6 +183,12 @@
       "headers": {
         "Cache-Control": "public, max-age=0, must-revalidate"
       }
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/notifications-cron",
+      "schedule": "0 */6 * * *"
     }
   ]
 } 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { supabase, getCategories, createCategory, type Category } from '@/lib/supabase';
+import { notifyNewContent } from '@/lib/notifications';
 import { useNavigate } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
 import type { EbookContentLocale } from '@/lib/ebook-locale';
@@ -127,7 +128,7 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
       if (coverError) throw coverError;
 
       // Save metadata
-      const { error: metadataError } = await supabase
+      const { data: newEbook, error: metadataError } = await supabase
         .from('ebooks_metadata')
         .insert({
           filename: sanitizedPdfName,
@@ -136,9 +137,19 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
           price: parseFloat(price),
           category_id: selectedCategoryId || null,
           content_locale: contentLocale,
-        });
+        })
+        .select('id')
+        .single();
 
       if (metadataError) throw metadataError;
+
+      if (newEbook?.id) {
+        void notifyNewContent('new_ebook', {
+          title,
+          link: `/shop/ebook/${newEbook.id}`,
+          sourceId: newEbook.id,
+        });
+      }
 
       toast.success('Ebook uploaded successfully');
       resetForm();
