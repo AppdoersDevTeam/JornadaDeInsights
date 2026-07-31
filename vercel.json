@@ -88,6 +88,31 @@
       }
     },
     {
+      "src": "/api/lifecycle-event-track",
+      "dest": "/api/lifecycle.js?action=track",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/lifecycle-followup-jobs",
+      "dest": "/api/lifecycle.js?action=followup-jobs",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/lifecycle-funnel-summary",
+      "dest": "/api/lifecycle.js?action=funnel-summary",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/health",
+      "dest": "/api/ops.js?action=health",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/lifecycle-followup-runner",
+      "dest": "/api/ops.js?action=followup-runner",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1.js",
       "methods": ["GET", "POST", "DELETE", "OPTIONS"],
