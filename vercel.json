@@ -53,7 +53,7 @@
     },
     {
       "src": "/api/stats",
-      "dest": "/api/stats.js",
+      "dest": "/api/analytics.js?action=stats",
       "methods": ["GET", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
@@ -65,7 +65,7 @@
     },
     {
       "src": "/api/top-products",
-      "dest": "/api/top-products.js",
+      "dest": "/api/analytics.js?action=top-products",
       "methods": ["GET", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
@@ -74,6 +74,16 @@
         "Access-Control-Allow-Credentials": "true",
         "Content-Type": "application/json"
       }
+    },
+    {
+      "src": "/api/site-analytics-track",
+      "dest": "/api/analytics.js?action=track",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/site-analytics-summary",
+      "dest": "/api/analytics.js?action=summary",
+      "methods": ["GET", "OPTIONS"]
     },
     {
       "src": "/api/users",
