@@ -1,9 +1,12 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { useLanguage } from '@/context/language-context';
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 export function ForgotPasswordPage() {
   const { t } = useLanguage();
@@ -12,6 +15,8 @@ export function ForgotPasswordPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState('');
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   const isRecoveryMode = useMemo(
     () => window.location.hash.includes('type=recovery'),
@@ -34,8 +39,13 @@ export function ForgotPasswordPage() {
         throw new Error(t('forgot.needEmail', 'Enter your email to reset your password.'));
       }
 
+      if (!captchaToken) {
+        throw new Error(t('forgot.captchaRequired', 'Please complete the verification challenge'));
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/forgot-password`,
+        captchaToken,
       });
       if (error) throw error;
 
@@ -44,6 +54,8 @@ export function ForgotPasswordPage() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('forgot.sendFail', 'Could not send reset email.'));
     } finally {
+      turnstileRef.current?.reset();
+      setCaptchaToken('');
       setIsSubmitting(false);
     }
   };
@@ -96,7 +108,15 @@ export function ForgotPasswordPage() {
                 className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={TURNSTILE_SITE_KEY}
+                onSuccess={setCaptchaToken}
+                onExpire={() => setCaptchaToken('')}
+                onError={() => setCaptchaToken('')}
+                className="flex justify-center"
+              />
+              <Button type="submit" className="w-full" disabled={isSubmitting || !captchaToken}>
                 {isSubmitting
                   ? t('forgot.page.sendingReset', 'Sending...')
                   : t('forgot.page.sendReset', 'Send recovery link')}

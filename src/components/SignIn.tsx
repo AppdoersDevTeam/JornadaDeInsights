@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Book, Headphones } from 'lucide-react';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { useLanguage } from '@/context/language-context';
 import { trackLifecycleEvent } from '@/lib/lifecycle';
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 const ALLOWED_ADMIN_EMAILS = [
   'devteam@appdoers.co.nz',
@@ -18,6 +21,8 @@ const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as { from?: string; returnTo?: string } | undefined;
@@ -71,8 +76,17 @@ const SignIn = () => {
       return;
     }
 
+    if (!captchaToken) {
+      setError(t('signin.captchaRequired', 'Please complete the verification challenge'));
+      return;
+    }
+
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options: { captchaToken }
+      });
       if (error) throw error;
       const user = data.user;
       
@@ -103,6 +117,9 @@ const SignIn = () => {
       } else {
         setError(t('signin.fail', 'Could not sign in'));
       }
+    } finally {
+      turnstileRef.current?.reset();
+      setCaptchaToken('');
     }
   };
 
@@ -219,6 +236,15 @@ const SignIn = () => {
                     </div>
                   </div>
 
+                  <Turnstile
+                    ref={turnstileRef}
+                    siteKey={TURNSTILE_SITE_KEY}
+                    onSuccess={setCaptchaToken}
+                    onExpire={() => setCaptchaToken('')}
+                    onError={() => setCaptchaToken('')}
+                    className="flex justify-center"
+                  />
+
                   {error && (
                     <div className="text-red-500 text-sm text-center">{error}</div>
                   )}
@@ -232,7 +258,7 @@ const SignIn = () => {
                     </Button>
                   </div>
 
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={!captchaToken}>
                     {t('signin.page.submit', 'Sign in')}
                   </Button>
 

@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Book, Headphones } from 'lucide-react';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { useLanguage } from '@/context/language-context';
 import { trackLifecycleEvent } from '@/lib/lifecycle';
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 const SignUp = () => {
   const { t } = useLanguage();
@@ -15,6 +18,8 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const navigate = useNavigate();
 
   const markSignupLeadCaptured = async (emailAddress: string) => {
@@ -45,6 +50,11 @@ const SignUp = () => {
       return;
     }
 
+    if (!captchaToken) {
+      setError(t('signup.captchaRequired', 'Please complete the verification challenge'));
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -53,7 +63,8 @@ const SignUp = () => {
           data: {
             full_name: name || null
           },
-          emailRedirectTo: `${window.location.origin}/signin`
+          emailRedirectTo: `${window.location.origin}/signin`,
+          captchaToken
         }
       });
 
@@ -63,6 +74,9 @@ const SignUp = () => {
     } catch (error) {
       const errorMessage = error instanceof AuthError ? error.message : t('signup.fail', 'Could not create account');
       setError(errorMessage);
+    } finally {
+      turnstileRef.current?.reset();
+      setCaptchaToken('');
     }
   };
 
@@ -210,6 +224,15 @@ const SignUp = () => {
                     </div>
                   </div>
 
+                  <Turnstile
+                    ref={turnstileRef}
+                    siteKey={TURNSTILE_SITE_KEY}
+                    onSuccess={setCaptchaToken}
+                    onExpire={() => setCaptchaToken('')}
+                    onError={() => setCaptchaToken('')}
+                    className="flex justify-center"
+                  />
+
                   {error && (
                     <div className="text-red-500 text-sm text-center">{error}</div>
                   )}
@@ -220,7 +243,7 @@ const SignUp = () => {
                     </Button>
                   </div>
 
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={!captchaToken}>
                     {t('signup.page.submit', 'Create account')}
                   </Button>
 
