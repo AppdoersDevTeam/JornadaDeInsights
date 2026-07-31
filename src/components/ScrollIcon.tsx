@@ -25,9 +25,11 @@ const ScrollIcon = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 animate-bounce flex flex-col items-center gap-1">
-      <FaChevronDown className="text-primary text-3xl" />
-      <span className="text-primary text-sm font-medium">{t('common.scrollDown', 'Scroll')}</span>
+    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-1">
+      <div className="animate-bounce flex flex-col items-center gap-1">
+        <FaChevronDown className="text-primary text-3xl" />
+        <span className="text-primary text-sm font-medium">{t('common.scrollDown', 'Scroll')}</span>
+      </div>
     </div>
   );
 };

@@ -26,22 +26,32 @@ const detectRecommendedLanguage = (): SupportedLanguage => {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
+const getStoredLanguage = (): SupportedLanguage | null => {
+  if (typeof window === 'undefined') return null;
+  const saved = localStorage.getItem(STORAGE_KEY);
+  return saved === 'pt-BR' || saved === 'en' ? saved : null;
+};
+
+// Manifest link for install-time app name/branding; kept in sync with the
+// active language so an install always reflects the user's chosen locale.
+const applyManifestForLanguage = (lang: SupportedLanguage) => {
+  if (typeof document === 'undefined') return;
+  const manifestLink = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+  if (manifestLink) {
+    manifestLink.href = lang === 'en' ? '/manifest-en.webmanifest' : '/manifest.webmanifest';
+  }
+};
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const recommendedLanguage = useMemo(detectRecommendedLanguage, []);
-  const [language, setLanguageState] = useState<SupportedLanguage>('pt-BR');
-  const [isLanguagePromptOpen, setIsLanguagePromptOpen] = useState(false);
-
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem(STORAGE_KEY) as SupportedLanguage | null;
-    if (savedLanguage === 'pt-BR' || savedLanguage === 'en') {
-      setLanguageState(savedLanguage);
-      setIsLanguagePromptOpen(false);
-      return;
-    }
-
-    setLanguageState(recommendedLanguage);
-    setIsLanguagePromptOpen(true);
-  }, [recommendedLanguage]);
+  // Read localStorage synchronously in the initializer (not a post-mount
+  // effect) so the correct language renders on the very first paint — no
+  // flash of the default language when the app (especially the installed,
+  // standalone PWA) opens.
+  const [language, setLanguageState] = useState<SupportedLanguage>(
+    () => getStoredLanguage() ?? recommendedLanguage
+  );
+  const [isLanguagePromptOpen, setIsLanguagePromptOpen] = useState(() => getStoredLanguage() === null);
 
   const setLanguage = (lang: SupportedLanguage) => {
     setLanguageState(lang);
@@ -60,6 +70,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = language === 'en' ? 'en' : 'pt-BR';
+    applyManifestForLanguage(language);
   }, [language]);
 
   const t = useCallback((key: string, fallback: string) => {

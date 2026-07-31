@@ -1,12 +1,13 @@
-import { 
-  LayoutDashboard, 
-  FileText, 
-  BarChart3, 
-  Users, 
+import {
+  LayoutDashboard,
+  FileText,
+  BarChart3,
+  Users,
   ShoppingCart,
   BookOpen,
   LifeBuoy,
-  Languages
+  Languages,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TabType } from '@/types/dashboard';
@@ -80,6 +81,14 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
         >
           <BookOpen className="mr-2 h-4 w-4" />
           {t('admin.tab.curiosidades', 'Insights')}
+        </Button>
+        <Button
+          variant={activeTab === 'settings' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('settings')}
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          {t('admin.tab.settings', 'Settings')}
         </Button>
         <Button
           type="button"

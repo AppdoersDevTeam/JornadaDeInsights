@@ -23,7 +23,7 @@ const handleList = async (req, res, requestMeta) => {
 
     const audiences = isAdmin ? ['user', 'admin'] : ['user'];
 
-    const [eventsRes, readsRes] = await Promise.all([
+    const [eventsRes, readsRes, prefsRes] = await Promise.all([
       supabaseAdmin
         .from('notification_events')
         .select('id, type, audience, title, body, link, source_id, metadata, created_at')
@@ -34,25 +34,34 @@ const handleList = async (req, res, requestMeta) => {
         .from('notification_reads')
         .select('notification_id')
         .eq('user_id', user.id),
+      supabaseAdmin
+        .from('notification_preferences')
+        .select('type, enabled')
+        .eq('user_id', user.id)
+        .eq('enabled', false),
     ]);
 
     if (eventsRes.error) throw eventsRes.error;
     if (readsRes.error) throw readsRes.error;
+    if (prefsRes.error) throw prefsRes.error;
 
     const readIds = new Set((readsRes.data || []).map((row) => row.notification_id));
+    const disabledTypes = new Set((prefsRes.data || []).map((row) => row.type));
 
-    const notifications = (eventsRes.data || []).map((event) => ({
-      id: event.id,
-      type: event.type,
-      audience: event.audience,
-      title: event.title,
-      body: event.body,
-      link: event.link,
-      sourceId: event.source_id,
-      metadata: event.metadata,
-      createdAt: event.created_at,
-      read: readIds.has(event.id),
-    }));
+    const notifications = (eventsRes.data || [])
+      .filter((event) => !disabledTypes.has(event.type))
+      .map((event) => ({
+        id: event.id,
+        type: event.type,
+        audience: event.audience,
+        title: event.title,
+        body: event.body,
+        link: event.link,
+        sourceId: event.source_id,
+        metadata: event.metadata,
+        createdAt: event.created_at,
+        read: readIds.has(event.id),
+      }));
 
     const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -86,17 +95,29 @@ const handleMarkRead = async (req, res, requestMeta) => {
 
     if (all) {
       const audiences = isAdmin ? ['user', 'admin'] : ['user'];
-      const { data: events, error: eventsError } = await supabaseAdmin
-        .from('notification_events')
-        .select('id')
-        .in('audience', audiences)
-        .limit(LIST_LIMIT);
+      const [{ data: events, error: eventsError }, { data: disabledPrefs, error: prefsError }] =
+        await Promise.all([
+          supabaseAdmin
+            .from('notification_events')
+            .select('id, type')
+            .in('audience', audiences)
+            .limit(LIST_LIMIT),
+          supabaseAdmin
+            .from('notification_preferences')
+            .select('type')
+            .eq('user_id', user.id)
+            .eq('enabled', false),
+        ]);
       if (eventsError) throw eventsError;
+      if (prefsError) throw prefsError;
 
-      const rows = (events || []).map((event) => ({
-        user_id: user.id,
-        notification_id: event.id,
-      }));
+      const disabledTypes = new Set((disabledPrefs || []).map((row) => row.type));
+      const rows = (events || [])
+        .filter((event) => !disabledTypes.has(event.type))
+        .map((event) => ({
+          user_id: user.id,
+          notification_id: event.id,
+        }));
       if (rows.length > 0) {
         const { error: upsertError } = await supabaseAdmin
           .from('notification_reads')

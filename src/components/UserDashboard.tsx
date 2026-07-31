@@ -25,6 +25,9 @@ import { loadStripe } from '@stripe/stripe-js';
 import type { Ebook } from '@/components/shop/ebook-card';
 import { TabType } from '@/types/dashboard';
 import { trackLifecycleEvent } from '@/lib/lifecycle';
+import { NotificationPreferences } from '@/components/notifications/notification-preferences';
+
+const ALLOWED_ADMIN_EMAILS = ['devteam@appdoers.co.nz', 'ptasbr2020@gmail.com'];
 
 interface CompletedOrder {
   id: string;
@@ -1110,6 +1113,12 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                 </div>
               </CardContent>
             </Card>
+
+            <NotificationPreferences
+              isAdmin={Boolean(
+                user.email && ALLOWED_ADMIN_EMAILS.includes(user.email.toLowerCase())
+              )}
+            />
           </div>
         )}
       </div>

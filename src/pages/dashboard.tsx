@@ -22,6 +22,7 @@ import { toast } from 'react-hot-toast';
 import UploadEbookForm from '@/components/dashboard/upload-ebook-form';
 import EbookList from '@/components/dashboard/ebook-list';
 import CuriosidadesList from '@/components/dashboard/curiosidades-list';
+import { NotificationPreferences } from '@/components/notifications/notification-preferences';
 import { getCategories, createCategory, updateCategory, deleteCategory, type Category } from '@/lib/supabase';
 import { SalesTrendsChart, SalesData } from '@/components/dashboard/sales-trends-chart';
 import { StripeBalanceChart, BalanceData } from '@/components/dashboard/stripe-balance-chart';
@@ -964,6 +965,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               {activeTab === 'orders' && t('admin.tab.orders', 'Completed orders')}
               {activeTab === 'support' && t('admin.tab.support', 'Support')}
               {activeTab === 'curiosidades' && t('admin.tab.curiosidades', 'Insights')}
+              {activeTab === 'settings' && t('admin.tab.settings', 'Settings')}
             </h1>
           )}
         </div>
@@ -1965,6 +1967,12 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
       {activeTab === 'curiosidades' && (
         <div className="space-y-6 w-full">
           <CuriosidadesList />
+        </div>
+      )}
+
+      {activeTab === 'settings' && (
+        <div className="space-y-6 w-full max-w-2xl">
+          <NotificationPreferences isAdmin />
         </div>
       )}
     </div>

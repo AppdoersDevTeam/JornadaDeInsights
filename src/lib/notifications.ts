@@ -11,6 +11,19 @@ export type NotificationType =
   | 'admin_webhook_lag'
   | 'admin_traffic_spike';
 
+export const USER_NOTIFICATION_TYPES: NotificationType[] = [
+  'new_ebook',
+  'new_curiosidade',
+  'new_podcast_episode',
+];
+
+export const ADMIN_NOTIFICATION_TYPES: NotificationType[] = [
+  'admin_failed_emails',
+  'admin_abandoned_carts',
+  'admin_webhook_lag',
+  'admin_traffic_spike',
+];
+
 export interface AppNotification {
   id: string;
   type: NotificationType;
@@ -89,4 +102,42 @@ export const markAllNotificationsRead = async (): Promise<void> => {
     body: JSON.stringify({ all: true }),
   });
   if (!response.ok) throw new Error('Failed to mark notifications as read');
+};
+
+// Preferences are read/written directly against Supabase (RLS restricts each
+// user to their own row), so no serverless function round-trip is needed.
+export const getNotificationPreferences = async (
+  types: NotificationType[]
+): Promise<Record<string, boolean>> => {
+  const { data, error } = await supabase
+    .from('notification_preferences')
+    .select('type, enabled')
+    .in('type', types);
+  if (error) throw error;
+
+  // Missing rows default to enabled (opt-out model).
+  const preferences: Record<string, boolean> = {};
+  types.forEach((type) => {
+    preferences[type] = true;
+  });
+  (data || []).forEach((row) => {
+    preferences[row.type] = row.enabled;
+  });
+  return preferences;
+};
+
+export const updateNotificationPreference = async (
+  type: NotificationType,
+  enabled: boolean
+): Promise<void> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const { error } = await supabase.from('notification_preferences').upsert(
+    { user_id: user.id, type, enabled, updated_at: new Date().toISOString() },
+    { onConflict: 'user_id,type' }
+  );
+  if (error) throw error;
 };

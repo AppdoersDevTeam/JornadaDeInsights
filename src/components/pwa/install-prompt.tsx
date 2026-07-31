@@ -21,6 +21,16 @@ function isIos() {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
 
+function isAndroid() {
+  return /android/i.test(window.navigator.userAgent);
+}
+
+// Restrict the install prompt to phones/tablets — desktop Chrome/Edge also
+// fire beforeinstallprompt, but an install nudge isn't useful on laptops.
+function isMobileOrTablet() {
+  return isIos() || isAndroid();
+}
+
 export function InstallPrompt() {
   const { t } = useLanguage();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -28,7 +38,11 @@ export function InstallPrompt() {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    if (isStandalone() || localStorage.getItem(DISMISSED_KEY) === 'true') {
+    if (
+      isStandalone() ||
+      localStorage.getItem(DISMISSED_KEY) === 'true' ||
+      !isMobileOrTablet()
+    ) {
       return;
     }
 

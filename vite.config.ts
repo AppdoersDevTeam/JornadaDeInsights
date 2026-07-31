@@ -14,10 +14,11 @@ export default defineConfig({
       },
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
-        name: 'Jornada de Insights | Patricia',
-        short_name: 'Jornada',
+        name: 'Jornada de Insights',
+        short_name: 'Jornada de Insights',
         description:
           'Podcasts, vídeos e eBooks cristãos para fortalecer sua jornada espiritual.',
+        lang: 'pt-BR',
         start_url: '/',
         scope: '/',
         display: 'standalone',
