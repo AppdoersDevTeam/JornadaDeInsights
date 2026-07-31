@@ -93,13 +93,13 @@ export function AdminHeader() {
         <div className="hidden lg:flex flex-shrink-0 justify-end items-center gap-2 xl:gap-3">
           {user ? (
             <>
+              <NotificationBell triggerClassName="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0 text-background" />
               <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
                 <Link to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email.toLowerCase()) ? "/dashboard" : "/user-dashboard"} className="flex items-center gap-1.5 xl:gap-2">
                   <LayoutDashboard className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0" />
                   <span className="text-xs xl:text-sm font-medium">{t('nav.dashboard', 'Dashboard')}</span>
                 </Link>
               </Button>
-              <NotificationBell triggerClassName="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0 text-background" />
               <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
