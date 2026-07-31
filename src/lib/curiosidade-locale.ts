@@ -1,4 +1,4 @@
-import type { Curiosidade, CuriosidadeCategory } from '@/lib/supabase';
+import type { Curiosidade, CuriosidadeCategory, PodcastArticle } from '@/lib/supabase';
 import type { AppLocale } from '@/locales/messages';
 
 function pickText(
@@ -33,4 +33,12 @@ export function curiosidadeDisplayTitle(curiosidade: Curiosidade, language: AppL
 
 export function curiosidadeDisplayBody(curiosidade: Curiosidade, language: AppLocale): string {
   return pickText(language, curiosidade.body, curiosidade.body_en);
+}
+
+export function podcastArticleDisplayTitle(article: PodcastArticle, language: AppLocale): string {
+  return pickText(language, article.title_pt, article.title_en);
+}
+
+export function podcastArticleDisplayBody(article: PodcastArticle, language: AppLocale): string {
+  return pickText(language, article.body_pt, article.body_en);
 }

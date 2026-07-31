@@ -123,6 +123,11 @@
       "methods": ["GET", "OPTIONS"]
     },
     {
+      "src": "/api/podcast-articles-admin",
+      "dest": "/api/admin.js?action=podcast-articles",
+      "methods": ["GET", "PATCH", "OPTIONS"]
+    },
+    {
       "src": "/api/notifications",
       "dest": "/api/notifications.js?action=list",
       "methods": ["GET", "OPTIONS"]
@@ -189,6 +194,10 @@
     {
       "path": "/api/notifications-cron",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/generate-podcast-articles",
+      "schedule": "0 7 * * *"
     }
   ]
 } 

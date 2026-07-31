@@ -27,6 +27,7 @@ import { TermsPage } from '@/pages/terms';
 import { PrivacyPage } from '@/pages/privacy';
 import { CuriosidadesPage } from '@/pages/curiosidades';
 import { CuriosidadeDetailsPage } from '@/pages/curiosidade-details';
+import { PodcastArticleDetailsPage } from '@/pages/podcast-article-details';
 import { CuriosidadeEditorPage } from '@/pages/curiosidade-editor';
 import { TabType } from '@/types/dashboard';
 import { ForgotPasswordPage } from '@/pages/forgot-password';
@@ -215,6 +216,9 @@ function AppRoutes() {
       (location.pathname.startsWith('/curiosidades/')
         ? localeMeta['/curiosidades']
         : undefined) ??
+      (location.pathname.startsWith('/podcast/')
+        ? localeMeta['/podcast']
+        : undefined) ??
       localeMeta['/'];
     document.title = routeMeta.title;
 
@@ -260,6 +264,7 @@ function AppRoutes() {
             <Route path="shop/ebook/:id" element={<EbookDetailsPage />} />
             <Route path="curiosidades" element={<CuriosidadesPage />} />
             <Route path="curiosidades/:id" element={<CuriosidadeDetailsPage />} />
+            <Route path="podcast/:slug" element={<PodcastArticleDetailsPage />} />
             <Route path="signin" element={<SignIn />} />
             <Route path="signup" element={<SignUp />} />
             <Route path="check-email" element={<CheckEmailPage />} />

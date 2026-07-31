@@ -337,6 +337,84 @@ const handleUsers = async (req, res, requestMeta) => {
   }
 };
 
+// --- action=podcast-articles (podcast-articles) ---
+
+const ARTICLE_EDITABLE_FIELDS = ['title_pt', 'body_pt', 'title_en', 'body_en', 'spotify_url', 'youtube_url'];
+
+const handlePodcastArticles = async (req, res, requestMeta) => {
+  applyCors(req, res, { methods: 'GET,PATCH,OPTIONS' });
+  if (handleOptionsRequest(req, res)) return;
+
+  if (!['GET', 'PATCH'].includes(req.method)) {
+    logger.warn('podcast_articles_method_not_allowed', requestMeta);
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  try {
+    const auth = await requireAdmin(req, res);
+    if (!auth) return;
+    const { supabaseAdmin } = auth;
+
+    if (req.method === 'GET') {
+      const { data, error } = await supabaseAdmin
+        .from('podcast_articles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      res.status(200).json({ articles: data || [] });
+      return;
+    }
+
+    // PATCH: update fields and/or flip status (draft <-> published)
+    const id = typeof req.query.id === 'string' ? req.query.id : '';
+    if (!id) {
+      res.status(400).json({ error: 'Missing id query parameter' });
+      return;
+    }
+
+    const body = req.body || {};
+    const updates = {};
+
+    for (const field of ARTICLE_EDITABLE_FIELDS) {
+      if (typeof body[field] === 'string') {
+        updates[field] = body[field].trim();
+      }
+    }
+
+    if (body.status === 'published' || body.status === 'draft') {
+      updates.status = body.status;
+      if (body.status === 'published') {
+        updates.published_at = new Date().toISOString();
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      res.status(400).json({ error: 'No valid fields to update' });
+      return;
+    }
+
+    updates.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabaseAdmin
+      .from('podcast_articles')
+      .update(updates)
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (error) throw error;
+
+    res.status(200).json({ article: data });
+  } catch (error) {
+    logger.error('podcast_articles_admin_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 export default async function handler(req, res) {
   const requestMeta = getRequestMeta(req);
   const action = req.query?.action;
@@ -348,6 +426,8 @@ export default async function handler(req, res) {
       return handleCustomerLookup(req, res, requestMeta);
     case 'users':
       return handleUsers(req, res, requestMeta);
+    case 'podcast-articles':
+      return handlePodcastArticles(req, res, requestMeta);
     default:
       res.status(404).json({ error: 'Unknown admin action' });
   }

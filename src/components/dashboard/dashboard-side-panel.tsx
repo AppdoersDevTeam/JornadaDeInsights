@@ -5,6 +5,7 @@ import {
   Users,
   ShoppingCart,
   BookOpen,
+  Mic,
   LifeBuoy,
   Languages,
   Settings
@@ -81,6 +82,14 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
         >
           <BookOpen className="mr-2 h-4 w-4" />
           {t('admin.tab.curiosidades', 'Insights')}
+        </Button>
+        <Button
+          variant={activeTab === 'podcastArticles' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('podcastArticles')}
+        >
+          <Mic className="mr-2 h-4 w-4" />
+          {t('admin.tab.podcastArticles', 'Podcast SEO articles')}
         </Button>
         <Button
           variant={activeTab === 'settings' ? 'secondary' : 'ghost'}

@@ -567,6 +567,44 @@ export const deleteCuriosidade = async (id: string): Promise<void> => {
   }
 };
 
+// Podcast episode articles (auto-generated SEO articles)
+export interface PodcastArticle {
+  id: string;
+  spreaker_episode_id: string;
+  episode_title: string;
+  episode_url: string | null;
+  spotify_url: string | null;
+  youtube_url: string | null;
+  slug: string;
+  title_pt: string | null;
+  title_en: string | null;
+  body_pt: string | null;
+  body_en: string | null;
+  status: 'draft' | 'published';
+  published_at: string | null;
+  episode_published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const getPodcastArticleBySlug = async (slug: string): Promise<PodcastArticle> => {
+  try {
+    const { data, error } = await supabase
+      .from('podcast_articles')
+      .select('*')
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .single();
+
+    if (error) throw error;
+    if (!data) throw new Error('Podcast article not found');
+    return data;
+  } catch (error) {
+    console.error('Error fetching podcast article:', error);
+    throw error;
+  }
+};
+
 // Curiosidades Categories management functions
 export const getCuriosidadesCategories = async (): Promise<CuriosidadeCategory[]> => {
   try {
