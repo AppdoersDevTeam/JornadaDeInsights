@@ -113,7 +113,9 @@ export default async function handler(req, res) {
         logger.error('generate_podcast_articles_episode_failed', {
           ...requestMeta,
           episode: episode.title,
-          errorMessage: error instanceof Error ? error.message : 'unknown_error',
+          errorName: error?.name ?? typeof error,
+          errorMessage: error?.message || String(error),
+          errorStack: typeof error?.stack === 'string' ? error.stack.slice(0, 500) : undefined,
         });
         results.push({ episode: episode.title, status: 'failed' });
       }
