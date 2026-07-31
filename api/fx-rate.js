@@ -1,5 +1,5 @@
-import { applyCors, handleOptionsRequest } from './_lib/cors.js';
-import { logger, getRequestMeta } from './_lib/logger.js';
+import { applyCors, handleOptionsRequest } from '../lib/cors.js';
+import { logger, getRequestMeta } from '../lib/logger.js';
 
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 let cache = {

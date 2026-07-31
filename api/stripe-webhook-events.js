@@ -1,6 +1,6 @@
-import { requireAdmin } from './_lib/admin-auth.js';
-import { applyCors, handleOptionsRequest } from './_lib/cors.js';
-import { logger, getRequestMeta } from './_lib/logger.js';
+import { requireAdmin } from '../lib/admin-auth.js';
+import { applyCors, handleOptionsRequest } from '../lib/cors.js';
+import { logger, getRequestMeta } from '../lib/logger.js';
 
 const parseLimit = (value, fallback) => {
   const num = typeof value === 'string' ? Number.parseInt(value, 10) : NaN;

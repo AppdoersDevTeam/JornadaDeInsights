@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
-import { requireAdmin } from './_lib/admin-auth.js';
-import { applyCors, handleOptionsRequest } from './_lib/cors.js';
-import { logger, getRequestMeta } from './_lib/logger.js';
+import { requireAdmin } from '../lib/admin-auth.js';
+import { applyCors, handleOptionsRequest } from '../lib/cors.js';
+import { logger, getRequestMeta } from '../lib/logger.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2023-10-16',

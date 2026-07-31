@@ -1,8 +1,8 @@
 import Stripe from 'stripe';
 import { Resend } from 'resend';
-import { applyCors, handleOptionsRequest } from './_lib/cors.js';
-import { logger, getRequestMeta } from './_lib/logger.js';
-import { captureServerError } from './_lib/monitoring.js';
+import { applyCors, handleOptionsRequest } from '../lib/cors.js';
+import { logger, getRequestMeta } from '../lib/logger.js';
+import { captureServerError } from '../lib/monitoring.js';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {

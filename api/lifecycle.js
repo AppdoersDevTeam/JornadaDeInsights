@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
-import { requireAdmin } from './_lib/admin-auth.js';
-import { applyCors, handleOptionsRequest } from './_lib/cors.js';
-import { logger, getRequestMeta } from './_lib/logger.js';
-import { captureServerError } from './_lib/monitoring.js';
+import { requireAdmin } from '../lib/admin-auth.js';
+import { applyCors, handleOptionsRequest } from '../lib/cors.js';
+import { logger, getRequestMeta } from '../lib/logger.js';
+import { captureServerError } from '../lib/monitoring.js';
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

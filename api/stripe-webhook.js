@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
-import { captureServerError } from './_lib/monitoring.js';
+import { captureServerError } from '../lib/monitoring.js';
 
 export const config = {
   api: {
