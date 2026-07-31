@@ -17,7 +17,7 @@
   "routes": [
     {
       "src": "/api/create-checkout-session",
-      "dest": "/api/create-checkout-session.js",
+      "dest": "/api/orders.js?action=checkout",
       "methods": ["POST", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
@@ -26,6 +26,11 @@
         "Access-Control-Allow-Credentials": "true",
         "Content-Type": "application/json"
       }
+    },
+    {
+      "src": "/api/create-donation-session",
+      "dest": "/api/orders.js?action=donation",
+      "methods": ["POST", "OPTIONS"]
     },
     {
       "src": "/api/send-purchase-email",
@@ -41,7 +46,7 @@
     },
     {
       "src": "/api/completed-orders",
-      "dest": "/api/completed-orders.js",
+      "dest": "/api/orders.js?action=completed",
       "methods": ["GET", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
@@ -50,6 +55,16 @@
         "Access-Control-Allow-Credentials": "true",
         "Content-Type": "application/json"
       }
+    },
+    {
+      "src": "/api/orders-export",
+      "dest": "/api/orders.js?action=export",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/my-orders",
+      "dest": "/api/orders.js?action=mine",
+      "methods": ["GET", "OPTIONS"]
     },
     {
       "src": "/api/stats",
