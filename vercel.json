@@ -87,7 +87,7 @@
     },
     {
       "src": "/api/users",
-      "dest": "/api/users.js",
+      "dest": "/api/admin.js?action=users",
       "methods": ["GET", "DELETE", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://jornadadeinsights.com",
@@ -96,6 +96,16 @@
         "Access-Control-Allow-Credentials": "true",
         "Content-Type": "application/json"
       }
+    },
+    {
+      "src": "/api/admin-alerts",
+      "dest": "/api/admin.js?action=alerts",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/admin-customer-lookup",
+      "dest": "/api/admin.js?action=customer-lookup",
+      "methods": ["GET", "OPTIONS"]
     },
     {
       "src": "/api/lifecycle-event-track",
