@@ -61,12 +61,14 @@ export function EbookCard({ book }: EbookCardProps) {
         <p className="font-medium group-hover:text-primary transition-colors">
           {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(book.price)}
         </p>
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           onClick={handleAddToCart}
           className="transition-all duration-300 hover:scale-105 hover:shadow-md"
+          aria-label={t('shop.featured.add', 'Adicionar ao carrinho')}
         >
-          <ShoppingCart className="mr-2 h-4 w-4" /> {t('shop.featured.add', 'Adicionar ao carrinho')}
+          <ShoppingCart className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">{t('shop.featured.add', 'Adicionar ao carrinho')}</span>
         </Button>
       </div>
     </div>
