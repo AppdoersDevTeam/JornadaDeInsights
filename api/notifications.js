@@ -334,6 +334,20 @@ const handleCronCheck = async (req, res, requestMeta) => {
       checkNewPodcastEpisodes(supabaseAdmin, requestMeta),
       checkAdminAlerts(supabaseAdmin, requestMeta),
     ]);
+
+    const { error: heartbeatError } = await supabaseAdmin
+      .from('app_metadata')
+      .upsert(
+        { key: 'last_cron_run:notifications', value: new Date().toISOString() },
+        { onConflict: 'key' }
+      );
+    if (heartbeatError) {
+      logger.warn('notifications_cron_heartbeat_failed', {
+        ...requestMeta,
+        errorMessage: heartbeatError.message,
+      });
+    }
+
     res.status(200).json({ success: true });
   } catch (error) {
     logger.error('notifications_cron_failed', {

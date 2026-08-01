@@ -35,6 +35,8 @@ import { captureClientError } from '@/lib/monitoring';
 import { LanguageProvider, useLanguage } from '@/context/language-context';
 import { LanguagePickerDialog } from '@/components/language/language-picker-dialog';
 import { InstallPrompt } from '@/components/pwa/install-prompt';
+import { useAuth } from '@/context/auth-context';
+import { isAdminEmail } from '@/lib/admin';
 
 const ROUTE_METADATA: Record<'pt-BR' | 'en', Record<string, { title: string; description: string }>> = {
   'pt-BR': {
@@ -122,6 +124,33 @@ const ROUTE_METADATA: Record<'pt-BR' | 'en', Record<string, { title: string; des
     },
   },
 };
+
+function isStandalonePwa() {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
+// Installed PWAs should open straight into the user's dashboard instead of the marketing home page.
+function PwaLaunchRedirect() {
+  const { user, isLoading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const hasRedirectedRef = useRef(false);
+
+  useEffect(() => {
+    if (isLoading || hasRedirectedRef.current) return;
+    if (location.pathname !== '/') return;
+    if (!user || !isStandalonePwa()) return;
+
+    hasRedirectedRef.current = true;
+    navigate(isAdminEmail(user.email) ? '/dashboard' : '/user-dashboard', { replace: true });
+  }, [user, isLoading, location.pathname, navigate]);
+
+  return null;
+}
 
 function App() {
   return (
@@ -248,6 +277,7 @@ function AppRoutes() {
   return (
     <AuthProvider>
       <CartProvider>
+        <PwaLaunchRedirect />
         <Routes>
           <Route path="/" element={<Layout><Outlet /></Layout>}>
             <Route index element={<HomePage />} />

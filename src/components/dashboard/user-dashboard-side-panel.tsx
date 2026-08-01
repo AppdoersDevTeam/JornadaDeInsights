@@ -61,7 +61,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
         <nav className="space-y-1 p-4">
           <Button
             variant={activeTab === 'overview' ? 'secondary' : 'ghost'}
-            className="w-full justify-start"
+            className="w-full justify-start min-h-[44px]"
             onClick={() => onTabChange('overview')}
           >
             <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -69,7 +69,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
           </Button>
           <Button
             variant={activeTab === 'ebooks' ? 'secondary' : 'ghost'}
-            className="w-full justify-start"
+            className="w-full justify-start min-h-[44px]"
             onClick={() => onTabChange('ebooks')}
           >
             <Book className="mr-2 h-4 w-4" />
@@ -77,7 +77,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
           </Button>
           <Button
             variant={activeTab === 'orders' ? 'secondary' : 'ghost'}
-            className="w-full justify-start"
+            className="w-full justify-start min-h-[44px]"
             onClick={() => onTabChange('orders')}
           >
             <ShoppingBag className="mr-2 h-4 w-4" />
@@ -85,7 +85,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
           </Button>
           <Button
             variant={activeTab === 'cart' ? 'secondary' : 'ghost'}
-            className="w-full justify-start"
+            className="w-full justify-start min-h-[44px]"
             onClick={() => onTabChange('cart')}
           >
             <ShoppingCart className="mr-2 h-4 w-4" />
@@ -98,7 +98,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
           </Button>
           <Button
             variant={activeTab === 'settings' ? 'secondary' : 'ghost'}
-            className="w-full justify-start"
+            className="w-full justify-start min-h-[44px]"
             onClick={() => onTabChange('settings')}
           >
             <Settings className="mr-2 h-4 w-4" />
@@ -107,7 +107,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
           <Button
             type="button"
             variant="ghost"
-            className="w-full justify-start"
+            className="w-full justify-start min-h-[44px]"
             onClick={openLanguagePrompt}
           >
             <Languages className="mr-2 h-4 w-4" />
@@ -118,7 +118,7 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
           </Button>
           <Button
             variant="ghost"
-            className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+            className="w-full justify-start min-h-[44px] text-red-500 hover:text-red-600 hover:bg-red-50"
             onClick={() => setShowSignOutDialog(true)}
           >
             <LogOut className="mr-2 h-4 w-4" />

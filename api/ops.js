@@ -11,6 +11,8 @@ const frontendUrl = process.env.FRONTEND_URL || 'https://jornadadeinsights.com';
 const cronSecret = process.env.CRON_SECRET;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
+const CRON_STALE_AFTER_MS = 36 * 60 * 60 * 1000;
+
 const handleHealth = async (_req, res) => {
   const missing = [];
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -25,6 +27,9 @@ const handleHealth = async (_req, res) => {
   if (!process.env.RESEND_API_KEY) {
     missing.push('RESEND_API_KEY');
   }
+  if (!cronSecret) {
+    missing.push('CRON_SECRET');
+  }
 
   const warnings = [];
   if (!process.env.STRIPE_WEBHOOK_SECRET) {
@@ -34,6 +39,28 @@ const handleHealth = async (_req, res) => {
     warnings.push('FRONTEND_URL');
   }
 
+  let notificationsCron = { lastRunAt: null, stale: true };
+  if (supabaseUrl && supabaseServiceRoleKey) {
+    try {
+      const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const { data } = await supabase
+        .from('app_metadata')
+        .select('value')
+        .eq('key', 'last_cron_run:notifications')
+        .maybeSingle();
+      const lastRunAt = data?.value || null;
+      const stale = !lastRunAt || Date.now() - new Date(lastRunAt).getTime() > CRON_STALE_AFTER_MS;
+      notificationsCron = { lastRunAt, stale };
+      if (stale) {
+        warnings.push('notifications_cron_stale');
+      }
+    } catch {
+      warnings.push('notifications_cron_status_unavailable');
+    }
+  }
+
   const healthy = missing.length === 0;
 
   res.status(healthy ? 200 : 503).json({
@@ -41,6 +68,7 @@ const handleHealth = async (_req, res) => {
     timestamp: new Date().toISOString(),
     missingEnv: missing,
     warnings,
+    notificationsCron,
   });
 };
 

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
 import { useLanguage } from '@/context/language-context';
 import { Button } from '@/components/ui/button';
-import { Download, Eye, X, Plus, Minus, ShoppingCart } from 'lucide-react';
+import { Download, Eye, X, Plus, Minus, ShoppingCart, ShoppingBag, BookOpen, Mic } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
@@ -26,8 +26,8 @@ import type { Ebook } from '@/components/shop/ebook-card';
 import { TabType } from '@/types/dashboard';
 import { trackLifecycleEvent } from '@/lib/lifecycle';
 import { NotificationPreferences } from '@/components/notifications/notification-preferences';
-
-const ALLOWED_ADMIN_EMAILS = ['devteam@appdoers.co.nz', 'ptasbr2020@gmail.com'];
+import { ALLOWED_ADMIN_EMAILS } from '@/lib/admin';
+import { SectionPromoCard } from '@/components/dashboard/section-promo-card';
 
 interface CompletedOrder {
   id: string;
@@ -789,6 +789,34 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Explore more sections */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold">{t('dashboard.explore.title', 'Explore more')}</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <SectionPromoCard
+                  to="/shop"
+                  title={t('promo.shop.title', 'eBook store')}
+                  description={t('promo.shop.description', 'Deepen your studies with our collection of Christian eBooks.')}
+                  ctaLabel={t('promo.cta', 'Explore')}
+                  icon={<ShoppingBag className="h-6 w-6" />}
+                />
+                <SectionPromoCard
+                  to="/curiosidades"
+                  title={t('promo.curiosidades.title', 'Insights')}
+                  description={t('promo.curiosidades.description', 'Discover reflections and insights on the Bible and faith.')}
+                  ctaLabel={t('promo.cta', 'Explore')}
+                  icon={<BookOpen className="h-6 w-6" />}
+                />
+                <SectionPromoCard
+                  to="/podcast"
+                  title={t('promo.podcast.title', 'Podcast')}
+                  description={t('promo.podcast.description', 'Listen to episodes with biblical reflections whenever you like.')}
+                  ctaLabel={t('promo.cta', 'Explore')}
+                  icon={<Mic className="h-6 w-6" />}
+                />
+              </div>
+            </div>
           </div>
         )}
 
