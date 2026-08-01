@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, LogOut, BookOpen, Languages } from 'lucide-react';
+import { Menu, X, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, LogOut, BookOpen, Languages, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
@@ -186,6 +186,17 @@ export function Header() {
               <LayoutDashboard className="h-5 w-5" />
               Dashboard
             </NavLink>
+          )}
+
+          {/* Notifications for logged-in users */}
+          {user && (
+            <div className="flex items-center justify-between gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal">
+              <span className="flex items-center gap-3">
+                <Bell className="h-5 w-5" />
+                {t('notifications.title', 'Notifications')}
+              </span>
+              <NotificationBell triggerClassName="relative p-2 rounded-full hover:bg-[#606C38]/10 transition-colors text-[#606C38]" />
+            </div>
           )}
 
           {/* Main Navigation Links */}

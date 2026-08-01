@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart, Info, BookOpen } from 'lucide-react';
+import { Menu, X, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart, Info, BookOpen, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
@@ -159,7 +159,18 @@ export function AdminHeader() {
             <LayoutDashboard className="h-5 w-5" />
             {t('nav.dashboard', 'Dashboard')}
           </Link>
-          
+
+          {/* Notifications */}
+          {user && (
+            <div className="flex items-center justify-between gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal">
+              <span className="flex items-center gap-3">
+                <Bell className="h-5 w-5" />
+                {t('notifications.title', 'Notifications')}
+              </span>
+              <NotificationBell triggerClassName="relative p-2 rounded-full hover:bg-[#606C38]/10 transition-colors text-[#606C38]" />
+            </div>
+          )}
+
           {/* Dashboard Links Dropdown */}
           <button
             onClick={() => setIsDashboardOpen(!isDashboardOpen)}
