@@ -37,6 +37,7 @@ import { LanguagePickerDialog } from '@/components/language/language-picker-dial
 import { InstallPrompt } from '@/components/pwa/install-prompt';
 import { useAuth } from '@/context/auth-context';
 import { isAdminEmail } from '@/lib/admin';
+import { isStandalonePwa } from '@/lib/pwa';
 
 const ROUTE_METADATA: Record<'pt-BR' | 'en', Record<string, { title: string; description: string }>> = {
   'pt-BR': {
@@ -124,14 +125,6 @@ const ROUTE_METADATA: Record<'pt-BR' | 'en', Record<string, { title: string; des
     },
   },
 };
-
-function isStandalonePwa() {
-  if (typeof window === 'undefined') return false;
-  return (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
-  );
-}
 
 // Installed PWAs should open straight into the user's dashboard instead of the marketing home page.
 function PwaLaunchRedirect() {

@@ -53,26 +53,42 @@ export const notifyNewContent = async (
   try {
     // Upsert + ignoreDuplicates: re-publishing/re-saving the same content
     // (matched by type+sourceId) is a harmless no-op, not a duplicate broadcast.
-    const { error } = await supabase.from('notification_events').upsert(
-      {
-        type,
-        audience: 'user',
-        title: options.title,
-        body: options.body ?? null,
-        link: options.link,
-        source_id: options.sourceId,
-        metadata: options.metadata ?? null,
-      },
-      { onConflict: 'type,source_id', ignoreDuplicates: true }
-    );
+    const { data, error } = await supabase
+      .from('notification_events')
+      .upsert(
+        {
+          type,
+          audience: 'user',
+          title: options.title,
+          body: options.body ?? null,
+          link: options.link,
+          source_id: options.sourceId,
+          metadata: options.metadata ?? null,
+        },
+        { onConflict: 'type,source_id', ignoreDuplicates: true }
+      )
+      .select('id')
+      .maybeSingle();
     if (error) throw error;
+
+    // The browser can't hold the VAPID private key, so ask the server to send
+    // the push for the row we just created. Best-effort — a re-publish that hit
+    // the ignoreDuplicates no-op above returns no row, so there's nothing to push.
+    if (data?.id) {
+      void authorizedFetch('/api/notifications-broadcast-push', {
+        method: 'POST',
+        body: JSON.stringify({ notificationId: data.id }),
+      }).catch((pushError) => {
+        console.error('Error triggering push broadcast:', pushError);
+      });
+    }
   } catch (error) {
     // Non-fatal: publishing the content itself already succeeded.
     console.error('Error broadcasting notification:', error);
   }
 };
 
-const authorizedFetch = async (path: string, init?: RequestInit) => {
+export const authorizedFetch = async (path: string, init?: RequestInit) => {
   const token = await getSupabaseAccessToken();
   if (!token) throw new Error('Not authenticated');
 

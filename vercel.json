@@ -143,6 +143,21 @@
       "methods": ["GET", "OPTIONS"]
     },
     {
+      "src": "/api/notifications-broadcast-push",
+      "dest": "/api/notifications.js?action=broadcast-push",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/push-subscribe",
+      "dest": "/api/push.js?action=subscribe",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/push-unsubscribe",
+      "dest": "/api/push.js?action=unsubscribe",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
       "src": "/api/lifecycle-event-track",
       "dest": "/api/lifecycle.js?action=track",
       "methods": ["POST", "OPTIONS"]

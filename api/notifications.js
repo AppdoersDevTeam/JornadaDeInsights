@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { requireUser } from '../lib/admin-auth.js';
 import { applyCors, handleOptionsRequest } from '../lib/cors.js';
 import { logger, getRequestMeta } from '../lib/logger.js';
+import { sendPushToAudience } from '../lib/push.js';
 
 const LIST_LIMIT = 50;
 
@@ -151,6 +152,55 @@ const handleMarkRead = async (req, res, requestMeta) => {
   }
 };
 
+// --- action=broadcast-push ---
+// Called by the client right after it inserts a notification_events row (new ebook/
+// curiosidade publish). The browser can't hold the VAPID private key, so this
+// re-reads the just-created row server-side and sends the push from there.
+
+const handleBroadcastPush = async (req, res, requestMeta) => {
+  applyCors(req, res, { methods: 'POST,OPTIONS' });
+  if (handleOptionsRequest(req, res)) return;
+
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  try {
+    const auth = await requireUser(req, res);
+    if (!auth) return;
+    const { supabaseAdmin, isAdmin } = auth;
+
+    if (!isAdmin) {
+      res.status(403).json({ error: 'Forbidden' });
+      return;
+    }
+
+    const { notificationId } = req.body || {};
+    if (!notificationId) {
+      res.status(400).json({ error: 'notificationId is required' });
+      return;
+    }
+
+    const { data: event, error } = await supabaseAdmin
+      .from('notification_events')
+      .select('audience, type, title, body, link')
+      .eq('id', notificationId)
+      .single();
+    if (error) throw error;
+
+    await sendPushToAudience(supabaseAdmin, event);
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    logger.error('notifications_broadcast_push_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // --- action=cron-check (Vercel Cron entry point) ---
 
 const getServiceRoleClient = () => {
@@ -197,15 +247,23 @@ const checkNewPodcastEpisodes = async (supabaseAdmin, requestMeta) => {
 
   if (rows.length === 0) return;
 
-  const { error } = await supabaseAdmin
+  const { data: inserted, error } = await supabaseAdmin
     .from('notification_events')
-    .upsert(rows, { onConflict: 'type,source_id', ignoreDuplicates: true });
+    .upsert(rows, { onConflict: 'type,source_id', ignoreDuplicates: true })
+    .select('type, title, body, link');
   if (error) {
     logger.error('notifications_cron_youtube_insert_failed', {
       ...requestMeta,
       errorMessage: error.message,
     });
+    return;
   }
+
+  await Promise.all(
+    (inserted || []).map((row) =>
+      sendPushToAudience(supabaseAdmin, { audience: 'user', ...row })
+    )
+  );
 };
 
 const checkAdminAlerts = async (supabaseAdmin, requestMeta) => {
@@ -302,15 +360,23 @@ const checkAdminAlerts = async (supabaseAdmin, requestMeta) => {
 
   if (events.length === 0) return;
 
-  const { error } = await supabaseAdmin
+  const { data: inserted, error } = await supabaseAdmin
     .from('notification_events')
-    .upsert(events, { onConflict: 'type,source_id', ignoreDuplicates: true });
+    .upsert(events, { onConflict: 'type,source_id', ignoreDuplicates: true })
+    .select('type, title, body, link');
   if (error) {
     logger.error('notifications_cron_alerts_insert_failed', {
       ...requestMeta,
       errorMessage: error.message,
     });
+    return;
   }
+
+  await Promise.all(
+    (inserted || []).map((row) =>
+      sendPushToAudience(supabaseAdmin, { audience: 'admin', ...row })
+    )
+  );
 };
 
 const handleCronCheck = async (req, res, requestMeta) => {
@@ -367,6 +433,8 @@ export default async function handler(req, res) {
       return handleList(req, res, requestMeta);
     case 'mark-read':
       return handleMarkRead(req, res, requestMeta);
+    case 'broadcast-push':
+      return handleBroadcastPush(req, res, requestMeta);
     case 'cron-check':
       return handleCronCheck(req, res, requestMeta);
     default:

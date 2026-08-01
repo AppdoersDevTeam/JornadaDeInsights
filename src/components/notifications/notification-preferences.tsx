@@ -11,6 +11,14 @@ import {
   updateNotificationPreference,
   type NotificationType,
 } from '@/lib/notifications';
+import {
+  getExistingPushSubscription,
+  getNotificationPermission,
+  isPushSupported,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from '@/lib/push';
+import { isIos, isStandalonePwa } from '@/lib/pwa';
 
 interface NotificationPreferencesProps {
   isAdmin: boolean;
@@ -38,6 +46,46 @@ export function NotificationPreferences({ isAdmin }: NotificationPreferencesProp
   const [preferences, setPreferences] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [savingType, setSavingType] = useState<string | null>(null);
+
+  const pushSupported = isPushSupported();
+  const iosNeedsInstall = isIos() && !isStandalonePwa();
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+
+  useEffect(() => {
+    if (!pushSupported) return;
+    (async () => {
+      try {
+        const subscription = await getExistingPushSubscription();
+        setPushEnabled(Boolean(subscription) && getNotificationPermission() === 'granted');
+      } catch (error) {
+        console.error('Error checking push subscription:', error);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handlePushToggle = async (next: boolean) => {
+    setPushBusy(true);
+    try {
+      if (next) {
+        await subscribeToPush();
+        setPushEnabled(true);
+      } else {
+        await unsubscribeFromPush();
+        setPushEnabled(false);
+      }
+    } catch (error) {
+      console.error('Error updating push subscription:', error);
+      toast.error(
+        next
+          ? t('notifications.push.enableError', 'Could not enable push notifications.')
+          : t('notifications.push.disableError', 'Could not disable push notifications.')
+      );
+    } finally {
+      setPushBusy(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -96,6 +144,40 @@ export function NotificationPreferences({ isAdmin }: NotificationPreferencesProp
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 pb-4 border-b">
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <Label htmlFor="push-master-toggle" className="font-medium">
+                {t('notifications.push.title', 'Push notifications on this device')}
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                {t(
+                  'notifications.push.desc',
+                  'Get notified even when the app is closed.'
+                )}
+              </p>
+            </div>
+            <Switch
+              id="push-master-toggle"
+              checked={pushEnabled}
+              disabled={!pushSupported || iosNeedsInstall || pushBusy}
+              onCheckedChange={handlePushToggle}
+            />
+          </div>
+          {!pushSupported && !iosNeedsInstall && (
+            <p className="text-sm text-muted-foreground">
+              {t('notifications.push.unsupported', 'Push notifications are not supported in this browser.')}
+            </p>
+          )}
+          {iosNeedsInstall && (
+            <p className="text-sm text-muted-foreground">
+              {t(
+                'notifications.push.iosInstallHint',
+                'On iPhone, add this app to your Home Screen first (Share → Add to Home Screen), then come back here to enable notifications.'
+              )}
+            </p>
+          )}
+        </div>
         <div className="divide-y">
           {USER_NOTIFICATION_TYPES.map((type) => renderToggle(type, USER_TYPE_LABEL_KEYS[type]))}
         </div>

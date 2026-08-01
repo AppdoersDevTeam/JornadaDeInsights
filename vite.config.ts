@@ -64,6 +64,9 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
+        // Adds push/notificationclick handlers to the generated SW without
+        // switching to injectManifest — see public/push-sw.js.
+        importScripts: ['push-sw.js'],
         runtimeCaching: [
           {
             // Never cache API or Supabase responses — dashboards must always hit the network.

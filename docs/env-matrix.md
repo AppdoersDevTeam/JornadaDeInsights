@@ -25,6 +25,9 @@ All variables required to run Jornada de Insights in production.
 | `ALLOWED_ORIGINS` | 💡 Optional | CORS in analytics endpoints | Falls back to `https://jornadadeinsights.com`. Set to override |
 | `SENTRY_DSN` | 💡 Optional | API runtime monitoring (`api/_lib/monitoring.js`) | Add DSN to capture serverless exceptions in production |
 | `CRON_SECRET` | ❌ **MISSING** | `api/lifecycle-followup-runner.js` | Shared secret required by scheduled job caller. Send as `x-cron-secret` header |
+| `VAPID_PUBLIC_KEY` | ❌ **MISSING** | `lib/push.js` | Web Push application server public key. Generate with `npx web-push generate-vapid-keys`. Not secret — also exposed to the frontend as `VITE_VAPID_PUBLIC_KEY` (same value) |
+| `VAPID_PRIVATE_KEY` | ❌ **MISSING** | `lib/push.js` | Web Push private key — secret, server only |
+| `VAPID_SUBJECT` | ❌ **MISSING** | `lib/push.js` | Contact address for push services, e.g. `mailto:devteam@appdoers.co.nz` |
 
 ---
 
@@ -39,6 +42,7 @@ All variables required to run Jornada de Insights in production.
 | `VITE_YOUTUBE_CHANNEL_ID` | ✅ Set | Home page videos, Podcast page | — |
 | `VITE_SERVER_URL` | 💡 Optional | API base URL in frontend | Leave empty in production — the fallback `window.location.origin` is correct since API and frontend share the same Vercel domain. Only needed for a separate server origin |
 | `VITE_SENTRY_DSN` | 💡 Optional | Frontend runtime monitoring (`src/lib/monitoring.ts`) | Add DSN to capture browser errors in production |
+| `VITE_VAPID_PUBLIC_KEY` | ❌ **MISSING** | `src/lib/push.ts` | Same value as server-side `VAPID_PUBLIC_KEY`. Needed for the browser to call `pushManager.subscribe()` |
 
 ---
 
