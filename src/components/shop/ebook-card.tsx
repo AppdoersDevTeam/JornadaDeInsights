@@ -62,13 +62,13 @@ export function EbookCard({ book }: EbookCardProps) {
           {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(book.price)}
         </p>
         <Button
-          size="sm"
+          size="icon"
           onClick={handleAddToCart}
-          className="transition-all duration-300 hover:scale-105 hover:shadow-md"
+          className="transition-all duration-300 hover:scale-105 hover:shadow-md flex-shrink-0"
           aria-label={t('shop.featured.add', 'Adicionar ao carrinho')}
+          title={t('shop.featured.add', 'Adicionar ao carrinho')}
         >
-          <ShoppingCart className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">{t('shop.featured.add', 'Adicionar ao carrinho')}</span>
+          <ShoppingCart className="h-4 w-4" />
         </Button>
       </div>
     </div>
