@@ -16,6 +16,7 @@ import {
   markNotificationRead,
   type AppNotification,
 } from '@/lib/notifications';
+import { localizeNotification } from '@/lib/notification-i18n';
 
 const POLL_INTERVAL_MS = 60_000;
 
@@ -26,7 +27,7 @@ interface NotificationBellProps {
 
 export function NotificationBell({ triggerClassName }: NotificationBellProps) {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -126,32 +127,35 @@ export function NotificationBell({ triggerClassName }: NotificationBellProps) {
             </p>
           ) : (
             <ul>
-              {notifications.map((notification) => (
-                <li key={notification.id} className="border-b last:border-b-0">
-                  <Link
-                    to={notification.link || '#'}
-                    onClick={() => handleItemClick(notification)}
-                    className={`flex flex-col gap-0.5 px-3 py-2.5 text-sm hover:bg-accent transition-colors ${
-                      notification.read ? '' : 'bg-primary/5'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2 font-medium">
-                      {!notification.read && (
-                        <span className="h-2 w-2 rounded-full bg-secondary flex-shrink-0" />
-                      )}
-                      {notification.title}
-                    </span>
-                    {notification.body && (
-                      <span className="text-muted-foreground text-xs line-clamp-2">
-                        {notification.body}
+              {notifications.map((notification) => {
+                const localized = localizeNotification(notification, language, t);
+                return (
+                  <li key={notification.id} className="border-b last:border-b-0">
+                    <Link
+                      to={notification.link || '#'}
+                      onClick={() => handleItemClick(notification)}
+                      className={`flex flex-col gap-0.5 px-3 py-2.5 text-sm hover:bg-accent transition-colors ${
+                        notification.read ? '' : 'bg-primary/5'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2 font-medium">
+                        {!notification.read && (
+                          <span className="h-2 w-2 rounded-full bg-secondary flex-shrink-0" />
+                        )}
+                        {localized.title}
                       </span>
-                    )}
-                    <span className="text-muted-foreground text-xs">
-                      {new Date(notification.createdAt).toLocaleString()}
-                    </span>
-                  </Link>
-                </li>
-              ))}
+                      {localized.body && (
+                        <span className="text-muted-foreground text-xs line-clamp-2">
+                          {localized.body}
+                        </span>
+                      )}
+                      <span className="text-muted-foreground text-xs">
+                        {new Date(notification.createdAt).toLocaleString()}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </ScrollArea>

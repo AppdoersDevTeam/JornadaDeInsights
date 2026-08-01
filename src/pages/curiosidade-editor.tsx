@@ -143,6 +143,7 @@ export function CuriosidadeEditorPage() {
             title: titlePt || titleEnDb || 'New post',
             link: `/curiosidades/${id}`,
             sourceId: id,
+            metadata: { titlePt: titlePt || null, titleEn: titleEnDb || null },
           });
         }
         toast.success(publish ? t('admin.curiosidades.publishSuccess', 'Post published successfully!') : t('admin.curiosidades.draftSaved', 'Draft saved successfully!'));
@@ -163,6 +164,7 @@ export function CuriosidadeEditorPage() {
             title: titlePt || titleEnDb || 'New post',
             link: `/curiosidades/${newCuriosidade.id}`,
             sourceId: newCuriosidade.id,
+            metadata: { titlePt: titlePt || null, titleEn: titleEnDb || null },
           });
         }
         toast.success(publish ? t('admin.curiosidades.publishSuccess', 'Post published successfully!') : t('admin.curiosidades.draftSaved', 'Draft saved successfully!'));

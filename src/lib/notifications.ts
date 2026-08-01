@@ -42,7 +42,13 @@ export interface AppNotification {
 // only succeeds when the caller's session belongs to an allow-listed admin.
 export const notifyNewContent = async (
   type: 'new_ebook' | 'new_curiosidade',
-  options: { title: string; body?: string | null; link: string; sourceId: string }
+  options: {
+    title: string;
+    body?: string | null;
+    link: string;
+    sourceId: string;
+    metadata?: Record<string, unknown>;
+  }
 ): Promise<void> => {
   try {
     // Upsert + ignoreDuplicates: re-publishing/re-saving the same content
@@ -55,6 +61,7 @@ export const notifyNewContent = async (
         body: options.body ?? null,
         link: options.link,
         source_id: options.sourceId,
+        metadata: options.metadata ?? null,
       },
       { onConflict: 'type,source_id', ignoreDuplicates: true }
     );
