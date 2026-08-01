@@ -257,8 +257,10 @@ export function ShopPage() {
                       addItem(featuredEbook);
                     }}
                     className="transition-all duration-300 hover:scale-105 hover:shadow-md w-full sm:w-auto"
+                    aria-label={t('shop.featured.add', 'Adicionar ao carrinho')}
                   >
-                    <ShoppingCart className="mr-2 h-4 w-4" /> {t('shop.featured.add', 'Adicionar ao carrinho')}
+                    <ShoppingCart className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">{t('shop.featured.add', 'Adicionar ao carrinho')}</span>
                   </Button>
                 </Link>
               </>

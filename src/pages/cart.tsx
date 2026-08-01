@@ -391,8 +391,10 @@ export function CartPage() {
                             variant="outline"
                             className="w-full mt-3"
                             onClick={() => addItem(ebook)}
+                            aria-label={t('cart.crossSell.add', 'Add to cart')}
                           >
-                            {t('cart.crossSell.add', 'Add to cart')}
+                            <ShoppingCart className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">{t('cart.crossSell.add', 'Add to cart')}</span>
                           </Button>
                         </div>
                       ))}

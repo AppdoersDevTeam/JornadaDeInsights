@@ -16,7 +16,14 @@ const router = {
 
 initClientMonitoring();
 
-registerSW({ immediate: true });
+// Without a reload on update, an already-open tab or installed PWA keeps running
+// the bundle it loaded with even after a new version activates in the background.
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    updateSW(true);
+  },
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

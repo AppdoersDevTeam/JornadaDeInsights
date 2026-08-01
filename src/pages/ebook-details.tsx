@@ -129,13 +129,14 @@ export function EbookDetailsPage() {
             <p className="text-lg text-muted-foreground mb-8 whitespace-pre-line">{ebook.description}</p>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 onClick={() => addItem(ebook)}
                 className="flex-1"
+                aria-label={t('ebook.addToCart', 'Add to cart')}
               >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                {t('ebook.addToCart', 'Add to cart')}
+                <ShoppingCart className="h-5 w-5 sm:mr-2" />
+                <span className="hidden sm:inline">{t('ebook.addToCart', 'Add to cart')}</span>
               </Button>
               <Button variant="outline" size="lg" asChild className="flex-1">
                 <Link to="/cart">{t('ebook.goToCart', 'Go to cart')}</Link>
