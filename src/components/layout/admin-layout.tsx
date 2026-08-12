@@ -29,7 +29,7 @@ export function AdminLayout({ children, sidePanel }: AdminLayoutProps) {
           </>
         )}
         {/* Main Content */}
-        <main className={`flex-1 ${sidePanel ? 'md:pl-64' : ''}`}>
+        <main className={`flex-1 min-w-0 ${sidePanel ? 'md:pl-64' : ''}`}>
           {children}
         </main>
       </div>

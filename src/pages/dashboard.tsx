@@ -1288,7 +1288,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 <p className="text-sm text-muted-foreground">{t('admin.analytics.loadingTraffic', 'Loading traffic...')}</p>
               ) : (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Card className="p-4">
                       <p className="text-sm text-muted-foreground">{t('admin.analytics.pageViews', 'Page views')}</p>
                       <p className="text-2xl font-bold">{siteAnalytics.totalPageViews.toLocaleString(numberLocale)}</p>
@@ -1299,8 +1299,8 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                     </Card>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <Card className="p-4">
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <Card className="min-w-0 p-4">
                       <h3 className="text-sm font-semibold mb-3">{t('admin.analytics.countries', 'Countries')}</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topCountries.length === 0 && (
@@ -1308,9 +1308,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                         )}
                         {siteAnalytics.topCountries.map((item) => (
                           <div key={item.country} className="space-y-1">
-                            <div className="flex justify-between text-sm">
-                              <span>{formatCountryName(item.country, language)}</span>
-                              <span>{item.views}</span>
+                            <div className="flex justify-between gap-2 text-sm">
+                              <span className="truncate">{formatCountryName(item.country, language)}</span>
+                              <span className="shrink-0">{item.views}</span>
                             </div>
                             <Progress
                               value={siteAnalytics.totalPageViews > 0 ? (item.views / siteAnalytics.totalPageViews) * 100 : 0}
@@ -1320,7 +1320,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       </div>
                     </Card>
 
-                    <Card className="p-4">
+                    <Card className="min-w-0 p-4">
                       <h3 className="text-sm font-semibold mb-3">{t('admin.analytics.topPages', 'Top pages')}</h3>
                       <div className="space-y-2">
                         {siteAnalytics.topPages.length === 0 && (
@@ -1344,8 +1344,8 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                     </Card>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <Card className="p-4">
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                    <Card className="min-w-0 p-4">
                       <h3 className="text-sm font-semibold mb-3">{t('admin.analytics.referrers', 'Referrers')}</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topReferrers.length === 0 && (
@@ -1373,7 +1373,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       </div>
                     </Card>
 
-                    <Card className="p-4">
+                    <Card className="min-w-0 p-4">
                       <h3 className="text-sm font-semibold mb-3">{t('admin.analytics.devices', 'Devices')}</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topDevices.length === 0 && (
@@ -1397,7 +1397,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                       </div>
                     </Card>
 
-                    <Card className="p-4">
+                    <Card className="min-w-0 p-4">
                       <h3 className="text-sm font-semibold mb-3">{t('admin.analytics.operatingSystems', 'Operating systems')}</h3>
                       <div className="space-y-3">
                         {siteAnalytics.topOperatingSystems.length === 0 && (
@@ -1430,7 +1430,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               )}
             </CardContent>
           </Card>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 w-full [&>*]:min-w-0">
             <SalesTrendsChart
               dailyData={salesTrends.daily}
               weeklyData={salesTrends.weekly}
