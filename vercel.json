@@ -118,6 +118,11 @@
       "methods": ["GET", "OPTIONS"]
     },
     {
+      "src": "/api/stripe-webhook-events",
+      "dest": "/api/admin.js?action=webhook-events",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
       "src": "/api/admin-customer-lookup",
       "dest": "/api/admin.js?action=customer-lookup",
       "methods": ["GET", "OPTIONS"]
