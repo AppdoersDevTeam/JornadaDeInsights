@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'react-hot-toast';
 import UploadEbookForm from '@/components/dashboard/upload-ebook-form';
 import EbookList from '@/components/dashboard/ebook-list';
@@ -106,6 +107,28 @@ interface SiteAnalyticsSummary {
   dailyViews: SiteAnalyticsPoint[];
   windowDays: number;
 }
+
+interface MonthlyAnalyticsSummary {
+  month: string;
+  totalPageViews: number;
+  uniqueVisitors: number;
+  availableMonths: string[];
+}
+
+const currentMonthKey = () => {
+  const now = new Date();
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+};
+
+const formatMonthLabel = (month: string, locale: string) => {
+  const [year, monthIndex] = month.split('-').map((part) => Number.parseInt(part, 10));
+  if (!Number.isFinite(year) || !Number.isFinite(monthIndex)) return month;
+  return new Date(Date.UTC(year, monthIndex - 1, 1)).toLocaleDateString(locale, {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+};
 
 interface LifecycleFunnelSummary {
   windowDays: number;
@@ -215,6 +238,15 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   });
   const [siteAnalyticsLoading, setSiteAnalyticsLoading] = useState(false);
   const [siteAnalyticsError, setSiteAnalyticsError] = useState<string | null>(null);
+  const [monthlyAnalytics, setMonthlyAnalytics] = useState<MonthlyAnalyticsSummary>({
+    month: currentMonthKey(),
+    totalPageViews: 0,
+    uniqueVisitors: 0,
+    availableMonths: [currentMonthKey()],
+  });
+  const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthKey());
+  const [monthlyAnalyticsLoading, setMonthlyAnalyticsLoading] = useState(false);
+  const [monthlyAnalyticsError, setMonthlyAnalyticsError] = useState<string | null>(null);
   const [lifecycleFunnel, setLifecycleFunnel] = useState<LifecycleFunnelSummary>({
     windowDays: 30,
     totals: {
@@ -677,6 +709,56 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
     fetchSiteAnalytics();
   }, [activeTab, SERVER_URL, t]);
+
+  useEffect(() => {
+    if (activeTab !== 'analytics') return;
+
+    const fetchMonthlyAnalytics = async () => {
+      try {
+        setMonthlyAnalyticsLoading(true);
+        setMonthlyAnalyticsError(null);
+
+        const idToken = await getSupabaseAccessToken();
+        if (!idToken) throw new Error('Admin token is not available');
+
+        const response = await fetch(
+          `${SERVER_URL}/api/site-analytics-monthly?month=${encodeURIComponent(selectedMonth)}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${idToken}`,
+            },
+            credentials: 'include',
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to load monthly analytics (${response.status})`);
+        }
+
+        const data = await response.json();
+        const availableMonths =
+          Array.isArray(data.availableMonths) && data.availableMonths.length > 0
+            ? (data.availableMonths as string[])
+            : [selectedMonth];
+
+        setMonthlyAnalytics({
+          month: typeof data.month === 'string' ? data.month : selectedMonth,
+          totalPageViews: Number(data.totalPageViews) || 0,
+          uniqueVisitors: Number(data.uniqueVisitors) || 0,
+          availableMonths,
+        });
+      } catch (error) {
+        console.error('Error fetching monthly analytics:', error);
+        setMonthlyAnalyticsError(t('admin.analytics.monthlyLoadFail', 'Could not load monthly totals.'));
+      } finally {
+        setMonthlyAnalyticsLoading(false);
+      }
+    };
+
+    fetchMonthlyAnalytics();
+  }, [activeTab, SERVER_URL, selectedMonth, t]);
 
   useEffect(() => {
     if (activeTab !== 'analytics') return;
@@ -1273,6 +1355,58 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
 
       {activeTab === 'analytics' && (
         <div className="space-y-6 w-full">
+          <Card className="p-6 w-full">
+            <CardHeader>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <CardTitle>{t('admin.analytics.monthlyTitle', 'Monthly totals')}</CardTitle>
+                  <CardDescription>
+                    {t('admin.analytics.monthlyDesc', 'Page views and unique visitors for the selected month.')}
+                  </CardDescription>
+                </div>
+                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                  <SelectTrigger className="w-full sm:w-[200px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {monthlyAnalytics.availableMonths.map((month) => (
+                      <SelectItem key={month} value={month}>
+                        {formatMonthLabel(month, numberLocale)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {monthlyAnalyticsError && (
+                <p className="text-sm text-destructive">{monthlyAnalyticsError}</p>
+              )}
+              {monthlyAnalyticsLoading ? (
+                <p className="text-sm text-muted-foreground">
+                  {t('admin.analytics.loadingMonthly', 'Loading monthly totals...')}
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Card className="min-w-0 p-4">
+                    <p className="text-sm text-muted-foreground">{t('admin.analytics.pageViews', 'Page views')}</p>
+                    <p className="text-2xl font-bold">
+                      {monthlyAnalytics.totalPageViews.toLocaleString(numberLocale)}
+                    </p>
+                  </Card>
+                  <Card className="min-w-0 p-4">
+                    <p className="text-sm text-muted-foreground">
+                      {t('admin.analytics.uniqueVisitors', 'Unique visitors')}
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {monthlyAnalytics.uniqueVisitors.toLocaleString(numberLocale)}
+                    </p>
+                  </Card>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <Card className="p-6 w-full">
             <CardHeader>
               <CardTitle>{t('admin.analytics.trafficTitle', 'Site traffic')}</CardTitle>

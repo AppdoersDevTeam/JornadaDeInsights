@@ -313,6 +313,167 @@ const handleSummary = async (req, res, requestMeta) => {
   }
 };
 
+// --- action=monthly (site-analytics-monthly) ---
+
+const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
+const UNIQUE_VISITOR_PAGE_SIZE = 1000;
+const UNIQUE_VISITOR_MAX_ROWS = 100000;
+
+const toMonthKey = (date) =>
+  `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+
+const monthRange = (month) => {
+  const [year, monthIndex] = month.split('-').map((part) => Number.parseInt(part, 10));
+  const start = new Date(Date.UTC(year, monthIndex - 1, 1));
+  const end = new Date(Date.UTC(year, monthIndex, 1));
+  return { start: start.toISOString(), end: end.toISOString() };
+};
+
+const listMonthsSince = (firstDate, now) => {
+  const months = [];
+  const cursor = new Date(Date.UTC(firstDate.getUTCFullYear(), firstDate.getUTCMonth(), 1));
+  const last = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+
+  while (cursor <= last) {
+    months.push(toMonthKey(cursor));
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  }
+
+  return months.reverse();
+};
+
+const countUniqueVisitors = async (supabaseAdmin, start, end) => {
+  const visitors = new Set();
+  let from = 0;
+  let truncated = false;
+
+  for (;;) {
+    const { data, error } = await supabaseAdmin
+      .from('site_page_views')
+      .select('visitor_id')
+      .gte('created_at', start)
+      .lt('created_at', end)
+      .order('created_at', { ascending: true })
+      .range(from, from + UNIQUE_VISITOR_PAGE_SIZE - 1);
+
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+
+    for (const row of data) {
+      if (row.visitor_id) visitors.add(row.visitor_id);
+    }
+
+    if (data.length < UNIQUE_VISITOR_PAGE_SIZE) break;
+
+    from += UNIQUE_VISITOR_PAGE_SIZE;
+    if (from >= UNIQUE_VISITOR_MAX_ROWS) {
+      truncated = true;
+      break;
+    }
+  }
+
+  return { uniqueVisitors: visitors.size, truncated };
+};
+
+const handleMonthly = async (req, res, requestMeta) => {
+  applyCors(req, res, { methods: 'GET,OPTIONS', cacheControl: 'private, no-store' });
+  if (handleOptionsRequest(req, res)) return;
+
+  if (req.method !== 'GET') {
+    logger.warn('site_analytics_monthly_method_not_allowed', requestMeta);
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    logger.error('site_analytics_monthly_missing_supabase_config', requestMeta);
+    res.status(500).json({ error: 'Missing Supabase configuration for analytics summary' });
+    return;
+  }
+
+  try {
+    const authHeader = req.headers.authorization || '';
+    const idToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+    if (!idToken) {
+      logger.warn('site_analytics_monthly_missing_token', requestMeta);
+      res.status(401).json({ error: 'Missing auth token' });
+      return;
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseAdmin.auth.getUser(idToken);
+
+    if (authError || !user) {
+      logger.warn('site_analytics_monthly_invalid_token', requestMeta);
+      res.status(401).json({ error: 'Invalid auth token' });
+      return;
+    }
+
+    if (!ALLOWED_ADMIN_EMAILS.includes((user.email || '').toLowerCase())) {
+      logger.warn('site_analytics_monthly_forbidden', requestMeta);
+      res.status(403).json({ error: 'Forbidden' });
+      return;
+    }
+
+    const now = new Date();
+    const requestedMonth = String(req.query.month || '');
+
+    if (requestedMonth && !MONTH_PATTERN.test(requestedMonth)) {
+      res.status(400).json({ error: 'Invalid month. Expected format YYYY-MM.' });
+      return;
+    }
+
+    const month = requestedMonth || toMonthKey(now);
+
+    const { start, end } = monthRange(month);
+
+    const [totalRes, firstRowRes] = await Promise.all([
+      supabaseAdmin
+        .from('site_page_views')
+        .select('id', { count: 'exact', head: true })
+        .gte('created_at', start)
+        .lt('created_at', end),
+      supabaseAdmin
+        .from('site_page_views')
+        .select('created_at')
+        .order('created_at', { ascending: true })
+        .limit(1),
+    ]);
+
+    if (totalRes.error) throw totalRes.error;
+    if (firstRowRes.error) throw firstRowRes.error;
+
+    const { uniqueVisitors, truncated } = await countUniqueVisitors(supabaseAdmin, start, end);
+
+    const firstCreatedAt = firstRowRes.data?.[0]?.created_at;
+    const availableMonths = firstCreatedAt
+      ? listMonthsSince(new Date(firstCreatedAt), now)
+      : [toMonthKey(now)];
+
+    res.status(200).json({
+      month,
+      totalPageViews: totalRes.count || 0,
+      uniqueVisitors,
+      uniqueVisitorsTruncated: truncated,
+      availableMonths,
+    });
+  } catch (error) {
+    captureServerError(error, { route: 'site-analytics-monthly' });
+    logger.error('site_analytics_monthly_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
+    res.status(500).json({ error: 'Failed to build monthly analytics' });
+  }
+};
+
 // --- action=top-products (top-products) ---
 
 const handleTopProducts = async (req, res, requestMeta) => {
@@ -663,6 +824,8 @@ export default async function handler(req, res) {
       return handleTrack(req, res, requestMeta);
     case 'summary':
       return handleSummary(req, res, requestMeta);
+    case 'monthly':
+      return handleMonthly(req, res, requestMeta);
     case 'top-products':
       return handleTopProducts(req, res, requestMeta);
     case 'stats':

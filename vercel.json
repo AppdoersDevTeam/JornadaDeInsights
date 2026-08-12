@@ -101,6 +101,11 @@
       "methods": ["GET", "OPTIONS"]
     },
     {
+      "src": "/api/site-analytics-monthly",
+      "dest": "/api/analytics.js?action=monthly",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
       "src": "/api/users",
       "dest": "/api/admin.js?action=users",
       "methods": ["GET", "DELETE", "OPTIONS"],
