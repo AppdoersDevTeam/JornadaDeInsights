@@ -10,12 +10,17 @@ const DEFAULT_SPREAKER_RSS_URL = 'https://www.spreaker.com/show/6718982/episodes
 // limit or the Vercel function's execution time budget.
 const MAX_ARTICLES_PER_RUN = 5;
 
+// Postgres unique_violation - another concurrent run already claimed this episode.
+const UNIQUE_VIOLATION = '23505';
+
 const requireCronAuth = (req, res) => {
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) {
-    // No secret configured yet (e.g. first deploy) - allow, but log loudly.
-    logger.warn('generate_podcast_articles_no_cron_secret_configured', {});
-    return true;
+    // Without a secret this route is world-callable (the /api/(.*) catch-all
+    // route makes it public), and every hit costs Gemini calls. Fail closed.
+    logger.error('generate_podcast_articles_no_cron_secret_configured', {});
+    res.status(401).json({ error: 'Unauthorized' });
+    return false;
   }
 
   const authHeader = req.headers.authorization || '';
@@ -91,24 +96,54 @@ export default async function handler(req, res) {
         const baseSlug = slugify(article.title_pt || episode.title);
         const slug = await buildUniqueSlug(supabase, baseSlug);
 
-        const { error: insertError } = await supabase.from('podcast_articles').insert({
-          spreaker_episode_id: episode.guid,
-          episode_title: episode.title,
-          episode_url: episode.link || null,
-          slug,
-          title_pt: article.title_pt,
-          body_pt: article.body_pt,
-          title_en: article.title_en,
-          body_en: article.body_en,
-          status: 'draft',
-          episode_published_at: episode.pubDate,
-        });
+        // Upsert rather than insert: the existingIds check above happens before
+        // a slow Gemini call, so two overlapping runs (Vercel cron retries are
+        // at-least-once) can both decide an episode is new. The unique index on
+        // spreaker_episode_id makes the loser a no-op instead of a duplicate.
+        const { data: inserted, error: insertError } = await supabase
+          .from('podcast_articles')
+          .upsert(
+            {
+              spreaker_episode_id: episode.guid,
+              episode_title: episode.title,
+              episode_url: episode.link || null,
+              slug,
+              title_pt: article.title_pt,
+              body_pt: article.body_pt,
+              title_en: article.title_en,
+              body_en: article.body_en,
+              status: 'draft',
+              episode_published_at: episode.pubDate,
+            },
+            { onConflict: 'spreaker_episode_id', ignoreDuplicates: true }
+          )
+          .select('id');
 
         if (insertError) throw insertError;
+
+        if (!inserted || inserted.length === 0) {
+          results.push({ episode: episode.title, status: 'already_exists' });
+          logger.info('generate_podcast_articles_duplicate_skipped', {
+            ...requestMeta,
+            episodeId: episode.guid,
+          });
+          continue;
+        }
 
         results.push({ episode: episode.title, slug, status: 'draft_created' });
         logger.info('generate_podcast_articles_draft_created', { ...requestMeta, slug });
       } catch (error) {
+        // A concurrent run can also win the slug race, which conflicts on a
+        // different index than the one targeted above. Same outcome, not a bug.
+        if (error?.code === UNIQUE_VIOLATION) {
+          results.push({ episode: episode.title, status: 'already_exists' });
+          logger.info('generate_podcast_articles_duplicate_skipped', {
+            ...requestMeta,
+            episodeId: episode.guid,
+          });
+          continue;
+        }
+
         captureServerError(error, { route: 'generate-podcast-articles', episode: episode.title });
         logger.error('generate_podcast_articles_episode_failed', {
           ...requestMeta,
@@ -126,6 +161,8 @@ export default async function handler(req, res) {
       totalInFeed: episodes.length,
       newFound: allNewEpisodes.length,
       processed: results.length,
+      created: results.filter((r) => r.status === 'draft_created').length,
+      skipped: results.filter((r) => r.status === 'already_exists').length,
       results,
     });
   } catch (error) {
