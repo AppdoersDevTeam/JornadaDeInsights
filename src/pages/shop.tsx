@@ -33,6 +33,12 @@ export function ShopPage() {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const { addItem, totalCount } = useCart();
+  const [ebooks, setEbooks] = useState<Ebook[]>([]);
+  const [filteredEbooks, setFilteredEbooks] = useState<Ebook[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [featuredEbook, setFeaturedEbook] = useState<Ebook | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
 

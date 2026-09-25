@@ -379,7 +379,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       navigate('/signin', { 
         state: { 
           from: location.pathname,
-          returnTo: '/dashboard?tab=cart'
+          returnTo: '/user-dashboard?tab=cart'
         } 
       });
       return;
