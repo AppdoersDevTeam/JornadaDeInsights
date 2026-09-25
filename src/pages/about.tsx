@@ -6,6 +6,7 @@ import { motion, Variants } from 'framer-motion';
 import { useTypewriter, Cursor } from 'react-simple-typewriter';
 import CountUp from 'react-countup';
 import { useLanguage } from '@/context/language-context';
+import { ShopBridgeStrip } from '@/components/shop/shop-bridge-strip';
 
 // Add CTA animations
 const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.5 } } };
@@ -527,11 +528,18 @@ export function AboutPage() {
                 <p className="text-lg text-muted-foreground">
                   {t('about.support.p2', '')}
                 </p>
-                <Button size="lg" className="mt-4" asChild>
-                  <Link to="/donation">
-                    {t('about.support.cta', '')}
-                  </Link>
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                  <Button size="lg" asChild>
+                    <Link to="/shop">
+                      {t('about.support.shopCta', 'Comprar eBooks')}
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild>
+                    <Link to="/donation">
+                      {t('about.support.cta', '')}
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -575,6 +583,7 @@ export function AboutPage() {
         </div>
       </motion.section>
 
+      <ShopBridgeStrip />
     </>
   );
 }

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useReducer, ReactNode } from 'react';
 import type { Ebook } from '@/components/shop/ebook-card';
 import { toast } from 'react-hot-toast';
+import { localeMessages, type AppLocale } from '@/locales/messages';
 
 interface CartItem extends Ebook {
   quantity: number;
@@ -35,6 +36,26 @@ const CartContext = createContext<{
 });
 
 const CART_STORAGE_KEY = 'jdi_cart_v1';
+const LANGUAGE_STORAGE_KEY = 'jdi_language_preference';
+
+function resolveLocale(): AppLocale {
+  try {
+    const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (stored === 'en' || stored === 'pt-BR') return stored;
+  } catch {
+    // ignore
+  }
+  return 'pt-BR';
+}
+
+function addedToCartMessage(title: string): string {
+  const locale = resolveLocale();
+  const template =
+    localeMessages[locale]['cart.toast.added'] ||
+    localeMessages['pt-BR']['cart.toast.added'] ||
+    '{title} adicionado ao carrinho!';
+  return template.replace('{title}', title);
+}
 
 function loadInitialCartState(): CartState {
   if (typeof window === 'undefined') return { items: [] };
@@ -107,7 +128,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = (item: Ebook) => {
     dispatch({ type: 'ADD_ITEM', payload: item });
-    toast.success(`${item.title} adicionado ao carrinho!`, {
+    toast.success(addedToCartMessage(item.title), {
       id: `add-to-cart-${item.id}`,
       duration: 2000,
       position: 'top-right',
@@ -129,4 +150,4 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   return useContext(CartContext);
-} 
+}

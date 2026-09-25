@@ -1,18 +1,16 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, X, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, X, Plus, Minus, ShieldCheck, CreditCard } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { loadStripe } from '@stripe/stripe-js';
 import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { LazyImage } from '@/components/shop/lazy-image';
 import { trackLifecycleEvent } from '@/lib/lifecycle';
 import { useLanguage } from '@/context/language-context';
 import { Label } from '@/components/ui/label';
 
-// Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const API_BASE_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
@@ -42,29 +40,26 @@ export function CartPage() {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuthGate, setShowAuthGate] = useState(false);
   const [recommendedEbooks, setRecommendedEbooks] = useState<Ebook[]>([]);
   const [displayCurrency, setDisplayCurrency] = useState<'BRL' | 'USD' | 'EUR' | 'GBP'>('BRL');
   const [fxRate, setFxRate] = useState<number | null>(null);
   const [fxLoading, setFxLoading] = useState(false);
   const { state: { items }, totalCount, totalPrice, clearCart, addItem, removeItem, decrementItem } = useCart();
 
-  // Check authentication status
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       const user = session?.user;
       setIsAuthenticated(!!user);
-      // If user just signed in and we have saved cart state, restore it
       if (user) {
+        setShowAuthGate(false);
         const savedCart = sessionStorage.getItem('cartState');
         if (savedCart) {
           try {
             const parsedCart = JSON.parse(savedCart) as CartItem[];
-            // Clear current cart and restore saved items
             clearCart();
             parsedCart.forEach((item) => {
-              // Ensure required fields are present
               const ebookItem: Ebook = {
                 id: item.id,
                 title: item.title,
@@ -77,8 +72,6 @@ export function CartPage() {
               addItem(ebookItem);
             });
             sessionStorage.removeItem('cartState');
-            // Close auth modal if open
-            setShowAuthModal(false);
           } catch (error) {
             console.error('Error restoring cart state:', error);
           }
@@ -158,25 +151,39 @@ export function CartPage() {
     void loadFx();
   }, [displayCurrency]);
 
+  const persistCartForAuth = () => {
+    sessionStorage.setItem('cartState', JSON.stringify(items));
+  };
+
+  const goToSignIn = () => {
+    persistCartForAuth();
+    navigate('/signin', {
+      state: {
+        from: location.pathname,
+        returnTo: '/cart',
+      },
+    });
+  };
+
+  const goToSignUp = () => {
+    persistCartForAuth();
+    navigate('/signup', {
+      state: {
+        from: location.pathname,
+        returnTo: '/cart',
+      },
+    });
+  };
+
   const handleCheckout = async () => {
-    // If not authenticated, show auth modal and redirect to sign in
     if (!isAuthenticated) {
-      // Track checkout attempt even if user must sign in first
       void trackLifecycleEvent('checkout_started', {
         itemCount: items.length,
         total: Number(totalPrice.toFixed(2)),
         userEmail: null,
       });
-
-      // Store current cart state in sessionStorage
-      sessionStorage.setItem('cartState', JSON.stringify(items));
-      // Navigate to sign in with return path
-      navigate('/signin', { 
-        state: { 
-          from: location.pathname,
-          returnTo: '/cart'
-        } 
-      });
+      persistCartForAuth();
+      setShowAuthGate(true);
       return;
     }
 
@@ -193,7 +200,6 @@ export function CartPage() {
       const stripe = await stripePromise;
       if (!stripe) throw new Error('Stripe failed to initialize');
 
-      // Create checkout session
       const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
         method: 'POST',
         headers: {
@@ -202,21 +208,13 @@ export function CartPage() {
         body: JSON.stringify({
           customerEmail: user?.email ?? undefined,
           items: items.map(item => {
-            // Ensure image URL is absolute and uses HTTPS
             let imageUrl = item.cover_url;
             if (imageUrl) {
               try {
-                // Parse the URL to handle it properly
                 const url = new URL(imageUrl, window.location.origin);
-                
-                // Remove any query parameters or fragments
                 url.search = '';
                 url.hash = '';
-                
-                // Ensure HTTPS
                 url.protocol = 'https:';
-                
-                // Get the final URL
                 imageUrl = url.toString();
               } catch (error) {
                 console.error('Error processing image URL:', error);
@@ -228,9 +226,9 @@ export function CartPage() {
               id: item.id,
               name: item.title,
               description: `Digital eBook${item.description ? ` - ${item.description}` : ''}`,
-              price: Math.round(item.price * 100), // Convert to cents
+              price: Math.round(item.price * 100),
               quantity: item.quantity,
-              image: imageUrl || undefined, // Use formatted image URL
+              image: imageUrl || undefined,
               metadata: {
                 type: 'ebook',
                 layout: 'preppy',
@@ -248,7 +246,6 @@ export function CartPage() {
 
       const { sessionId } = await response.json();
 
-      // Redirect to Stripe Checkout
       const result = await stripe.redirectToCheckout({
         sessionId,
       });
@@ -262,21 +259,8 @@ export function CartPage() {
     }
   };
 
-  const handleAuthRedirect = () => {
-    // Store current cart state in sessionStorage
-    sessionStorage.setItem('cartState', JSON.stringify(items));
-    // Navigate to sign in with return path
-    navigate('/signin', { 
-      state: { 
-        from: location.pathname,
-        returnTo: '/cart'
-      } 
-    });
-  };
-
   return (
     <>
-      {/* Hero Section */}
       <section className="pt-24 pb-12 bg-gradient-to-br from-primary/10 to-background">
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
           <div className="max-w-3xl mx-auto">
@@ -362,6 +346,40 @@ export function CartPage() {
                           : t('cart.currency.unavailable', 'Exchange rate unavailable. Charged in BRL.')}
                   </p>
                 </div>
+
+                {showAuthGate && !isAuthenticated && (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-5 space-y-4">
+                    <h3 className="font-heading text-lg font-semibold">
+                      {t('cart.authGate.title', 'Create a free account to get your PDFs')}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {t(
+                        'cart.authGate.body',
+                        'Sign in or create a free account so we can deliver your eBooks to your dashboard right after payment.',
+                      )}
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button onClick={goToSignUp} className="flex-1">
+                        {t('cart.authGate.signup', 'Create free account')}
+                      </Button>
+                      <Button variant="outline" onClick={goToSignIn} className="flex-1">
+                        {t('cart.authGate.signin', 'Sign in')}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="rounded-lg border border-border/60 bg-card/60 p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <ShieldCheck className="h-4 w-4 text-primary flex-shrink-0" />
+                    {t('cart.trust.stripe', 'Secure checkout powered by Stripe.')}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CreditCard className="h-4 w-4 text-primary flex-shrink-0" />
+                    {t('cart.trust.cards', 'Visa, Mastercard, and other cards accepted.')}
+                  </div>
+                </div>
+
                 <div className="flex justify-center gap-4 mt-6">
                   <Button variant="outline" onClick={clearCart}>{t('cart.clear', 'Clear cart')}</Button>
                   <Button onClick={handleCheckout}>{t('cart.checkout', 'Checkout')}</Button>
@@ -393,8 +411,8 @@ export function CartPage() {
                             onClick={() => addItem(ebook)}
                             aria-label={t('cart.crossSell.add', 'Add to cart')}
                           >
-                            <ShoppingCart className="h-4 w-4 sm:mr-2" />
-                            <span className="hidden sm:inline">{t('cart.crossSell.add', 'Add to cart')}</span>
+                            <ShoppingCart className="h-4 w-4 mr-2" />
+                            {t('cart.crossSell.add', 'Add to cart')}
                           </Button>
                         </div>
                       ))}
@@ -406,25 +424,6 @@ export function CartPage() {
           </div>
         </div>
       </section>
-
-      {/* Auth required modal */}
-      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('cart.auth.title', 'Attention')}</DialogTitle>
-            <DialogDescription>
-              {t('cart.auth.body', 'You need to be signed in to complete checkout. Continue?')}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAuthModal(false)}>{t('cart.auth.cancel', 'Cancel')}</Button>
-            <Button onClick={handleAuthRedirect}>
-              {t('cart.auth.continue', 'Continue')}
-            </Button>
-          </DialogFooter>
-          <DialogClose />
-        </DialogContent>
-      </Dialog>
     </>
   );
-} 
+}

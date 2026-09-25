@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, LogOut, BookOpen, Languages, Bell } from 'lucide-react';
+import { Menu, X, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, BookOpen, Languages, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
@@ -97,7 +97,7 @@ export function Header() {
                 </Link>
               </Button>
               <div className="flex items-center gap-1 xl:gap-2">
-                <Link to="/dashboard?tab=cart" className="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
+                <Link to="/user-dashboard?tab=cart" className="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
                   <ShoppingCart className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
                   {totalCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
@@ -133,8 +133,20 @@ export function Header() {
             </>
           )}
         </div>
-        {/* Mobile Menu Toggle */}
+        {/* Mobile: cart + language + menu */}
         <div className="lg:hidden flex items-center gap-2 ml-auto">
+          <Link
+            to={user ? '/user-dashboard?tab=cart' : '/cart'}
+            className="relative p-2 bg-background rounded-full shadow flex-shrink-0"
+            aria-label={t('nav.cart', 'Carrinho')}
+          >
+            <ShoppingCart className="h-5 w-5 text-foreground" />
+            {totalCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+                {totalCount}
+              </span>
+            )}
+          </Link>
           <button
             onClick={openLanguagePrompt}
             className="text-foreground p-2 bg-background rounded-full shadow flex-shrink-0"
@@ -224,9 +236,9 @@ export function Header() {
             </NavLink>
           ))}
 
-          {/* Cart Link */}
+          {/* Cart Link — guests use public /cart; signed-in users use dashboard cart */}
           <NavLink
-            to="/dashboard?tab=cart"
+            to={user ? '/user-dashboard?tab=cart' : '/cart'}
             className={({ isActive }) =>
               `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
                 isActive
@@ -245,34 +257,8 @@ export function Header() {
             )}
           </NavLink>
 
-          {/* Sign In/Out Link */}
-          {user ? (
-            <div className="flex items-center gap-2 w-full">
-              <NavLink
-                to="/dashboard?tab=cart"
-                className="flex items-center gap-3 text-lg px-4 py-3 flex-1 rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
-                onClick={closeMenu}
-              >
-                <ShoppingCart className="h-5 w-5" />
-                Carrinho
-                {totalCount > 0 && (
-                  <span className="ml-2 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
-                    {totalCount}
-                  </span>
-                )}
-              </NavLink>
-              <button
-                onClick={() => {
-                  closeMenu();
-                  // Add your sign out logic here
-                }}
-                className="flex items-center gap-3 text-lg px-4 py-3 rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
-              >
-                <LogOut className="h-5 w-5" />
-                Sair
-              </button>
-            </div>
-          ) : (
+          {/* Sign In Link (signed-out only; signed-in users use Dashboard above) */}
+          {!user && (
             <NavLink
               to="/signin"
               className={({ isActive }) =>

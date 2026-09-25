@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, ArrowLeft, ShieldCheck, Clock3, BadgeCheck } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, ShieldCheck, Clock3, BadgeCheck, CreditCard } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { LazyImage } from '@/components/shop/lazy-image';
 import { motion } from 'framer-motion';
@@ -9,11 +9,13 @@ import { getEbookById } from '@/lib/supabase';
 import type { Ebook } from '@/components/shop/ebook-card';
 import { StructuredData } from '@/components/seo/structured-data';
 import { useLanguage } from '@/context/language-context';
+import { trackLifecycleEvent } from '@/lib/lifecycle';
 
 export function EbookDetailsPage() {
   const { t, language } = useLanguage();
   const { id } = useParams<{ id: string }>();
   const { addItem } = useCart();
+  const navigate = useNavigate();
   const [ebook, setEbook] = useState<Ebook | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +28,13 @@ export function EbookDetailsPage() {
         
         const data = await getEbookById(id, { locale: language });
         setEbook(data);
+        if (data) {
+          void trackLifecycleEvent('view_item', {
+            ebookId: data.id,
+            title: data.title,
+            price: data.price,
+          });
+        }
       } catch (err) {
         setError(t('ebook.loadError', 'Could not load this eBook. Please try again later.'));
         console.error(err);
@@ -131,29 +140,58 @@ export function EbookDetailsPage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 size="lg"
-                onClick={() => addItem(ebook)}
+                onClick={() => {
+                  addItem(ebook);
+                  void trackLifecycleEvent('add_to_cart', {
+                    ebookId: ebook.id,
+                    title: ebook.title,
+                    price: ebook.price,
+                    source: 'buy_now',
+                  });
+                  navigate('/cart');
+                }}
+                className="flex-1"
+                aria-label={t('ebook.buyNow', 'Comprar agora')}
+              >
+                {t('ebook.buyNow', 'Comprar agora')}
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => {
+                  addItem(ebook);
+                  void trackLifecycleEvent('add_to_cart', {
+                    ebookId: ebook.id,
+                    title: ebook.title,
+                    price: ebook.price,
+                  });
+                }}
                 className="flex-1"
                 aria-label={t('ebook.addToCart', 'Add to cart')}
               >
-                <ShoppingCart className="h-5 w-5 sm:mr-2" />
-                <span className="hidden sm:inline">{t('ebook.addToCart', 'Add to cart')}</span>
-              </Button>
-              <Button variant="outline" size="lg" asChild className="flex-1">
-                <Link to="/cart">{t('ebook.goToCart', 'Go to cart')}</Link>
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                {t('ebook.addToCart', 'Add to cart')}
               </Button>
             </div>
+            <Button variant="ghost" size="sm" asChild className="mt-2 self-start">
+              <Link to="/cart">{t('ebook.goToCart', 'Go to cart')}</Link>
+            </Button>
 
             <div className="mt-8 rounded-lg border border-border/60 bg-card/60 p-4 space-y-3">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <ShieldCheck className="h-4 w-4 text-primary" />
+                <ShieldCheck className="h-4 w-4 text-primary flex-shrink-0" />
                 {t('ebook.trust.stripe', 'Secure payment processed by Stripe.')}
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Clock3 className="h-4 w-4 text-primary" />
+                <CreditCard className="h-4 w-4 text-primary flex-shrink-0" />
+                {t('ebook.trust.cards', 'Visa, Mastercard, and other cards accepted.')}
+              </div>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Clock3 className="h-4 w-4 text-primary flex-shrink-0" />
                 {t('ebook.trust.access', 'Immediate digital access after purchase confirmation.')}
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <BadgeCheck className="h-4 w-4 text-primary" />
+                <BadgeCheck className="h-4 w-4 text-primary flex-shrink-0" />
                 {t('ebook.trust.support', 'Email support for access and download questions.')}
               </div>
             </div>

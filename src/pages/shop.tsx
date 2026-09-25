@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ShoppingCart, ArrowRight, ShieldCheck, Clock3, Download } from 'lucide-react';
+import { Search, ShoppingCart, ArrowRight, ShieldCheck, Clock3, Download, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EbookCard, type Ebook } from '@/components/shop/ebook-card';
 import { useCart } from '@/context/cart-context';
@@ -8,7 +8,7 @@ import { AnimatedGridItem } from '@/components/shop/animated-grid-item';
 import { AnimatedCartIcon } from '@/components/shop/animated-cart-icon';
 import { motion, Variants } from 'framer-motion';
 import { getEbooks, getCategories, type Category } from '@/lib/supabase';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/language-context';
 
 // Add CTA animations
@@ -31,14 +31,8 @@ const scrollToSection = (sectionId: string) => {
 
 export function ShopPage() {
   const { t, language } = useLanguage();
-  const { addItem } = useCart();
-  const [ebooks, setEbooks] = useState<Ebook[]>([]);
-  const [filteredEbooks, setFilteredEbooks] = useState<Ebook[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [featuredEbook, setFeaturedEbook] = useState<Ebook | null>(null);
-  const { totalCount } = useCart();
+  const navigate = useNavigate();
+  const { addItem, totalCount } = useCart();
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
 
@@ -197,18 +191,22 @@ export function ShopPage() {
       {/* Trust Bar */}
       <section className="py-6 bg-card border-y border-border/50">
         <div className="container mx-auto px-6 sm:px-8 lg:px-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
-              <ShieldCheck className="h-4 w-4 text-primary" />
+              <ShieldCheck className="h-4 w-4 text-primary flex-shrink-0" />
               {t('shop.trust.stripe', 'Checkout seguro com Stripe.')}
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Clock3 className="h-4 w-4 text-primary" />
-              {t('shop.trust.delivery', 'Entrega digital imediata apos pagamento.')}
+              <CreditCard className="h-4 w-4 text-primary flex-shrink-0" />
+              {t('ebook.trust.cards', 'Aceitamos Visa, Mastercard e outros cartões.')}
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Download className="h-4 w-4 text-primary" />
-              {t('shop.trust.access', 'Acesso aos arquivos no painel do usuario.')}
+              <Clock3 className="h-4 w-4 text-primary flex-shrink-0" />
+              {t('shop.trust.delivery', 'Entrega digital imediata após pagamento.')}
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Download className="h-4 w-4 text-primary flex-shrink-0" />
+              {t('shop.trust.access', 'Acesso aos arquivos no painel do usuário.')}
             </div>
           </div>
         </div>
@@ -249,19 +247,35 @@ export function ShopPage() {
                   <p className="font-medium text-lg mb-4 group-hover:text-primary transition-colors">
                     {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(featuredEbook.price)}
                   </p>
-                  <Button 
-                    size="sm" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      addItem(featuredEbook);
-                    }}
-                    className="transition-all duration-300 hover:scale-105 hover:shadow-md w-full sm:w-auto"
-                    aria-label={t('shop.featured.add', 'Adicionar ao carrinho')}
-                  >
-                    <ShoppingCart className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">{t('shop.featured.add', 'Adicionar ao carrinho')}</span>
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        addItem(featuredEbook);
+                        navigate('/cart');
+                      }}
+                      className="transition-all duration-300 hover:scale-105 hover:shadow-md w-full sm:w-auto"
+                      aria-label={t('ebook.buyNow', 'Comprar agora')}
+                    >
+                      {t('ebook.buyNow', 'Comprar agora')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        addItem(featuredEbook);
+                      }}
+                      className="transition-all duration-300 w-full sm:w-auto"
+                      aria-label={t('shop.featured.add', 'Adicionar ao carrinho')}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      {t('shop.featured.add', 'Adicionar ao carrinho')}
+                    </Button>
+                  </div>
                 </Link>
               </>
             ) : null}

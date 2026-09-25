@@ -325,15 +325,15 @@ export function HomePage() {
               >
                 <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
                   <Button size="lg" asChild className="w-full sm:w-auto">
-                    <Link to="/podcast">
-                      {t('home.cta.podcast', '')} <ArrowRight className="ml-2 h-4 w-4" />
+                    <Link to="/shop">
+                      {t('home.cta.shop', 'Comprar eBooks')} <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 </motion.div>
                 <motion.div variants={ctaButtonVariants} className="w-full sm:w-auto">
                   <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                    <Link to="/shop">
-                      {t('home.cta.shop', '')} <ArrowRight className="ml-2 h-4 w-4" />
+                    <Link to="/podcast">
+                      {t('home.cta.podcast', 'Ouvir o Podcast')} <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 </motion.div>

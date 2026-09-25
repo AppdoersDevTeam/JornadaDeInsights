@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/auth-context';
+import { useCart } from '@/context/cart-context';
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ export function AdminHeader() {
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { totalCount } = useCart();
   const { t, language } = useLanguage();
 
   const toggleMenu = () => {
@@ -93,6 +95,24 @@ export function AdminHeader() {
         <div className="hidden lg:flex flex-shrink-0 justify-end items-center gap-2 xl:gap-3">
           {user ? (
             <>
+              <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 whitespace-nowrap px-2 xl:px-3">
+                <Link to="/shop" className="text-xs xl:text-sm font-medium">
+                  <span className="hidden xl:inline">{t('nav.ebooks.cta', 'Comprar eBooks')}</span>
+                  <span className="xl:hidden">{t('nav.ebooks.short', 'eBooks')}</span>
+                </Link>
+              </Button>
+              <Link
+                to="/user-dashboard?tab=cart"
+                className="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0"
+                aria-label={t('nav.cart', 'Cart')}
+              >
+                <ShoppingCart className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
+                {totalCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+                    {totalCount}
+                  </span>
+                )}
+              </Link>
               <NotificationBell triggerClassName="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0 text-background" />
               <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
                 <Link to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email.toLowerCase()) ? "/dashboard" : "/user-dashboard"} className="flex items-center gap-1.5 xl:gap-2">
@@ -134,14 +154,28 @@ export function AdminHeader() {
             </Link>
           )}
         </div>
-        {/* Mobile Menu Toggle */}
-        <button 
-          onClick={toggleMenu}
-          className="lg:hidden text-foreground p-2 bg-background rounded-full shadow flex-shrink-0 ml-auto"
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        {/* Mobile: cart icon + menu toggle */}
+        <div className="lg:hidden flex items-center gap-2 ml-auto">
+          <Link
+            to="/user-dashboard?tab=cart"
+            className="relative p-2 bg-background rounded-full shadow flex-shrink-0"
+            aria-label={t('nav.cart', 'Cart')}
+          >
+            <ShoppingCart className="h-5 w-5 text-foreground" />
+            {totalCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+                {totalCount}
+              </span>
+            )}
+          </Link>
+          <button
+            onClick={toggleMenu}
+            className="text-foreground p-2 bg-background rounded-full shadow flex-shrink-0"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}
@@ -240,6 +274,19 @@ export function AdminHeader() {
           >
             <ShoppingBag className="h-5 w-5" />
             {t('nav.shop', 'Store')}
+          </Link>
+          <Link
+            to="/user-dashboard?tab=cart"
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+            onClick={closeMenu}
+          >
+            <ShoppingCart className="h-5 w-5" />
+            {t('nav.cart', 'Cart')}
+            {totalCount > 0 && (
+              <span className="ml-2 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+                {totalCount}
+              </span>
+            )}
           </Link>
           <Link
             to="/contact"

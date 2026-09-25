@@ -73,12 +73,18 @@ const handleHealth = async (_req, res) => {
 };
 
 const handleFollowupRunner = async (req, res, requestMeta) => {
-  if (req.method !== 'POST') {
+  if (req.method !== 'POST' && req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
-  if (!cronSecret || req.headers['x-cron-secret'] !== cronSecret) {
+  const authHeader = req.headers.authorization || '';
+  const headerSecret = req.headers['x-cron-secret'];
+  const authorized =
+    Boolean(cronSecret) &&
+    (authHeader === `Bearer ${cronSecret}` || headerSecret === cronSecret);
+
+  if (!authorized) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }

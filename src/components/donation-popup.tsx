@@ -18,6 +18,10 @@ const EXCLUDED_PAGES = [
   '/signup',
   '/check-email',
   '/confirm-email',
+  '/shop',
+  '/cart',
+  '/success',
+  '/cancel',
 ];
 
 export function DonationPopup() {

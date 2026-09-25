@@ -14,7 +14,13 @@ const getOrCreateId = (storage: Storage, key: string) => {
 };
 
 export const trackLifecycleEvent = async (
-  eventName: 'checkout_started' | 'purchase_completed' | 'donation_started' | 'lead_captured',
+  eventName:
+    | 'checkout_started'
+    | 'purchase_completed'
+    | 'donation_started'
+    | 'lead_captured'
+    | 'add_to_cart'
+    | 'view_item',
   metadata?: Record<string, unknown>
 ) => {
   try {

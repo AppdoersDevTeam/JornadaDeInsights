@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { PodcastCard, type PodcastEpisode } from '@/components/podcast/podcast-card';
 import { motion, Variants, useInView } from 'framer-motion';
 import { useLanguage } from '@/context/language-context';
+import { ShopBridgeStrip } from '@/components/shop/shop-bridge-strip';
 
 type PodcastCategoryId = 'all' | 'rute' | 'sobrenatural' | 'apocalipse';
 
@@ -382,6 +383,8 @@ export function PodcastPage() {
           )}
         </div>
       </section>
+
+      <ShopBridgeStrip />
 
     </div>
   );

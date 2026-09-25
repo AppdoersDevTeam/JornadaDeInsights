@@ -3,6 +3,7 @@ import { getCuriosidades, type Curiosidade } from '@/lib/supabase';
 import { CuriosidadeCard } from '@/components/curiosidades/curiosidade-card';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/language-context';
+import { ShopBridgeStrip } from '@/components/shop/shop-bridge-strip';
 
 export function CuriosidadesPage() {
   const { t } = useLanguage();
@@ -107,7 +108,8 @@ export function CuriosidadesPage() {
           )}
         </div>
       </motion.section>
+
+      <ShopBridgeStrip />
     </div>
   );
 }
-

@@ -24,7 +24,7 @@ All variables required to run Jornada de Insights in production.
 | `ALLOWED_ADMIN_EMAILS` | 💡 Optional | Admin auth middleware fallback | Comma-separated. Falls back to `devteam@appdoers.co.nz,ptasbr2020@gmail.com`. Set to override |
 | `ALLOWED_ORIGINS` | 💡 Optional | CORS in analytics endpoints | Falls back to `https://jornadadeinsights.com`. Set to override |
 | `SENTRY_DSN` | 💡 Optional | API runtime monitoring (`api/_lib/monitoring.js`) | Add DSN to capture serverless exceptions in production |
-| `CRON_SECRET` | ❌ **MISSING** | `api/lifecycle-followup-runner.js` | Shared secret required by scheduled job caller. Send as `x-cron-secret` header |
+| `CRON_SECRET` | ✅ Set (rotated) | `api/ops.js` (`followup-runner`), notifications + podcast crons | Vercel Cron sends `Authorization: Bearer`. Abandoned-cart runner: `/api/lifecycle-followup-runner` daily at 09:00 UTC (Hobby plan allows once/day). |
 | `VAPID_PUBLIC_KEY` | ❌ **MISSING** | `lib/push.js` | Web Push application server public key. Generate with `npx web-push generate-vapid-keys`. Not secret — also exposed to the frontend as `VITE_VAPID_PUBLIC_KEY` (same value) |
 | `VAPID_PRIVATE_KEY` | ❌ **MISSING** | `lib/push.js` | Web Push private key — secret, server only |
 | `VAPID_SUBJECT` | ❌ **MISSING** | `lib/push.js` | Contact address for push services, e.g. `mailto:devteam@appdoers.co.nz` |
