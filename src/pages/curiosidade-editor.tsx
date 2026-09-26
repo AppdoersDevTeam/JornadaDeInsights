@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Save, Eye, Upload, X, File, Image as ImageIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/context/language-context';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 
 export function CuriosidadeEditorPage() {
   const { t } = useLanguage();
@@ -62,7 +63,7 @@ export function CuriosidadeEditorPage() {
 
   const htmlToPlain = (html: string) => {
     const d = document.createElement('div');
-    d.innerHTML = html || '';
+    d.innerHTML = sanitizeHtml(html || '');
     return (d.textContent || d.innerText || '').trim();
   };
 
@@ -558,4 +559,3 @@ export function CuriosidadeEditorPage() {
     </div>
   );
 }
-

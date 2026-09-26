@@ -306,6 +306,7 @@ export function ShopPage() {
                 placeholder={t('shop.search.placeholder', 'Pesquisar eBooks...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label={t('shop.search.placeholder', 'Pesquisar eBooks...')}
                 className="pl-10 pr-4 py-2 w-full rounded-md border border-input bg-background cursor-text"
               />
             </div>

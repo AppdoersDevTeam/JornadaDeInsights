@@ -56,6 +56,8 @@ These are highest priority before production sign-off:
 4. Fix `SUPABASE_SERVICE_ROLE_KEY` (Needs Attention) — admin endpoints can fail
 5. Fix `RESEND_API_KEY` (Needs Attention) — purchase confirmation emails can fail
 6. Verify `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are still present in Vercel
+7. Apply SQL migration `supabase/migrations/20260926_purchases.sql` so entitlements persist beyond Stripe’s last-100-sessions limit (app still falls back to Stripe if table missing) — **applied 2026-09-26**
+8. Optional: `CONTACT_INBOX_EMAIL` — defaults to `suporte@jornadadeinsights.com` for `/api/contact`
 
 ---
 

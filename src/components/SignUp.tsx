@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Book, Headphones } from 'lucide-react';
@@ -21,6 +21,10 @@ const SignUp = () => {
   const [captchaToken, setCaptchaToken] = useState('');
   const turnstileRef = useRef<TurnstileInstance>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as { from?: string; returnTo?: string } | undefined;
+  const returnPath = state?.returnTo || state?.from || '/user-dashboard';
+  const authReturnState = { from: state?.from, returnTo: returnPath };
 
   const markSignupLeadCaptured = async (emailAddress: string) => {
     const normalized = emailAddress.trim().toLowerCase();
@@ -40,8 +44,8 @@ const SignUp = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError(t('signup.passwordShort', 'Password must be at least 6 characters'));
+    if (password.length < 8) {
+      setError(t('signup.passwordShort', 'Password must be at least 8 characters'));
       return;
     }
 
@@ -70,7 +74,7 @@ const SignUp = () => {
 
       if (error) throw error;
       await markSignupLeadCaptured(email);
-      navigate('/check-email');
+      navigate('/check-email', { state: authReturnState });
     } catch (error) {
       const errorMessage = error instanceof AuthError ? error.message : t('signup.fail', 'Could not create account');
       setError(errorMessage);
@@ -239,7 +243,9 @@ const SignUp = () => {
 
                   <div className="flex items-center justify-center">
                     <Button variant="link" asChild className="text-primary hover:text-primary/90">
-                      <a href="/signin">{t('signup.page.hasAccount', 'Already have an account? Sign in')}</a>
+                      <Link to="/signin" state={authReturnState}>
+                        {t('signup.page.hasAccount', 'Already have an account? Sign in')}
+                      </Link>
                     </Button>
                   </div>
 

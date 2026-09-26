@@ -207,6 +207,7 @@ export function CartPage() {
         },
         body: JSON.stringify({
           customerEmail: user?.email ?? undefined,
+          locale: language,
           items: items.map(item => {
             let imageUrl = item.cover_url;
             if (imageUrl) {

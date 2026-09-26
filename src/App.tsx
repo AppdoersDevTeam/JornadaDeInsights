@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/layout';
 import { AdminLayout } from '@/components/layout/admin-layout';
@@ -11,13 +11,11 @@ import { CartPage } from '@/pages/cart';
 import { DonationPage } from '@/pages/donation';
 import { SuccessPage } from '@/pages/success';
 import { CancelPage } from '@/pages/cancel';
-import { DashboardPage } from '@/pages/dashboard';
 import { DashboardSidePanel } from '@/components/dashboard/dashboard-side-panel';
 import SignIn from '@/components/SignIn';
 import SignUp from '@/components/SignUp';
 import { CheckEmailPage } from './pages/check-email';
 import { ConfirmEmailPage } from './pages/confirm-email';
-import UserDashboard from '@/components/UserDashboard';
 import { UserDashboardSidePanel } from '@/components/dashboard/user-dashboard-side-panel';
 import { Toaster } from 'react-hot-toast';
 import { CartProvider } from '@/context/cart-context';
@@ -28,9 +26,9 @@ import { PrivacyPage } from '@/pages/privacy';
 import { CuriosidadesPage } from '@/pages/curiosidades';
 import { CuriosidadeDetailsPage } from '@/pages/curiosidade-details';
 import { PodcastArticleDetailsPage } from '@/pages/podcast-article-details';
-import { CuriosidadeEditorPage } from '@/pages/curiosidade-editor';
 import { TabType } from '@/types/dashboard';
 import { ForgotPasswordPage } from '@/pages/forgot-password';
+import { NotFoundPage } from '@/pages/not-found';
 import { captureClientError } from '@/lib/monitoring';
 import { LanguageProvider, useLanguage } from '@/context/language-context';
 import { LanguagePickerDialog } from '@/components/language/language-picker-dialog';
@@ -38,6 +36,14 @@ import { InstallPrompt } from '@/components/pwa/install-prompt';
 import { useAuth } from '@/context/auth-context';
 import { isAdminEmail } from '@/lib/admin';
 import { isStandalonePwa } from '@/lib/pwa';
+
+const DashboardPage = lazy(() =>
+  import('@/pages/dashboard').then((m) => ({ default: m.DashboardPage }))
+);
+const UserDashboard = lazy(() => import('@/components/UserDashboard'));
+const CuriosidadeEditorPage = lazy(() =>
+  import('@/pages/curiosidade-editor').then((m) => ({ default: m.CuriosidadeEditorPage }))
+);
 
 const ROUTE_METADATA: Record<'pt-BR' | 'en', Record<string, { title: string; description: string }>> = {
   'pt-BR': {
@@ -154,7 +160,8 @@ function App() {
 }
 
 function AppRoutes() {
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [adminActiveTab, setAdminActiveTab] = useState<TabType>('overview');
+  const [userActiveTab, setUserActiveTab] = useState<TabType>('overview');
   const location = useLocation();
   const navigate = useNavigate();
   const lastTrackedPathRef = useRef<string | null>(null);
@@ -162,13 +169,14 @@ function AppRoutes() {
   const { language } = useLanguage();
 
   useEffect(() => {
+    if (location.pathname !== '/user-dashboard') return;
     const searchParams = new URLSearchParams(location.search);
     const tabParam = searchParams.get('tab');
     const validTabs: TabType[] = ['overview', 'ebooks', 'orders', 'settings', 'cart'];
     if (tabParam && validTabs.includes(tabParam as TabType)) {
-      setActiveTab(tabParam as TabType);
+      setUserActiveTab(tabParam as TabType);
     }
-  }, [location.search]);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     const path = `${location.pathname}${location.search}`;
@@ -259,9 +267,13 @@ function AppRoutes() {
     canonicalTag.setAttribute('href', canonicalHref);
   }, [location.pathname, language]);
 
-  const handleTabChange = (tab: string | TabType) => {
+  const handleAdminTabChange = (tab: string | TabType) => {
+    setAdminActiveTab(tab as TabType);
+  };
+
+  const handleUserTabChange = (tab: string | TabType) => {
     const newTab = tab as TabType;
-    setActiveTab(newTab);
+    setUserActiveTab(newTab);
     if (location.pathname === '/user-dashboard') {
       navigate(`/user-dashboard?tab=${newTab}`);
     }
@@ -293,18 +305,23 @@ function AppRoutes() {
             <Route path="check-email" element={<CheckEmailPage />} />
             <Route path="confirm-email" element={<ConfirmEmailPage />} />
             <Route path="forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
 
           <Route path="/dashboard" element={
             <AdminLayout 
               sidePanel={
                 <DashboardSidePanel 
-                  activeTab={activeTab} 
-                  onTabChange={handleTabChange} 
+                  activeTab={adminActiveTab} 
+                  onTabChange={handleAdminTabChange} 
                 />
               }
             >
-              <DashboardPage activeTab={activeTab} onTabChange={handleTabChange} />
+              <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading…</div>}>
+                <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading…</div>}>
+                <DashboardPage activeTab={adminActiveTab} onTabChange={handleAdminTabChange} />
+              </Suspense>
+              </Suspense>
             </AdminLayout>
           } />
           
@@ -312,12 +329,16 @@ function AppRoutes() {
             <AdminLayout 
               sidePanel={
                 <DashboardSidePanel 
-                  activeTab={activeTab} 
-                  onTabChange={handleTabChange} 
+                  activeTab={adminActiveTab} 
+                  onTabChange={handleAdminTabChange} 
                 />
               }
             >
-              <CuriosidadeEditorPage />
+              <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading…</div>}>
+                <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading…</div>}>
+                <CuriosidadeEditorPage />
+              </Suspense>
+              </Suspense>
             </AdminLayout>
           } />
 
@@ -325,14 +346,20 @@ function AppRoutes() {
             <AdminLayout 
               sidePanel={
                 <UserDashboardSidePanel 
-                  activeTab={activeTab} 
-                  onTabChange={handleTabChange} 
+                  activeTab={userActiveTab} 
+                  onTabChange={handleUserTabChange} 
                 />
               }
             >
-              <UserDashboard activeTab={activeTab} onTabChange={handleTabChange} />
+              <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading…</div>}>
+                <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading…</div>}>
+                <UserDashboard activeTab={userActiveTab} onTabChange={handleUserTabChange} />
+              </Suspense>
+              </Suspense>
             </AdminLayout>
           } />
+
+          <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
         </Routes>
         <LanguagePickerDialog />
         <Toaster />

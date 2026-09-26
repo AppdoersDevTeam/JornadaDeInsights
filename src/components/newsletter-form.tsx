@@ -79,6 +79,7 @@ export function NewsletterForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('newsletter.emailPlaceholder', '')}
+                aria-label={t('newsletter.emailPlaceholder', 'Your email address')}
                 className="flex-1 px-4 py-2 rounded-md border border-input bg-background"
                 required
                 initial={{ opacity: 0, y: 20 }}

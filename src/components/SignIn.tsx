@@ -254,7 +254,9 @@ const SignIn = () => {
                       <Link to="/forgot-password">{t('signin.page.forgotPassword', 'Forgot password?')}</Link>
                     </Button>
                     <Button variant="link" asChild className="text-primary hover:text-primary/90">
-                      <Link to="/signup">{t('signin.page.createAccount', 'Create account')}</Link>
+                      <Link to="/signup" state={state}>
+                        {t('signin.page.createAccount', 'Create account')}
+                      </Link>
                     </Button>
                   </div>
 

@@ -1,10 +1,13 @@
 import { CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/context/language-context';
 
 export function CheckEmailPage() {
   const { t } = useLanguage();
+  const location = useLocation();
+  const state = location.state as { from?: string; returnTo?: string } | undefined;
+
   return (
     <section className="pt-24 pb-12 bg-gradient-to-br from-primary/10 to-background min-h-screen">
       <div className="container mx-auto px-6 sm:px-8 lg:px-10">
@@ -17,7 +20,7 @@ export function CheckEmailPage() {
             {t('check.body', 'We sent a confirmation link. Please open your inbox and click the link to verify your email.')}
           </p>
           <Button asChild size="lg">
-            <Link to="/signin">{t('check.back', 'Back to sign in')}</Link>
+            <Link to="/signin" state={state}>{t('check.back', 'Back to sign in')}</Link>
           </Button>
         </div>
       </div>

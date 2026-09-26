@@ -29,10 +29,11 @@ import { Edit, Trash2, Plus, FileText, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/context/language-context';
 import { curiosidadeDisplayBody, curiosidadeDisplayTitle, categoryDisplayName } from '@/lib/curiosidade-locale';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 
 function stripHtmlPreview(html: string, maxLen: number): string {
   const d = document.createElement('div');
-  d.innerHTML = html;
+  d.innerHTML = sanitizeHtml(html);
   const text = (d.textContent || d.innerText || '').replace(/\s+/g, ' ').trim();
   return text.length > maxLen ? `${text.slice(0, maxLen)}…` : text;
 }

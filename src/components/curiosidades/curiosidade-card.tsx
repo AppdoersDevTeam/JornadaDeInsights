@@ -7,6 +7,7 @@ import {
   curiosidadeDisplayBody,
   curiosidadeDisplayTitle,
 } from '@/lib/curiosidade-locale';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 
 interface CuriosidadeCardProps {
   curiosidade: Curiosidade;
@@ -29,7 +30,7 @@ export function CuriosidadeCard({ curiosidade }: CuriosidadeCardProps) {
 
   const getPreview = (html: string) => {
     const div = document.createElement('div');
-    div.innerHTML = html;
+    div.innerHTML = sanitizeHtml(html);
     const text = div.textContent || div.innerText || '';
     return text.length > 200 ? text.substring(0, 200) + '...' : text;
   };

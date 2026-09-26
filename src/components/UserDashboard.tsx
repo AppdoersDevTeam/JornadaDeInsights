@@ -66,6 +66,41 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 // Server URL
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
+const openEbookPdf = async (ebook: { id: string; filename?: string }) => {
+  if (!ebook.filename) {
+    throw new Error('Missing ebook filename');
+  }
+
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    if (token) {
+      const response = await fetch(
+        `${SERVER_URL}/api/ebook-download?ebookId=${encodeURIComponent(ebook.id)}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (response.ok) {
+        const payload = await response.json();
+        if (payload?.url) {
+          window.open(payload.url, '_blank');
+          return;
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('Signed PDF URL unavailable, using public fallback', error);
+  }
+
+  const pdfUrl = supabase.storage
+    .from('store-assets')
+    .getPublicUrl(`pdfs/${ebook.filename}`).data.publicUrl;
+  window.open(pdfUrl, '_blank');
+};
+
 const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
   const { t, language } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
@@ -397,6 +432,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
         },
         body: JSON.stringify({
           customerEmail: user?.email ?? undefined,
+          locale: language,
           items: items.map(item => {
             // Ensure image URL is absolute and uses HTTPS
             let imageUrl = item.cover_url || '';
@@ -620,10 +656,9 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                                     variant="outline" 
                                     className="flex-1 h-14 sm:h-9"
                                     onClick={() => {
-                                      const pdfUrl = supabase.storage
-                                        .from('store-assets')
-                                        .getPublicUrl(`pdfs/${ebook.filename}`).data.publicUrl;
-                                      window.open(pdfUrl, '_blank');
+                                      void openEbookPdf(ebook).catch(() => {
+                                        toast.error(t('ud.toast.downloadFail', 'Could not download the file.'));
+                                      });
                                     }}
                                   >
                                     <Eye className="mr-2 h-5 w-5 sm:h-4 sm:w-4" />
@@ -858,10 +893,9 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                               variant="outline" 
                               className="flex-1 h-14 sm:h-9"
                               onClick={() => {
-                                const pdfUrl = supabase.storage
-                                  .from('store-assets')
-                                  .getPublicUrl(`pdfs/${ebook.filename}`).data.publicUrl;
-                                window.open(pdfUrl, '_blank');
+                                void openEbookPdf(ebook).catch(() => {
+                                  toast.error(t('ud.toast.downloadFail', 'Could not download the file.'));
+                                });
                               }}
                             >
                               <Eye className="mr-2 h-5 w-5 sm:h-4 sm:w-4" />
@@ -872,25 +906,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                               className="flex-1 h-14 sm:h-9"
                               onClick={async () => {
                                 try {
-                                  const { data, error } = await supabase.storage
-                                    .from('store-assets')
-                                    .download(`pdfs/${ebook.filename}`);
-                                    
-                                  if (error) {
-                                    throw error;
-                                  }
-
-                                  if (data) {
-                                    const blob = new Blob([data], { type: 'application/pdf' });
-                                    const url = window.URL.createObjectURL(blob);
-                                    const link = document.createElement('a');
-                                    link.href = url;
-                                    link.download = ebook.filename;
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    window.URL.revokeObjectURL(url);
-                                    document.body.removeChild(link);
-                                  }
+                                  await openEbookPdf(ebook);
                                 } catch (err) {
                                   console.error('Error downloading file:', err);
                                   toast.error(t('ud.toast.downloadFail', 'Could not download the file.'));

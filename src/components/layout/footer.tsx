@@ -81,6 +81,11 @@ export function Footer() {
                     {t('nav.contact', '')}
                   </Link>
                 </li>
+                <li>
+                  <Link to="/donation" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.donation', 'Doação')}
+                  </Link>
+                </li>
               </ul>
             </div>
             {/* Resources Accordion */}
@@ -168,6 +173,11 @@ export function Footer() {
                 <li>
                   <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">
                     {t('nav.contact', '')}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/donation" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.donation', 'Donate')}
                   </Link>
                 </li>
               </ul>

@@ -42,3 +42,5 @@ server/.env
 **/*-firebase-adminsdk-*.json
 .vercel
 .env*.local
+.hub-session.json
+.hub-ticket-time.json

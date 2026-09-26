@@ -22,7 +22,7 @@ export function DonationPage() {
   const [amount, setAmount] = useState<number | ''>('');
   const [customAmount, setCustomAmount] = useState('');
   const [note, setNote] = useState('');
-  const [isRecurring, setIsRecurring] = useState(true);
+  const [isRecurring, setIsRecurring] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAmountSelect = (value: number) => {

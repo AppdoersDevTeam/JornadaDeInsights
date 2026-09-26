@@ -33,6 +33,46 @@ if (missingEnvVars.length > 0) {
 const app = express();
 const port = process.env.PORT || 3000;
 
+const DEFAULT_ALLOWED_ADMIN_EMAILS = [
+  'devteam@appdoers.co.nz',
+  'ptasbr2020@gmail.com',
+];
+
+const getAllowedAdmins = () => {
+  const envValue = process.env.ALLOWED_ADMIN_EMAILS || '';
+  const parsed = envValue
+    .split(',')
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+  return parsed.length > 0 ? parsed : DEFAULT_ALLOWED_ADMIN_EMAILS;
+};
+
+/** Protect privileged Express routes (legacy server). Fail closed. */
+const requireExpressAdmin = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization || '';
+    const idToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!idToken) {
+      return res.status(401).json({ error: 'Missing auth token' });
+    }
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(idToken);
+    if (error || !user) {
+      return res.status(401).json({ error: 'Invalid auth token' });
+    }
+    if (!getAllowedAdmins().includes((user.email || '').toLowerCase())) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    req.adminUser = user;
+    return next();
+  } catch (error) {
+    console.error('Express admin auth failed:', error);
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+};
+
 // Initialize Stripe with secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -58,18 +98,15 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Validate cart items
+// Validate cart shape — prices resolved from ebooks_metadata
 const validateCartItems = (items) => {
   if (!Array.isArray(items) || items.length === 0) {
     throw new Error('Cart must be a non-empty array');
   }
 
-  return items.every(item => {
-    if (!item.name || typeof item.name !== 'string') {
-      throw new Error('Each item must have a valid name');
-    }
-    if (!Number.isInteger(item.price) || item.price <= 0) {
-      throw new Error('Each item must have a valid price in cents');
+  return items.every((item) => {
+    if (!item.id || typeof item.id !== 'string') {
+      throw new Error('Each item must have a valid id');
     }
     if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
       throw new Error('Each item must have a valid quantity');
@@ -78,36 +115,57 @@ const validateCartItems = (items) => {
   });
 };
 
+const resolveCheckoutItems = async (items) => {
+  const ids = items.map((item) => item.id);
+  const { data, error } = await supabase
+    .from('ebooks_metadata')
+    .select('id, title, description, price')
+    .in('id', ids);
+  if (error) throw error;
+  const byId = new Map((data || []).map((row) => [row.id, row]));
+  return items.map((item) => {
+    const row = byId.get(item.id);
+    if (!row) throw new Error(`Unknown ebook: ${item.id}`);
+    const unitAmount = Math.round(Number(row.price) * 100);
+    if (!Number.isFinite(unitAmount) || unitAmount <= 0) {
+      throw new Error(`Invalid catalog price for ebook: ${item.id}`);
+    }
+    return {
+      id: row.id,
+      name: row.title || item.name || 'eBook',
+      description: item.description || row.description || 'Digital eBook',
+      price: unitAmount,
+      quantity: item.quantity,
+      image: item.image,
+    };
+  });
+};
+
 // Create checkout session endpoint
 app.post('/create-checkout-session', async (req, res) => {
   try {
-    const { items } = req.body;
+    const { items, customerEmail, locale } = req.body;
 
-    // Validate cart items
     validateCartItems(items);
+    const resolvedItems = await resolveCheckoutItems(items);
+    const ebookIds = resolvedItems.map((item) => item.id).join(',');
+    const stripeLocale =
+      locale === 'en' || locale === 'en-US' ? 'en' : locale === 'pt' || locale === 'pt-BR' ? 'pt-BR' : 'auto';
 
-    // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
-      locale: 'pt-BR',
+      locale: stripeLocale,
       currency: 'brl',
-      line_items: items.map(item => {
-        // Ensure image URL is properly formatted for Stripe
+      customer_email: typeof customerEmail === 'string' ? customerEmail : undefined,
+      line_items: resolvedItems.map((item) => {
         let imageUrl = item.image;
         if (imageUrl) {
           try {
-            // Parse the URL to handle it properly
             const url = new URL(imageUrl);
-            
-            // Remove any query parameters or fragments
             url.search = '';
             url.hash = '';
-            
-            // Ensure HTTPS
             url.protocol = 'https:';
-            
-            // Get the final URL
             imageUrl = url.toString();
           } catch (error) {
             console.error('Error processing image URL:', error);
@@ -115,7 +173,6 @@ app.post('/create-checkout-session', async (req, res) => {
           }
         }
 
-        // Price is already in BRL cents
         return {
           price_data: {
             currency: 'brl',
@@ -123,30 +180,42 @@ app.post('/create-checkout-session', async (req, res) => {
               name: item.name,
               description: item.description || 'Digital eBook',
               images: imageUrl ? [imageUrl] : [],
-              metadata: { 
+              metadata: {
                 ebookId: item.id,
-                type: 'ebook'
-              }
+                type: 'ebook',
+              },
             },
-            unit_amount: item.price, // Price is already in BRL cents
+            unit_amount: item.price,
           },
           quantity: item.quantity,
           adjustable_quantity: {
-            enabled: false
-          }
+            enabled: false,
+          },
         };
       }),
+      payment_intent_data: {
+        metadata: {
+          product_names: resolvedItems.map((item) => item.name).join(', '),
+          type: 'ebook_purchase',
+          ebook_ids: ebookIds,
+        },
+      },
+      metadata: {
+        type: 'ebook_purchase',
+        ebook_ids: ebookIds,
+        locale: typeof locale === 'string' ? locale : '',
+      },
       success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       allow_promotion_codes: true,
-      billing_address_collection: 'required'
+      billing_address_collection: 'required',
     });
 
     res.json({ sessionId: session.id });
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    res.status(error.message.includes('valid') ? 400 : 500).json({
-      error: error.message
+    res.status(400).json({
+      error: error instanceof Error ? error.message : 'Failed to create checkout session',
     });
   }
 });
@@ -245,7 +314,7 @@ app.get('/health', (req, res) => {
 });
 
 // Get analytics data
-app.get('/stats', async (req, res) => {
+app.get('/stats', requireExpressAdmin, async (req, res) => {
   try {
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -470,7 +539,7 @@ app.get('/stats', async (req, res) => {
 });
 
 // Endpoint to list all completed checkout orders
-app.get('/completed-orders', async (req, res) => {
+app.get('/completed-orders', requireExpressAdmin, async (req, res) => {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
@@ -528,7 +597,7 @@ app.get('/completed-orders', async (req, res) => {
 });
 
 // Endpoint to list all authenticated users
-app.get('/users', async (req, res) => {
+app.get('/users', requireExpressAdmin, async (req, res) => {
   try {
     const {
       data: { users: supabaseUsers = [] },
@@ -558,7 +627,7 @@ app.get('/users', async (req, res) => {
 });
 
 // Endpoint to proxy user profile photos (handles Google rate limits)
-app.get('/user-photo/:uid', async (req, res) => {
+app.get('/user-photo/:uid', requireExpressAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase.auth.admin.getUserById(req.params.uid);
     if (error) {
@@ -577,111 +646,76 @@ app.get('/user-photo/:uid', async (req, res) => {
 });
 
 // Endpoint to send purchase confirmation email
-app.post('/send-purchase-email', async (req, res) => {
+app.post('/send-purchase-email', requireExpressAdmin, async (req, res) => {
   try {
-    const { sessionId, customerEmail, customerName } = req.body;
-    console.log('Received email request:', { sessionId, customerEmail, customerName });
+    const { sessionId } = req.body;
+    console.log('Received email request:', { sessionId });
 
-    // Validate required fields
-    if (!sessionId || !customerEmail || !customerName) {
-      console.error('Missing required fields:', { sessionId, customerEmail, customerName });
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Missing sessionId' });
     }
 
-    // Get the session details from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-    console.log('Stripe session:', session);
-    
+
     if (!session || session.payment_status !== 'paid') {
-      console.error('Invalid or unpaid session:', session);
       return res.status(400).json({ error: 'Invalid or unpaid session' });
     }
 
-    // Get line items for the session
+    const customerEmail = (session.customer_details?.email || session.customer_email || '').trim();
+    const customerName = session.customer_details?.name || customerEmail;
+    if (!customerEmail) {
+      return res.status(400).json({ error: 'Session has no customer email' });
+    }
+
     const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
-    console.log('Line items:', lineItems.data);
-    
-    // Get the purchased eBook titles
-    const purchasedEbooks = lineItems.data.map(item => ({
+
+    const purchasedEbooks = lineItems.data.map((item) => ({
       title: item.description || item.price_data?.product_data?.name,
-      id: item.price_data?.product_data?.metadata?.ebookId
     }));
 
-    // Validate Resend configuration
     if (!process.env.RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not configured');
       return res.status(500).json({ error: 'Email service not configured' });
     }
 
-    // Validate frontend URL
     if (!process.env.FRONTEND_URL) {
-      console.error('FRONTEND_URL is not configured');
       return res.status(500).json({ error: 'Frontend URL not configured' });
     }
 
-    // Send email using Resend
-    console.log('Sending email to:', customerEmail);
+    const escapeHtml = (value) =>
+      String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+
     const { data, error } = await resend.emails.send({
       from: 'Suporte Jornada de Insights <suporte@jornadadeinsights.com>',
       to: customerEmail,
       subject: 'Confirmação de Compra - Jornada de Insights',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333;">Obrigado pela sua compra, ${customerName}!</h1>
-          <p style="color: #666; line-height: 1.6;">
-            Estamos felizes em confirmar sua compra recente. Você já pode acessar seus eBooks no seu painel.
-          </p>
-          <div style="margin: 20px 0;">
-            <h2 style="color: #333; margin-bottom: 10px;">Seus eBooks adquiridos:</h2>
-            <ul style="list-style: none; padding: 0;">
-              ${purchasedEbooks.map(ebook => `
-                <li style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                  ${ebook.title}
-                </li>
-              `).join('')}
-            </ul>
-          </div>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.FRONTEND_URL}/user-dashboard?tab=ebooks" 
-               style="display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-              Acessar Meus eBooks
-            </a>
-          </div>
-          <p style="color: #666; line-height: 1.6;">
-            Se você tiver alguma dúvida ou precisar de ajuda, não hesite em nos contatar.
-          </p>
-          <p style="color: #666; line-height: 1.6;">
-            Atenciosamente,<br>
-            Patricia
-          </p>
+          <h1 style="color: #333;">Obrigado pela sua compra, ${escapeHtml(customerName)}!</h1>
+          <ul>
+            ${purchasedEbooks.map((ebook) => `<li>${escapeHtml(ebook.title)}</li>`).join('')}
+          </ul>
+          <a href="${process.env.FRONTEND_URL}/user-dashboard?tab=ebooks">Acessar Meus eBooks</a>
         </div>
-      `
+      `,
     });
 
     if (error) {
-      console.error('Resend API error:', error);
-      return res.status(500).json({ 
-        error: 'Failed to send email', 
-        details: error.message,
-        code: error.code,
-        statusCode: error.statusCode
-      });
+      return res.status(500).json({ error: 'Failed to send email' });
     }
 
-    console.log('Email sent successfully:', data);
-    res.json({ success: true });
+    return res.json({ success: true, id: data?.id });
   } catch (error) {
     console.error('Error in send-purchase-email:', error);
-    res.status(500).json({ 
-      error: 'Internal server error',
-      details: error.message,
-      stack: error.stack
-    });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // Top products endpoint
-app.get('/api/top-products', async (req, res) => {
+app.get('/api/top-products', requireExpressAdmin, async (req, res) => {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
@@ -749,4 +783,4 @@ app.get('/api/top-products', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
-}); 
+});

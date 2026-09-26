@@ -11,6 +11,7 @@ import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { StructuredData } from '@/components/seo/structured-data';
 import { useLanguage } from '@/context/language-context';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 
 export function CuriosidadeDetailsPage() {
   const { t, language } = useLanguage();
@@ -79,7 +80,7 @@ export function CuriosidadeDetailsPage() {
   }
 
   const displayTitle = curiosidadeDisplayTitle(curiosidade, language);
-  const displayBodyHtml = curiosidadeDisplayBody(curiosidade, language);
+  const displayBodyHtml = sanitizeHtml(curiosidadeDisplayBody(curiosidade, language));
   const displayCategoryLabel =
     categoryDisplayName(curiosidade.category, language) ?? t('nav.curiosidades', 'Curiosidades');
 

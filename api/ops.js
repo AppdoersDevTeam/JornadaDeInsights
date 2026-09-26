@@ -13,7 +13,7 @@ const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 const CRON_STALE_AFTER_MS = 36 * 60 * 60 * 1000;
 
-const handleHealth = async (_req, res) => {
+const handleHealth = async (req, res) => {
   const missing = [];
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
     missing.push('SUPABASE_SERVICE_ROLE_KEY');
@@ -37,6 +37,18 @@ const handleHealth = async (_req, res) => {
   }
   if (!process.env.FRONTEND_URL) {
     warnings.push('FRONTEND_URL');
+  }
+
+  const detailAuth =
+    (req.headers.authorization || '') === `Bearer ${cronSecret}` && Boolean(cronSecret);
+
+  // Public response: no env name disclosure. Detail only with CRON_SECRET bearer.
+  if (!detailAuth) {
+    res.status(200).json({
+      ok: missing.length === 0,
+      warningCount: warnings.length,
+    });
+    return;
   }
 
   let notificationsCron = { lastRunAt: null, stale: true };

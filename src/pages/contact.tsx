@@ -3,6 +3,9 @@ import { Mail, MapPin, Send, Clock, CheckCircle, ChevronDown, Loader2, ArrowRigh
 import { Button } from '@/components/ui/button';
 import { motion, Variants } from 'framer-motion';
 import { useLanguage } from '@/context/language-context';
+import toast from 'react-hot-toast';
+
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
 // Add CTA animations
 const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.5 } } };
@@ -28,30 +31,61 @@ export function ContactPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formState.name,
+          email: formState.email,
+          subject: formState.subject,
+          message: formState.message,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = t('contact.form.error', 'Could not send your message. Please try again.');
+        try {
+          const data = await response.json();
+          if (data?.error && typeof data.error === 'string') {
+            errorMessage = data.error;
+          }
+        } catch {
+          // ignore JSON parse errors
+        }
+        throw new Error(errorMessage);
+      }
+
       setIsSubmitted(true);
       setFormState({
         name: '',
         email: '',
         subject: '',
-        message: ''
+        message: '',
       });
 
-      // Smooth scroll to success message
-      const successMessage = document.getElementById('success-message');
-      if (successMessage) {
-        successMessage.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'center'
-        });
-      }
-    }, 1500);
+      requestAnimationFrame(() => {
+        const successMessage = document.getElementById('success-message');
+        if (successMessage) {
+          successMessage.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : t('contact.form.error', 'Could not send your message. Please try again.');
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleFaq = (index: number) => {
