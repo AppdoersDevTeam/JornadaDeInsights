@@ -79,9 +79,9 @@ export function localizeNotification(
         body: fill(
           t(
             'notifications.type.admin_webhook_lag.body',
-            'Last webhook processed at {lastWebhookAt}, more than 2h ago.'
+            '{count} Stripe checkout event(s) from the last 24h were not received by the webhook.'
           ),
-          { lastWebhookAt: String(metadata.lastWebhookAt ?? '') }
+          { count: Number(metadata.count ?? 0) }
         ),
       };
 

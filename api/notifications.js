@@ -1,3 +1,4 @@
+import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { requireUser } from '../lib/admin-auth.js';
 import { applyCors, handleOptionsRequest } from '../lib/cors.js';
@@ -5,6 +6,10 @@ import { logger, getRequestMeta } from '../lib/logger.js';
 import { sendPushToAudience } from '../lib/push.js';
 
 const LIST_LIMIT = 50;
+
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' })
+  : null;
 
 // --- action=list ---
 
@@ -266,12 +271,40 @@ const checkNewPodcastEpisodes = async (supabaseAdmin, requestMeta) => {
   );
 };
 
+// Stripe events older than 2h that never reached stripe_webhook_events. The window
+// is 26h wide so each daily cron run covers the previous run's 2h grace period
+// and every missed event is reported exactly once.
+const findUnprocessedStripeEvents = async (supabaseAdmin, now) => {
+  if (!stripe) return null;
+
+  const toUnix = (ms) => Math.floor(ms / 1000);
+  const events = await stripe.events.list({
+    type: 'checkout.session.completed',
+    created: {
+      gte: toUnix(now.getTime() - 26 * 60 * 60 * 1000),
+      lte: toUnix(now.getTime() - 2 * 60 * 60 * 1000),
+    },
+    limit: 100,
+  });
+
+  const eventIds = events.data.map((event) => event.id);
+  if (eventIds.length === 0) return [];
+
+  const { data, error } = await supabaseAdmin
+    .from('stripe_webhook_events')
+    .select('event_id')
+    .in('event_id', eventIds);
+  if (error) throw error;
+
+  const recorded = new Set((data || []).map((row) => row.event_id));
+  return eventIds.filter((id) => !recorded.has(id));
+};
+
 const checkAdminAlerts = async (supabaseAdmin, requestMeta) => {
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
   const since24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
   const since7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const since2h = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
   const todayStart = new Date(now.getTime());
   todayStart.setUTCHours(0, 0, 0, 0);
 
@@ -329,16 +362,30 @@ const checkAdminAlerts = async (supabaseAdmin, requestMeta) => {
     });
   }
 
-  const lastWebhookAt = lastWebhookRes.data?.[0]?.processed_at || null;
-  if (!lastWebhookRes.error && lastWebhookAt && lastWebhookAt < since2h) {
+  let unprocessedEventIds = null;
+  try {
+    unprocessedEventIds = await findUnprocessedStripeEvents(supabaseAdmin, now);
+  } catch (error) {
+    logger.warn('notifications_cron_webhook_reconcile_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
+  }
+
+  if (unprocessedEventIds && unprocessedEventIds.length > 0) {
+    const lastWebhookAt = lastWebhookRes.data?.[0]?.processed_at || null;
     events.push({
       type: 'admin_webhook_lag',
       audience: 'admin',
       title: 'Stripe webhook lag',
-      body: `Last webhook processed at ${lastWebhookAt}, more than 2h ago.`,
+      body: `${unprocessedEventIds.length} Stripe checkout event(s) from the last 24h were not received by the webhook.`,
       link: '/dashboard?tab=overview',
       source_id: `admin_webhook_lag:${today}`,
-      metadata: { lastWebhookAt },
+      metadata: {
+        count: unprocessedEventIds.length,
+        eventIds: unprocessedEventIds.slice(0, 20),
+        lastWebhookAt,
+      },
     });
   }
 
