@@ -642,19 +642,43 @@ const handleStats = async (req, res, requestMeta) => {
 
     const balanceData = [];
 
-    const thirtyDaysAgo = new Date();
+    const toUnix = (date) => Math.floor(date.getTime() / 1000);
+    const trendsNow = new Date();
+    const thirtyDaysAgo = new Date(trendsNow);
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const trendsStart = new Date(
+      Math.min(
+        new Date(trendsNow.getFullYear(), trendsNow.getMonth(), trendsNow.getDate() - 6).getTime(),
+        new Date(trendsNow.getFullYear(), trendsNow.getMonth(), trendsNow.getDate() - 28).getTime(),
+        new Date(trendsNow.getFullYear(), trendsNow.getMonth() - 2, 1).getTime()
+      )
+    );
 
-    const balanceTransactions = await stripe.balanceTransactions.list({
-      created: {
-        gte: Math.floor(thirtyDaysAgo.getTime() / 1000),
-      },
-      limit: 100,
-    });
+    // Sales are reported in the charge currency (what customers paid, e.g. BRL), while
+    // balance transactions are always in the account's settlement currency (e.g. NZD).
+    const [trendCharges, balanceTransactions] = await Promise.all([
+      stripe.charges
+        .list({ created: { gte: toUnix(trendsStart) }, limit: 100 })
+        .autoPagingToArray({ limit: 2000 }),
+      stripe.balanceTransactions
+        .list({ created: { gte: toUnix(thirtyDaysAgo) }, limit: 100 })
+        .autoPagingToArray({ limit: 2000 }),
+    ]);
+
+    const salesCharges = trendCharges.filter(
+      (charge) => charge.status === 'succeeded' && charge.currency === primaryCurrency
+    );
+    const sumSales = (start, end) =>
+      salesCharges
+        .filter((charge) => charge.created >= toUnix(start) && charge.created < toUnix(end))
+        .reduce((sum, charge) => sum + (charge.amount || 0) / 100, 0);
+
+    const balanceCurrency =
+      balanceTransactions.find((txn) => txn.currency)?.currency || primaryCurrency;
 
     const transactionsByDay = {};
-    balanceTransactions.data
-      .filter((txn) => txn.currency === primaryCurrency)
+    balanceTransactions
+      .filter((txn) => txn.currency === balanceCurrency)
       .forEach((txn) => {
         const date = new Date(txn.created * 1000);
         const day = date.toISOString().split('T')[0];
@@ -718,18 +742,7 @@ const handleStats = async (req, res, requestMeta) => {
       const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const endOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
 
-      const dayTransactions = await stripe.balanceTransactions.list({
-        created: {
-          gte: Math.floor(startOfDate.getTime() / 1000),
-          lt: Math.floor(endOfDate.getTime() / 1000),
-        },
-        limit: 100,
-      });
-
-      const sales = dayTransactions.data
-        .filter((txn) => txn.currency === primaryCurrency)
-        .filter((txn) => ['payment', 'charge'].includes(txn.type))
-        .reduce((sum, txn) => sum + txn.amount / 100, 0);
+      const sales = sumSales(startOfDate, endOfDate);
 
       const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
 
@@ -745,18 +758,7 @@ const handleStats = async (req, res, requestMeta) => {
       const startDate = new Date(endDate);
       startDate.setDate(endDate.getDate() - 7);
 
-      const weekTransactions = await stripe.balanceTransactions.list({
-        created: {
-          gte: Math.floor(startDate.getTime() / 1000),
-          lt: Math.floor(endDate.getTime() / 1000),
-        },
-        limit: 100,
-      });
-
-      const sales = weekTransactions.data
-        .filter((txn) => txn.currency === primaryCurrency)
-        .filter((txn) => ['payment', 'charge'].includes(txn.type))
-        .reduce((sum, txn) => sum + txn.amount / 100, 0);
+      const sales = sumSales(startDate, endDate);
 
       salesTrends.weekly.push({
         date: `Week ${4 - i}`,
@@ -765,26 +767,13 @@ const handleStats = async (req, res, requestMeta) => {
     }
 
     for (let i = 2; i >= 0; i--) {
-      const endDate = new Date();
-      endDate.setMonth(endDate.getMonth() - i);
-      const startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
-      const nextMonth = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 1);
+      const startDate = new Date(trendsNow.getFullYear(), trendsNow.getMonth() - i, 1);
+      const nextMonth = new Date(trendsNow.getFullYear(), trendsNow.getMonth() - i + 1, 1);
 
-      const monthTransactions = await stripe.balanceTransactions.list({
-        created: {
-          gte: Math.floor(startDate.getTime() / 1000),
-          lt: Math.floor(nextMonth.getTime() / 1000),
-        },
-        limit: 100,
-      });
-
-      const sales = monthTransactions.data
-        .filter((txn) => txn.currency === primaryCurrency)
-        .filter((txn) => ['payment', 'charge'].includes(txn.type))
-        .reduce((sum, txn) => sum + txn.amount / 100, 0);
+      const sales = sumSales(startDate, nextMonth);
 
       salesTrends.monthly.push({
-        date: `${endDate.getMonth() + 1}`.padStart(2, '0'),
+        date: `${startDate.getMonth() + 1}`.padStart(2, '0'),
         sales: Number(sales.toFixed(2)),
       });
     }
@@ -798,6 +787,7 @@ const handleStats = async (req, res, requestMeta) => {
       salesTrends,
       balanceData,
       currency: primaryCurrency.toUpperCase(),
+      balanceCurrency: balanceCurrency.toUpperCase(),
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

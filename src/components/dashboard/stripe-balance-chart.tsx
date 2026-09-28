@@ -20,16 +20,17 @@ export interface BalanceData {
 
 interface StripeBalanceChartProps {
   data: BalanceData[];
+  currency?: string;
 }
 
-export function StripeBalanceChart({ data }: StripeBalanceChartProps) {
+export function StripeBalanceChart({ data, currency = 'BRL' }: StripeBalanceChartProps) {
   const [activeTab, setActiveTab] = useState('all');
   const { t, language } = useLanguage();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', {
       style: 'currency',
-      currency: 'BRL',
+      currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(value);

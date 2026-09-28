@@ -219,6 +219,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
     monthly: []
   });
   const [balanceData, setBalanceData] = useState<BalanceData[]>([]);
+  const [balanceCurrency, setBalanceCurrency] = useState('BRL');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryName, setCategoryName] = useState('');
@@ -528,6 +529,9 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           setSalesTrends(formattedTrends);
 
           // Set balance data
+          if (typeof statsData?.balanceCurrency === 'string') {
+            setBalanceCurrency(statsData.balanceCurrency);
+          }
           if (Array.isArray(statsData?.balanceData)) {
             setBalanceData(statsData.balanceData.map((item: BalanceData) => ({
               ...item,
@@ -1570,7 +1574,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
               weeklyData={salesTrends.weekly}
               monthlyData={salesTrends.monthly}
             />
-            <StripeBalanceChart data={balanceData} />
+            <StripeBalanceChart data={balanceData} currency={balanceCurrency} />
           </div>
 
           <Card className="p-6 w-full">
