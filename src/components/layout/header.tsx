@@ -1,9 +1,16 @@
 import { useState, useEffect } from 'react';
-import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, User, Home, Info, Mic, ShoppingBag,
-  GraduationCap, Mail, LayoutDashboard, ShoppingCart, BookOpen, Languages, Bell } from 'lucide-react';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, User, Home, Info, Mic, ShoppingBag, GraduationCap, Mail, LayoutDashboard, ShoppingCart,
+  BookOpen, Languages, Bell, ChevronDown, Book, LogOut } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
 import { useAuth } from '@/context/auth-context';
 import { useLanguage } from '@/context/language-context';
@@ -16,6 +23,9 @@ export function Header() {
   const { totalCount } = useCart();
   const { user } = useAuth();
   const { language, openLanguagePrompt, t } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const storeActive = location.pathname.startsWith('/shop') || location.pathname.startsWith('/courses');
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -29,23 +39,41 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = user ? [
-    { to: '/', label: t('nav.home', 'Home') },
-    { to: '/about', label: t('nav.about', 'Sobre') },
-    { to: '/podcast', label: t('nav.podcast', 'Podcast') },
-    { to: '/curiosidades', label: t('nav.curiosidades', 'Curiosidades') },
-    { to: '/shop', label: t('nav.shop', 'Loja') },
-    { to: '/courses', label: t('nav.courses', 'Cursos') },
-    { to: '/contact', label: t('nav.contact', 'Contato') }
-  ] : [
+  // Desktop groups the store pages under one "Store" menu; mobile lists them under a heading.
+  const primaryLinks = [
     { to: '/', label: t('nav.home', 'Início') },
     { to: '/about', label: t('nav.about', 'Sobre') },
     { to: '/podcast', label: t('nav.podcast', 'Podcast') },
     { to: '/curiosidades', label: t('nav.curiosidades', 'Curiosidades') },
-    { to: '/shop', label: t('nav.shop', 'Loja') },
-    { to: '/courses', label: t('nav.courses', 'Cursos') },
-    { to: '/contact', label: t('nav.contact', 'Contato') }
   ];
+  const storeLinks = [
+    { to: '/shop', label: t('nav.ebooks.short', 'eBooks') },
+    { to: '/courses', label: t('nav.courses', 'Cursos') },
+  ];
+  const contactLink = { to: '/contact', label: t('nav.contact', 'Contato') };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/signin');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const desktopLinkClass = ({ isActive }: { isActive: boolean }) =>
+    cn(
+      'text-sm xl:text-base text-background font-normal hover:text-secondary transition-colors whitespace-nowrap px-1',
+      isActive && 'underline underline-offset-8 decoration-2'
+    );
+
+  const iconButtonClass =
+    'relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0 text-background';
+
+  const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
+      isActive ? 'bg-[#606C38] text-white' : 'hover:bg-[#606C38] hover:text-white'
+    }`;
 
   return (
     <header className={cn(
@@ -60,80 +88,114 @@ export function Header() {
           </Link>
         </div>
         {/* Center: Nav Links */}
-        <nav className="hidden lg:flex flex-1 justify-center items-center gap-2 xl:gap-4 min-w-0">
-          {navLinks.map((link) => (
-            <NavLink 
-              key={link.to}
-              to={link.to} 
-              end={link.to === '/'}
-              className="text-sm xl:text-base text-background font-normal hover:text-secondary transition-colors whitespace-nowrap px-1"
-            >
+        <nav className="hidden lg:flex flex-1 justify-center items-center gap-3 xl:gap-5 min-w-0">
+          {primaryLinks.map((link) => (
+            <NavLink key={link.to} to={link.to} end={link.to === '/'} className={desktopLinkClass}>
               {link.label}
             </NavLink>
           ))}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                'flex items-center gap-1 text-sm xl:text-base text-background font-normal hover:text-secondary transition-colors whitespace-nowrap px-1 outline-none',
+                storeActive && 'underline underline-offset-8 decoration-2'
+              )}
+            >
+              {t('nav.shop', 'Loja')}
+              <ChevronDown className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="min-w-[10rem]">
+              <DropdownMenuItem asChild>
+                <Link to="/shop" className="flex items-center gap-2 cursor-pointer">
+                  <ShoppingBag className="h-4 w-4" />
+                  {t('nav.ebooks.short', 'eBooks')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/courses" className="flex items-center gap-2 cursor-pointer">
+                  <GraduationCap className="h-4 w-4" />
+                  {t('nav.courses', 'Cursos')}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <NavLink to={contactLink.to} className={desktopLinkClass}>
+            {contactLink.label}
+          </NavLink>
         </nav>
         {/* Right: Actions */}
-        <div className="hidden lg:flex flex-shrink-0 justify-end items-center gap-2 xl:gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-background border-background hover:bg-background hover:text-primary bg-background/10 whitespace-nowrap px-2 xl:px-3"
+        <div className="hidden lg:flex flex-shrink-0 justify-end items-center gap-1 xl:gap-2">
+          <button
+            type="button"
+            className="flex items-center gap-1 rounded-full px-2 py-1.5 text-xs font-medium text-background hover:bg-background/10 transition-colors"
             onClick={openLanguagePrompt}
             aria-label={t('lang.switch', 'Change language')}
             title={t('lang.switch', 'Change language')}
           >
-            <Languages className="h-4 w-4 mr-1.5" />
+            <Languages className="h-4 w-4" />
             {language === 'pt-BR' ? 'PT' : 'EN'}
-          </Button>
+          </button>
+          <Link
+            to={user ? '/user-dashboard?tab=cart' : '/cart'}
+            className={iconButtonClass}
+            aria-label={t('nav.cart', 'Carrinho')}
+            title={t('nav.cart', 'Carrinho')}
+          >
+            <ShoppingCart className="h-5 w-5 xl:h-6 xl:w-6" />
+            {totalCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+                {totalCount}
+              </span>
+            )}
+          </Link>
           {user ? (
             <>
-              <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
-                <Link to="/dashboard" className="flex items-center gap-1.5 xl:gap-2">
-                  <LayoutDashboard className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0" />
-                  <span className="text-xs xl:text-sm font-medium">{t('nav.dashboard', 'Dashboard')}</span>
-                </Link>
-              </Button>
-              <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 whitespace-nowrap px-2 xl:px-3">
-                <Link to="/shop" className="text-xs xl:text-sm font-medium">
-                  <span className="hidden xl:inline">{t('nav.ebooks.cta', 'Adquirir Meus eBooks')}</span>
-                  <span className="xl:hidden">{t('nav.ebooks.short', 'eBooks')}</span>
-                </Link>
-              </Button>
-              <div className="flex items-center gap-1 xl:gap-2">
-                <Link to="/user-dashboard?tab=cart" className="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
-                  <ShoppingCart className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
-                  {totalCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
-                      {totalCount}
-                    </span>
-                  )}
-                </Link>
-                <NotificationBell triggerClassName="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0 text-background" />
-                <Link to="/dashboard" className="p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
-                  <User className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
-                </Link>
-              </div>
+              <NotificationBell triggerClassName={iconButtonClass} />
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className={cn(iconButtonClass, 'flex items-center gap-0.5 outline-none')}
+                  aria-label={t('nav.account', 'Minha conta')}
+                  title={t('nav.account', 'Minha conta')}
+                >
+                  <User className="h-5 w-5 xl:h-6 xl:w-6" />
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-[12rem]">
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutDashboard className="h-4 w-4" />
+                      {t('nav.dashboard', 'Dashboard')}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/user-dashboard?tab=ebooks" className="flex items-center gap-2 cursor-pointer">
+                      <Book className="h-4 w-4" />
+                      {t('user.tab.ebooks', 'Meus eBooks')}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/user-dashboard?tab=courses" className="flex items-center gap-2 cursor-pointer">
+                      <GraduationCap className="h-4 w-4" />
+                      {t('courses.mine.title', 'Meus cursos')}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => void handleSignOut()} className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600">
+                    <LogOut className="h-4 w-4" />
+                    {t('user.signOut.cta', 'Sair')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
-            <>
-              <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 whitespace-nowrap px-2 xl:px-3">
-                <Link to="/shop" className="text-xs xl:text-sm font-medium">
-                  <span className="hidden xl:inline">{t('nav.ebooks.cta', 'Adquirir Meus eBooks')}</span>
-                  <span className="xl:hidden">{t('nav.ebooks.short', 'eBooks')}</span>
-                </Link>
-              </Button>
-              <Link to="/cart" className="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
-                <ShoppingCart className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
-                {totalCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
-                    {totalCount}
-                  </span>
-                )}
-              </Link>
-              <Link to="/signin" className="p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0">
-                <User className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
-              </Link>
-            </>
+            <Link
+              to="/signin"
+              className={iconButtonClass}
+              aria-label={t('nav.signIn', 'Entrar')}
+              title={t('nav.signIn', 'Entrar')}
+            >
+              <User className="h-5 w-5 xl:h-6 xl:w-6" />
+            </Link>
           )}
         </div>
         {/* Mobile: cart + language + menu */}
@@ -215,30 +277,34 @@ export function Header() {
           )}
 
           {/* Main Navigation Links */}
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.to === '/'}
-              className={({ isActive }) =>
-                `flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left ${
-                  isActive
-                    ? 'bg-[#606C38] text-white'
-                    : 'hover:bg-[#606C38] hover:text-white'
-                }`
-              }
-              onClick={closeMenu}
-            >
+          {primaryLinks.map((link) => (
+            <NavLink key={link.to} to={link.to} end={link.to === '/'} className={mobileLinkClass} onClick={closeMenu}>
               {link.to === '/' && <Home className="h-5 w-5" />}
               {link.to === '/about' && <Info className="h-5 w-5" />}
               {link.to === '/podcast' && <Mic className="h-5 w-5" />}
               {link.to === '/curiosidades' && <BookOpen className="h-5 w-5" />}
-              {link.to === '/shop' && <ShoppingBag className="h-5 w-5" />}
-              {link.to === '/courses' && <GraduationCap className="h-5 w-5" />}
-              {link.to === '/contact' && <Mail className="h-5 w-5" />}
               {link.label}
             </NavLink>
           ))}
+
+          <div className="w-full">
+            <p className="px-4 pt-2 pb-1 text-xs font-semibold uppercase tracking-wide text-[#606C38]/70">
+              {t('nav.shop', 'Loja')}
+            </p>
+            <div className="flex flex-col gap-1 pl-4">
+              {storeLinks.map((link) => (
+                <NavLink key={link.to} to={link.to} className={mobileLinkClass} onClick={closeMenu}>
+                  {link.to === '/shop' ? <ShoppingBag className="h-5 w-5" /> : <GraduationCap className="h-5 w-5" />}
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+
+          <NavLink to={contactLink.to} className={mobileLinkClass} onClick={closeMenu}>
+            <Mail className="h-5 w-5" />
+            {contactLink.label}
+          </NavLink>
 
           {/* Cart Link — guests use public /cart; signed-in users use dashboard cart */}
           <NavLink
