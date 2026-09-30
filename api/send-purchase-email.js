@@ -4,20 +4,14 @@ import { requireAdmin } from '../lib/admin-auth.js';
 import { applyCors, handleOptionsRequest } from '../lib/cors.js';
 import { logger, getRequestMeta } from '../lib/logger.js';
 import { captureServerError } from '../lib/monitoring.js';
+import { buildPurchaseEmail } from '../lib/purchase-email.js';
+import { listSessionProducts } from '../lib/stripe-purchases.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2023-10-16',
 });
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-const escapeHtml = (value) =>
-  String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 
 export default async function handler(req, res) {
   const requestMeta = getRequestMeta(req);
@@ -79,44 +73,19 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Session has no customer email' });
     }
 
-    const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
-
-    const purchasedEbooks = lineItems.data.map((item) => ({
-      title: item.description || item.price_data?.product_data?.name || 'eBook',
-    }));
+    const products = await listSessionProducts(stripe, session);
+    const { subject, html } = buildPurchaseEmail({
+      products,
+      customerName,
+      locale: session.metadata?.locale || '',
+      frontendUrl: process.env.FRONTEND_URL,
+    });
 
     const { data, error } = await resend.emails.send({
       from: 'Suporte Jornada de Insights <suporte@jornadadeinsights.com>',
       to: customerEmail,
-      subject: 'Confirmação de Compra - Jornada de Insights',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333;">Obrigado pela sua compra, ${escapeHtml(customerName)}!</h1>
-          <p style="color: #666; line-height: 1.6;">
-            Estamos felizes em confirmar sua compra recente. Você já pode acessar seus eBooks no seu painel.
-          </p>
-          <div style="margin: 20px 0;">
-            <h2 style="color: #333; margin-bottom: 10px;">Seus eBooks adquiridos:</h2>
-            <ul style="list-style: none; padding: 0;">
-              ${purchasedEbooks
-                .map(
-                  (ebook) => `
-                <li style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                  ${escapeHtml(ebook.title)}
-                </li>
-              `
-                )
-                .join('')}
-            </ul>
-          </div>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.FRONTEND_URL}/user-dashboard?tab=ebooks"
-               style="display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-              Acessar Meus eBooks
-            </a>
-          </div>
-        </div>
-      `,
+      subject,
+      html,
     });
 
     if (error) {

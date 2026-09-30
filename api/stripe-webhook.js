@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { captureServerError } from '../lib/monitoring.js';
+import { buildPurchaseEmail } from '../lib/purchase-email.js';
 import {
   buildPurchaseRows,
   listSessionProducts,
@@ -21,14 +22,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-const escapeHtml = (value) =>
-  String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 
 const getRawBody = async (req) =>
   new Promise((resolve, reject) => {
@@ -55,7 +48,7 @@ const isDuplicateError = (error) => error && error.code === '23505';
 const persistPurchases = async (supabaseAdmin, session, products) => {
   if (!sessionEmail(session)) return;
   const resolved = await resolveEbookIdsByTitle(supabaseAdmin, products);
-  const unmatched = resolved.filter((product) => !product.ebookId).map((product) => product.title);
+  const unmatched = resolved.filter((product) => !product.productId).map((product) => product.title);
   if (unmatched.length) {
     console.error('persistPurchases unmatched line items:', session.id, unmatched);
   }
@@ -66,56 +59,17 @@ const persistPurchases = async (supabaseAdmin, session, products) => {
 };
 
 const sendPurchaseEmail = async ({ products, customerEmail, customerName, locale }) => {
-  const purchasedEbooks = products.map((product) => ({ title: product.title }));
-
   const frontendUrl = process.env.FRONTEND_URL;
   if (!frontendUrl) {
     throw new Error('FRONTEND_URL is not configured');
   }
 
-  const isEn = typeof locale === 'string' && locale.toLowerCase().startsWith('en');
-  const subject = isEn
-    ? 'Purchase Confirmation - Journey of Insights'
-    : 'Confirmação de Compra - Jornada de Insights';
-  const heading = isEn
-    ? `Thank you for your purchase, ${escapeHtml(customerName)}!`
-    : `Obrigado pela sua compra, ${escapeHtml(customerName)}!`;
-  const body = isEn
-    ? 'We are happy to confirm your recent purchase. You can access your eBooks in your dashboard.'
-    : 'Estamos felizes em confirmar sua compra recente. Você já pode acessar seus eBooks no seu painel.';
-  const listTitle = isEn ? 'Your purchased eBooks:' : 'Seus eBooks adquiridos:';
-  const cta = isEn ? 'Access My eBooks' : 'Acessar Meus eBooks';
-
+  const { subject, html } = buildPurchaseEmail({ products, customerName, locale, frontendUrl });
   const { error } = await resend.emails.send({
     from: 'Suporte Jornada de Insights <suporte@jornadadeinsights.com>',
     to: customerEmail,
     subject,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #333;">${heading}</h1>
-        <p style="color: #666; line-height: 1.6;">${body}</p>
-        <div style="margin: 20px 0;">
-          <h2 style="color: #333; margin-bottom: 10px;">${listTitle}</h2>
-          <ul style="list-style: none; padding: 0;">
-            ${purchasedEbooks
-              .map(
-                (ebook) => `
-                  <li style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                    ${escapeHtml(ebook.title)}
-                  </li>
-                `
-              )
-              .join('')}
-          </ul>
-        </div>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${frontendUrl}/user-dashboard?tab=ebooks"
-             style="display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-            ${cta}
-          </a>
-        </div>
-      </div>
-    `,
+    html,
   });
 
   if (error) {
@@ -188,6 +142,7 @@ export default async function handler(req, res) {
             metadata: {
               session_id: sessionId,
               ebook_ids: session.metadata?.ebook_ids || '',
+              course_ids: session.metadata?.course_ids || '',
             },
           });
         } catch {

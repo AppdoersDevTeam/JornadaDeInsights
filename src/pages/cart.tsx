@@ -1,30 +1,15 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, X, Plus, Minus, ShieldCheck, CreditCard } from 'lucide-react';
-import { useCart } from '@/context/cart-context';
-import { loadStripe } from '@stripe/stripe-js';
+import { useCart, restoreCartAfterSignIn, saveCartForSignIn } from '@/context/cart-context';
 import { toast } from 'react-hot-toast';
+import { startCheckout, CheckoutError } from '@/lib/checkout';
 import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
 import { LazyImage } from '@/components/shop/lazy-image';
 import { trackLifecycleEvent } from '@/lib/lifecycle';
 import { useLanguage } from '@/context/language-context';
 import { Label } from '@/components/ui/label';
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
-const API_BASE_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
-
-interface CartItem {
-  id: string;
-  title: string;
-  price: number;
-  quantity: number;
-  cover_url?: string;
-  description?: string;
-  filename?: string;
-  created_at: string;
-}
 
 interface Ebook {
   id: string;
@@ -54,28 +39,7 @@ export function CartPage() {
       setIsAuthenticated(!!user);
       if (user) {
         setShowAuthGate(false);
-        const savedCart = sessionStorage.getItem('cartState');
-        if (savedCart) {
-          try {
-            const parsedCart = JSON.parse(savedCart) as CartItem[];
-            clearCart();
-            parsedCart.forEach((item) => {
-              const ebookItem: Ebook = {
-                id: item.id,
-                title: item.title,
-                description: item.description || '',
-                price: item.price,
-                filename: item.filename || item.id,
-                cover_url: item.cover_url,
-                created_at: item.created_at
-              };
-              addItem(ebookItem);
-            });
-            sessionStorage.removeItem('cartState');
-          } catch (error) {
-            console.error('Error restoring cart state:', error);
-          }
-        }
+        restoreCartAfterSignIn(clearCart, addItem);
       }
     });
 
@@ -94,7 +58,7 @@ export function CartPage() {
 
         if (error) throw error;
 
-        const cartIds = new Set(items.map((item) => item.id));
+        const cartIds = new Set(items.filter((item) => item.type === 'ebook').map((item) => item.id));
         const suggestions = (data || [])
           .filter((ebook) => !cartIds.has(ebook.id))
           .slice(0, 3)
@@ -152,7 +116,7 @@ export function CartPage() {
   }, [displayCurrency]);
 
   const persistCartForAuth = () => {
-    sessionStorage.setItem('cartState', JSON.stringify(items));
+    saveCartForSignIn(items);
   };
 
   const goToSignIn = () => {
@@ -197,64 +161,17 @@ export function CartPage() {
         total: Number(totalPrice.toFixed(2)),
         userEmail: user?.email ?? null,
       });
-      const stripe = await stripePromise;
-      if (!stripe) throw new Error('Stripe failed to initialize');
-
-      const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerEmail: user?.email ?? undefined,
-          locale: language,
-          items: items.map(item => {
-            let imageUrl = item.cover_url;
-            if (imageUrl) {
-              try {
-                const url = new URL(imageUrl, window.location.origin);
-                url.search = '';
-                url.hash = '';
-                url.protocol = 'https:';
-                imageUrl = url.toString();
-              } catch (error) {
-                console.error('Error processing image URL:', error);
-                imageUrl = undefined;
-              }
-            }
-
-            return {
-              id: item.id,
-              name: item.title,
-              description: `Digital eBook${item.description ? ` - ${item.description}` : ''}`,
-              price: Math.round(item.price * 100),
-              quantity: item.quantity,
-              image: imageUrl || undefined,
-              metadata: {
-                type: 'ebook',
-                layout: 'preppy',
-                displayStyle: 'large_cover'
-              }
-            };
-          }),
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create checkout session');
-      }
-
-      const { sessionId } = await response.json();
-
-      const result = await stripe.redirectToCheckout({
-        sessionId,
-      });
-
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
+      await startCheckout(items, language);
     } catch (error) {
+      if (error instanceof CheckoutError && error.code === 'already_owned') {
+        toast.error(t('cart.toast.courseAlreadyOwned', 'You already own this course. Remove it from your cart to continue.'));
+        return;
+      }
+      if (error instanceof CheckoutError && error.code === 'auth_required') {
+        persistCartForAuth();
+        setShowAuthGate(true);
+        return;
+      }
       console.error('Erro ao iniciar o processo de checkout:', error);
       toast.error(t('cart.toast.checkoutFail', 'Could not start checkout. Please try again.'));
     }
@@ -279,7 +196,7 @@ export function CartPage() {
               <div className="space-y-6">
                 <div className="space-y-4">
                   {items.map(item => (
-                    <div key={item.id} className="bg-card rounded-lg p-4 flex justify-between items-center">
+                    <div key={`${item.type}-${item.id}`} className="bg-card rounded-lg p-4 flex justify-between items-center">
                       <div className="flex items-center space-x-4">
                         <LazyImage
                           src={item.cover_url || ''}
@@ -288,28 +205,35 @@ export function CartPage() {
                         />
                         <div>
                           <h3 className="font-semibold">{item.title}</h3>
+                          {item.type === 'course' && (
+                            <p className="text-xs font-medium uppercase tracking-wide text-primary">
+                              {t('courses.badge', 'Online course')}
+                            </p>
+                          )}
                           <p className="text-muted-foreground">{formatPrice(item.price)}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => decrementItem(item.id)}
-                            className="p-1 rounded border hover:bg-muted"
-                            disabled={item.quantity <= 1}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </button>
-                          <span>{item.quantity}</span>
-                          <button
-                            onClick={() => addItem(item)}
-                            className="p-1 rounded border hover:bg-muted"
-                          >
-                            <Plus className="h-4 w-4" />
-                          </button>
-                        </div>
+                        {item.type !== 'course' && (
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => decrementItem(item.id, item.type)}
+                              className="p-1 rounded border hover:bg-muted"
+                              disabled={item.quantity <= 1}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </button>
+                            <span>{item.quantity}</span>
+                            <button
+                              onClick={() => addItem(item)}
+                              className="p-1 rounded border hover:bg-muted"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </button>
+                          </div>
+                        )}
                         <button
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeItem(item.id, item.type)}
                           className="p-1 rounded border border-destructive text-destructive hover:bg-destructive/10"
                         >
                           <X className="h-4 w-4" />

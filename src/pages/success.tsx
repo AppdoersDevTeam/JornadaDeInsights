@@ -9,10 +9,37 @@ import { useCart } from '@/context/cart-context';
 import { EbookCard, type Ebook } from '@/components/shop/ebook-card';
 import { getEbooks } from '@/lib/supabase';
 
+interface PurchasedCourse {
+  id: string;
+  slug?: string;
+}
+
+/** Read what was bought before the cart is cleared: the checkout snapshot, else the cart itself. */
+const readPurchasedCourses = (cartItems: Array<{ type: string; id: string; slug?: string }>): PurchasedCourse[] => {
+  let source: Array<{ type?: string; id?: string; slug?: string }> = cartItems;
+  try {
+    const raw = sessionStorage.getItem('jdi_last_checkout');
+    if (raw) source = JSON.parse(raw) as typeof source;
+  } catch {
+    // fall back to the cart
+  }
+  return source
+    .filter((item) => item.type === 'course' && typeof item.id === 'string')
+    .map((item) => ({ id: item.id as string, slug: item.slug }));
+};
+
 export function SuccessPage() {
   const { t, language } = useLanguage();
-  const { clearCart } = useCart();
+  const {
+    state: { items: cartItems },
+    clearCart,
+  } = useCart();
   const [searchParams] = useSearchParams();
+  const [purchasedCourses] = useState(() => readPurchasedCourses(cartItems));
+  const courseLink =
+    purchasedCourses.length === 1 && purchasedCourses[0].slug
+      ? `/user-dashboard/courses/${purchasedCourses[0].slug}`
+      : '/user-dashboard?tab=courses';
   const [isLoading, setIsLoading] = useState(true);
   const [recommendations, setRecommendations] = useState<Ebook[]>([]);
   const sessionId = searchParams.get('session_id');
@@ -46,6 +73,7 @@ export function SuccessPage() {
       if (!isDonation) {
         clearCart();
         sessionStorage.removeItem('cartState');
+        sessionStorage.removeItem('jdi_last_checkout');
         void trackLifecycleEvent('purchase_completed', { sessionId });
       }
     }
@@ -94,8 +122,13 @@ export function SuccessPage() {
                   )}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {!isDonation && (
+            {!isDonation && purchasedCourses.length > 0 && (
               <Button asChild size="lg">
+                <Link to={courseLink}>{t('success.cta.course', 'Go to your course')}</Link>
+              </Button>
+            )}
+            {!isDonation && (
+              <Button asChild size="lg" variant={purchasedCourses.length > 0 ? 'outline' : 'default'}>
                 <Link to="/user-dashboard?tab=ebooks">
                   {t('success.cta.ebooks', 'Go to my eBooks')}
                 </Link>

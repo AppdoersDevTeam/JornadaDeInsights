@@ -6,6 +6,7 @@ import { logger, getRequestMeta } from '../lib/logger.js';
 import { captureServerError } from '../lib/monitoring.js';
 import {
   buildPurchaseRows,
+  emailOwnsProduct,
   listPaidSessionsForEmail,
   listSessionProducts,
   persistPurchaseRows,
@@ -30,15 +31,24 @@ const createSupabaseAdmin = () => {
   });
 };
 
-// Validate cart shape only — prices are resolved server-side from ebooks_metadata.
+// Validate cart shape only — prices are resolved server-side from the catalog.
+// Items: { type: 'ebook' | 'course', id, quantity }. A missing type means ebook (older clients).
+const itemType = (item) => (item.type === 'course' ? 'course' : 'ebook');
+
 const validateCartItems = (items) => {
   if (!Array.isArray(items) || items.length === 0) {
     throw new Error('Cart must be a non-empty array');
+  }
+  if (items.length > 50) {
+    throw new Error('Cart has too many items');
   }
 
   return items.every((item) => {
     if (!item.id || typeof item.id !== 'string') {
       throw new Error('Each item must have a valid id');
+    }
+    if (item.type !== undefined && item.type !== 'ebook' && item.type !== 'course') {
+      throw new Error('Each item must have a valid type');
     }
     if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
       throw new Error('Each item must have a valid quantity');
@@ -47,39 +57,89 @@ const validateCartItems = (items) => {
   });
 };
 
+const toUnitAmount = (price, label) => {
+  const unitAmount = Math.round(Number(price) * 100);
+  if (!Number.isFinite(unitAmount) || unitAmount <= 0) {
+    throw new Error(`Invalid catalog price for ${label}`);
+  }
+  return unitAmount;
+};
+
 /** Resolve authoritative BRL prices from catalog; ignore client-sent amounts. */
 const resolveCheckoutItems = async (items) => {
   const supabaseAdmin = createSupabaseAdmin();
-  const ids = items.map((item) => item.id);
-  const { data, error } = await supabaseAdmin
-    .from('ebooks_metadata')
-    .select('id, title, description, price, filename')
-    .in('id', ids);
+  const ebookIds = items.filter((item) => itemType(item) === 'ebook').map((item) => item.id);
+  const courseIds = items.filter((item) => itemType(item) === 'course').map((item) => item.id);
 
-  if (error) {
-    throw error;
-  }
+  const [ebooksRes, coursesRes] = await Promise.all([
+    ebookIds.length
+      ? supabaseAdmin.from('ebooks_metadata').select('id, title, description, price').in('id', ebookIds)
+      : Promise.resolve({ data: [], error: null }),
+    courseIds.length
+      ? supabaseAdmin
+          .from('courses')
+          .select('id, title, subtitle, price')
+          .in('id', courseIds)
+          .eq('is_published', true)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
 
-  const byId = new Map((data || []).map((row) => [row.id, row]));
+  if (ebooksRes.error) throw ebooksRes.error;
+  if (coursesRes.error) throw coursesRes.error;
+
+  const ebooksById = new Map((ebooksRes.data || []).map((row) => [row.id, row]));
+  const coursesById = new Map((coursesRes.data || []).map((row) => [row.id, row]));
+  const seenCourses = new Set();
 
   return items.map((item) => {
-    const row = byId.get(item.id);
+    if (itemType(item) === 'course') {
+      const row = coursesById.get(item.id);
+      if (!row) {
+        throw new Error(`Unknown course: ${item.id}`);
+      }
+      if (seenCourses.has(row.id)) {
+        throw new Error(`Duplicate course in cart: ${item.id}`);
+      }
+      seenCourses.add(row.id);
+      return {
+        type: 'course',
+        id: row.id,
+        name: row.title || 'Course',
+        description: row.subtitle || 'Online course',
+        price: toUnitAmount(row.price, `course: ${item.id}`),
+        quantity: 1,
+        image: item.image,
+      };
+    }
+
+    const row = ebooksById.get(item.id);
     if (!row) {
       throw new Error(`Unknown ebook: ${item.id}`);
     }
-    const unitAmount = Math.round(Number(row.price) * 100);
-    if (!Number.isFinite(unitAmount) || unitAmount <= 0) {
-      throw new Error(`Invalid catalog price for ebook: ${item.id}`);
-    }
     return {
+      type: 'ebook',
       id: row.id,
       name: row.title || item.name || 'eBook',
       description: item.description || row.description || 'Digital eBook',
-      price: unitAmount,
+      price: toUnitAmount(row.price, `ebook: ${item.id}`),
       quantity: item.quantity,
       image: item.image,
     };
   });
+};
+
+/** Optional bearer auth: the user, or null when the token is absent or invalid. */
+const getOptionalUser = async (req) => {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) return null;
+  const supabaseAdmin = createSupabaseAdmin();
+  const {
+    data: { user },
+    error,
+  } = await supabaseAdmin.auth.getUser(token);
+  if (error || !user?.email) return null;
+  return user;
 };
 
 const handleCheckout = async (req, res, requestMeta) => {
@@ -121,8 +181,44 @@ const handleCheckout = async (req, res, requestMeta) => {
       return;
     }
 
-    const productNames = resolvedItems.map((item) => item.name).join(', ');
-    const ebookIds = resolvedItems.map((item) => item.id).join(',');
+    const courseItems = resolvedItems.filter((item) => item.type === 'course');
+    let buyerEmail = typeof customerEmail === 'string' ? customerEmail : undefined;
+
+    // Course access is tied to the account email, so course carts require sign-in
+    // and are charged to that email.
+    if (courseItems.length > 0) {
+      const user = await getOptionalUser(req);
+      if (!user) {
+        res.status(401).json({ error: 'Sign in to buy a course', code: 'auth_required' });
+        return;
+      }
+      buyerEmail = user.email;
+
+      const supabaseAdmin = createSupabaseAdmin();
+      for (const course of courseItems) {
+        const owns = await emailOwnsProduct({
+          stripe,
+          supabaseAdmin,
+          email: user.email,
+          type: 'course',
+          productId: course.id,
+        });
+        if (owns) {
+          res
+            .status(409)
+            .json({ error: 'You already own this course', code: 'already_owned', courseId: course.id });
+          return;
+        }
+      }
+    }
+
+    const productNames = resolvedItems.map((item) => item.name).join(', ').slice(0, 500);
+    const ebookIds = resolvedItems
+      .filter((item) => item.type === 'ebook')
+      .map((item) => item.id)
+      .join(',');
+    const courseIds = courseItems.map((item) => item.id).join(',');
+    const purchaseType = courseItems.length > 0 ? 'course_purchase' : 'ebook_purchase';
     const stripeLocale =
       locale === 'en' || locale === 'en-US' ? 'en' : locale === 'pt' || locale === 'pt-BR' ? 'pt-BR' : 'auto';
 
@@ -132,7 +228,7 @@ const handleCheckout = async (req, res, requestMeta) => {
       mode: 'payment',
       locale: stripeLocale,
       currency: 'brl',
-      customer_email: typeof customerEmail === 'string' ? customerEmail : undefined,
+      customer_email: buyerEmail,
       line_items: resolvedItems.map((item) => {
         let imageUrl = item.image;
         if (imageUrl) {
@@ -155,10 +251,10 @@ const handleCheckout = async (req, res, requestMeta) => {
               name: item.name,
               description: item.description || 'Digital eBook',
               images: imageUrl ? [imageUrl] : [],
-              metadata: {
-                ebookId: item.id,
-                type: 'ebook',
-              },
+              metadata:
+                item.type === 'course'
+                  ? { type: 'course', courseId: item.id }
+                  : { type: 'ebook', ebookId: item.id },
             },
             unit_amount: item.price,
           },
@@ -171,13 +267,15 @@ const handleCheckout = async (req, res, requestMeta) => {
       payment_intent_data: {
         metadata: {
           product_names: productNames,
-          type: 'ebook_purchase',
-          ebook_ids: ebookIds,
+          type: purchaseType,
+          ebook_ids: ebookIds.slice(0, 500),
+          course_ids: courseIds.slice(0, 500),
         },
       },
       metadata: {
-        type: 'ebook_purchase',
-        ebook_ids: ebookIds,
+        type: purchaseType,
+        ebook_ids: ebookIds.slice(0, 500),
+        course_ids: courseIds.slice(0, 500),
         locale: typeof locale === 'string' ? locale : '',
       },
       success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -501,7 +599,9 @@ const handleMine = async (req, res, requestMeta) => {
       const supabaseAdmin = createSupabaseAdmin();
       const { data: purchaseRows, error: purchaseError } = await supabaseAdmin
         .from('purchases')
-        .select('session_id, customer_email, customer_name, ebook_id, ebook_title, amount_cents, created_at')
+        .select(
+          'session_id, customer_email, customer_name, ebook_id, ebook_title, product_type, product_id, amount_cents, created_at'
+        )
         .ilike('customer_email', email);
 
       if (!purchaseError && Array.isArray(purchaseRows)) {
@@ -519,10 +619,15 @@ const handleMine = async (req, res, requestMeta) => {
           }
           const order = ordersBySession.get(sessionId);
           const itemPrice = parseFloat(((row.amount_cents || 0) / 100).toFixed(2));
+          const type = row.product_type === 'course' ? 'course' : 'ebook';
+          const productId = row.product_id || row.ebook_id || null;
           order.items.push({
-            name: row.ebook_title || 'eBook',
+            name: row.ebook_title || (type === 'course' ? 'Course' : 'eBook'),
             price: itemPrice,
-            ebookId: row.ebook_id || null,
+            type,
+            productId,
+            ebookId: type === 'ebook' ? productId : null,
+            courseId: type === 'course' ? productId : null,
           });
           order.total = parseFloat(
             (order.items.reduce((sum, item) => sum + item.price, 0)).toFixed(2)
@@ -569,7 +674,10 @@ const handleMine = async (req, res, requestMeta) => {
           items: products.map((product) => ({
             name: product.title || 'Unknown Item',
             price: parseFloat((product.amountCents / 100).toFixed(2)),
+            type: product.type,
+            productId: product.productId,
             ebookId: product.ebookId,
+            courseId: product.courseId,
           })),
         });
       })
@@ -588,40 +696,16 @@ const handleMine = async (req, res, requestMeta) => {
 
 // --- action=ebook-download (ebook-download) ---
 
-const userOwnsEbook = async (supabaseAdmin, userEmail, ebookId) => {
-  const email = (userEmail || '').toLowerCase();
-  if (!email || !ebookId) return false;
-
-  const { data, error } = await supabaseAdmin
-    .from('purchases')
-    .select('id')
-    .ilike('customer_email', email)
-    .eq('ebook_id', ebookId)
-    .limit(1);
-
-  // Missing table / RLS errors → fall through to Stripe
-  if (!error && data?.length) {
-    return true;
-  }
-
-  // Fallback: the buyer's full Stripe history. Self-heal the purchases row when found.
-  const paidForUser = await listPaidSessionsForEmail(stripe, email);
-  for (const session of paidForUser) {
-    const products = await resolveEbookIdsByTitle(
-      supabaseAdmin,
-      await listSessionProducts(stripe, session)
-    );
-    if (products.some((product) => product.ebookId === ebookId)) {
-      const healError = await persistPurchaseRows(supabaseAdmin, buildPurchaseRows(session, products));
-      if (healError) {
-        logger.warn('ebook_ownership_heal_failed', { sessionId: session.id, errorMessage: healError.message });
-      }
-      return true;
-    }
-  }
-
-  return false;
-};
+const userOwnsEbook = (supabaseAdmin, userEmail, ebookId) =>
+  emailOwnsProduct({
+    stripe,
+    supabaseAdmin,
+    email: userEmail,
+    type: 'ebook',
+    productId: ebookId,
+    onHealError: (sessionId, error) =>
+      logger.warn('ebook_ownership_heal_failed', { sessionId, errorMessage: error.message }),
+  });
 
 const handleEbookDownload = async (req, res, requestMeta) => {
   if (req.method !== 'GET') {
@@ -687,6 +771,168 @@ const handleEbookDownload = async (req, res, requestMeta) => {
   }
 };
 
+// --- action=course-outline (public): lesson titles/durations only, never video IDs ---
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+const handleCourseOutline = async (req, res, requestMeta) => {
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  try {
+    const slug = typeof req.query?.slug === 'string' ? req.query.slug.trim().toLowerCase() : '';
+    const courseId = typeof req.query?.courseId === 'string' ? req.query.courseId.trim() : '';
+    if (!(slug && SLUG_RE.test(slug)) && !UUID_RE.test(courseId)) {
+      res.status(400).json({ error: 'slug or courseId is required' });
+      return;
+    }
+
+    const supabaseAdmin = createSupabaseAdmin();
+    let courseQuery = supabaseAdmin.from('courses').select('id').eq('is_published', true);
+    courseQuery = slug ? courseQuery.eq('slug', slug) : courseQuery.eq('id', courseId);
+    const { data: course, error: courseError } = await courseQuery.maybeSingle();
+    if (courseError) throw courseError;
+    if (!course) {
+      res.status(404).json({ error: 'Course not found' });
+      return;
+    }
+
+    const { data: lessons, error: lessonsError } = await supabaseAdmin
+      .from('course_lessons')
+      .select('id, position, title, duration_seconds')
+      .eq('course_id', course.id)
+      .order('position', { ascending: true });
+    if (lessonsError) throw lessonsError;
+
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    res.status(200).json({
+      courseId: course.id,
+      lessons: (lessons || []).map((lesson) => ({
+        id: lesson.id,
+        position: lesson.position,
+        title: lesson.title,
+        durationSeconds: lesson.duration_seconds,
+      })),
+    });
+  } catch (error) {
+    logger.error('course_outline_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
+    res.status(500).json({ error: 'Failed to load course outline' });
+  }
+};
+
+// --- action=course-access (owner or admin): one lesson's video id + watermark ---
+
+const handleCourseAccess = async (req, res, requestMeta) => {
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  try {
+    const auth = await requireUser(req, res);
+    if (!auth) return;
+
+    const courseId = typeof req.query?.courseId === 'string' ? req.query.courseId.trim() : '';
+    const lessonId = typeof req.query?.lessonId === 'string' ? req.query.lessonId.trim() : '';
+    if (!UUID_RE.test(courseId) || (lessonId && !UUID_RE.test(lessonId))) {
+      res.status(400).json({ error: 'courseId (and optional lessonId) must be valid ids' });
+      return;
+    }
+
+    const supabaseAdmin = createSupabaseAdmin();
+    const { data: course, error: courseError } = await supabaseAdmin
+      .from('courses')
+      .select('id')
+      .eq('id', courseId)
+      .maybeSingle();
+    if (courseError) throw courseError;
+    if (!course) {
+      res.status(404).json({ error: 'Course not found' });
+      return;
+    }
+
+    if (!auth.isAdmin) {
+      const owns = await emailOwnsProduct({
+        stripe,
+        supabaseAdmin,
+        email: auth.user.email,
+        type: 'course',
+        productId: courseId,
+        onHealError: (sessionId, error) =>
+          logger.warn('course_ownership_heal_failed', { sessionId, errorMessage: error.message }),
+      });
+      if (!owns) {
+        res.status(403).json({ error: 'Purchase required' });
+        return;
+      }
+    }
+
+    let lessonQuery = supabaseAdmin
+      .from('course_lessons')
+      .select('id, position, title, duration_seconds, youtube_video_id')
+      .eq('course_id', courseId);
+    lessonQuery = lessonId
+      ? lessonQuery.eq('id', lessonId)
+      : lessonQuery.order('position', { ascending: true }).limit(1);
+    const { data: lessonRows, error: lessonError } = await lessonQuery;
+    if (lessonError) throw lessonError;
+    const lesson = lessonRows?.[0];
+    if (!lesson) {
+      res.status(404).json({ error: 'Lesson not found' });
+      return;
+    }
+
+    const { error: logError } = await supabaseAdmin.from('course_access_log').insert({
+      course_id: courseId,
+      lesson_id: lesson.id,
+      user_id: auth.user.id,
+      user_email: (auth.user.email || '').toLowerCase(),
+      user_agent: String(req.headers['user-agent'] || '').slice(0, 300),
+    });
+    if (logError) {
+      logger.warn('course_access_log_failed', { ...requestMeta, errorMessage: logError.message });
+    }
+
+    const { data: outline, error: outlineError } = await supabaseAdmin
+      .from('course_lessons')
+      .select('id, position, title, duration_seconds')
+      .eq('course_id', courseId)
+      .order('position', { ascending: true });
+    if (outlineError) throw outlineError;
+
+    res.status(200).json({
+      lesson: {
+        id: lesson.id,
+        position: lesson.position,
+        title: lesson.title,
+        durationSeconds: lesson.duration_seconds,
+      },
+      lessons: (outline || []).map((row) => ({
+        id: row.id,
+        position: row.position,
+        title: row.title,
+        durationSeconds: row.duration_seconds,
+      })),
+      videoId: lesson.youtube_video_id,
+      watermark: auth.user.email,
+    });
+  } catch (error) {
+    captureServerError(error, { route: 'course-access' });
+    logger.error('course_access_failed', {
+      ...requestMeta,
+      errorMessage: error instanceof Error ? error.message : 'unknown_error',
+    });
+    res.status(500).json({ error: 'Failed to load lesson' });
+  }
+};
+
 export default async function handler(req, res) {
   const requestMeta = getRequestMeta(req);
   const action = req.query?.action;
@@ -711,6 +957,10 @@ export default async function handler(req, res) {
       return handleMine(req, res, requestMeta);
     case 'ebook-download':
       return handleEbookDownload(req, res, requestMeta);
+    case 'course-outline':
+      return handleCourseOutline(req, res, requestMeta);
+    case 'course-access':
+      return handleCourseAccess(req, res, requestMeta);
     default:
       res.status(404).json({ error: 'Unknown orders action' });
   }

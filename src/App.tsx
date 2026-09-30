@@ -29,6 +29,8 @@ import { PodcastArticleDetailsPage } from '@/pages/podcast-article-details';
 import { TabType } from '@/types/dashboard';
 import { ForgotPasswordPage } from '@/pages/forgot-password';
 import { NotFoundPage } from '@/pages/not-found';
+import { CoursesPage } from '@/pages/courses';
+import { CourseDetailsPage } from '@/pages/course-details';
 import { captureClientError } from '@/lib/monitoring';
 import { LanguageProvider, useLanguage } from '@/context/language-context';
 import { LanguagePickerDialog } from '@/components/language/language-picker-dialog';
@@ -41,6 +43,9 @@ const DashboardPage = lazy(() =>
   import('@/pages/dashboard').then((m) => ({ default: m.DashboardPage }))
 );
 const UserDashboard = lazy(() => import('@/components/UserDashboard'));
+const CoursePlayerPage = lazy(() =>
+  import('@/pages/course-player').then((m) => ({ default: m.CoursePlayerPage }))
+);
 const CuriosidadeEditorPage = lazy(() =>
   import('@/pages/curiosidade-editor').then((m) => ({ default: m.CuriosidadeEditorPage }))
 );
@@ -71,6 +76,11 @@ const ROUTE_METADATA: Record<'pt-BR' | 'en', Record<string, { title: string; des
       title: 'Loja de eBooks | Jornada de Insights',
       description:
         'Acesse eBooks cristãos digitais para aprofundar seus estudos e devocionais.',
+    },
+    '/courses': {
+      title: 'Cursos | Jornada de Insights',
+      description:
+        'Cursos em vídeo para aprofundar seu estudo da Bíblia, no seu ritmo e em qualquer dispositivo.',
     },
     '/contact': {
       title: 'Contato | Jornada de Insights',
@@ -112,6 +122,10 @@ const ROUTE_METADATA: Record<'pt-BR' | 'en', Record<string, { title: string; des
     '/shop': {
       title: 'eBook Store | Journey of Insights',
       description: 'Browse Christian eBooks designed to deepen your studies and devotional life.',
+    },
+    '/courses': {
+      title: 'Courses | Journey of Insights',
+      description: 'Video courses to go deeper in the Bible, at your own pace and on any device.',
     },
     '/contact': {
       title: 'Contact | Journey of Insights',
@@ -172,7 +186,7 @@ function AppRoutes() {
     if (location.pathname !== '/user-dashboard') return;
     const searchParams = new URLSearchParams(location.search);
     const tabParam = searchParams.get('tab');
-    const validTabs: TabType[] = ['overview', 'ebooks', 'orders', 'settings', 'cart'];
+    const validTabs: TabType[] = ['overview', 'ebooks', 'courses', 'orders', 'settings', 'cart'];
     if (tabParam && validTabs.includes(tabParam as TabType)) {
       setUserActiveTab(tabParam as TabType);
     }
@@ -249,6 +263,9 @@ function AppRoutes() {
       (location.pathname.startsWith('/podcast/')
         ? localeMeta['/podcast']
         : undefined) ??
+      (location.pathname.startsWith('/courses/')
+        ? localeMeta['/courses']
+        : undefined) ??
       localeMeta['/'];
     document.title = routeMeta.title;
 
@@ -274,7 +291,7 @@ function AppRoutes() {
   const handleUserTabChange = (tab: string | TabType) => {
     const newTab = tab as TabType;
     setUserActiveTab(newTab);
-    if (location.pathname === '/user-dashboard') {
+    if (location.pathname.startsWith('/user-dashboard')) {
       navigate(`/user-dashboard?tab=${newTab}`);
     }
   };
@@ -297,6 +314,8 @@ function AppRoutes() {
             <Route path="terms" element={<TermsPage />} />
             <Route path="privacy" element={<PrivacyPage />} />
             <Route path="shop/ebook/:id" element={<EbookDetailsPage />} />
+            <Route path="courses" element={<CoursesPage />} />
+            <Route path="courses/:slug" element={<CourseDetailsPage />} />
             <Route path="curiosidades" element={<CuriosidadesPage />} />
             <Route path="curiosidades/:id" element={<CuriosidadeDetailsPage />} />
             <Route path="podcast/:slug" element={<PodcastArticleDetailsPage />} />
@@ -355,6 +374,21 @@ function AppRoutes() {
                 <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading…</div>}>
                 <UserDashboard activeTab={userActiveTab} onTabChange={handleUserTabChange} />
               </Suspense>
+              </Suspense>
+            </AdminLayout>
+          } />
+
+          <Route path="/user-dashboard/courses/:slug" element={
+            <AdminLayout
+              sidePanel={
+                <UserDashboardSidePanel
+                  activeTab="courses"
+                  onTabChange={handleUserTabChange}
+                />
+              }
+            >
+              <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading…</div>}>
+                <CoursePlayerPage />
               </Suspense>
             </AdminLayout>
           } />

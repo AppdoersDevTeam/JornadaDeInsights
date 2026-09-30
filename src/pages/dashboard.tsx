@@ -22,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'react-hot-toast';
 import UploadEbookForm from '@/components/dashboard/upload-ebook-form';
 import EbookList from '@/components/dashboard/ebook-list';
+import CourseAdmin from '@/components/dashboard/course-admin';
 import CuriosidadesList from '@/components/dashboard/curiosidades-list';
 import PodcastArticlesList from '@/components/dashboard/podcast-articles-list';
 import { NotificationPreferences } from '@/components/notifications/notification-preferences';
@@ -1047,6 +1048,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
             <h1 className="text-3xl font-bold">
               {activeTab === 'overview' && t('admin.tab.overview', 'Overview')}
               {activeTab === 'ebooks' && t('admin.tab.ebooks', 'eBooks')}
+              {activeTab === 'courses' && t('admin.tab.courses', 'Courses')}
               {activeTab === 'analytics' && t('admin.tab.analytics', 'Analytics')}
               {activeTab === 'users' && t('admin.tab.users', 'Users')}
               {activeTab === 'orders' && t('admin.tab.orders', 'Completed orders')}
@@ -2103,6 +2105,8 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
           </Card>
         </div>
       )}
+
+      {activeTab === 'courses' && <CourseAdmin />}
 
       {activeTab === 'curiosidades' && (
         <div className="space-y-6 w-full">

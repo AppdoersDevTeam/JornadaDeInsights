@@ -1,2 +1,2 @@
 export type DashboardTab = 'overview' | 'ebooks' | 'analytics' | 'users';
-export type TabType = 'overview' | 'ebooks' | 'orders' | 'newsletter' | 'cart' | 'analytics' | 'users' | 'categories' | 'curiosidades' | 'podcastArticles' | 'support' | 'settings'; 
+export type TabType = 'overview' | 'ebooks' | 'courses' | 'orders' | 'newsletter' | 'cart' | 'analytics' | 'users' | 'categories' | 'curiosidades' | 'podcastArticles' | 'support' | 'settings'; 

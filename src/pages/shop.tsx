@@ -10,6 +10,7 @@ import { motion, Variants } from 'framer-motion';
 import { getEbooks, getCategories, type Category } from '@/lib/supabase';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/language-context';
+import { ShopCoursesSection } from '@/components/courses/shop-courses-section';
 
 // Add CTA animations
 const ctaContainerVariants: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.5 } } };
@@ -288,6 +289,8 @@ export function ShopPage() {
           </div>
         </div>
       </section>
+
+      <ShopCoursesSection />
 
       {/* All eBooks with Search and Filter */}
       <section id="all-ebooks" className="py-16 bg-muted/30">

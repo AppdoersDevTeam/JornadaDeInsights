@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Menu, X, User, Home, Info, Mic, ShoppingBag, Mail, LayoutDashboard, ShoppingCart, BookOpen, Languages, Bell } from 'lucide-react';
+import { Menu, X, User, Home, Info, Mic, ShoppingBag,
+  GraduationCap, Mail, LayoutDashboard, ShoppingCart, BookOpen, Languages, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
@@ -34,6 +35,7 @@ export function Header() {
     { to: '/podcast', label: t('nav.podcast', 'Podcast') },
     { to: '/curiosidades', label: t('nav.curiosidades', 'Curiosidades') },
     { to: '/shop', label: t('nav.shop', 'Loja') },
+    { to: '/courses', label: t('nav.courses', 'Cursos') },
     { to: '/contact', label: t('nav.contact', 'Contato') }
   ] : [
     { to: '/', label: t('nav.home', 'Início') },
@@ -41,6 +43,7 @@ export function Header() {
     { to: '/podcast', label: t('nav.podcast', 'Podcast') },
     { to: '/curiosidades', label: t('nav.curiosidades', 'Curiosidades') },
     { to: '/shop', label: t('nav.shop', 'Loja') },
+    { to: '/courses', label: t('nav.courses', 'Cursos') },
     { to: '/contact', label: t('nav.contact', 'Contato') }
   ];
 
@@ -231,6 +234,7 @@ export function Header() {
               {link.to === '/podcast' && <Mic className="h-5 w-5" />}
               {link.to === '/curiosidades' && <BookOpen className="h-5 w-5" />}
               {link.to === '/shop' && <ShoppingBag className="h-5 w-5" />}
+              {link.to === '/courses' && <GraduationCap className="h-5 w-5" />}
               {link.to === '/contact' && <Mail className="h-5 w-5" />}
               {link.label}
             </NavLink>

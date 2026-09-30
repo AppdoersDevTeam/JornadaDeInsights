@@ -9,7 +9,8 @@ import {
   Mic,
   LifeBuoy,
   Languages,
-  Settings
+  Settings,
+  GraduationCap
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,14 @@ export function DashboardSidePanel({ activeTab, onTabChange }: DashboardSidePane
         >
           <FileText className="mr-2 h-4 w-4" />
           {t('admin.tab.ebooks', 'eBooks')}
+        </Button>
+        <Button
+          variant={activeTab === 'courses' ? 'secondary' : 'ghost'}
+          className="w-full justify-start min-h-[44px]"
+          onClick={() => onTabChange('courses')}
+        >
+          <GraduationCap className="mr-2 h-4 w-4" />
+          {t('admin.tab.courses', 'Courses')}
         </Button>
         <Button
           variant={activeTab === 'analytics' ? 'secondary' : 'ghost'}

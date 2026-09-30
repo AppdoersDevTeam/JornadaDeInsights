@@ -10,7 +10,8 @@ import { supabase } from '@/lib/supabase';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EbookCard } from '@/components/shop/ebook-card';
-import { useCart } from '@/context/cart-context';
+import { useCart, restoreCartAfterSignIn, saveCartForSignIn } from '@/context/cart-context';
+import { startCheckout, CheckoutError } from '@/lib/checkout';
 import { LazyImage } from '@/components/shop/lazy-image';
 import {
   Dialog,
@@ -21,13 +22,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Badge } from '@/components/ui/badge';
-import { loadStripe } from '@stripe/stripe-js';
 import type { Ebook } from '@/components/shop/ebook-card';
 import { TabType } from '@/types/dashboard';
 import { trackLifecycleEvent } from '@/lib/lifecycle';
 import { NotificationPreferences } from '@/components/notifications/notification-preferences';
 import { ALLOWED_ADMIN_EMAILS } from '@/lib/admin';
 import { SectionPromoCard } from '@/components/dashboard/section-promo-card';
+import { MyCourses } from '@/components/courses/my-courses';
 
 interface CompletedOrder {
   id: string;
@@ -38,7 +39,9 @@ interface CompletedOrder {
   items: Array<{
     name: string;
     price: number;
+    type?: 'ebook' | 'course';
     ebookId?: string | null;
+    courseId?: string | null;
   }>;
 }
 
@@ -47,21 +50,7 @@ interface UserDashboardProps {
   onTabChange: (tab: TabType) => void;
 }
 
-interface CartItem {
-  id: string;
-  title: string;
-  price: number;
-  quantity: number;
-  cover_url?: string;
-  description?: string;
-  filename?: string;
-  created_at: string;
-}
-
 const DEFAULT_COVER_DATA_URL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2UyZThmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBDb3ZlcjwvdGV4dD48L3N2Zz4=';
-
-// Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 // Server URL
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
@@ -241,6 +230,9 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       
       userOrders.forEach((order: CompletedOrder) => {
         order.items.forEach((item) => {
+          if (item.type === 'course') {
+            return;
+          }
           if (item.ebookId) {
             orderedEbookIds.add(item.ebookId);
             console.log('Found ebookId in order:', item.ebookId, 'for item:', item.name);
@@ -387,30 +379,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       setIsAuthenticated(!!user);
       // If user just signed in and we have saved cart state, restore it
       if (user) {
-        const savedCart = sessionStorage.getItem('cartState');
-        if (savedCart) {
-          try {
-            const parsedCart = JSON.parse(savedCart) as CartItem[];
-            // Clear current cart and restore saved items
-            clearCart();
-            parsedCart.forEach((item) => {
-              // Convert CartItem to Ebook for addItem
-              const ebook: Ebook = {
-                id: item.id,
-                title: item.title,
-                description: item.description || '',
-                price: item.price,
-                filename: item.filename || item.id,
-                cover_url: item.cover_url,
-                created_at: item.created_at
-              };
-              addItem(ebook);
-            });
-            sessionStorage.removeItem('cartState');
-          } catch (error) {
-            console.error('Error restoring cart state:', error);
-          }
-        }
+        restoreCartAfterSignIn(clearCart, addItem);
       }
     });
 
@@ -429,7 +398,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
       });
 
       // Store current cart state in sessionStorage
-      sessionStorage.setItem('cartState', JSON.stringify(items));
+      saveCartForSignIn(items);
       // Navigate to sign in with return path
       navigate('/signin', { 
         state: { 
@@ -441,74 +410,12 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
     }
 
     try {
-      const stripe = await stripePromise;
-      if (!stripe) throw new Error('Stripe failed to initialize');
-
-      // Create checkout session
-      const response = await fetch(`${SERVER_URL}/api/create-checkout-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerEmail: user?.email ?? undefined,
-          locale: language,
-          items: items.map(item => {
-            // Ensure image URL is absolute and uses HTTPS
-            let imageUrl = item.cover_url || '';
-            if (imageUrl) {
-              try {
-                // Parse the URL to handle it properly
-                const url = new URL(imageUrl, window.location.origin);
-                
-                // Remove any query parameters or fragments
-                url.search = '';
-                url.hash = '';
-                
-                // Ensure HTTPS
-                url.protocol = 'https:';
-                
-                // Get the final URL
-                imageUrl = url.toString();
-              } catch (error) {
-                console.error('Error processing image URL:', error);
-                imageUrl = '';
-              }
-            }
-
-            return {
-              id: item.id,
-              name: item.title,
-              description: `Digital eBook${item.description ? ` - ${item.description}` : ''}`,
-              price: Math.round(item.price * 100), // Convert to cents
-              quantity: item.quantity,
-              image: imageUrl || undefined, // Use formatted image URL
-              metadata: {
-                type: 'ebook',
-                layout: 'preppy',
-                displayStyle: 'large_cover'
-              }
-            };
-          }),
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create checkout session');
-      }
-
-      const { sessionId } = await response.json();
-
-      // Redirect to Stripe Checkout
-      const result = await stripe.redirectToCheckout({
-        sessionId,
-      });
-
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
+      await startCheckout(items, language);
     } catch (error) {
+      if (error instanceof CheckoutError && error.code === 'already_owned') {
+        toast.error(t('cart.toast.courseAlreadyOwned', 'You already own this course. Remove it from your cart to continue.'));
+        return;
+      }
       console.error('Erro ao iniciar o processo de checkout:', error);
       toast.error(t('ud.toast.checkoutFail', 'Could not start checkout. Please try again.'));
     }
@@ -610,6 +517,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           <h1 className="text-3xl font-bold">
             {activeTab === 'overview' && t('ud.tab.overview', 'Overview')}
             {activeTab === 'ebooks' && t('ud.tab.ebooks', 'My eBooks')}
+            {activeTab === 'courses' && t('courses.mine.title', 'My courses')}
             {activeTab === 'orders' && t('ud.tab.orders', 'My orders')}
             {activeTab === 'settings' && t('ud.tab.settings', 'Settings')}
             {activeTab === 'cart' && t('ud.tab.cart', 'My cart')}
@@ -617,6 +525,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           <p className="text-muted-foreground mt-2">
             {activeTab === 'overview' && t('ud.tab.overview.desc', 'An overview of your account and activity')}
             {activeTab === 'ebooks' && t('ud.tab.ebooks.desc', 'Manage your eBooks and downloads')}
+            {activeTab === 'courses' && t('courses.mine.desc', 'Watch the courses you bought')}
             {activeTab === 'orders' && t('ud.tab.orders.desc', 'Track your orders and purchases')}
             {activeTab === 'settings' && t('ud.tab.settings.desc', 'Manage your account settings')}
             {activeTab === 'cart' && t('ud.tab.cart.desc', 'Manage your cart items')}
@@ -929,6 +838,8 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
           </div>
         )}
 
+        {activeTab === 'courses' && <MyCourses />}
+
         {activeTab === 'orders' && (
           <div className="space-y-8">
             <Card className="p-6">
@@ -1041,9 +952,14 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                           </div>
                         </div>
                         <div className="flex items-center justify-between gap-2">
+                          {item.type === 'course' ? (
+                            <span className="text-xs font-medium uppercase tracking-wide text-primary">
+                              {t('courses.badge', 'Online course')}
+                            </span>
+                          ) : (
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => decrementItem(item.id)}
+                              onClick={() => decrementItem(item.id, item.type)}
                               className="p-2 rounded border hover:bg-muted"
                               disabled={item.quantity <= 1}
                             >
@@ -1057,8 +973,9 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                               <Plus className="h-4 w-4" />
                             </button>
                           </div>
+                          )}
                           <button
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeItem(item.id, item.type)}
                             className="p-2 rounded border border-destructive text-destructive hover:bg-destructive/10"
                           >
                             <X className="h-4 w-4" />

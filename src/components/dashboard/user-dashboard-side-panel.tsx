@@ -5,7 +5,8 @@ import {
   LogOut,
   LayoutDashboard,
   ShoppingCart,
-  Languages
+  Languages,
+  GraduationCap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -74,6 +75,14 @@ export function UserDashboardSidePanel({ activeTab, onTabChange }: UserDashboard
           >
             <Book className="mr-2 h-4 w-4" />
             {t('user.tab.ebooks', 'My eBooks')}
+          </Button>
+          <Button
+            variant={activeTab === 'courses' ? 'secondary' : 'ghost'}
+            className="w-full justify-start min-h-[44px]"
+            onClick={() => onTabChange('courses')}
+          >
+            <GraduationCap className="mr-2 h-4 w-4" />
+            {t('courses.mine.title', 'My courses')}
           </Button>
           <Button
             variant={activeTab === 'orders' ? 'secondary' : 'ghost'}

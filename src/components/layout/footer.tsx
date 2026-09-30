@@ -77,6 +77,11 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
+                  <Link to="/courses" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.courses', '')}
+                  </Link>
+                </li>
+                <li>
                   <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-base">
                     {t('nav.contact', '')}
                   </Link>
@@ -168,6 +173,11 @@ export function Footer() {
                 <li>
                   <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors text-base">
                     {t('nav.shop', '')}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/courses" className="text-muted-foreground hover:text-primary transition-colors text-base">
+                    {t('nav.courses', '')}
                   </Link>
                 </li>
                 <li>

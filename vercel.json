@@ -72,6 +72,46 @@
       "methods": ["GET", "OPTIONS"]
     },
     {
+      "src": "/api/course-outline",
+      "dest": "/api/orders.js?action=course-outline",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/course-access",
+      "dest": "/api/orders.js?action=course-access",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/admin-course-private",
+      "dest": "/api/admin.js?action=course-private",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/admin-course-save-playlist",
+      "dest": "/api/admin.js?action=course-save-playlist",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/admin-course-resync",
+      "dest": "/api/admin.js?action=course-resync",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/admin-course-grant",
+      "dest": "/api/admin.js?action=course-grant",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/admin-course-access-log",
+      "dest": "/api/admin.js?action=course-access-log",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/admin-course-delete",
+      "dest": "/api/admin.js?action=course-delete",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
       "src": "/api/contact",
       "dest": "/api/lead-capture.js?action=contact",
       "methods": ["POST", "OPTIONS"]

@@ -63,6 +63,7 @@ export function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-heading font-semibold mb-4 text-foreground">{t('terms.s4.h', '')}</h2>
             <p className="text-muted-foreground mb-4">{t('terms.s4.p', '')}</p>
+            <p className="text-muted-foreground mb-4">{t('terms.s4.courses', '')}</p>
           </section>
 
           <section className="mb-8">
