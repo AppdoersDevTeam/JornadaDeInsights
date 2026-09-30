@@ -103,20 +103,20 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
       const sanitizedPdfName = sanitizeFilename(pdfFile.name);
       // Check if a file with the same name already exists
       const { data: existingFiles } = await supabase.storage
-        .from('store-assets')
+        .from('ebook-pdfs')
         .list('pdfs', {
           search: sanitizedPdfName
         });
 
-      if (existingFiles && existingFiles.length > 0) {
+      if (existingFiles?.some((file) => file.name === sanitizedPdfName)) {
         toast.error('A file with this name already exists');
         return;
       }
 
-      // Upload PDF
+      // Upload PDF to the private bucket (buyers get signed URLs only)
       const { error: pdfError } = await supabase.storage
-        .from('store-assets')
-        .upload(`pdfs/${sanitizedPdfName}`, pdfFile);
+        .from('ebook-pdfs')
+        .upload(`pdfs/${sanitizedPdfName}`, pdfFile, { contentType: 'application/pdf' });
 
       if (pdfError) throw pdfError;
 
@@ -152,6 +152,16 @@ export default function UploadEbookForm({ onUploadSuccess }: UploadEbookFormProp
       }
 
       toast.success('Ebook uploaded successfully');
+
+      // Preview is best-effort: the ebook is already live if this fails.
+      try {
+        const { generateAndUploadPreview } = await import('@/lib/ebook-preview');
+        await generateAndUploadPreview(sanitizedPdfName, pdfFile);
+      } catch (previewError) {
+        console.error('Error generating ebook preview:', previewError);
+        toast.error(t('admin.ebooks.preview.uploadWarning', 'eBook uploaded, but the free preview could not be generated. Use "Generate preview" in the list.'));
+      }
+
       resetForm();
       onUploadSuccess?.();
     } catch (error) {

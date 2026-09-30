@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, ArrowLeft, ShieldCheck, Clock3, BadgeCheck, CreditCard } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, ShieldCheck, Clock3, BadgeCheck, CreditCard, BookOpen } from 'lucide-react';
+import { EbookPreviewDialog } from '@/components/shop/ebook-preview-dialog';
 import { useCart } from '@/context/cart-context';
 import { LazyImage } from '@/components/shop/lazy-image';
 import { motion } from 'framer-motion';
@@ -19,6 +20,17 @@ export function EbookDetailsPage() {
   const [ebook, setEbook] = useState<Ebook | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const hasPreview = Number(ebook?.preview_pages ?? 0) > 0;
+  const previewOpen = hasPreview && searchParams.get('preview') === '1';
+
+  // `?preview=1` drives the dialog so "Read sample" links from shop cards open it directly.
+  const setPreviewOpen = (open: boolean) => {
+    const next = new URLSearchParams(searchParams);
+    if (open) next.set('preview', '1');
+    else next.delete('preview');
+    setSearchParams(next, { replace: true });
+  };
 
   useEffect(() => {
     const fetchEbook = async () => {
@@ -135,6 +147,17 @@ export function EbookDetailsPage() {
             <p className="text-xl text-primary font-medium mb-6">
               {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(ebook.price)}
             </p>
+            {hasPreview && (
+              <Button
+                variant="secondary"
+                size="lg"
+                className="mb-6 self-start"
+                onClick={() => setPreviewOpen(true)}
+              >
+                <BookOpen className="h-5 w-5 mr-2" />
+                {t('ebook.preview.open', 'Read the first pages free')}
+              </Button>
+            )}
             <p className="text-lg text-muted-foreground mb-8 whitespace-pre-line">{ebook.description}</p>
             
             <div className="flex flex-col sm:flex-row gap-4">
@@ -216,6 +239,9 @@ export function EbookDetailsPage() {
           </div>
         </div>
       </div>
+      {hasPreview && (
+        <EbookPreviewDialog ebook={ebook} open={previewOpen} onOpenChange={setPreviewOpen} />
+      )}
     </motion.section>
   );
 } 

@@ -234,18 +234,40 @@ const handleCustomerLookup = async (req, res, requestMeta) => {
       }
     }
 
+    const resolveEbook = (item) =>
+      (item.ebookId ? ebookById.get(item.ebookId) : null) ||
+      ebookByTitle.get(String(item.name || '').trim()) ||
+      null;
+
+    // Full PDFs live in the private ebook-pdfs bucket; admins get 1h signed links.
+    const pdfPaths = Array.from(
+      new Set(
+        lookup
+          .flatMap((s) => s.items.map((item) => resolveEbook(item)?.filename))
+          .filter(Boolean)
+          .map((filename) => `pdfs/${filename}`)
+      )
+    );
+    const signedPdfUrls = new Map();
+    if (pdfPaths.length > 0) {
+      const { data: signed, error: signError } = await auth.supabaseAdmin.storage
+        .from('ebook-pdfs')
+        .createSignedUrls(pdfPaths, 3600);
+      if (signError) throw signError;
+      for (const entry of signed || []) {
+        if (entry.path && entry.signedUrl) {
+          signedPdfUrls.set(entry.path, entry.signedUrl);
+        }
+      }
+    }
+
     const results = lookup.map((session) => {
       const enrichedItems = session.items.map((item) => {
-        const ebook =
-          (item.ebookId ? ebookById.get(item.ebookId) : null) ||
-          ebookByTitle.get(String(item.name || '').trim()) ||
-          null;
+        const ebook = resolveEbook(item);
         const filename = ebook?.filename || null;
         const title = ebook?.title || null;
 
-        const pdfUrl = filename
-          ? auth.supabaseAdmin.storage.from('store-assets').getPublicUrl(`pdfs/${filename}`).data.publicUrl
-          : null;
+        const pdfUrl = filename ? signedPdfUrls.get(`pdfs/${filename}`) || null : null;
         const coverUrl = filename
           ? auth.supabaseAdmin.storage.from('store-assets').getPublicUrl(`covers/${filename}`).data.publicUrl
           : null;

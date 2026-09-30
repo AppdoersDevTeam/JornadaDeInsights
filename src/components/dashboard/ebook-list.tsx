@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase, getCategories, type Category } from '@/lib/supabase';
-import { Eye, Edit, Trash2 } from 'lucide-react';
+import { Eye, Edit, Trash2, BookOpen, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import EditEbookForm from './edit-ebook-form';
 import {
@@ -23,6 +23,7 @@ interface EbookMetadata {
   filename: string;
   category_id?: string | null;
   content_locale?: EbookContentLocale;
+  preview_pages: number;
   category?: {
     id: string;
     name: string;
@@ -49,6 +50,79 @@ export default function EbookList() {
   const [ebookToDelete, setEbookToDelete] = useState<Ebook | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+  const [previewBusy, setPreviewBusy] = useState<Set<string>>(new Set());
+  const [bulkPreviewRunning, setBulkPreviewRunning] = useState(false);
+
+  const setBusy = (filename: string, busy: boolean) => {
+    setPreviewBusy((prev) => {
+      const next = new Set(prev);
+      if (busy) next.add(filename);
+      else next.delete(filename);
+      return next;
+    });
+  };
+
+  const applyPreviewPages = (filename: string, pages: number) => {
+    const update = (list: Ebook[]) =>
+      list.map((e) => (e.name === filename ? { ...e, metadata: { ...e.metadata, preview_pages: pages } } : e));
+    setAllEbooks(update);
+    setEbooks(update);
+  };
+
+  const generatePreview = async (ebook: Ebook): Promise<boolean> => {
+    setBusy(ebook.name, true);
+    try {
+      const { generatePreviewFromStorage } = await import('@/lib/ebook-preview');
+      const pages = await generatePreviewFromStorage(ebook.name);
+      applyPreviewPages(ebook.name, pages);
+      return true;
+    } catch (error) {
+      console.error(`Error generating preview for ${ebook.name}:`, error);
+      return false;
+    } finally {
+      setBusy(ebook.name, false);
+    }
+  };
+
+  const handleGeneratePreview = async (ebook: Ebook) => {
+    const ok = await generatePreview(ebook);
+    if (ok) toast.success(t('admin.ebooks.preview.success', 'Preview generated'));
+    else toast.error(t('admin.ebooks.preview.fail', 'Could not generate the preview.'));
+  };
+
+  const handleGenerateMissingPreviews = async () => {
+    const missing = allEbooks.filter((e) => !e.metadata.preview_pages);
+    if (missing.length === 0) {
+      toast.success(t('admin.ebooks.preview.noneMissing', 'Every eBook already has a preview.'));
+      return;
+    }
+    setBulkPreviewRunning(true);
+    let failed = 0;
+    // Sequential on purpose: each PDF is rendered in memory.
+    for (const ebook of missing) {
+      if (!(await generatePreview(ebook))) failed += 1;
+    }
+    setBulkPreviewRunning(false);
+    const done = missing.length - failed;
+    const summary = t('admin.ebooks.preview.bulkSummary', '{done} preview(s) generated, {failed} failed.')
+      .replace('{done}', String(done))
+      .replace('{failed}', String(failed));
+    if (failed > 0) toast.error(summary);
+    else toast.success(summary);
+  };
+
+  const openPdf = async (ebook: Ebook) => {
+    const tab = window.open('', '_blank');
+    const { data, error } = await supabase.storage.from('ebook-pdfs').createSignedUrl(`pdfs/${ebook.name}`, 300);
+    if (error || !data?.signedUrl) {
+      tab?.close();
+      console.error('Error creating signed PDF URL:', error);
+      toast.error(t('admin.ebooks.openFail', 'Could not open the PDF.'));
+      return;
+    }
+    if (tab) tab.location.href = data.signedUrl;
+    else window.location.href = data.signedUrl;
+  };
 
   const fetchEbooks = async () => {
     try {
@@ -76,7 +150,7 @@ export default function EbookList() {
       let pdfs: Array<{ id: string; name: string; metadata?: { size?: number }; created_at: string }> = [];
       try {
         const { data: pdfData, error: pdfError } = await supabase.storage
-          .from('store-assets')
+          .from('ebook-pdfs')
           .list('pdfs', {
             limit: 100,
             offset: 0,
@@ -159,6 +233,7 @@ export default function EbookList() {
               filename: ebookMetadata.filename,
               category_id: ebookMetadata.category_id || null,
               content_locale: (ebookMetadata.content_locale as EbookContentLocale | undefined) ?? 'pt-BR',
+              preview_pages: Number(ebookMetadata.preview_pages ?? 0),
               category: category
             }
           };
@@ -217,7 +292,7 @@ export default function EbookList() {
 
       // Then delete the PDF file from storage
       const { error: pdfError } = await supabase.storage
-        .from('store-assets')
+        .from('ebook-pdfs')
         .remove([`pdfs/${ebookToDelete.name}`]);
 
       if (pdfError) {
@@ -239,6 +314,14 @@ export default function EbookList() {
           setEbooks(prevEbooks => [...prevEbooks, ebookToDelete]);
           throw coverError;
         }
+      }
+
+      // Preview images are public copies of pages 1-2; don't leave them behind.
+      try {
+        const { removePreview } = await import('@/lib/ebook-preview');
+        await removePreview(ebookToDelete.name);
+      } catch (previewError) {
+        console.error('Error deleting preview images:', previewError);
       }
 
       // Verify the deletion
@@ -337,6 +420,17 @@ export default function EbookList() {
               .replace('{total}', String(allEbooks.length))}
           </p>
         )}
+        <div className="mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void handleGenerateMissingPreviews()}
+            disabled={bulkPreviewRunning || previewBusy.size > 0}
+          >
+            {bulkPreviewRunning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BookOpen className="mr-2 h-4 w-4" />}
+            {t('admin.ebooks.preview.generateMissing', 'Generate missing previews')}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -375,9 +469,23 @@ export default function EbookList() {
                 <span>{ebook.size.toFixed(2)} MB</span>
                 <span>{ebook.lastModified}</span>
               </div>
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end items-center space-x-2">
+                <span className="mr-auto text-xs text-gray-500">
+                  {ebook.metadata.preview_pages > 0
+                    ? t('admin.ebooks.preview.has', 'Preview: {n} page(s)').replace('{n}', String(ebook.metadata.preview_pages))
+                    : t('admin.ebooks.preview.none', 'No preview')}
+                </span>
                 <button
-                  onClick={() => window.open(supabase.storage.from('store-assets').getPublicUrl(`pdfs/${ebook.name}`).data.publicUrl, '_blank')}
+                  onClick={() => void handleGeneratePreview(ebook)}
+                  disabled={previewBusy.has(ebook.name) || bulkPreviewRunning}
+                  className="p-2 text-gray-600 hover:text-primary transition-colors disabled:opacity-50"
+                  title={t('admin.ebooks.preview.generate', 'Generate preview')}
+                  aria-label={t('admin.ebooks.preview.generate', 'Generate preview')}
+                >
+                  {previewBusy.has(ebook.name) ? <Loader2 size={20} className="animate-spin" /> : <BookOpen size={20} />}
+                </button>
+                <button
+                  onClick={() => void openPdf(ebook)}
                   className="p-2 text-gray-600 hover:text-primary transition-colors"
                 >
                   <Eye size={20} />

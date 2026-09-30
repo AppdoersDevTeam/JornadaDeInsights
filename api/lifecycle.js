@@ -14,6 +14,7 @@ const ALLOWED_EVENTS = new Set([
   'lead_captured',
   'add_to_cart',
   'view_item',
+  'preview_open',
 ]);
 
 const normalizeId = (value) => {

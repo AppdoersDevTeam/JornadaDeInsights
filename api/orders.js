@@ -681,24 +681,18 @@ const handleEbookDownload = async (req, res, requestMeta) => {
       return;
     }
 
+    const asAttachment = req.query?.download === '1';
     const { data: signed, error: signedError } = await supabaseAdmin.storage
-      .from('store-assets')
-      .createSignedUrl(`pdfs/${ebook.filename}`, 120);
+      .from('ebook-pdfs')
+      .createSignedUrl(`pdfs/${ebook.filename}`, 120, asAttachment ? { download: ebook.filename } : undefined);
 
     if (signedError || !signed?.signedUrl) {
-      const { data: publicData } = supabaseAdmin.storage
-        .from('store-assets')
-        .getPublicUrl(`pdfs/${ebook.filename}`);
-      logger.warn('ebook_download_signed_fallback_public', {
+      logger.error('ebook_download_sign_failed', {
         ...requestMeta,
         ebookId,
         signedError: signedError?.message,
       });
-      res.status(200).json({
-        url: publicData.publicUrl,
-        mode: 'public_fallback',
-        expiresIn: null,
-      });
+      res.status(502).json({ error: 'Failed to create download URL' });
       return;
     }
 

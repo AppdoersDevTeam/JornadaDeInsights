@@ -20,7 +20,8 @@ export const trackLifecycleEvent = async (
     | 'donation_started'
     | 'lead_captured'
     | 'add_to_cart'
-    | 'view_item',
+    | 'view_item'
+    | 'preview_open',
   metadata?: Record<string, unknown>
 ) => {
   try {

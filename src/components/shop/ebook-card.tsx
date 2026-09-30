@@ -1,7 +1,7 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, BookOpen } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { LazyImage } from './lazy-image';
 import { useLanguage } from '@/context/language-context';
@@ -22,6 +22,7 @@ export interface Ebook {
     name: string;
   } | null;
   content_locale?: EbookContentLocale;
+  preview_pages?: number;
 }
 
 interface EbookCardProps {
@@ -81,6 +82,15 @@ export function EbookCard({ book }: EbookCardProps) {
         <p className="font-medium group-hover:text-primary transition-colors">
           {new Intl.NumberFormat(language === 'en' ? 'en' : 'pt-BR', { style: 'currency', currency: 'BRL' }).format(book.price)}
         </p>
+        {Number(book.preview_pages ?? 0) > 0 && (
+          <Link
+            to={`/shop/ebook/${book.id}?preview=1`}
+            className="inline-flex items-center text-xs sm:text-sm text-primary hover:underline"
+          >
+            <BookOpen className="h-4 w-4 mr-1.5" />
+            {t('shop.card.readSample', 'Ler amostra grátis')}
+          </Link>
+        )}
         <div className="flex gap-2">
           <Button
             size="sm"

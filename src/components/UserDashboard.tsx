@@ -66,39 +66,59 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 // Server URL
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
-const openEbookPdf = async (ebook: { id: string; filename?: string }) => {
+// Full PDFs are private; the server checks ownership and returns a short-lived signed URL.
+const getSignedEbookUrl = async (ebook: { id: string; filename?: string }, asAttachment: boolean): Promise<string> => {
   if (!ebook.filename) {
     throw new Error('Missing ebook filename');
   }
 
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const token = session?.access_token;
-    if (token) {
-      const response = await fetch(
-        `${SERVER_URL}/api/ebook-download?ebookId=${encodeURIComponent(ebook.id)}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (response.ok) {
-        const payload = await response.json();
-        if (payload?.url) {
-          window.open(payload.url, '_blank');
-          return;
-        }
-      }
-    }
-  } catch (error) {
-    console.warn('Signed PDF URL unavailable, using public fallback', error);
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const token = session?.access_token;
+  if (!token) {
+    throw new Error('Not signed in');
   }
 
-  const pdfUrl = supabase.storage
-    .from('store-assets')
-    .getPublicUrl(`pdfs/${ebook.filename}`).data.publicUrl;
-  window.open(pdfUrl, '_blank');
+  const params = new URLSearchParams({ ebookId: ebook.id });
+  if (asAttachment) params.set('download', '1');
+  const response = await fetch(`${SERVER_URL}/api/ebook-download?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    throw new Error(`Download URL request failed (${response.status})`);
+  }
+  const payload = (await response.json()) as { url?: string };
+  if (!payload?.url) {
+    throw new Error('Download URL missing');
+  }
+  return payload.url;
+};
+
+const openEbookPdf = async (ebook: { id: string; filename?: string }) => {
+  // Open the tab synchronously so popup blockers allow it, then point it at the signed URL.
+  const tab = window.open('', '_blank');
+  try {
+    const url = await getSignedEbookUrl(ebook, false);
+    if (tab) {
+      tab.location.href = url;
+    } else {
+      window.location.href = url;
+    }
+  } catch (error) {
+    tab?.close();
+    throw error;
+  }
+};
+
+const downloadEbookPdf = async (ebook: { id: string; filename?: string }) => {
+  const url = await getSignedEbookUrl(ebook, true);
+  const link = document.createElement('a');
+  link.href = url;
+  link.rel = 'noopener';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
 const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
@@ -669,25 +689,7 @@ const UserDashboard = ({ activeTab, onTabChange }: UserDashboardProps) => {
                                     className="flex-1 h-14 sm:h-9"
                                     onClick={async () => {
                                       try {
-                                        const { data, error } = await supabase.storage
-                                          .from('store-assets')
-                                          .download(`pdfs/${ebook.filename}`);
-                                          
-                                        if (error) {
-                                          throw error;
-                                        }
-
-                                        if (data) {
-                                          const blob = new Blob([data], { type: 'application/pdf' });
-                                          const url = window.URL.createObjectURL(blob);
-                                          const link = document.createElement('a');
-                                          link.href = url;
-                                          link.download = ebook.filename;
-                                          document.body.appendChild(link);
-                                          link.click();
-                                          window.URL.revokeObjectURL(url);
-                                          document.body.removeChild(link);
-                                        }
+                                        await downloadEbookPdf(ebook);
                                       } catch (err) {
                                         console.error('Error downloading file:', err);
                                         toast.error(t('ud.toast.downloadFail', 'Could not download the file.'));
