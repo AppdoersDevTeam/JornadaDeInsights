@@ -87,6 +87,11 @@
       "methods": ["GET", "OPTIONS"]
     },
     {
+      "src": "/api/admin-course-playlist-preview",
+      "dest": "/api/admin.js?action=course-playlist-preview",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
       "src": "/api/admin-course-save-playlist",
       "dest": "/api/admin.js?action=course-save-playlist",
       "methods": ["POST", "OPTIONS"]

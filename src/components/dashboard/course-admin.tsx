@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { ExternalLink, Loader2, Pencil, Plus, RefreshCw, Settings2, Trash2, UserPlus } from 'lucide-react';
+import { CheckCircle2, ExternalLink, Loader2, Pencil, Plus, RefreshCw, Settings2, Trash2, UserPlus } from 'lucide-react';
 import { supabase, getSupabaseAccessToken, getCategories, type Category } from '@/lib/supabase';
 import { useLanguage } from '@/context/language-context';
 import { Button } from '@/components/ui/button';
@@ -92,6 +92,20 @@ const parseYouTubeVideoId = (value: string): string | null => {
 
 // --- Create / edit ---------------------------------------------------------
 
+interface PlaylistPreview {
+  title: string;
+  videoCount: number;
+}
+
+interface SyncResult {
+  lessons: AdminLesson[];
+  skipped: number;
+  notEmbeddable: string[];
+  lastSyncedAt: string;
+}
+
+const looksLikePlaylistLink = (value: string) => /[?&]list=[A-Za-z0-9_-]{10,}/.test(value);
+
 interface CourseFormDialogProps {
   open: boolean;
   course: Course | null;
@@ -102,7 +116,13 @@ interface CourseFormDialogProps {
 
 function CourseFormDialog({ open, course, categories, onClose, onSaved }: CourseFormDialogProps) {
   const { t } = useLanguage();
+  const isNew = !course;
+  const [playlistUrl, setPlaylistUrl] = useState('');
+  const [playlistPreview, setPlaylistPreview] = useState<PlaylistPreview | null>(null);
+  const [playlistError, setPlaylistError] = useState('');
+  const [isCheckingPlaylist, setIsCheckingPlaylist] = useState(false);
   const [title, setTitle] = useState('');
+  const [titleTouched, setTitleTouched] = useState(false);
   const [slug, setSlug] = useState('');
   const [slugTouched, setSlugTouched] = useState(false);
   const [subtitle, setSubtitle] = useState('');
@@ -116,10 +136,15 @@ function CourseFormDialog({ open, course, categories, onClose, onSaved }: Course
   const [isPublished, setIsPublished] = useState(false);
   const [cover, setCover] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [savingStep, setSavingStep] = useState('');
 
   useEffect(() => {
     if (!open) return;
+    setPlaylistUrl('');
+    setPlaylistPreview(null);
+    setPlaylistError('');
     setTitle(course?.title || '');
+    setTitleTouched(Boolean(course));
     setSlug(course?.slug || '');
     setSlugTouched(Boolean(course));
     setSubtitle(course?.subtitle || '');
@@ -130,11 +155,56 @@ function CourseFormDialog({ open, course, categories, onClose, onSaved }: Course
     setCategoryId(course?.category_id || '');
     setPreviewUrl(course?.preview_youtube_id || '');
     setSortOrder(String(course?.sort_order ?? 0));
-    setIsPublished(course?.is_published || false);
+    // New courses go on sale as soon as their lessons import; edits keep the current state.
+    setIsPublished(course ? course.is_published : true);
     setCover(null);
+    setSavingStep('');
   }, [open, course]);
 
-  const canPublish = Boolean(course && course.lesson_count > 0);
+  const applyTitle = (value: string) => {
+    setTitle(value);
+    if (!slugTouched) setSlug(slugify(value));
+  };
+
+  // Check the playlist as soon as a link is pasted, and fill in the course name from YouTube.
+  useEffect(() => {
+    if (!isNew) return;
+    const link = playlistUrl.trim();
+    setPlaylistPreview(null);
+    setPlaylistError('');
+    if (!link) return;
+    if (!looksLikePlaylistLink(link)) {
+      setPlaylistError(
+        t('admin.courses.playlist.notPlaylist', 'This is not a playlist link. Open the playlist on YouTube, click Share, then Copy.')
+      );
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setIsCheckingPlaylist(true);
+      try {
+        const info = await adminRequest<PlaylistPreview>('/api/admin-course-playlist-preview', {
+          method: 'POST',
+          body: { playlistUrl: link },
+        });
+        if (cancelled) return;
+        setPlaylistPreview(info);
+        if (!titleTouched && info.title) applyTitle(info.title);
+      } catch (error) {
+        if (!cancelled) setPlaylistError(error instanceof Error ? error.message : 'Could not check this playlist');
+      } finally {
+        if (!cancelled) setIsCheckingPlaylist(false);
+      }
+    }, 400);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+    // applyTitle/titleTouched are read at call time; re-running on them would re-check the link.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playlistUrl, isNew, t]);
+
+  const canPublish = isNew ? Boolean(playlistPreview) : Boolean(course && course.lesson_count > 0);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -142,6 +212,10 @@ function CourseFormDialog({ open, course, categories, onClose, onSaved }: Course
     const priceValue = Number(price.replace(',', '.'));
     const previewId = previewUrl.trim() ? parseYouTubeVideoId(previewUrl) : null;
 
+    if (isNew && !playlistPreview) {
+      toast.error(t('admin.courses.form.playlistRequired', 'Paste a working YouTube playlist link first.'));
+      return;
+    }
     if (!title.trim() || !finalSlug) {
       toast.error(t('admin.courses.form.titleRequired', 'Title is required.'));
       return;
@@ -161,6 +235,7 @@ function CourseFormDialog({ open, course, categories, onClose, onSaved }: Course
 
     setIsSaving(true);
     try {
+      setSavingStep(t('admin.courses.step.saving', 'Saving course…'));
       let coverFilename = course?.cover_filename || null;
       if (cover) {
         const extension = (cover.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
@@ -190,151 +265,256 @@ function CourseFormDialog({ open, course, categories, onClose, onSaved }: Course
         category_id: categoryId || null,
         preview_youtube_id: previewId,
         sort_order: Number.parseInt(sortOrder, 10) || 0,
-        is_published: canPublish && isPublished,
         cover_filename: coverFilename,
       };
 
-      const { error } = course
-        ? await supabase.from('courses').update(row).eq('id', course.id)
-        : await supabase.from('courses').insert(row);
-      if (error) {
-        if (error.code === '23505') {
-          toast.error(t('admin.courses.form.slugTaken', 'Another course already uses this URL. Change the slug.'));
-          return;
-        }
-        throw error;
+      if (!isNew && course) {
+        const { error } = await supabase
+          .from('courses')
+          .update({ ...row, is_published: canPublish && isPublished })
+          .eq('id', course.id);
+        if (error) throw error;
+        toast.success(t('admin.courses.saved', 'Course saved.'));
+        onSaved();
+        onClose();
+        return;
       }
 
-      toast.success(course ? t('admin.courses.saved', 'Course saved.') : t('admin.courses.created', 'Course created. Now add its playlist.'));
+      // New course: create as a draft, import the playlist, then publish if asked.
+      const { data: created, error: insertError } = await supabase
+        .from('courses')
+        .insert({ ...row, is_published: false })
+        .select('id')
+        .single();
+      if (insertError) throw insertError;
+
+      setSavingStep(t('admin.courses.step.importing', 'Importing lessons from YouTube…'));
+      let result: SyncResult;
+      try {
+        result = await adminRequest<SyncResult>('/api/admin-course-save-playlist', {
+          method: 'POST',
+          body: { courseId: created.id, playlistUrl: playlistUrl.trim() },
+        });
+      } catch (importError) {
+        toast.error(
+          t(
+            'admin.courses.importFailedDraft',
+            'The course was saved as a draft, but the lessons could not be imported: {error}. Open "Lessons & access" to try again.'
+          ).replace('{error}', importError instanceof Error ? importError.message : 'unknown error')
+        );
+        onSaved();
+        onClose();
+        return;
+      }
+
+      if (isPublished && result.lessons.length > 0) {
+        const { error: publishError } = await supabase.from('courses').update({ is_published: true }).eq('id', created.id);
+        if (publishError) throw publishError;
+      }
+
+      toast.success(
+        (isPublished
+          ? t('admin.courses.createdLive', 'Course is on sale with {count} lessons.')
+          : t('admin.courses.createdDraft', 'Course saved as a draft with {count} lessons.')
+        ).replace('{count}', String(result.lessons.length)),
+        { duration: 5000 }
+      );
+      if (result.notEmbeddable.length > 0) {
+        toast.error(
+          t('admin.courses.sync.notEmbeddable', 'Embedding is turned off for: {titles}. Allow embedding in YouTube Studio.').replace(
+            '{titles}',
+            result.notEmbeddable.join(', ')
+          ),
+          { duration: 8000 }
+        );
+      }
       onSaved();
       onClose();
     } catch (error) {
-      console.error('Failed to save course:', error);
-      toast.error(t('admin.courses.saveFailed', 'Could not save the course.'));
+      const code = (error as { code?: string } | null)?.code;
+      if (code === '23505') {
+        toast.error(t('admin.courses.form.slugTaken', 'Another course already uses this URL. Change the slug.'));
+      } else {
+        console.error('Failed to save course:', error);
+        toast.error(t('admin.courses.saveFailed', 'Could not save the course.'));
+      }
     } finally {
       setIsSaving(false);
+      setSavingStep('');
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && !isSaving && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <DialogHeader>
-            <DialogTitle>{course ? t('admin.courses.edit', 'Edit course') : t('admin.courses.new', 'New course')}</DialogTitle>
-            <DialogDescription>
-              {t('admin.courses.form.help', 'Create the course as a draft, import its playlist, then publish it.')}
-            </DialogDescription>
+            <DialogTitle>{isNew ? t('admin.courses.new', 'New course') : t('admin.courses.edit', 'Edit course')}</DialogTitle>
+            {isNew && (
+              <DialogDescription>
+                {t('admin.courses.form.simpleHelp', 'Paste your YouTube playlist link, set a price, and save. The lessons are added for you.')}
+              </DialogDescription>
+            )}
           </DialogHeader>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="course-title">{t('admin.courses.form.title', 'Title')}</Label>
+          {isNew && (
+            <div className="space-y-2">
+              <Label htmlFor="course-playlist" className="text-base">
+                1. {t('admin.courses.form.playlistLabel', 'YouTube playlist link')}
+              </Label>
               <Input
-                id="course-title"
-                value={title}
-                onChange={(event) => {
-                  setTitle(event.target.value);
-                  if (!slugTouched) setSlug(slugify(event.target.value));
-                }}
-                required
+                id="course-playlist"
+                value={playlistUrl}
+                onChange={(event) => setPlaylistUrl(event.target.value)}
+                placeholder="https://www.youtube.com/playlist?list=…"
+                autoFocus
               />
+              {isCheckingPlaylist ? (
+                <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('admin.courses.playlist.checking', 'Checking the playlist…')}
+                </p>
+              ) : playlistPreview ? (
+                <p className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  {t('admin.courses.playlist.found', 'Found "{title}" with {count} videos.')
+                    .replace('{title}', playlistPreview.title)
+                    .replace('{count}', String(playlistPreview.videoCount))}
+                </p>
+              ) : playlistError ? (
+                <p className="text-sm text-destructive">{playlistError}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {t('admin.courses.form.playlistHelp', 'On YouTube, open the playlist, click Share, then Copy, and paste it here. The playlist must be Unlisted.')}
+                </p>
+              )}
             </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="course-slug">{t('admin.courses.form.slug', 'Page URL')}</Label>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="shrink-0">/courses/</span>
-                <Input
-                  id="course-slug"
-                  value={slug}
-                  onChange={(event) => {
-                    setSlugTouched(true);
-                    setSlug(slugify(event.target.value));
-                  }}
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="course-subtitle">{t('admin.courses.form.subtitle', 'Subtitle')}</Label>
-              <Input id="course-subtitle" value={subtitle} onChange={(event) => setSubtitle(event.target.value)} />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="course-description">{t('admin.courses.form.description', 'Description')}</Label>
-              <Textarea id="course-description" rows={5} value={description} onChange={(event) => setDescription(event.target.value)} />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="course-learn">{t('admin.courses.form.learnPoints', 'What students will learn (one per line)')}</Label>
-              <Textarea id="course-learn" rows={4} value={learnPoints} onChange={(event) => setLearnPoints(event.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="course-price">{t('admin.courses.form.price', 'Price (BRL)')}</Label>
-              <Input id="course-price" inputMode="decimal" value={price} onChange={(event) => setPrice(event.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="course-locale">{t('admin.courses.form.language', 'Course language')}</Label>
-              <select id="course-locale" className={SELECT_CLASS} value={locale} onChange={(event) => setLocale(event.target.value as CourseLocale)}>
-                <option value="pt-BR">Português</option>
-                <option value="en">English</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="course-category">{t('admin.courses.form.category', 'Category')}</Label>
-              <select id="course-category" className={SELECT_CLASS} value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
-                <option value="">{t('admin.courses.form.noCategory', 'No category')}</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="course-order">{t('admin.courses.form.sortOrder', 'Display order')}</Label>
-              <Input id="course-order" type="number" value={sortOrder} onChange={(event) => setSortOrder(event.target.value)} />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="course-preview">{t('admin.courses.form.preview', 'Trailer (public YouTube video link, optional)')}</Label>
-              <Input
-                id="course-preview"
-                value={previewUrl}
-                onChange={(event) => setPreviewUrl(event.target.value)}
-                placeholder="https://youtu.be/…"
-              />
-              <p className="text-xs text-muted-foreground">
-                {t('admin.courses.form.previewHelp', 'Anyone can watch the trailer. Do not use a lesson video here.')}
-              </p>
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="course-cover">{t('admin.courses.form.cover', 'Cover image (16:9)')}</Label>
-              <Input id="course-cover" type="file" accept="image/*" onChange={(event) => setCover(event.target.files?.[0] || null)} />
-            </div>
-            <label className="flex items-start gap-3 sm:col-span-2">
-              <input
-                type="checkbox"
-                className="mt-1 h-4 w-4"
-                checked={canPublish && isPublished}
-                disabled={!canPublish}
-                onChange={(event) => setIsPublished(event.target.checked)}
-              />
-              <span className="text-sm">
-                {t('admin.courses.form.published', 'Published (visible and for sale)')}
-                {!canPublish && (
-                  <span className="block text-xs text-muted-foreground">
-                    {t('admin.courses.form.publishNeedsLessons', 'Import the playlist before publishing.')}
-                  </span>
-                )}
-              </span>
-            </label>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="course-title" className="text-base">
+              {isNew && '2. '}
+              {t('admin.courses.form.title', 'Title')}
+            </Label>
+            <Input
+              id="course-title"
+              value={title}
+              onChange={(event) => {
+                setTitleTouched(true);
+                applyTitle(event.target.value);
+              }}
+              required
+            />
           </div>
 
-          <DialogFooter>
+          <div className="space-y-2">
+            <Label htmlFor="course-price" className="text-base">
+              {isNew && '3. '}
+              {t('admin.courses.form.price', 'Price (BRL)')}
+            </Label>
+            <Input
+              id="course-price"
+              inputMode="decimal"
+              value={price}
+              onChange={(event) => setPrice(event.target.value)}
+              placeholder="97,00"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="course-cover">{t('admin.courses.form.coverOptional', 'Cover image (optional)')}</Label>
+            <Input id="course-cover" type="file" accept="image/*" onChange={(event) => setCover(event.target.files?.[0] || null)} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="course-description">{t('admin.courses.form.descriptionOptional', 'Description (optional)')}</Label>
+            <Textarea id="course-description" rows={4} value={description} onChange={(event) => setDescription(event.target.value)} />
+          </div>
+
+          <label className="flex items-start gap-3 rounded-md border border-border/60 p-3">
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4"
+              checked={isPublished}
+              disabled={!isNew && !canPublish}
+              onChange={(event) => setIsPublished(event.target.checked)}
+            />
+            <span className="text-sm">
+              <span className="font-medium">{t('admin.courses.form.onSale', 'Put on sale now')}</span>
+              <span className="block text-xs text-muted-foreground">
+                {!isNew && !canPublish
+                  ? t('admin.courses.form.publishNeedsLessons', 'Import the playlist before publishing.')
+                  : t('admin.courses.form.onSaleHelp', 'Untick to keep it hidden as a draft.')}
+              </span>
+            </span>
+          </label>
+
+          <details className="rounded-md border border-border/60 p-3">
+            <summary className="cursor-pointer text-sm font-medium">{t('admin.courses.form.more', 'More options')}</summary>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="course-subtitle">{t('admin.courses.form.subtitle', 'Subtitle')}</Label>
+                <Input id="course-subtitle" value={subtitle} onChange={(event) => setSubtitle(event.target.value)} />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="course-learn">{t('admin.courses.form.learnPoints', 'What students will learn (one per line)')}</Label>
+                <Textarea id="course-learn" rows={4} value={learnPoints} onChange={(event) => setLearnPoints(event.target.value)} />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="course-preview">{t('admin.courses.form.preview', 'Trailer (public YouTube video link, optional)')}</Label>
+                <Input id="course-preview" value={previewUrl} onChange={(event) => setPreviewUrl(event.target.value)} placeholder="https://youtu.be/…" />
+                <p className="text-xs text-muted-foreground">
+                  {t('admin.courses.form.previewHelp', 'Anyone can watch the trailer. Do not use a lesson video here.')}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="course-locale">{t('admin.courses.form.language', 'Course language')}</Label>
+                <select id="course-locale" className={SELECT_CLASS} value={locale} onChange={(event) => setLocale(event.target.value as CourseLocale)}>
+                  <option value="pt-BR">Português</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="course-category">{t('admin.courses.form.category', 'Category')}</Label>
+                <select id="course-category" className={SELECT_CLASS} value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
+                  <option value="">{t('admin.courses.form.noCategory', 'No category')}</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="course-order">{t('admin.courses.form.sortOrder', 'Display order')}</Label>
+                <Input id="course-order" type="number" value={sortOrder} onChange={(event) => setSortOrder(event.target.value)} />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="course-slug">{t('admin.courses.form.slug', 'Page URL')}</Label>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="shrink-0">/courses/</span>
+                  <Input
+                    id="course-slug"
+                    value={slug}
+                    onChange={(event) => {
+                      setSlugTouched(true);
+                      setSlug(slugify(event.target.value));
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <DialogFooter className="gap-2 sm:items-center">
+            {savingStep && <p className="mr-auto text-sm text-muted-foreground">{savingStep}</p>}
             <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>
               {t('common.cancel', 'Cancel')}
             </Button>
-            <Button type="submit" disabled={isSaving}>
+            <Button type="submit" disabled={isSaving || (isNew && !playlistPreview)}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('admin.courses.save', 'Save')}
+              {isNew ? t('admin.courses.form.create', 'Create course') : t('admin.courses.save', 'Save')}
             </Button>
           </DialogFooter>
         </form>

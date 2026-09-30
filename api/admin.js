@@ -4,7 +4,7 @@ import { requireAdmin } from '../lib/admin-auth.js';
 import { applyCors, handleOptionsRequest } from '../lib/cors.js';
 import { logger, getRequestMeta } from '../lib/logger.js';
 import { listPaidSessionsForEmail, listSessionProducts } from '../lib/stripe-purchases.js';
-import { importPlaylist, parsePlaylistId, PlaylistImportError } from '../lib/youtube-playlist.js';
+import { fetchPlaylistInfo, importPlaylist, parsePlaylistId, PlaylistImportError } from '../lib/youtube-playlist.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2023-10-16',
@@ -571,6 +571,22 @@ const handleCoursePrivate = async (req, res, requestMeta) => {
   }
 };
 
+const handleCoursePlaylistPreview = async (req, res, requestMeta) => {
+  try {
+    const auth = await courseAdminGuard(req, res, ['POST']);
+    if (!auth) return;
+    const playlistId = parsePlaylistId((req.body || {}).playlistUrl);
+    if (!playlistId) {
+      res.status(400).json({ error: 'This is not a YouTube playlist link. It should contain "list=".' });
+      return;
+    }
+    const info = await fetchPlaylistInfo(playlistId);
+    res.status(200).json({ playlistId, ...info });
+  } catch (error) {
+    sendCourseError(res, requestMeta, 'admin_course_playlist_preview_failed', error);
+  }
+};
+
 const handleCourseSavePlaylist = async (req, res, requestMeta) => {
   try {
     const auth = await courseAdminGuard(req, res, ['POST']);
@@ -809,6 +825,8 @@ export default async function handler(req, res) {
       return handlePodcastArticles(req, res, requestMeta);
     case 'course-private':
       return handleCoursePrivate(req, res, requestMeta);
+    case 'course-playlist-preview':
+      return handleCoursePlaylistPreview(req, res, requestMeta);
     case 'course-save-playlist':
       return handleCourseSavePlaylist(req, res, requestMeta);
     case 'course-resync':
