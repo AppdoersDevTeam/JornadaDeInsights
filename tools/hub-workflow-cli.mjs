@@ -92,6 +92,7 @@ Usage:
   node tools/hub-workflow-cli.mjs note --ticket-id <uuid> --note "..."
   node tools/hub-workflow-cli.mjs flush-ticket-time --ticket-id <uuid> [--note "..."] [--finalize]
   node tools/hub-workflow-cli.mjs show-ticket-time [--ticket-id <uuid>]
+  node tools/hub-workflow-cli.mjs log-time --ticket-id <uuid> --hours <n> [--note "..."]
 
 Session:
   .hub-session.json stores active client, project, and team member for this workspace.
@@ -487,7 +488,21 @@ async function run() {
       method: 'POST',
       body: JSON.stringify(payload),
     })
+    // A ticket created straight into a work stage must start its timer like move-ticket does.
+    const createdId = data?.ticket?.id ?? data?.id
+    if (createdId && isWorkStage(payload.stage)) {
+      ticketTime.startTicket(String(createdId))
+    }
     print(data)
+    return
+  }
+
+  if (command === 'log-time') {
+    if (!args['ticket-id']) throw new Error('--ticket-id is required')
+    const hours = Number(args.hours)
+    if (!(hours > 0)) throw new Error('--hours must be a positive number')
+    const description = args.note ? String(args.note) : 'Manual time entry'
+    print(await logTicketHours(hubFetch, String(args['ticket-id']), hours, description))
     return
   }
 
