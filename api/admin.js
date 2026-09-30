@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import { requireAdmin } from '../lib/admin-auth.js';
 import { applyCors, handleOptionsRequest } from '../lib/cors.js';
 import { logger, getRequestMeta } from '../lib/logger.js';
+import { listPaidSessionsForEmail, listSessionProducts } from '../lib/stripe-purchases.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2023-10-16',
@@ -91,33 +92,6 @@ const safeString = (value, max = 500) => {
   return trimmed ? trimmed.slice(0, max) : null;
 };
 
-const listSessionsFallback = async ({ email, limit }) => {
-  const sessions = [];
-  let startingAfter = undefined;
-
-  while (sessions.length < limit) {
-    const page = await stripe.checkout.sessions.list({
-      limit: Math.min(100, limit),
-      starting_after: startingAfter,
-    });
-    if (!page.data?.length) break;
-
-    for (const sess of page.data) {
-      const sessEmail = (sess.customer_details?.email || sess.customer_email || '').trim().toLowerCase();
-      if (sessEmail === email) {
-        sessions.push(sess);
-        if (sessions.length >= limit) break;
-      }
-    }
-
-    if (!page.has_more) break;
-    startingAfter = page.data[page.data.length - 1]?.id;
-    if (!startingAfter) break;
-  }
-
-  return sessions;
-};
-
 const handleCustomerLookup = async (req, res, requestMeta) => {
   applyCors(req, res, { methods: 'GET,OPTIONS' });
   if (handleOptionsRequest(req, res)) return;
@@ -139,47 +113,23 @@ const handleCustomerLookup = async (req, res, requestMeta) => {
     }
     const limit = parseLimit(req.query.limit, 10);
 
-    let sessions = [];
-    try {
-      // Search is not enabled for all accounts; fallback to list+filter if it fails.
-      const result = await stripe.checkout.sessions.search({
-        query: `customer_email:'${email}'`,
-        limit,
-      });
-      sessions = result.data || [];
-    } catch (error) {
-      logger.warn('admin_customer_lookup_stripe_search_unavailable', requestMeta);
-      sessions = await listSessionsFallback({ email, limit });
-    }
+    const sessions = await listPaidSessionsForEmail(stripe, email);
 
     const paidSessions = sessions
-      .filter((s) => s.payment_status === 'paid')
       .sort((a, b) => (b.created || 0) - (a.created || 0))
       .slice(0, limit);
 
     const lookup = await Promise.all(
       paidSessions.map(async (sess) => {
-        const lineItemsList = await stripe.checkout.sessions.listLineItems(sess.id, { limit: 100 });
+        const products = await listSessionProducts(stripe, sess);
 
-        const items = lineItemsList.data.map((li) => {
-          const unitAmount = li.price?.unit_amount ?? li.amount_total ?? 0;
-          const ebookId =
-            li.price_data?.product_data?.metadata?.ebookId ||
-            li.price?.product_data?.metadata?.ebookId ||
-            null;
-
-          return {
-            name:
-              li.price_data?.product_data?.name ||
-              li.price?.product_data?.name ||
-              li.description ||
-              'Unknown Item',
-            quantity: li.quantity || 1,
-            amount: Number(((unitAmount || 0) / 100).toFixed(2)),
-            currency: (li.currency || li.price?.currency || 'brl').toUpperCase(),
-            ebookId: safeString(ebookId, 128),
-          };
-        });
+        const items = products.map((product) => ({
+          name: product.title || 'Unknown Item',
+          quantity: product.quantity,
+          amount: Number(((product.amountCents || 0) / 100).toFixed(2)),
+          currency: (sess.currency || 'brl').toUpperCase(),
+          ebookId: safeString(product.ebookId, 128),
+        }));
 
         return {
           sessionId: sess.id,

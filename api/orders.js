@@ -4,6 +4,13 @@ import { requireAdmin, requireUser } from '../lib/admin-auth.js';
 import { applyCors, handleOptionsRequest } from '../lib/cors.js';
 import { logger, getRequestMeta } from '../lib/logger.js';
 import { captureServerError } from '../lib/monitoring.js';
+import {
+  buildPurchaseRows,
+  listPaidSessionsForEmail,
+  listSessionProducts,
+  persistPurchaseRows,
+  resolveEbookIdsByTitle,
+} from '../lib/stripe-purchases.js';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -301,20 +308,12 @@ const handleCompleted = async (req, res, requestMeta) => {
     // For each paid session, fetch line items and map to ebook titles
     const ordersList = await Promise.all(
       paidSessions.map(async (sess) => {
-        const lineItemsList = await stripe.checkout.sessions.listLineItems(sess.id, { limit: 100 });
-        const items = lineItemsList.data.map(li => {
-          const price = parseFloat(((li.amount_total ?? li.price?.unit_amount ?? 0) / 100).toFixed(2));
-          return {
-            name: li.price_data?.product_data?.name ||
-                  li.price?.product_data?.name ||
-                  li.description ||
-                  'Unknown Item',
-            price: price,
-            ebookId: li.price_data?.product_data?.metadata?.ebookId ||
-                     li.price?.product_data?.metadata?.ebookId ||
-                     null
-          };
-        });
+        const products = await listSessionProducts(stripe, sess);
+        const items = products.map((product) => ({
+          name: product.title || 'Unknown Item',
+          price: parseFloat((product.amountCents / 100).toFixed(2)),
+          ebookId: product.ebookId,
+        }));
         return {
           id: sess.id,
           date: (sess.created ?? 0) * 1000,
@@ -401,9 +400,9 @@ const handleExport = async (req, res, requestMeta) => {
 
     const rows = [];
     for (const sess of filtered) {
-      const lineItems = await stripe.checkout.sessions.listLineItems(sess.id, { limit: 100 });
-      const itemTitles = lineItems.data.map((li) => li.description || li.price_data?.product_data?.name || li.price?.product_data?.name || 'Item');
-      const itemEbookIds = lineItems.data.map((li) => li.price_data?.product_data?.metadata?.ebookId || li.price?.product_data?.metadata?.ebookId || '').filter(Boolean);
+      const products = await listSessionProducts(stripe, sess);
+      const itemTitles = products.map((product) => product.title || 'Item');
+      const itemEbookIds = products.map((product) => product.ebookId).filter(Boolean);
 
       rows.push({
         session_id: sess.id,
@@ -412,7 +411,7 @@ const handleExport = async (req, res, requestMeta) => {
         name: sess.customer_details?.name || '',
         total_amount: Number(((sess.amount_total || 0) / 100).toFixed(2)),
         currency: (sess.currency || 'brl').toUpperCase(),
-        item_count: lineItems.data.length,
+        item_count: products.length,
         item_titles: itemTitles.join(' | '),
         item_ebook_ids: itemEbookIds.join(' | '),
       });
@@ -538,43 +537,28 @@ const handleMine = async (req, res, requestMeta) => {
       });
     }
 
-    const allSessionsList = await stripe.checkout.sessions.list({ limit: 100 });
-    const paidSessions = allSessionsList.data.filter(
-      (session) =>
-        session.payment_status === 'paid' &&
-        (session.customer_details?.email || session.customer_email || '').toLowerCase() === email
-    );
+    const paidSessions = await listPaidSessionsForEmail(stripe, user.email);
+    const supabaseForHeal = createSupabaseAdmin();
 
     await Promise.all(
       paidSessions.map(async (session) => {
         if (ordersBySession.has(session.id)) {
           return;
         }
-        const metaIds = (session.metadata?.ebook_ids || '')
-          .split(',')
-          .map((value) => value.trim())
-          .filter(Boolean);
-        const lineItemsList = await stripe.checkout.sessions.listLineItems(session.id, {
-          limit: 100,
-        });
-        const items = lineItemsList.data.map((lineItem, index) => {
-          const price = parseFloat(
-            ((lineItem.amount_total ?? lineItem.price?.unit_amount ?? 0) / 100).toFixed(2)
-          );
-          return {
-            name:
-              lineItem.price_data?.product_data?.name ||
-              lineItem.price?.product_data?.name ||
-              lineItem.description ||
-              'Unknown Item',
-            price,
-            ebookId:
-              lineItem.price_data?.product_data?.metadata?.ebookId ||
-              lineItem.price?.product_data?.metadata?.ebookId ||
-              metaIds[index] ||
-              null,
-          };
-        });
+        const products = await resolveEbookIdsByTitle(
+          supabaseForHeal,
+          await listSessionProducts(stripe, session)
+        );
+        const healError = await persistPurchaseRows(
+          supabaseForHeal,
+          buildPurchaseRows(session, products)
+        );
+        if (healError) {
+          logger.warn('my_orders_purchase_heal_failed', {
+            ...requestMeta,
+            errorMessage: healError.message,
+          });
+        }
 
         ordersBySession.set(session.id, {
           id: session.id,
@@ -582,7 +566,11 @@ const handleMine = async (req, res, requestMeta) => {
           name: session.customer_details?.name || '',
           email: session.customer_details?.email || session.customer_email || '',
           total: parseFloat(((session.amount_total ?? 0) / 100).toFixed(2)),
-          items,
+          items: products.map((product) => ({
+            name: product.title || 'Unknown Item',
+            price: parseFloat((product.amountCents / 100).toFixed(2)),
+            ebookId: product.ebookId,
+          })),
         });
       })
     );
@@ -616,31 +604,19 @@ const userOwnsEbook = async (supabaseAdmin, userEmail, ebookId) => {
     return true;
   }
 
-  const sessions = await stripe.checkout.sessions.list({ limit: 100 });
-  const paidForUser = sessions.data.filter(
-    (session) =>
-      session.payment_status === 'paid' &&
-      (session.customer_details?.email || session.customer_email || '').toLowerCase() === email
-  );
-
+  // Fallback: the buyer's full Stripe history. Self-heal the purchases row when found.
+  const paidForUser = await listPaidSessionsForEmail(stripe, email);
   for (const session of paidForUser) {
-    const metaIds = (session.metadata?.ebook_ids || '')
-      .split(',')
-      .map((value) => value.trim())
-      .filter(Boolean);
-    if (metaIds.includes(ebookId)) {
-      return true;
-    }
-
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 100 });
-    for (const lineItem of lineItems.data) {
-      const lineEbookId =
-        lineItem.price_data?.product_data?.metadata?.ebookId ||
-        lineItem.price?.product_data?.metadata?.ebookId ||
-        null;
-      if (lineEbookId === ebookId) {
-        return true;
+    const products = await resolveEbookIdsByTitle(
+      supabaseAdmin,
+      await listSessionProducts(stripe, session)
+    );
+    if (products.some((product) => product.ebookId === ebookId)) {
+      const healError = await persistPurchaseRows(supabaseAdmin, buildPurchaseRows(session, products));
+      if (healError) {
+        logger.warn('ebook_ownership_heal_failed', { sessionId: session.id, errorMessage: healError.message });
       }
+      return true;
     }
   }
 

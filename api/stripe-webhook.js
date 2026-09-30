@@ -2,6 +2,13 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { captureServerError } from '../lib/monitoring.js';
+import {
+  buildPurchaseRows,
+  listSessionProducts,
+  persistPurchaseRows,
+  resolveEbookIdsByTitle,
+  sessionEmail,
+} from '../lib/stripe-purchases.js';
 
 export const config = {
   api: {
@@ -45,81 +52,21 @@ const createSupabaseAdmin = () => {
 
 const isDuplicateError = (error) => error && error.code === '23505';
 
-const persistPurchases = async (supabaseAdmin, session) => {
-  const sessionId = session.id;
-  const customerEmail = (session.customer_details?.email || session.customer_email || '')
-    .trim()
-    .toLowerCase();
-  const customerName = session.customer_details?.name || customerEmail;
-  if (!customerEmail) return;
-
-  const ebookIds = (session.metadata?.ebook_ids || '')
-    .split(',')
-    .map((value) => value.trim())
-    .filter(Boolean);
-
-  const lineItems = await stripe.checkout.sessions.listLineItems(sessionId, { limit: 100 });
-  const rows = [];
-
-  for (let index = 0; index < lineItems.data.length; index += 1) {
-    const lineItem = lineItems.data[index];
-    const title =
-      lineItem.description ||
-      lineItem.price_data?.product_data?.name ||
-      lineItem.price?.product_data?.name ||
-      'eBook';
-    const ebookId =
-      lineItem.price_data?.product_data?.metadata?.ebookId ||
-      lineItem.price?.product_data?.metadata?.ebookId ||
-      ebookIds[index] ||
-      null;
-    const amountCents = lineItem.amount_total ?? lineItem.price?.unit_amount ?? 0;
-
-    rows.push({
-      session_id: sessionId,
-      customer_email: customerEmail,
-      customer_name: customerName,
-      ebook_id: ebookId,
-      ebook_title: title,
-      amount_cents: amountCents,
-      currency: (session.currency || 'brl').toLowerCase(),
-    });
+const persistPurchases = async (supabaseAdmin, session, products) => {
+  if (!sessionEmail(session)) return;
+  const resolved = await resolveEbookIdsByTitle(supabaseAdmin, products);
+  const unmatched = resolved.filter((product) => !product.ebookId).map((product) => product.title);
+  if (unmatched.length) {
+    console.error('persistPurchases unmatched line items:', session.id, unmatched);
   }
-
-  if (!rows.length && ebookIds.length) {
-    for (const ebookId of ebookIds) {
-      rows.push({
-        session_id: sessionId,
-        customer_email: customerEmail,
-        customer_name: customerName,
-        ebook_id: ebookId,
-        ebook_title: 'eBook',
-        amount_cents: null,
-        currency: (session.currency || 'brl').toLowerCase(),
-      });
-    }
-  }
-
-  if (!rows.length) return;
-
-  const { error } = await supabaseAdmin.from('purchases').upsert(rows, {
-    onConflict: 'session_id,ebook_id',
-    ignoreDuplicates: true,
-  });
-
-  // Table may not exist yet — do not fail webhook fulfillment.
-  if (error && !String(error.message || '').includes('purchases')) {
-    console.warn('persistPurchases warning:', error.message || error);
-  } else if (error) {
-    console.warn('persistPurchases skipped (table may be missing):', error.message || error);
+  const error = await persistPurchaseRows(supabaseAdmin, buildPurchaseRows(session, resolved));
+  if (error) {
+    console.error('persistPurchases failed:', session.id, error.message || error);
   }
 };
 
-const sendPurchaseEmail = async ({ sessionId, customerEmail, customerName, locale }) => {
-  const lineItems = await stripe.checkout.sessions.listLineItems(sessionId, { limit: 100 });
-  const purchasedEbooks = lineItems.data.map((item) => ({
-    title: item.description || item.price_data?.product_data?.name || 'eBook',
-  }));
+const sendPurchaseEmail = async ({ products, customerEmail, customerName, locale }) => {
+  const purchasedEbooks = products.map((product) => ({ title: product.title }));
 
   const frontendUrl = process.env.FRONTEND_URL;
   if (!frontendUrl) {
@@ -226,10 +173,12 @@ export default async function handler(req, res) {
         const customerEmail = (session.customer_details?.email || session.customer_email || '').trim();
         const customerName = session.customer_details?.name || customerEmail;
 
+        const products = await listSessionProducts(stripe, session);
+
         try {
-          await persistPurchases(supabaseAdmin, session);
+          await persistPurchases(supabaseAdmin, session, products);
         } catch (persistError) {
-          console.warn('Webhook purchase persist failed (non-fatal):', persistError);
+          console.error('Webhook purchase persist failed (non-fatal):', persistError);
         }
 
         try {
@@ -255,7 +204,7 @@ export default async function handler(req, res) {
           if (!reserveError) {
             try {
               await sendPurchaseEmail({
-                sessionId,
+                products,
                 customerEmail,
                 customerName,
                 locale: session.metadata?.locale || '',
