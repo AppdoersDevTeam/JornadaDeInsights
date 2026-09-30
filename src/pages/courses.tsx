@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { GraduationCap } from 'lucide-react';
 import { CourseCard } from '@/components/courses/course-card';
 import { AnimatedGridItem } from '@/components/shop/animated-grid-item';
 import { useAuth } from '@/context/auth-context';
@@ -46,7 +45,6 @@ export function CoursesPage() {
     <>
       <section className="pt-24 pb-12 bg-gradient-to-br from-primary/10 to-background">
         <div className="container mx-auto px-6 sm:px-8 lg:px-10 text-center max-w-3xl">
-          <GraduationCap className="mx-auto mb-4 h-12 w-12 text-primary" />
           <h1 className="text-3xl md:text-5xl font-heading font-bold mb-4">{t('courses.title', 'Courses')}</h1>
           <p className="text-lg text-muted-foreground">
             {t('courses.subtitle', 'Video courses to go deeper in the Word, at your own pace.')}
