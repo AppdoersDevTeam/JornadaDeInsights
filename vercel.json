@@ -67,6 +67,16 @@
       "methods": ["GET", "OPTIONS"]
     },
     {
+      "src": "/api/ebook-download",
+      "dest": "/api/orders.js?action=ebook-download",
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/api/contact",
+      "dest": "/api/lead-capture.js?action=contact",
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
       "src": "/api/stats",
       "dest": "/api/analytics.js?action=stats",
       "methods": ["GET", "OPTIONS"],
