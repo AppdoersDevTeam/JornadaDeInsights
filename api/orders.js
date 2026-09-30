@@ -8,8 +8,10 @@ import {
   buildPurchaseRows,
   emailOwnsProduct,
   listPaidSessionsForEmail,
+  listProductSaleSessions,
   listSessionProducts,
   persistPurchaseRows,
+  reconcilePurchaseRows,
   resolveEbookIdsByTitle,
 } from '../lib/stripe-purchases.js';
 
@@ -399,14 +401,16 @@ const handleCompleted = async (req, res, requestMeta) => {
       return;
     }
 
-    // List all checkout sessions and filter for paid sessions
-    const allSessionsList = await stripe.checkout.sessions.list({ limit: 100 });
-    const paidSessions = allSessionsList.data.filter(sess => sess.payment_status === 'paid');
+    const saleSessions = await listProductSaleSessions(stripe);
+    const productsBySession = new Map();
 
-    // For each paid session, fetch line items and map to ebook titles
     const ordersList = await Promise.all(
-      paidSessions.map(async (sess) => {
-        const products = await listSessionProducts(stripe, sess);
+      saleSessions.map(async (sess) => {
+        const products = await resolveEbookIdsByTitle(
+          auth.supabaseAdmin,
+          await listSessionProducts(stripe, sess)
+        );
+        productsBySession.set(sess.id, products);
         const items = products.map((product) => ({
           name: product.title || 'Unknown Item',
           price: parseFloat((product.amountCents / 100).toFixed(2)),
@@ -422,6 +426,28 @@ const handleCompleted = async (req, res, requestMeta) => {
         };
       })
     );
+
+    // Stripe is the source of truth: repair missing or misdated purchase rows so customer
+    // libraries and "My orders" never drift from the sales the admin sees.
+    const reconcile = await reconcilePurchaseRows(
+      auth.supabaseAdmin,
+      saleSessions,
+      productsBySession
+    );
+    if (reconcile.error) {
+      logger.error('completed_orders_reconcile_failed', {
+        ...requestMeta,
+        errorMessage: reconcile.error.message || 'unknown_error',
+      });
+    } else if (reconcile.inserted || reconcile.redated || reconcile.unmatchedSessions.length) {
+      logger.warn('completed_orders_reconciled', {
+        ...requestMeta,
+        inserted: reconcile.inserted,
+        redated: reconcile.redated,
+        unmatchedSessions: reconcile.unmatchedSessions,
+      });
+    }
+
     res.status(200).json({ orders: ordersList });
   } catch (error) {
     logger.error('completed_orders_failed', {
@@ -648,6 +674,8 @@ const handleMine = async (req, res, requestMeta) => {
     await Promise.all(
       paidSessions.map(async (session) => {
         if (ordersBySession.has(session.id)) {
+          // Show when the sale happened, even if the stored row was written later.
+          ordersBySession.get(session.id).date = (session.created ?? 0) * 1000;
           return;
         }
         const products = await resolveEbookIdsByTitle(

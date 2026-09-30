@@ -4,6 +4,7 @@ import { requireAdmin } from '../lib/admin-auth.js';
 import { applyCors, handleOptionsRequest } from '../lib/cors.js';
 import { logger, getRequestMeta } from '../lib/logger.js';
 import { captureServerError } from '../lib/monitoring.js';
+import { listProductSaleSessions, listSessionProducts } from '../lib/stripe-purchases.js';
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -496,17 +497,24 @@ const handleTopProducts = async (req, res, requestMeta) => {
   }
 
   try {
+    const auth = await requireAdmin(req, res);
+    if (!auth) {
+      return;
+    }
+
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfMonthUnix = Math.floor(startOfMonth.getTime() / 1000);
 
-    let charges;
+    let saleProducts;
     try {
-      charges = await stripe.charges.list({
-        created: { gte: startOfMonthUnix },
-        limit: 100,
-        status: 'succeeded',
-      });
+      const saleSessions = await listProductSaleSessions(stripe, { createdGte: startOfMonthUnix });
+      saleProducts = await Promise.all(
+        saleSessions.map(async (session) => ({
+          currency: session.currency,
+          products: await listSessionProducts(stripe, session),
+        }))
+      );
     } catch (stripeError) {
       logger.error('top_products_stripe_api_failed', {
         ...requestMeta,
@@ -516,31 +524,22 @@ const handleTopProducts = async (req, res, requestMeta) => {
       return;
     }
 
-    if (!charges?.data || !Array.isArray(charges.data)) {
-      logger.warn('top_products_invalid_stripe_payload', requestMeta);
-      res.json({ products: [] });
-      return;
-    }
-
-    const primaryCurrency = charges.data.find((charge) => charge.currency)?.currency || 'brl';
-    const normalizedCharges = charges.data.filter((charge) => charge.currency === primaryCurrency);
-
+    const primaryCurrency = saleProducts.find((sale) => sale.currency)?.currency || 'brl';
     const productMap = new Map();
 
-    normalizedCharges.forEach((charge) => {
-      if (!charge) return;
-      const productNames = charge.metadata?.product_names || charge.description || 'Unknown Product';
-      const chargeAmount = (charge.amount || 0) / 100;
-      productNames.split(',').forEach((name) => {
-        const trimmed = name.trim();
-        if (!trimmed) return;
-        const current = productMap.get(trimmed) || { sales: 0, revenue: 0 };
-        productMap.set(trimmed, {
-          sales: current.sales + 1,
-          revenue: Number((current.revenue + chargeAmount).toFixed(2)),
+    // Each purchased line item is one sale of that product, priced at what was actually paid.
+    saleProducts
+      .filter((sale) => sale.currency === primaryCurrency)
+      .forEach(({ products }) => {
+        products.forEach((product) => {
+          const name = (product.title || '').trim() || 'Unknown Product';
+          const current = productMap.get(name) || { sales: 0, revenue: 0 };
+          productMap.set(name, {
+            sales: current.sales + (product.quantity || 1),
+            revenue: Number((current.revenue + (product.amountCents || 0) / 100).toFixed(2)),
+          });
         });
       });
-    });
 
     const products = Array.from(productMap.entries())
       .map(([name, data]) => ({
@@ -600,21 +599,17 @@ const handleStats = async (req, res, requestMeta) => {
       monthStart = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000);
     }
 
-    const [dailyCharges, weeklyCharges, monthlyCharges] = await Promise.all([
-      stripe.charges.list({ created: { gte: dayStart }, limit: 100 }),
-      stripe.charges.list({ created: { gte: weekStart }, limit: 100 }),
-      stripe.charges.list({ created: { gte: monthStart }, limit: 100 }),
-    ]);
+    // Order counts use the same definition as the completed-orders list (paid product
+    // checkouts, full history) so the dashboard numbers always match the list.
+    const saleSessions = await listProductSaleSessions(stripe);
+    const countSalesSince = (start) => saleSessions.filter((session) => session.created >= start).length;
 
-    const primaryCurrency =
-      monthlyCharges.data.find((charge) => charge.status === 'succeeded' && charge.currency)?.currency || 'brl';
+    const primaryCurrency = saleSessions.find((session) => session.currency)?.currency || 'brl';
 
-    const todayCount = dailyCharges.data.filter((ch) => ch.status === 'succeeded').length;
-    const weekCount = weeklyCharges.data.filter((ch) => ch.status === 'succeeded').length;
-    const monthCount = monthlyCharges.data.filter((ch) => ch.status === 'succeeded').length;
-
-    const allChargesEver = await stripe.charges.list({ limit: 100 });
-    const completedOrdersEver = allChargesEver.data.filter((ch) => ch.status === 'succeeded').length;
+    const todayCount = countSalesSince(dayStart);
+    const weekCount = countSalesSince(weekStart);
+    const monthCount = countSalesSince(monthStart);
+    const completedOrdersEver = saleSessions.length;
 
     const {
       data: { users: allUsers = [] },

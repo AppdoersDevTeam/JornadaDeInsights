@@ -435,12 +435,13 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
   };
 
   // Calculate top selling products
-  const calculateTopProducts = async (): Promise<ProductSales[]> => {
+  const calculateTopProducts = async (idToken: string): Promise<ProductSales[]> => {
     try {
       const response = await fetch(`${SERVER_URL}/api/top-products`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
         },
         credentials: 'include'
       });
@@ -478,7 +479,7 @@ export function DashboardPage({ activeTab, onTabChange }: DashboardPageProps) {
                 Authorization: `Bearer ${idToken}`,
               }
             }),
-            calculateTopProducts(),
+            calculateTopProducts(idToken),
             fetch(`${SERVER_URL}/api/stats`, {
               credentials: 'include',
               headers: {
