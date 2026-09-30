@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart, Info, BookOpen, Bell } from 'lucide-react';
+import { Menu, X, LogOut, ChevronDown, ChevronUp, LayoutDashboard, Book, ShoppingBag, Mail, Settings, Home, Mic, ShoppingCart, Info, BookOpen, Bell, GraduationCap, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
@@ -12,16 +12,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useLanguage } from '@/context/language-context';
 import { siteLogoAlt, siteLogoSrc } from '@/lib/site-logo';
 import { NotificationBell } from '@/components/notifications/notification-bell';
-
-const ALLOWED_ADMIN_EMAILS = [
-  'devteam@appdoers.co.nz',
-  'ptasbr2020@gmail.com'
-];
+import { DesktopActions, DesktopNav } from '@/components/layout/header-nav';
+import { isAdminEmail } from '@/lib/admin';
 
 export function AdminHeader() {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +26,8 @@ export function AdminHeader() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { totalCount } = useCart();
-  const { t, language } = useLanguage();
+  const { t, language, openLanguagePrompt } = useLanguage();
+  const dashboardPath = isAdminEmail(user?.email) ? '/dashboard' : '/user-dashboard';
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -56,18 +53,10 @@ export function AdminHeader() {
   const dashboardLinks = [
     { to: '/user-dashboard?tab=overview', label: t('user.tab.overview', 'Overview'), icon: LayoutDashboard },
     { to: '/user-dashboard?tab=ebooks', label: t('user.tab.ebooks', 'My eBooks'), icon: Book },
+    { to: '/user-dashboard?tab=courses', label: t('courses.mine.title', 'My courses'), icon: GraduationCap },
     { to: '/user-dashboard?tab=orders', label: t('user.tab.orders', 'Orders'), icon: ShoppingBag },
     { to: '/user-dashboard?tab=settings', label: t('user.tab.settings', 'Settings'), icon: Settings },
     { to: '/user-dashboard?tab=cart', label: t('nav.cart', 'Cart'), icon: ShoppingCart }
-  ];
-
-  const mainLinks = [
-    { to: '/', label: t('nav.home', 'Home') },
-    { to: '/about', label: t('nav.about', 'About') },
-    { to: '/podcast', label: t('nav.podcast', 'Podcast') },
-    { to: '/curiosidades', label: t('nav.curiosidades', 'Insights') },
-    { to: '/shop', label: t('nav.shop', 'Store') },
-    { to: '/contact', label: t('nav.contact', 'Contact') }
   ];
 
   return (
@@ -79,81 +68,8 @@ export function AdminHeader() {
             <img src={siteLogoSrc(language, 'header')} alt={siteLogoAlt(language)} className="h-8 sm:h-10 lg:h-12 w-auto" />
           </Link>
         </div>
-        {/* Center: Nav Links */}
-        <nav className="hidden lg:flex flex-1 justify-center items-center gap-2 xl:gap-4 min-w-0">
-          {mainLinks.map((link) => (
-            <Link 
-              key={link.to}
-              to={link.to} 
-              className="text-sm xl:text-base text-background font-normal hover:text-secondary transition-colors whitespace-nowrap px-1"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-        {/* Right: Actions */}
-        <div className="hidden lg:flex flex-shrink-0 justify-end items-center gap-2 xl:gap-3">
-          {user ? (
-            <>
-              <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 whitespace-nowrap px-2 xl:px-3">
-                <Link to="/shop" className="text-xs xl:text-sm font-medium">
-                  <span className="hidden xl:inline">{t('nav.ebooks.cta', 'Comprar eBooks')}</span>
-                  <span className="xl:hidden">{t('nav.ebooks.short', 'eBooks')}</span>
-                </Link>
-              </Button>
-              <Link
-                to="/user-dashboard?tab=cart"
-                className="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0"
-                aria-label={t('nav.cart', 'Cart')}
-              >
-                <ShoppingCart className="h-5 w-5 xl:h-6 xl:w-6 text-background" />
-                {totalCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
-                    {totalCount}
-                  </span>
-                )}
-              </Link>
-              <NotificationBell triggerClassName="relative p-1.5 xl:p-2 rounded-full hover:bg-background/10 transition-colors flex-shrink-0 text-background" />
-              <Button variant="outline" asChild size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
-                <Link to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email.toLowerCase()) ? "/dashboard" : "/user-dashboard"} className="flex items-center gap-1.5 xl:gap-2">
-                  <LayoutDashboard className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0" />
-                  <span className="text-xs xl:text-sm font-medium">{t('nav.dashboard', 'Dashboard')}</span>
-                </Link>
-              </Button>
-              <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
-                    <LogOut className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0 mr-1.5 xl:mr-2" />
-                    <span className="text-xs xl:text-sm font-medium">{t('nav.signOut', 'Sign out')}</span>
-                  </Button>
-                </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t('user.signOut.confirmTitle', 'Sign out?')}</DialogTitle>
-                  <DialogDescription>
-                    {t('user.signOut.confirmBody', 'Are you sure you want to sign out?')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex justify-end gap-4 mt-4">
-                  <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
-                    {t('user.signOut.cancel', 'Cancel')}
-                  </Button>
-                  <Button variant="destructive" onClick={handleSignOut}>
-                    {t('user.signOut.cta', 'Sign out')}
-                  </Button>
-                </div>
-              </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            <Link to="/signin">
-              <Button variant="outline" className="text-background border-background hover:bg-background hover:text-primary bg-background/10 min-w-[auto] px-2 xl:px-3">
-                <User className="h-4 w-4 xl:h-4 xl:w-4 flex-shrink-0 mr-1.5 xl:mr-2" />
-                <span className="text-xs xl:text-sm font-medium">{t('nav.signIn', 'Sign in')}</span>
-              </Button>
-            </Link>
-          )}
-        </div>
+        <DesktopNav />
+        <DesktopActions />
         {/* Mobile: cart icon + menu toggle */}
         <div className="lg:hidden flex items-center gap-2 ml-auto">
           <Link
@@ -184,9 +100,21 @@ export function AdminHeader() {
         isOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="bg-white container mx-auto px-4 py-8 flex flex-col gap-2 items-start">
+          <button
+            type="button"
+            onClick={() => {
+              closeMenu();
+              openLanguagePrompt();
+            }}
+            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors text-left hover:bg-[#606C38] hover:text-white"
+          >
+            <Languages className="h-5 w-5" />
+            {t('lang.switch', 'Change language')}
+          </button>
+
           {/* Dashboard Link */}
           <Link
-            to={user?.email && ALLOWED_ADMIN_EMAILS.includes(user.email.toLowerCase()) ? "/dashboard" : "/user-dashboard"}
+            to={dashboardPath}
             className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
             onClick={closeMenu}
           >
@@ -267,14 +195,29 @@ export function AdminHeader() {
             <BookOpen className="h-5 w-5" />
             {t('nav.curiosidades', 'Insights')}
           </Link>
-          <Link
-            to="/shop"
-            className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
-            onClick={closeMenu}
-          >
-            <ShoppingBag className="h-5 w-5" />
-            {t('nav.shop', 'Store')}
-          </Link>
+          <div className="w-full">
+            <p className="px-4 pt-2 pb-1 text-xs font-semibold uppercase tracking-wide text-[#606C38]/70">
+              {t('nav.shop', 'Store')}
+            </p>
+            <div className="flex flex-col gap-1 pl-4">
+              <Link
+                to="/shop"
+                className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+                onClick={closeMenu}
+              >
+                <ShoppingBag className="h-5 w-5" />
+                {t('nav.ebooks.short', 'eBooks')}
+              </Link>
+              <Link
+                to="/courses"
+                className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
+                onClick={closeMenu}
+              >
+                <GraduationCap className="h-5 w-5" />
+                {t('nav.courses', 'Courses')}
+              </Link>
+            </div>
+          </div>
           <Link
             to="/user-dashboard?tab=cart"
             className="flex items-center gap-3 text-lg px-4 py-3 w-full rounded-lg text-[#606C38] font-normal transition-colors hover:bg-[#606C38] hover:text-white"
