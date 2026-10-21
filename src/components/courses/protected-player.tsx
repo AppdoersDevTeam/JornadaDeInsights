@@ -1,11 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Maximize, Minimize } from 'lucide-react';
+import { Maximize, Minimize, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 
 interface YTPlayer {
   cueVideoById: (videoId: string) => void;
   destroy: () => void;
+  playVideo: () => void;
+  pauseVideo: () => void;
+  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  mute: () => void;
+  unMute: () => void;
 }
+
+// YT.PlayerState values.
+const STATE_ENDED = 0;
+const STATE_PLAYING = 1;
+const STATE_BUFFERING = 3;
+const STATE_UNSTARTED = -1;
+const STATE_CUED = 5;
 
 interface YTNamespace {
   Player: new (
@@ -16,7 +30,11 @@ interface YTNamespace {
       width?: string | number;
       height?: string | number;
       playerVars?: Record<string, string | number>;
-      events?: { onReady?: () => void; onError?: (event: { data: number }) => void };
+      events?: {
+        onReady?: () => void;
+        onError?: (event: { data: number }) => void;
+        onStateChange?: (event: { data: number }) => void;
+      };
     }
   ) => YTPlayer;
 }
@@ -73,6 +91,14 @@ const canUseElementFullscreen = (element: FullscreenElement | null): boolean =>
   // iPhone Safari exposes the API on video elements only.
   !/iPhone|iPod/.test(navigator.userAgent);
 
+const formatTime = (seconds: number): string => {
+  const total = Math.max(0, Math.floor(seconds));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = String(total % 60).padStart(2, '0');
+  return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
+};
+
 interface ProtectedPlayerProps {
   videoId: string;
   watermark: string;
@@ -88,6 +114,14 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
   const [isCssFullscreen, setIsCssFullscreen] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
+  const [playerState, setPlayerState] = useState(STATE_UNSTARTED);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+
+  const isPlaying = playerState === STATE_PLAYING || playerState === STATE_BUFFERING;
+  const notStarted = playerState === STATE_UNSTARTED || playerState === STATE_CUED;
 
   const stamp = `${watermark} · ${new Date().toLocaleDateString(language === 'en' ? 'en' : 'pt-BR')}`;
 
@@ -96,6 +130,8 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
     let cancelled = false;
     if (playerRef.current) {
       playerRef.current.cueVideoById(videoId);
+      setCurrentTime(0);
+      setDuration(0);
       return;
     }
 
@@ -109,7 +145,10 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
           videoId,
           width: '100%',
           height: '100%',
+          // YouTube's own controls include "copy link" / share and title links,
+          // so they are disabled and replaced by our controls below.
           playerVars: {
+            controls: 0,
             rel: 0,
             fs: 0,
             disablekb: 1,
@@ -119,6 +158,14 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
             origin: window.location.origin,
           },
           events: {
+            onReady: () => setIsReady(true),
+            onStateChange: (event) => {
+              setPlayerState(event.data);
+              const player = playerRef.current;
+              if (!player) return;
+              setDuration(player.getDuration() || 0);
+              setCurrentTime(event.data === STATE_ENDED ? player.getDuration() || 0 : player.getCurrentTime() || 0);
+            },
             onError: () => setLoadError(t('courses.player.error', 'This lesson could not be played. Please try again later.')),
           },
         });
@@ -140,6 +187,46 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
       playerRef.current = null;
     },
     []
+  );
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const timer = window.setInterval(() => {
+      const player = playerRef.current;
+      if (!player) return;
+      setCurrentTime(player.getCurrentTime() || 0);
+      setDuration(player.getDuration() || 0);
+    }, 500);
+    return () => window.clearInterval(timer);
+  }, [isPlaying]);
+
+  const togglePlay = useCallback(() => {
+    const player = playerRef.current;
+    if (!player || !isReady) return;
+    if (isPlaying) {
+      player.pauseVideo();
+    } else {
+      if (playerState === STATE_ENDED) player.seekTo(0, true);
+      player.playVideo();
+    }
+  }, [isPlaying, isReady, playerState]);
+
+  const toggleMute = useCallback(() => {
+    const player = playerRef.current;
+    if (!player || !isReady) return;
+    if (isMuted) player.unMute();
+    else player.mute();
+    setIsMuted(!isMuted);
+  }, [isMuted, isReady]);
+
+  const seek = useCallback(
+    (seconds: number) => {
+      const player = playerRef.current;
+      if (!player || !isReady) return;
+      player.seekTo(seconds, true);
+      setCurrentTime(seconds);
+    },
+    [isReady]
   );
 
   useEffect(() => {
@@ -212,6 +299,28 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
       <div className={expanded ? 'relative w-full flex-1 min-h-0' : 'relative w-full aspect-video'}>
         <div ref={mountRef} className="absolute inset-0 [&>iframe]:w-full [&>iframe]:h-full" title={title} />
 
+        {/* Sits over the whole iframe so nothing inside YouTube's player
+            (copy link, title link, logo, end-screen videos) can be clicked. */}
+        <button
+          type="button"
+          onClick={togglePlay}
+          aria-label={isPlaying ? t('courses.player.pause', 'Pause') : t('courses.player.play', 'Play')}
+          className={`absolute inset-0 flex items-center justify-center bg-cover bg-center focus:outline-none ${
+            isPlaying ? 'cursor-default bg-transparent' : notStarted || playerState === STATE_ENDED ? 'bg-black' : 'bg-black/70'
+          }`}
+          style={
+            notStarted || playerState === STATE_ENDED
+              ? { backgroundImage: `url(https://i.ytimg.com/vi/${videoId}/hqdefault.jpg)` }
+              : undefined
+          }
+        >
+          {!isPlaying && (
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-black/60 text-white ring-1 ring-white/30">
+              <Play className="ml-1 h-8 w-8" fill="currentColor" />
+            </span>
+          )}
+        </button>
+
         {loadError && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/80 p-6 text-center text-sm text-white">
             {loadError}
@@ -227,8 +336,45 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
         </div>
       </div>
 
+      <div className="flex shrink-0 items-center gap-2 bg-black px-3 pt-2">
+        <input
+          type="range"
+          min={0}
+          max={duration || 0}
+          step={1}
+          value={Math.min(currentTime, duration || 0)}
+          onChange={(event) => seek(Number(event.target.value))}
+          disabled={!isReady || !duration}
+          aria-label={t('courses.player.seek', 'Video position')}
+          className="h-1 w-full cursor-pointer accent-white disabled:cursor-default"
+        />
+      </div>
+
       <div className="flex h-10 shrink-0 items-center justify-between gap-3 bg-black px-3 text-xs text-white/70">
-        <span className="truncate">{title}</span>
+        <div className="flex min-w-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={togglePlay}
+            disabled={!isReady}
+            aria-label={isPlaying ? t('courses.player.pause', 'Pause') : t('courses.player.play', 'Play')}
+            className="shrink-0 rounded-md p-1.5 text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50"
+          >
+            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          </button>
+          <button
+            type="button"
+            onClick={toggleMute}
+            disabled={!isReady}
+            aria-label={isMuted ? t('courses.player.unmute', 'Unmute') : t('courses.player.mute', 'Mute')}
+            className="shrink-0 rounded-md p-1.5 text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50"
+          >
+            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          </button>
+          <span className="shrink-0 tabular-nums">
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </span>
+          <span className="ml-2 hidden truncate sm:inline">{title}</span>
+        </div>
         <button
           type="button"
           onClick={() => void toggleFullscreen()}
