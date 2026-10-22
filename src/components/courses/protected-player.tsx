@@ -284,6 +284,11 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
 
   const expanded = isNativeFullscreen || isCssFullscreen;
 
+  const progress = duration ? Math.min(100, (currentTime / duration) * 100) : 0;
+  const showCover = notStarted || playerState === STATE_ENDED;
+  const controlButton =
+    'flex shrink-0 items-center justify-center rounded-full p-2 text-background transition-colors hover:bg-background/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-40';
+
   return (
     <div
       ref={wrapperRef}
@@ -292,97 +297,119 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
           ? 'fixed inset-0 z-[100] flex flex-col bg-black'
           : expanded
             ? 'flex flex-col bg-black'
-            : 'relative flex w-full flex-col overflow-hidden rounded-lg bg-black'
+            : 'relative flex w-full flex-col overflow-hidden rounded-2xl bg-foreground shadow-xl ring-1 ring-foreground/10'
       }
       onContextMenu={(event) => event.preventDefault()}
     >
-      <div className={expanded ? 'relative w-full flex-1 min-h-0' : 'relative w-full aspect-video'}>
-        <div ref={mountRef} className="absolute inset-0 [&>iframe]:w-full [&>iframe]:h-full" title={title} />
-
-        {/* Sits over the whole iframe so nothing inside YouTube's player
-            (copy link, title link, logo, end-screen videos) can be clicked. */}
-        <button
-          type="button"
-          onClick={togglePlay}
-          aria-label={isPlaying ? t('courses.player.pause', 'Pause') : t('courses.player.play', 'Play')}
-          className={`absolute inset-0 flex items-center justify-center bg-cover bg-center focus:outline-none ${
-            isPlaying ? 'cursor-default bg-transparent' : notStarted || playerState === STATE_ENDED ? 'bg-black' : 'bg-black/70'
-          }`}
-          style={
-            notStarted || playerState === STATE_ENDED
-              ? { backgroundImage: `url(https://i.ytimg.com/vi/${videoId}/hqdefault.jpg)` }
-              : undefined
-          }
-        >
-          {!isPlaying && (
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-black/60 text-white ring-1 ring-white/30">
-              <Play className="ml-1 h-8 w-8" fill="currentColor" />
-            </span>
-          )}
-        </button>
-
-        {loadError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/80 p-6 text-center text-sm text-white">
-            {loadError}
-          </div>
-        )}
-
+      <div className={expanded ? 'flex min-h-0 w-full flex-1 items-center justify-center' : 'w-full'}>
         <div
-          aria-hidden="true"
-          className="pointer-events-none absolute select-none whitespace-nowrap rounded px-2 py-1 text-[11px] sm:text-sm font-medium text-white/60 bg-black/20 transition-all duration-[1500ms] ease-in-out"
-          style={{ top: `${position.top}%`, left: `${position.left}%` }}
+          className="relative aspect-video w-full overflow-hidden bg-black"
+          style={expanded ? { width: 'min(100%, calc((100dvh - 4.5rem) * 16 / 9))' } : undefined}
         >
-          {stamp}
-        </div>
-      </div>
+          {/* The iframe is three times taller than the visible frame. YouTube
+              letterboxes the video in the middle third and draws its own
+              chrome (title, copy link, "More videos", logo) at the iframe's
+              top and bottom edges, which stay clipped out of view. */}
+          <div
+            ref={mountRef}
+            className="pointer-events-none absolute inset-x-0 top-[-100%] h-[300%] [&>iframe]:h-full [&>iframe]:w-full"
+            title={title}
+          />
 
-      <div className="flex shrink-0 items-center gap-2 bg-black px-3 pt-2">
-        <input
-          type="range"
-          min={0}
-          max={duration || 0}
-          step={1}
-          value={Math.min(currentTime, duration || 0)}
-          onChange={(event) => seek(Number(event.target.value))}
-          disabled={!isReady || !duration}
-          aria-label={t('courses.player.seek', 'Video position')}
-          className="h-1 w-full cursor-pointer accent-white disabled:cursor-default"
-        />
-      </div>
-
-      <div className="flex h-10 shrink-0 items-center justify-between gap-3 bg-black px-3 text-xs text-white/70">
-        <div className="flex min-w-0 items-center gap-1">
+          {/* Covers the whole iframe so nothing inside YouTube's player can be
+              clicked or right-clicked. */}
           <button
             type="button"
             onClick={togglePlay}
-            disabled={!isReady}
             aria-label={isPlaying ? t('courses.player.pause', 'Pause') : t('courses.player.play', 'Play')}
-            className="shrink-0 rounded-md p-1.5 text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50"
+            className={`group absolute inset-0 flex items-center justify-center bg-cover bg-center transition-colors duration-300 focus:outline-none ${
+              isPlaying ? 'cursor-default bg-transparent' : showCover ? 'bg-foreground' : 'bg-foreground/60'
+            }`}
+            style={showCover ? { backgroundImage: `url(https://i.ytimg.com/vi/${videoId}/hqdefault.jpg)` } : undefined}
           >
-            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            {showCover && <span className="absolute inset-0 bg-foreground/40" />}
+            {!isPlaying && (
+              <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-4 ring-background/20 transition-transform duration-200 group-hover:scale-105 group-focus-visible:ring-background sm:h-20 sm:w-20">
+                <Play className="ml-1 h-6 w-6 sm:h-8 sm:w-8" fill="currentColor" />
+              </span>
+            )}
           </button>
+
+          {loadError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-foreground/90 p-6 text-center text-sm text-background">
+              {loadError}
+            </div>
+          )}
+
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute select-none whitespace-nowrap rounded px-2 py-1 text-[11px] sm:text-sm font-medium text-white/60 bg-black/20 transition-all duration-[1500ms] ease-in-out"
+            style={{ top: `${position.top}%`, left: `${position.left}%` }}
+          >
+            {stamp}
+          </div>
+        </div>
+      </div>
+
+      <div className="shrink-0 bg-foreground px-3 pb-1.5 pt-3 sm:px-4">
+        <div className="relative flex h-3 items-center">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-background/20">
+            <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
+          </div>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 rounded-full bg-background shadow"
+            style={{ left: `${progress}%` }}
+          />
+          <input
+            type="range"
+            min={0}
+            max={duration || 0}
+            step={1}
+            value={Math.min(currentTime, duration || 0)}
+            onChange={(event) => seek(Number(event.target.value))}
+            disabled={!isReady || !duration}
+            aria-label={t('courses.player.seek', 'Video position')}
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-default"
+          />
+        </div>
+
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={togglePlay}
+              disabled={!isReady}
+              aria-label={isPlaying ? t('courses.player.pause', 'Pause') : t('courses.player.play', 'Play')}
+              className={controlButton}
+            >
+              {isPlaying ? <Pause className="h-5 w-5" fill="currentColor" /> : <Play className="h-5 w-5" fill="currentColor" />}
+            </button>
+            <button
+              type="button"
+              onClick={toggleMute}
+              disabled={!isReady}
+              aria-label={isMuted ? t('courses.player.unmute', 'Unmute') : t('courses.player.mute', 'Mute')}
+              className={controlButton}
+            >
+              {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+            </button>
+            <span className="ml-1 shrink-0 text-xs tabular-nums text-background/80 sm:text-sm">
+              {formatTime(currentTime)} <span className="text-background/40">/</span> {formatTime(duration)}
+            </span>
+          </div>
           <button
             type="button"
-            onClick={toggleMute}
-            disabled={!isReady}
-            aria-label={isMuted ? t('courses.player.unmute', 'Unmute') : t('courses.player.mute', 'Mute')}
-            className="shrink-0 rounded-md p-1.5 text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50"
+            onClick={() => void toggleFullscreen()}
+            aria-label={expanded ? t('courses.player.exitFullscreen', 'Exit full screen') : t('courses.player.fullscreen', 'Full screen')}
+            className={`${controlButton} gap-2 text-sm sm:px-3`}
           >
-            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            {expanded ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+            <span className="hidden sm:inline">
+              {expanded ? t('courses.player.exitFullscreen', 'Exit full screen') : t('courses.player.fullscreen', 'Full screen')}
+            </span>
           </button>
-          <span className="shrink-0 tabular-nums">
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
-          <span className="ml-2 hidden truncate sm:inline">{title}</span>
         </div>
-        <button
-          type="button"
-          onClick={() => void toggleFullscreen()}
-          className="flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-        >
-          {expanded ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-          <span>{expanded ? t('courses.player.exitFullscreen', 'Exit full screen') : t('courses.player.fullscreen', 'Full screen')}</span>
-        </button>
       </div>
     </div>
   );
