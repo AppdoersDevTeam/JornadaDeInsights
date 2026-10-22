@@ -154,7 +154,7 @@ export function CoursePlayerPage() {
       {backLink}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-4">
-          <ProtectedPlayer videoId={access.videoId} watermark={access.watermark} title={access.lesson.title} />
+          <ProtectedPlayer videoId={access.videoId} title={access.lesson.title} />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <p className="text-sm text-muted-foreground">{course.title}</p>

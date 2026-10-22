@@ -854,7 +854,7 @@ const handleCourseOutline = async (req, res, requestMeta) => {
   }
 };
 
-// --- action=course-access (owner or admin): one lesson's video id + watermark ---
+// --- action=course-access (owner or admin): one lesson's video id ---
 
 const handleCourseAccess = async (req, res, requestMeta) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -949,7 +949,6 @@ const handleCourseAccess = async (req, res, requestMeta) => {
         durationSeconds: row.duration_seconds,
       })),
       videoId: lesson.youtube_video_id,
-      watermark: auth.user.email,
     });
   } catch (error) {
     captureServerError(error, { route: 'course-access' });

@@ -160,7 +160,6 @@ export interface LessonAccess {
   lesson: CourseLessonOutline;
   lessons: CourseLessonOutline[];
   videoId: string;
-  watermark: string;
 }
 
 /** Ownership-checked lesson access. Throws CourseAccessError (401/403/404). */
@@ -177,5 +176,5 @@ export async function fetchLessonAccess(courseId: string, lessonId?: string): Pr
   if (!response.ok || !body.videoId || !body.lesson) {
     throw new CourseAccessError(body.error || 'Failed to load lesson', response.status || 500);
   }
-  return { lesson: body.lesson, lessons: body.lessons || [], videoId: body.videoId, watermark: body.watermark || '' };
+  return { lesson: body.lesson, lessons: body.lessons || [], videoId: body.videoId };
 }

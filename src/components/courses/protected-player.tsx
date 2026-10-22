@@ -70,16 +70,6 @@ const loadIframeApi = (): Promise<YTNamespace> => {
   return iframeApiPromise;
 };
 
-// Watermark stays inside this box (percent of the player) so it never covers
-// YouTube's title bar, logo, or control bar.
-const SAFE_ZONE = { top: 14, bottom: 68, left: 4, right: 62 };
-const MOVE_EVERY_MS = 7000;
-
-const randomPosition = () => ({
-  top: SAFE_ZONE.top + Math.random() * (SAFE_ZONE.bottom - SAFE_ZONE.top),
-  left: SAFE_ZONE.left + Math.random() * (SAFE_ZONE.right - SAFE_ZONE.left),
-});
-
 type FullscreenElement = HTMLElement & { webkitRequestFullscreen?: () => Promise<void> | void };
 type FullscreenDocument = Document & {
   webkitFullscreenElement?: Element | null;
@@ -101,16 +91,14 @@ const formatTime = (seconds: number): string => {
 
 interface ProtectedPlayerProps {
   videoId: string;
-  watermark: string;
   title: string;
 }
 
-export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerProps) {
-  const { t, language } = useLanguage();
+export function ProtectedPlayer({ videoId, title }: ProtectedPlayerProps) {
+  const { t } = useLanguage();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
-  const [position, setPosition] = useState(randomPosition);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
   const [isCssFullscreen, setIsCssFullscreen] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -123,7 +111,6 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
   const isPlaying = playerState === STATE_PLAYING || playerState === STATE_BUFFERING;
   const notStarted = playerState === STATE_UNSTARTED || playerState === STATE_CUED;
 
-  const stamp = `${watermark} · ${new Date().toLocaleDateString(language === 'en' ? 'en' : 'pt-BR')}`;
 
   // Create the player once; later lessons are cued into the same iframe.
   useEffect(() => {
@@ -228,11 +215,6 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
     },
     [isReady]
   );
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setPosition(randomPosition()), MOVE_EVERY_MS);
-    return () => window.clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     const doc = document as FullscreenDocument;
@@ -340,14 +322,6 @@ export function ProtectedPlayer({ videoId, watermark, title }: ProtectedPlayerPr
               {loadError}
             </div>
           )}
-
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute select-none whitespace-nowrap rounded px-2 py-1 text-[11px] sm:text-sm font-medium text-white/60 bg-black/20 transition-all duration-[1500ms] ease-in-out"
-            style={{ top: `${position.top}%`, left: `${position.left}%` }}
-          >
-            {stamp}
-          </div>
         </div>
       </div>
 
